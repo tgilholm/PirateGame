@@ -55,7 +55,7 @@ function create() {
     // });
 
 
-    cameras.startFollow(ship.container, true, 0.2, 0.2);  // follow ship slightly behind
+    cameras.startFollow(ship.container, true, 0.1, 0.1);  // follow ship slightly behind
     cameras.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     socket.on('shipUpdate', (data) => {
@@ -77,5 +77,5 @@ function update() {
     };
     socket.emit('shipInput', input);
 
-    this.physics.add.collider(ship, )
+    //this.physics.add.collider(ship, )
 }
