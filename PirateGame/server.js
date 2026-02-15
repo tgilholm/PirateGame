@@ -66,9 +66,14 @@ setInterval(() => {
         console.log(`x: ${ship.x}, y: ${ship.y}, speed: ${ship.speed}, rot: ${ship.rotation}`)
 
         // send the new ship pos to clients
-        io.emit('shipUpdate', ship);
+        io.volatile.emit('shipUpdate', {
+            x: ship.x,
+            y: ship.y,
+            rotation: ship.rotation
+        }
+        );
     }
-}, 1000 / 60);    // loops 60 times/second and hopefully doesn't explode the server
+}, 1000 / 60);    // loops 45 times/second and hopefully doesn't explode the server
 
 const PORT = process.env.PORT || 3000;  // set port to 3000
 server.listen(PORT, () => {
