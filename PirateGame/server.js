@@ -95,6 +95,7 @@ io.on("connection", (socket) => {
     // init player
     players[socket.id] = {
         id: socket.id,
+        username: "",
         x: 0,
         y: 0,
         parentId: "ship_1",
@@ -114,6 +115,13 @@ io.on("connection", (socket) => {
 
     // Update player with current game state after joining
     socket.emit('initGame', { shipsForClient, players, id: socket.id }); // send only to this player
+
+    // Set the player's name by their socket id
+    socket.on('nameSet', (inputData) => {
+        if (players[inputData.id]) {
+            players[inputData.id].username = inputData.username
+        }
+    })
 
     // Handle players movement
     socket.on('playerInput', (inputData) => {

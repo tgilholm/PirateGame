@@ -9,19 +9,17 @@
 
     <script src="//cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/game.js" type="module"></script>
+    <script src="js/scenes/index.js" type="module"></script>
 
 
 </head>
 
 <body>
-    <div id="game-container">
-
-    </div>
+    <div id="game-container"></div> 
 
     <form id="input-form">
         <div class="border">
-            <input class="formElement" type="text" name="username" value="Enter Username">
+            <input class="formElement" id="input-text" type="text" name="username" placeholder="Enter Username">
         </div> 
         <div class="border">
             <button class="formElement" id="start-btn" type="button">Start Game</button>
