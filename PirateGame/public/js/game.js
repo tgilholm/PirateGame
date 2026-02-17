@@ -1,5 +1,6 @@
 /* global io */
 
+import Player from "./objects/player.js";
 import Ship from "./objects/ship.js";
 
 const config = {
@@ -9,15 +10,24 @@ const config = {
     backgroundColor: '#2d80c9',
     parent: 'game-container',
 
+    physics: {
+        default: 'matter',  // for complex physics
+        matter: {
+            gravity: { x: 0, y: 0 },
+            debug: true
+        }
+    },
+
     scene: { preload, create, update }
 };
 
 const game = new Phaser.Game(config);
 
 let socket;
-let ship;
-let keys;
-let cursors;
+let keys, shipKeys;
+
+let ships = {};
+let players = {};
 
 function preload() {
     // Load the tilesheet
@@ -25,11 +35,11 @@ function preload() {
 
     // Load the map
     this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
-
 }
 
 
 function create() {
+
     const cameras = this.cameras.main;
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("terrain-tilesheet", "tiles");
@@ -39,43 +49,68 @@ function create() {
     const shallows = map.createLayer("shallows", tileset, 0, 0);
     const islands = map.createLayer("islands", tileset, 0, 0);
 
-    islands.setCollisionByProperty({ collides: true });
+    this.matter.world.convertTilemapLayer(islands);
 
+    // @ts-ignore
     socket = io();
     keys = this.input.keyboard.addKeys("W, A, S, D");
-    ship = new Ship(this, 300, 400);
+    shipKeys = this.input.keyboard.addKeys({
+        left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+        down: Phaser.Input.Keyboard.KeyCodes.DOWN,
+        right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
+        up: Phaser.Input.Keyboard.KeyCodes.UP
+    })
+
+    socket.on('gameState', (data) => {
 
 
-    // uncomment to show collision spaces
-    // const debugGraphics = this.add.graphics().setAlpha(0.75);
-    // islands.renderDebug(debugGraphics, {
-    //     tileColor: null, // Color of non-colliding tiles
-    //     collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-    //     faceColor: new Phaser.Display.Color(40, 39, 37, 255) // Color of colliding face edges
-    // });
 
+        // Update the ships
+        data.ships.forEach(shipData => {
+            if (!ships[shipData.id]) {  // only create if it doesn't already exist
+                ships[shipData.id] = new Ship(this, shipData.x, shipData.y);
+            }
 
-    cameras.startFollow(ship.container, true, 0.1, 0.1);  // follow ship slightly behind
-    cameras.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+            // Update with server data
+            ships[shipData.id].target = { x: shipData.x, y: shipData.y, r: shipData.r };
+        });
 
-    socket.on('shipUpdate', (data) => {
+        // Update the players
+        data.players.forEach(playerData => {
+            if (!players[playerData.id]) {
+                players[playerData.id] = new Player(this, playerData.id);   // only create if it doesn't exist
+            }
 
-        ship.onServerUpdate(data);
-    });
+            // Link the player to their ship parent
+            const shipParent = ships[playerData.parentId];
+            players[playerData.id].updateState(playerData, shipParent);
+
+            // If current player, follow with the camera
+            if (playerData.id === socket.id && shipParent) {
+                this.cameras.main.startFollow(shipParent.container, true, 0.1, 0.1);
+            }
+        });
+    })
+    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
 }
 
 function update() {
-    if (!ship) return;
+    // Interpolate all objects 
+    Object.values(ships).forEach(ship => ship.update());
+    Object.values(players).forEach(player => player.update());
 
-    ship.update();
+    // Player movement
+    socket.emit('playerInput', {
+        w: keys.W.isDown,
+        a: keys.A.isDown,
+        s: keys.S.isDown,
+        d: keys.D.isDown
+    });
 
-    const input = {
-        up: keys.W.isDown,
-        down: keys.S.isDown,
-        left: keys.A.isDown,
-        right: keys.D.isDown
-    };
-    socket.emit('shipInput', input);
-
-    //this.physics.add.collider(ship, )
+    // Ship movement
+    socket.emit('shipInput', {
+        up: shipKeys.up.isDown,
+        left: shipKeys.left.isDown,
+        right: shipKeys.right.isDown
+    });
 }

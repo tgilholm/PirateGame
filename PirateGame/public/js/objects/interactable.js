@@ -1,4 +1,4 @@
-import Parent from "./parent";
+import Parent from "./parent.js";
 
 
 /**

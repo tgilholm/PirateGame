@@ -8,51 +8,59 @@ import Parent from "./parent.js";
  * independently of the ship.
  * 
  */
-export default class Ship// extends Parent {
-{
+export default class Ship extends Parent {
     constructor(scene, x, y) {
-        this.scene = scene;
+        super(scene, x, y);
 
-        this.container = scene.add.container(x, y);
         this.serverData = { x: x, y: y, rotation: 0 };
 
+        this.container.setBody({
+            type: 'rectangle',
+            width: 300,
+            height: 160
+        });
 
-        const graphics = scene.add.graphics();
+        this.container.setFrictionAir(0.05);
+        this.container.setMass(20);
 
-        // Draw the hull
-        graphics.fillStyle(0x5d4037, 1); // dark brown
-        graphics.lineStyle(4, 0x3e2723, 1);
+        // // Draw the hull
+        this.graphics.fillStyle(0x5d4037, 1); // dark brown
+        this.graphics.lineStyle(4, 0x3e2723, 1);
 
-        // Rectangle
-        graphics.fillRect(-150, -80, 200, 160);
-        graphics.strokeRect(-150, -80, 200, 160);
+        // // Rectangle
+        this.graphics.fillRect(-150, -80, 200, 160);
+        this.graphics.strokeRect(-150, -80, 200, 160);
 
-        // Triangle
-        graphics.beginPath();
-        graphics.moveTo(50, -80);
-        graphics.lineTo(130, 0);
-        graphics.lineTo(50, 80);
-        graphics.closePath();
-        graphics.fillPath();
-        graphics.strokePath();
+        // // Triangle
+        this.graphics.beginPath();
+        this.graphics.moveTo(50, -80);
+        this.graphics.lineTo(130, 0);
+        this.graphics.lineTo(50, 80);
+        this.graphics.closePath();
+        this.graphics.fillPath();
+        this.graphics.strokePath();
 
-        this.container.add(graphics);
+        this.container.add(this.graphics);
     }
 
     onServerUpdate(data) {
         this.serverData = data;
     }
 
+
     update() {
-        if (!this.serverData) return;
+        if (!this.target) return;
 
-        console.log(this.serverData)
+        // Interpolate position
+        this.container.x = Phaser.Math.Linear(this.container.x, this.target.x, 0.2);
+        this.container.y = Phaser.Math.Linear(this.container.y, this.target.y, 0.2);
 
-        this.container.x = Phaser.Math.Linear(this.container.x, this.serverData.x, 0.2); // interpolate 20% between the old and new data
-        this.container.y = Phaser.Math.Linear(this.container.y, this.serverData.y, 0.2);
+        // Handle Rotation
+        const targetRot = this.target.r !== undefined ? this.target.r : this.target.rotation;
+
         const rotationDiff = Phaser.Math.Angle.ShortestBetween(
             Phaser.Math.RadToDeg(this.container.rotation),
-            Phaser.Math.RadToDeg(this.serverData.rotation)
+            Phaser.Math.RadToDeg(targetRot || 0)
         );
 
         // Convert back to radians and add 10% of that difference
