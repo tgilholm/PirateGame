@@ -25,6 +25,10 @@ export default class Player {
                 // return to the absolute scope
                 this.scene.add.existing(this.sprite);
             }
+
+            // If re-parenting, update position immediately without lerp
+            this.sprite.x = data.x;
+            this.sprite.y = data.y;
         }
 
         this.target.x = data.x;
@@ -36,7 +40,7 @@ export default class Player {
         this.sprite.y = Phaser.Math.Linear(this.sprite.y, this.target.y, lInterp);
     }
 
-    
+
 }
 
 

@@ -25,6 +25,7 @@ const game = new Phaser.Game(config);
 
 let socket;
 let keys, shipKeys;
+let cameraTarget;
 
 let ships = {};
 let players = {};
@@ -50,6 +51,9 @@ function create() {
     const islands = map.createLayer("islands", tileset, 0, 0);
 
     this.matter.world.convertTilemapLayer(islands);
+
+    cameraTarget = this.add.container(0, 0);
+    this.cameras.main.startFollow(cameraTarget, true, 0.1, 0.1);
 
     // @ts-ignore
     socket = io();
@@ -84,9 +88,9 @@ function create() {
             players[playerData.id].updateState(playerData, shipParent);
 
             // If current player, follow with the camera
-            if (playerData.id === socket.id && shipParent) {
-                this.cameras.main.startFollow(shipParent.container, true, 0.1, 0.1);
-            }
+            // if (playerData.id === socket.id && shipParent) {
+            //     this.cameras.main.startFollow(shipParent.container, true, 0.1, 0.1);
+            // }
         });
     })
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
@@ -97,6 +101,28 @@ function update() {
     Object.values(ships).forEach(ship => ship.update());
     Object.values(players).forEach(player => player.update());
 
+    if (players[socket.id]) {
+        const player = players[socket.id];
+        const parentId = player.parentId;
+
+        if (parentId && ships[parentId]) {
+            // Player is on a ship – convert local to world
+            const ship = ships[parentId];
+            const shipContainer = ship.container;  // assuming ship has a container
+            const worldPos = Phaser.Math.RotateAround(
+                { x: player.sprite.x, y: player.sprite.y },
+                0, 0,
+                shipContainer.rotation
+            );
+            cameraTarget.x = shipContainer.x + worldPos.x;
+            cameraTarget.y = shipContainer.y + worldPos.y;
+        } else {
+            // Player is in world space
+            cameraTarget.x = player.sprite.x;
+            cameraTarget.y = player.sprite.y;
+        }
+    }
+
     // Player movement
     socket.emit('playerInput', {
         w: keys.W.isDown,
@@ -105,10 +131,15 @@ function update() {
         d: keys.D.isDown
     });
 
-    // Ship movement
-    socket.emit('shipInput', {
-        up: shipKeys.up.isDown,
-        left: shipKeys.left.isDown,
-        right: shipKeys.right.isDown
-    });
+    // Only move the ship if the player is on it
+    const player = players[socket.id];
+    if (player && player.parentId === "ship_1") {  // update to check for the correct ship id
+        // Ship movement
+        socket.emit('shipInput', {
+            up: shipKeys.up.isDown,
+            left: shipKeys.left.isDown,
+            right: shipKeys.right.isDown
+        });
+    }
+
 }

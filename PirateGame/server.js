@@ -191,36 +191,67 @@ function updateShipPhysics(ship) {
 }
 
 function updatePlayerPhysics(player) {
+    const ship = ships[player.parentId];
 
-    // if not on a ship, move freely in world space
-    if (!ships[player.parentId]) {
+    if (ship) {
+        const sx = ship.body.position.x;
+        const sy = ship.body.position.y;
+        const r = ship.body.angle;
+        const shipWidth = 200;
+        const shipHeight = 120;
+
+        // world position of the player
+        let worldPos = localToWorld(sx, sy, r, player.x, player.y);
+
+        // apply input in world space
+        if (player.inputs.w) worldPos.y -= player.speed;
+        if (player.inputs.s) worldPos.y += player.speed;
+        if (player.inputs.a) worldPos.x -= player.speed;
+        if (player.inputs.d) worldPos.x += player.speed;
+
+        // convert back to local space
+        const newLocal = worldToLocal(sx, sy, r, worldPos.x, worldPos.y);
+
+        // check if player is outside the ship's bounding box
+        if (Math.abs(newLocal.x) > shipWidth / 2 || Math.abs(newLocal.y) > shipHeight / 2) {
+            // player left the ship – unparent them
+            player.parentId = null;
+            player.x = worldPos.x;
+            player.y = worldPos.y;
+        } else {
+            // player is still on the ship
+            player.x = newLocal.x;
+            player.y = newLocal.y;
+        }
+    } else {
+        // player is in world space – move freely
         if (player.inputs.w) player.y -= player.speed;
         if (player.inputs.s) player.y += player.speed;
         if (player.inputs.a) player.x -= player.speed;
         if (player.inputs.d) player.x += player.speed;
-        return;
+
+        // check if player is near any ship and re-parent if so
+        for (const shipId in ships) {
+            const ship = ships[shipId];
+            const sx = ship.body.position.x;
+            const sy = ship.body.position.y;
+            const shipWidth = 200;
+            const shipHeight = 120;
+
+            const dx = player.x - sx;
+            const dy = player.y - sy;
+
+            if (Math.abs(dx) < shipWidth / 2 && Math.abs(dy) < shipHeight / 2) {
+                // player entered a ship's bounding box – re-parent them
+                player.parentId = shipId;
+                const r = ship.body.angle;
+                const local = worldToLocal(sx, sy, r, player.x, player.y);
+                player.x = local.x;
+                player.y = local.y;
+                break;
+            }
+        }
     }
-
-    // If on a ship, convert to world space then apply movement, then convert back to local space for storage
-    const ship = ships[player.parentId];
-    const sx = ship.body.position.x;
-    const sy = ship.body.position.y;
-    const r = ship.body.angle;  // angle is directly on body, not in position
-
-    // world position of the player
-    let worldPos = localToWorld(sx, sy, r, player.x, player.y);
-
-    // apply input in world space
-    if (player.inputs.w) worldPos.y -= player.speed;
-    if (player.inputs.s) worldPos.y += player.speed;
-    if (player.inputs.a) worldPos.x -= player.speed;
-    if (player.inputs.d) worldPos.x += player.speed;
-
-    //console.log(worldPos)
-    // convert back for storage
-    const newLocal = worldToLocal(sx, sy, r, worldPos.x, worldPos.y);
-    player.x = newLocal.x;
-    player.y = newLocal.y;
 }
 
 const PORT = process.env.PORT || 3000;  // set port to 3000
