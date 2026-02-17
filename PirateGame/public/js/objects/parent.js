@@ -26,4 +26,37 @@ export default class Parent {
             0.1
         );
     }
+
+    /**
+ * Converts local- (ship-scope) coordinates to absolute (world-scope)
+ * coordinates using RotateAround
+ * @param {Number} localX The X coordinate relative to this object
+ * @param {Number} localY The Y coordinate relative to this object
+ * @returns a Vector of x and y coordinates
+ */
+    toWorld(localX, localY) {
+        return Phaser.Math.RotateAround(
+            {
+                x: this.container.x + localX, y: this.container.y + localY
+            },
+            this.container.x, this.container.y, this.container.rotation
+        )
+    }
+
+    /**
+     * Converts absolute coordinates to coordinates relative to this object
+     * @param {Number} worldX 
+     * @param {Number} worldY 
+     * @returns the x and y coordinates relative to this object
+     */
+    toLocal(worldX, worldY) {
+        const angle = -this.container.rotation;
+        const dx = worldX - this.container.x;
+        const dy = worldY - this.container.y;
+
+        return {
+            x: dx * Math.cos(angle) - dy * Math.sin(angle),
+            y: dx * Math.sin(angle) + dy * Math.cos(angle)
+        };
+    }
 }

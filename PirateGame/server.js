@@ -56,7 +56,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 const TICK_RATE = 60;
-const NET_TICK_RATE = 20;
+const NET_TICK_RATE = 60;
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -70,12 +70,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 const ships = {
     "ship_1": {     // test ship
         id: "ship_1",
-        body: Bodies.rectangle(300, 400, 200, 120, {
+        body: Bodies.rectangle(300, 200, 200, 120, {
             frictionAir: 0.05,
-            mass: 50
+            mass: 150
         }), // x= 300, y = 400, 200 wide, 120 tall
 
-        turnSpeed: 0.002,
+        turnSpeed: 0.0003,
         thrust: 0.15,
         inputs: { up: false, down: false, left: false, right: false }   // arrow keys for ships
     }
@@ -187,32 +187,69 @@ function updateShipPhysics(ship) {
         Body.applyForce(body, body.position, force);
     }
 
-    console.log(body.position)
+    //console.log(body.position)
 }
 
 function updatePlayerPhysics(player) {
-    let dx = 0;
-    let dy = 0;
 
-
-    // phaser is insane and does coords backwards
-    if (player.inputs.w) dy -= player.speed;
-    if (player.inputs.a) dx -= player.speed;
-    if (player.inputs.s) dy += player.speed;
-    if (player.inputs.d) dx += player.speed;
-
-    // normalise
-    if (dx !== 0 && dy !== 0) {
-        dx *= 0.707;
-        dy *= 0.707;
+    // if not on a ship, move freely in world space
+    if (!ships[player.parentId]) {
+        if (player.inputs.w) player.y -= player.speed;
+        if (player.inputs.s) player.y += player.speed;
+        if (player.inputs.a) player.x -= player.speed;
+        if (player.inputs.d) player.x += player.speed;
+        return;
     }
 
-    // apply physics
-    player.x += dx;
-    player.y += dy;
+    // If on a ship, convert to world space then apply movement, then convert back to local space for storage
+    const ship = ships[player.parentId];
+    const sx = ship.body.position.x;
+    const sy = ship.body.position.y;
+    const r = ship.body.angle;  // angle is directly on body, not in position
+
+    // world position of the player
+    let worldPos = localToWorld(sx, sy, r, player.x, player.y);
+
+    // apply input in world space
+    if (player.inputs.w) worldPos.y -= player.speed;
+    if (player.inputs.s) worldPos.y += player.speed;
+    if (player.inputs.a) worldPos.x -= player.speed;
+    if (player.inputs.d) worldPos.x += player.speed;
+
+    //console.log(worldPos)
+    // convert back for storage
+    const newLocal = worldToLocal(sx, sy, r, worldPos.x, worldPos.y);
+    player.x = newLocal.x;
+    player.y = newLocal.y;
 }
 
 const PORT = process.env.PORT || 3000;  // set port to 3000
 server.listen(PORT, () => {
     console.log(`Server launched on port ${PORT}`);
 });
+
+
+function localToWorld(parentX, parentY, parentRotation, localX, localY) {
+    const cos = Math.cos(parentRotation);
+    const sin = Math.sin(parentRotation);
+
+    const rotatedX = localX * cos - localY * sin;
+    const rotatedY = localX * sin + localY * cos;
+
+    return {
+        x: parentX + rotatedX,
+        y: parentY + rotatedY
+    };
+}
+
+function worldToLocal(parentX, parentY, parentRotation, worldX, worldY) {
+    const dx = worldX - parentX;
+    const dy = worldY - parentY;
+    const cos = Math.cos(-parentRotation);
+    const sin = Math.sin(-parentRotation);
+
+    return {
+        x: dx * cos - dy * sin,
+        y: dx * sin + dy * cos
+    };
+}

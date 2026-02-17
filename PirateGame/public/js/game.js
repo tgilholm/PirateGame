@@ -63,8 +63,6 @@ function create() {
 
     socket.on('gameState', (data) => {
 
-
-
         // Update the ships
         data.ships.forEach(shipData => {
             if (!ships[shipData.id]) {  // only create if it doesn't already exist
