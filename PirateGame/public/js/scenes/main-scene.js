@@ -1,8 +1,7 @@
 /* global Phaser, io */
 
-import Player from "./objects/player.js";
-import Ship from "./objects/ship.js";
-import { StartScene } from "./start-scene.js";
+import Player from "../objects/player.js";
+import Ship from "../objects/ship.js";
 
 
 const ships = {}
@@ -18,7 +17,7 @@ const socket = globalThis.io();
  * but the server is the Single Source of Truth and has the final say on the
  * players' actual locations.
  */
-class MainScene extends Phaser.Scene {
+export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
 
@@ -44,7 +43,13 @@ class MainScene extends Phaser.Scene {
      * Executed once at runtime- set up all game objects here, such
      * as setting up user input and socket listeners.
      */
-    create() {
+    create(data) {
+
+        // Send username to server
+        const username = data.username;
+        const id = socket.id;
+        socket.emit('nameSet', {username, id});
+
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 0.1, 0.1);
@@ -150,22 +155,3 @@ class MainScene extends Phaser.Scene {
     }
 }
 
-// Set up game 
-const config = {
-    type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
-    backgroundColor: '#2d80c9',
-    parent: 'game-container',
-    scene: [StartScene, MainScene],     // Add all scenes in
-
-    physics: {
-        default: 'matter',  // for complex physics
-        matter: {
-            gravity: { x: 0, y: 0 },
-            debug: true
-        }
-    },
-};
-
-const game = new Phaser.Game(config);

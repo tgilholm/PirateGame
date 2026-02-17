@@ -8,7 +8,6 @@ export class StartScene extends Phaser.Scene {
         this.background = null;
     }
 
-    // TODO accept usernames in title screen
 
     preload() {
         this.load.image('background', 'assets/water.png');
@@ -21,11 +20,12 @@ export class StartScene extends Phaser.Scene {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
 
+
         // Add the animated background
         this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
 
         const title = this.add.image(centerX, 200, 'title');
-        const ship = this.add.sprite(centerX, 400, 'ship');
+        const ship = this.add.sprite(centerX, 700, 'ship');
 
         // Animate the ship sprite
         this.anims.create({
@@ -46,36 +46,29 @@ export class StartScene extends Phaser.Scene {
             loop: -1
         });
 
-        // Add the start button & behaviour
-        const startButtonBg = this.add.rectangle(centerX, 520, 260, 80, 0x0d2f4f, 0.9)
-            .setStrokeStyle(4, 0xffffff, 1)
-            .setInteractive({ useHandCursor: true });
-        const startButtonText = this.add.text(centerX, 520, 'Start Game', {
-            fontSize: '32px',
-            color: '#ffffff',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
+        // Get the username from the textinput
 
-        startButtonBg.on('pointerover', () => {
-            startButtonBg.setScale(1.08);
-            startButtonText.setScale(1.08);
-            startButtonBg.setAlpha(0.85);
-        });
+        let startBtn = document.getElementById('start-btn');
+        startBtn.addEventListener('click', () => {
+            let inputText =  document.getElementById('input-text')
+            // @ts-ignore because getElementById returns HTMLElement, not HTMLInputElement- it works regardless
+            let username = inputText.value; 
 
-        startButtonBg.on('pointerout', () => {
-            startButtonBg.setScale(1);
-            startButtonText.setScale(1);
-            startButtonBg.setAlpha(1);
-        });
+            if (username) // not null or empty
+            {
+                // Hide the form before continuing
+                document.getElementById('input-form').style.display = 'none';
+                this.scene.start('MainScene', { username });      // Pass the username to the main scene
+                
+            }
+        })
 
-        startButtonBg.on('pointerdown', () => {
-            this.scene.start('MainScene');      // Direct to the main game when pressed
-        });
     }
 
-    
+
     update() {
         // Vertically scroll the background image
+
         if (this.background) {
             this.background.tilePositionY -= 6;
         }
