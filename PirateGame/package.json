@@ -10,7 +10,10 @@
   },
   "dependencies": {
     "express": "^4.18.2",
+    "matter-js": "^0.20.0",
+    "nodemon": "^3.0.1",
+    "phaser": "^3.86.0",
     "socket.io": "^4.7.2",
-    "nodemon": "^3.0.1"
+    "socket.io-client": "^4.8.3"
   }
 }
