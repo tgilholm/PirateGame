@@ -164,11 +164,18 @@ setInterval(() => {
     io.volatile.emit('gameState', {
         // Don't send all the data, just what's important
         ships: Object.values(ships).map(s => ({
-            id: s.id, x: s.body.position.x, y: s.body.position.y, r: s.body.angle
+            id: s.id,
+            x: s.body.position.x,
+            y: s.body.position.y,
+            r: s.body.angle
         })),
 
         players: Object.values(players).map(p => ({
-            id: p.id, parentId: p.parentId, x: p.x, y: p.y
+            id: p.id,
+            parentId: p.parentId,
+            x: p.x,
+            y: p.y,
+            username: p.username
         }))
     });
 }, 1000 / NET_TICK_RATE);

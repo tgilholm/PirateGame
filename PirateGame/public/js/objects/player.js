@@ -5,8 +5,6 @@ export default class Player {
         this.scene = scene;
         this.id = id;
         this.sprite = scene.add.circle(0, 0, 15, 0xff0000); // update to pirate sprite
-
-        
         this.parentId = null; // parent is null by default
         this.target = { x: 0, y: 0 }
     }
