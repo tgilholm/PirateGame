@@ -39,9 +39,4 @@ export default class Player {
         this.sprite.x = Phaser.Math.Linear(this.sprite.x, this.target.x, lInterp);
         this.sprite.y = Phaser.Math.Linear(this.sprite.y, this.target.y, lInterp);
     }
-
-
 }
-
-
-

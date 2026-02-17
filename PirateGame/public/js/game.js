@@ -2,6 +2,7 @@
 
 import Player from "./objects/player.js";
 import Ship from "./objects/ship.js";
+import { StartScene } from "./start-scene.js";
 
 
 const ships = {}
@@ -24,7 +25,7 @@ class MainScene extends Phaser.Scene {
         this.keys = null;
         this.shipKeys = null;
         this.ui = null;
-        this.cameraTarget = this.add.container(0, 0); // follow the player
+        this.cameraTarget = null;
     }
 
 
@@ -45,6 +46,7 @@ class MainScene extends Phaser.Scene {
      */
     create() {
         // Cameras
+        this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 0.1, 0.1);
 
         // Generate the tilemap from the .json
@@ -155,6 +157,7 @@ const config = {
     height: window.innerHeight,
     backgroundColor: '#2d80c9',
     parent: 'game-container',
+    scene: [StartScene, MainScene],     // Add all scenes in
 
     physics: {
         default: 'matter',  // for complex physics
