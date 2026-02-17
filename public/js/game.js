@@ -28,14 +28,7 @@ class MainScene extends Phaser.Scene {
         const graphics = this.add.graphics();
         this.worldGraphics = graphics;
         graphics.setDepth(-1); // Add this line - render grid behind everything
-        const worldSize = 5000;
 
-        graphics.lineStyle(2, 0x2472b5, 1);
-
-        for (let i = -worldSize; i < worldSize; i += 200) {
-            graphics.lineBetween(i, -worldSize, i, worldSize);
-            graphics.lineBetween(-worldSize, i, worldSize, i);
-        }
 
         this.ship = new Ship(this, 500, 500);
 
