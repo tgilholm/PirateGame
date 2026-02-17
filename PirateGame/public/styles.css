@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 html,
 body {
     width: 100%;
@@ -8,6 +14,70 @@ body {
 }
 
 #game-container {
-    width: 100vw;
-    height: 100vh;
+    position: relative;
+}
+
+/* Force the input form above the game */
+#input-form {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    gap: 12px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+.border {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: 5px solid #fff;
+    border-radius: 6px;
+    transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+    will-change: transform, box-shadow;
+}
+
+.border:hover,
+.border:focus-within {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    filter: brightness(1.06);
+}
+
+.border:active {
+    transform: translateY(-2px) scale(0.99);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+}
+
+.formElement {
+    width: 260px;
+    height: 80px;
+    display: block;
+    font-family: 'Courier New', Courier, monospace;
+    color: white;
+    font-weight: bold;
+    font-size: 28px;
+    text-align: center;
+    border:none;
+    background-color: rgba(13,47,79,0.9);
+
+    padding: 0 12px;
+
+    opacity: 0.9;
+
+}
+
+input {
+    cursor: text;
+    user-select: all;
+    -moz-user-select: all;
+}
+
+button {
+    cursor: grab;
 }

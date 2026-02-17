@@ -21,6 +21,8 @@ export class StartScene extends Phaser.Scene {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
 
+        let textPressed;
+
         // Add the animated background
         this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
 
@@ -46,34 +48,18 @@ export class StartScene extends Phaser.Scene {
             loop: -1
         });
 
-        // Add the start button & behaviour
-        const startButtonBg = this.add.rectangle(centerX, 520, 260, 80, 0x0d2f4f, 0.9)
-            .setStrokeStyle(4, 0xffffff, 1)
-            .setInteractive({ useHandCursor: true });
-        const startButtonText = this.add.text(centerX, 520, 'Start Game', {
-            fontSize: '32px',
-            color: '#ffffff',
-            fontStyle: 'bold'
-        }).setOrigin(0.5);
 
-        startButtonBg.on('pointerover', () => {
-            startButtonBg.setScale(1.08);
-            startButtonText.setScale(1.08);
-            startButtonBg.setAlpha(0.85);
-        });
 
-        startButtonBg.on('pointerout', () => {
-            startButtonBg.setScale(1);
-            startButtonText.setScale(1);
-            startButtonBg.setAlpha(1);
-        });
+        // startButtonBg.on('pointerdown', () => {
+        //     // Hide the form
+        //     document.getElementById('input-form').style.display = 'none';
 
-        startButtonBg.on('pointerdown', () => {
-            this.scene.start('MainScene');      // Direct to the main game when pressed
-        });
+
+        //     this.scene.start('MainScene');      // Direct to the main game when pressed
+        // });
     }
 
-    
+
     update() {
         // Vertically scroll the background image
         if (this.background) {
