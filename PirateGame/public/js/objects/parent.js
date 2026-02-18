@@ -6,10 +6,7 @@
 export default class Parent {
     constructor(scene, x, y) {
         this.scene = scene;
-        this.container = scene.add.container(x, y); // Add the container at the specified point
-        if (scene.matter && typeof scene.matter.add === 'object' && typeof scene.matter.add.gameObject === 'function') {
-            scene.matter.add.gameObject(this.container);
-        }
+        this.container = scene.add.container(x, y);
         this.target = { x: x, y: y, r: 0 };
         this.graphics = scene.add.graphics();
     }
@@ -28,12 +25,12 @@ export default class Parent {
     }
 
     /**
- * Converts local- (ship-scope) coordinates to absolute (world-scope)
- * coordinates using RotateAround
- * @param {Number} localX The X coordinate relative to this object
- * @param {Number} localY The Y coordinate relative to this object
- * @returns a Vector of x and y coordinates
- */
+    * Converts local- (ship-scope) coordinates to absolute (world-scope)
+    * coordinates using RotateAround
+    * @param {Number} localX The X coordinate relative to this object
+    * @param {Number} localY The Y coordinate relative to this object
+    * @returns a Vector of x and y coordinates
+    */
     toWorld(localX, localY) {
         return Phaser.Math.RotateAround(
             {

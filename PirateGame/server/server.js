@@ -15,7 +15,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 const TICK_RATE = 60;
-const NET_TICK_RATE = 60;
+const NET_TICK_RATE = 20;
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -81,69 +81,81 @@ if (islands && islands.data) {
 
 // Array containing the ships in the game
 const ships = {
-    "ship_1": new ServerShip("ship_1", 300, 200)  // Create a new ship at the coordinates x = 300, y = 200 
+    "ship_1": new ServerShip("ship_1", 1000, 1000)  // Create a new ship at the coordinates x = 300, y = 200 
 };
+
+const players = {}; // Array containing players
 
 // Add all the ships to the world
 Object.keys(ships).forEach(id => {
     const ship = ships[id];
 
     if (ship.body) {
-        World.add(world, ships["ship_1"].body);
+        World.add(world, ship.body);
     }
 })
 
 
 
-let players = {};
 // Dispatch events to clients on specific events- moving, joining game etc
 io.on("connection", (socket) => {
     console.log(`Player Connected: ${socket.id}`);
 
-    // Initialise player 
-    players[socket.id] = {
-        id: socket.id,
-        username: "",
-        x: 0,
-        y: 0,
-        parentId: "ship_1", // initially parented to the test ship
-        speed: 3,
-        inputs: { w: false, a: false, s: false, d: false }   // wasd for players
-    }
+    socket.on('playerReady', (data) => {
+        // Collect current ship states
+        const shipData = {};
+        for (const id in ships) {
+            shipData[id] = {
+                x: ships[id].body.position.x,
+                y: ships[id].body.position.y,
+                r: ships[id].body.angle,
+                params: ships[id].getParams()
+            };
+        }
+
+        // Send initialization package only when client is ready
+        socket.emit('initGame', {
+            shipData,
+            players: players // existing players
+        });
+
+        players[socket.id] = {
+            id: socket.id,
+            username: "",
+            x: 0,   // relative to parent
+            y: 0,
+            parentId: "ship_1", // initially parented to the test ship
+            speed: 3,
+            inputs: { w: false, a: false, s: false, d: false }   // wasd for players
+        }
+
+        const newUsername = data.username;
+
+        // Check if the name exceeds 16 chars
+        if (newUsername.length > 16) {
+            const trimmedUsername = newUsername.substring(0, 16);
+
+            // Save the username up until index 16
+            players[socket.id].username = trimmedUsername
+
+            console.debug(`Invalid username ${newUsername}, trimming to ${trimmedUsername}`);
+        } else {
+            players[socket.id].username = data.username
+        }
+    });
+
 
     // Send the ship x, y, rotation and body parameters to the client to draw new ships with
     const shipData = {};
     for (const id in ships) {
         shipData[id] = {
-            x: ships[id].body.position.x,
+            x: ships[id].body.position.x,       // Extract x & y rather than sending a huge 'body' object
             y: ships[id].body.position.y,
             rotation: ships[id].body.angle,
             params: ships[id].getParams()       // From ServerShip class
         }
     }
 
-    // Update player with current game state after joining
-    //socket.emit('initGame', { shipsForClient, players }); // send only to this player
-
-    // Set the player's name by their socket id
-    socket.on('nameSet', (inputData) => {
-        if (players[inputData.id]) {
-
-            const newUsername = inputData.username;
-
-            // Check if the name exceeds 16 chars
-            if (newUsername.length > 16) {
-                const trimmedUsername = newUsername.substring(0, 16);
-
-                // Save the username up until index 16
-                players[inputData.id].username = trimmedUsername
-
-                console.debug(`Invalid username ${newUsername}, trimming to ${trimmedUsername}`);
-            } else {
-                players[inputData.id].username = inputData.username
-            }
-        }
-    })
 
     // Handle players movement
     socket.on('playerInput', (inputData) => {
@@ -199,6 +211,7 @@ setInterval(() => {
             y: p.y,
             username: p.username
         }))
+
     });
 }, 1000 / NET_TICK_RATE);
 
@@ -224,7 +237,7 @@ function updateShipPhysics(ship) {
         Body.applyForce(body, body.position, force);
     }
 
-    //console.log(body.position)
+    console.log(body.position)
 }
 
 function updatePlayerPhysics(player) {
@@ -233,14 +246,14 @@ function updatePlayerPhysics(player) {
     const shipHeight = 160;
 
 
-    // If the player is on the ship, keep them inside it
+    // If the player is on the ship, keep them inside it and move with the ship
     if (ship) {
-        const sx = ship.body.position.x;
-        const sy = ship.body.position.y;
+        const shipX = ship.body.position.x;
+        const shipY = ship.body.position.y;
         const r = ship.body.angle;
 
         // world position of the player
-        let worldPos = localToWorld(sx, sy, r, player.x, player.y);
+        let worldPos = localToWorld(shipX, shipY, r, player.x, player.y);
 
         // apply input in world space
         if (player.inputs.w) worldPos.y -= player.speed;
@@ -249,52 +262,53 @@ function updatePlayerPhysics(player) {
         if (player.inputs.d) worldPos.x += player.speed;
 
         // convert back to local space
-        const newLocal = worldToLocal(sx, sy, r, worldPos.x, worldPos.y);
+        const newLocal = worldToLocal(shipX, shipY, r, worldPos.x, worldPos.y);
 
         // bind the player inside the ship
-        const playerRadius = 10;
-        const maxX = (shipWidth / 2) - playerRadius;    // player cannot leave the "box"
-        const maxY = (shipHeight / 2) - playerRadius
+        if (ship.isInside(newLocal.x, newLocal.y)) {
+            // Player is inside, movement allowed
+            player.x = newLocal.x;
+            player.y = newLocal.y;
+        } else {
+            // Check if only the x or y are in the ship
+            const onlyX = { x: newLocal.x, y: player.y };
+            const onlyY = { x: player.x, y: newLocal.y };
 
-        // if the player ends up outside the box, put them back inside
-        if (newLocal.x > maxX) newLocal.x = maxX;
-        if (newLocal.x < -maxX) newLocal.x = -maxX;
+            if (ship.isInside(onlyX.x, onlyX.y)) {
+                player.x = onlyX.x;
+            } else if (ship.isInside(onlyY.x, onlyY.y)) {
+                player.y = onlyY.y;
+            }
+        }
 
-        if (newLocal.y > maxY) newLocal.y = maxY;
-        if (newLocal.y < -maxY) newLocal.y = -maxY;
 
-        // player is still on the ship
-        player.x = newLocal.x;
-        player.y = newLocal.y;
-
-        // player is in world space – move freely
-    } else {
+    } else { // player is in world space – move freely
         if (player.inputs.w) player.y -= player.speed;
         if (player.inputs.s) player.y += player.speed;
         if (player.inputs.a) player.x -= player.speed;
         if (player.inputs.d) player.x += player.speed;
-
-        // check if player is near any ship and re-parent if so
-        for (const shipId in ships) {
-            const ship = ships[shipId];
-            const sx = ship.body.position.x;
-            const sy = ship.body.position.y;
-
-            const dx = player.x - sx;
-            const dy = player.y - sy;
-
-            if (Math.abs(dx) < shipWidth / 2 && Math.abs(dy) < shipHeight / 2) {
-                // player entered a ship's bounding box – re-parent them
-                player.parentId = shipId;
-                const r = ship.body.angle;
-                const local = worldToLocal(sx, sy, r, player.x, player.y);
-                player.x = local.x;
-                player.y = local.y;
-                break;
-            }
-        }
     }
+    // check if player is near any ship and re-parent if so
+    // for (const shipId in ships) {
+    //     const ship = ships[shipId];
+    //     const sx = ship.body.position.x;
+    //     const sy = ship.body.position.y;
+
+    //     const dx = player.x - sx;
+    //     const dy = player.y - sy;
+
+    //     if (Math.abs(dx) < shipWidth / 2 && Math.abs(dy) < shipHeight / 2) {
+    //         // player entered a ship's bounding box – re-parent them
+    //         player.parentId = shipId;
+    //         const r = ship.body.angle;
+    //         const local = worldToLocal(sx, sy, r, player.x, player.y);
+    //         player.x = local.x;
+    //         player.y = local.y;
+    //         break;
+    //     }
+    // }
 }
+
 
 const PORT = process.env.PORT || 3000;  // set port to 3000
 server.listen(PORT, () => {

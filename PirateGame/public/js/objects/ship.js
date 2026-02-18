@@ -9,61 +9,77 @@ import Parent from "./parent.js";
  * 
  */
 export default class Ship extends Parent {
-    constructor(scene, x, y) {
+    constructor(scene, x, y, params) {
         super(scene, x, y);
+        this.params = params;
+        this.drawHull()
+    }
 
-        this.serverData = { x: x, y: y, rotation: 0 };
+    drawHull() {
+        if (!this.params) return;
+        const { height, middleWidth, bowLength, sternRadius } = this.params;
+        const halfH = height / 2;
+        const halfW = middleWidth / 2;
+        const segments = 12;
 
-        this.container.setBody({
-            type: 'rectangle',
-            width: 300,
-            height: 160
-        });
+        this.graphics.clear();
+        this.graphics.fillStyle(0x5d4037, 1);
+        this.graphics.lineStyle(4, 0xffffff, 1);
 
-        this.container.setFrictionAir(0.05);
-        this.container.setMass(20);
-
-        // // Draw the hull
-        this.graphics.fillStyle(0x5d4037, 1); // dark brown
-        this.graphics.lineStyle(4, 0x3e2723, 1);
-
-        // // Rectangle
-        this.graphics.fillRect(-150, -80, 200, 160);
-        this.graphics.strokeRect(-150, -80, 200, 160);
-
-        // // Triangle
         this.graphics.beginPath();
-        this.graphics.moveTo(50, -80);
-        this.graphics.lineTo(130, 0);
-        this.graphics.lineTo(50, 80);
+
+        // STERN
+        for (let i = 0; i <= segments; i++) {
+            const theta = (Math.PI / 2) + (i / segments) * Math.PI;
+            const px = -halfW + (Math.cos(theta) * sternRadius);
+            const py = Math.sin(theta) * sternRadius;
+            if (i === 0) this.graphics.moveTo(px, py);
+            else this.graphics.lineTo(px, py);
+        }
+
+        // BOW TOP
+        for (let i = 0; i <= segments; i++) {
+            const t = i / segments;
+            const px = halfW + (t * bowLength);
+            const py = -halfH * (1 - (t * t)); // Quadratic curve
+            this.graphics.lineTo(px, py);
+        }
+
+        // BOW BOTTOM
+        for (let i = segments; i >= 0; i--) {
+            const t = i / segments;
+            const px = halfW + (t * bowLength);
+            const py = halfH * (1 - (t * t));
+            this.graphics.lineTo(px, py);
+        }
+
         this.graphics.closePath();
         this.graphics.fillPath();
         this.graphics.strokePath();
 
         this.container.add(this.graphics);
+        this.container.setDepth(10); // Force above the tilemap
     }
 
-    onServerUpdate(data) {
-        this.serverData = data;
+    drawDebugHitbox() {
+        const debug = this.scene.add.graphics();
+        debug.lineStyle(2, 0x00ff00, 1);
+        this.container.add(debug);
     }
-
 
     update() {
         if (!this.target) return;
-
-        // Interpolate position
+        // Interpolate between the client and server positions
         this.container.x = Phaser.Math.Linear(this.container.x, this.target.x, 0.2);
         this.container.y = Phaser.Math.Linear(this.container.y, this.target.y, 0.2);
 
-        // Handle Rotation
-        const targetRot = this.target.r !== undefined ? this.target.r : this.target.rotation;
+        // Interpolate rotation
+        let targetAngle = this.target.r; 
+        let currentAngle = this.container.rotation;
+        let diff = targetAngle - currentAngle;
 
-        const rotationDiff = Phaser.Math.Angle.ShortestBetween(
-            Phaser.Math.RadToDeg(this.container.rotation),
-            Phaser.Math.RadToDeg(targetRot || 0)
-        );
-
-        // Convert back to radians and add 10% of that difference
-        this.container.rotation += Phaser.Math.DegToRad(rotationDiff) * 0.1;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        this.container.rotation += diff * 0.2;
     }
 }
