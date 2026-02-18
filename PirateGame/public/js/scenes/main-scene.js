@@ -25,6 +25,9 @@ export class MainScene extends Phaser.Scene {
         this.shipKeys = null;
         this.ui = null;
         this.cameraTarget = null;
+        this.shipParams = null; // retrieve ship width/height etc from server
+        this.showDebugHitboxes = true;
+        this.debugGraphics = null;
     }
 
 
@@ -44,15 +47,12 @@ export class MainScene extends Phaser.Scene {
      * as setting up user input and socket listeners.
      */
     create(data) {
-
-        // Send username to server
-        const username = data.username;
-        const id = socket.id;
-        socket.emit('nameSet', { username, id });
+        this.debugGraphics = this.add.graphics();
+        this.debugGraphics.setDepth(1000); // Always on top
 
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
-        this.cameras.main.startFollow(this.cameraTarget, true, 0.1, 0.1);
+        this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
@@ -73,26 +73,50 @@ export class MainScene extends Phaser.Scene {
             up: Phaser.Input.Keyboard.KeyCodes.UP
         }));
 
-        /*
-            Starts a listener on gameState- Whenever the server sends out a "tick"
-            with the current state of the game, update all data.
-        */
 
         socket.on('initGame', (data) => {
+            console.log("Received Ship Params:", data.shipData);
+            this.shipParams = data.shipData;
 
+            // Immediately spawn ships if they don't exist
+            Object.entries(data.shipData).forEach(([id, config]) => {
+                if (!ships[id]) {
+                    ships[id] = new Ship(this, config.x, config.y, config.params);
+                }
+            });
         });
 
+        socket.emit('playerReady', { username: data.username });
+
+
         socket.on('gameState', (data) => {
+
+            // Check if ship params have been received first
+            if (!this.shipParams) return; // skip until it has arrived
 
             // Update ship list
             data.ships.forEach(shipData => {
                 if (!ships[shipData.id]) {  // only create if it doesn't already exist
-                    ships[shipData.id] = new Ship(this, shipData.x, shipData.y);
+
+                    // Create the ship with the new params
+                    const params = this.shipParams[shipData.id].params;
+
+                    if (params) {
+                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, params);
+                    } else {
+                        console.warn(`Failed to create ship ${shipData.id}`);
+                        return;
+                    }
                 }
 
                 // Update with server data
                 ships[shipData.id].target = { x: shipData.x, y: shipData.y, r: shipData.r };
             });
+
+            // Store debug hitbox data if available
+            if (data.debug && data.debug.shipHitboxes) {
+                this.shipHitboxes = data.debug.shipHitboxes;
+            }
 
             // Update player list
             data.players.forEach(playerData => {
@@ -118,6 +142,32 @@ export class MainScene extends Phaser.Scene {
         // Interpolate all objects 
         Object.values(ships).forEach(ship => ship.update());
         Object.values(players).forEach(player => player.update());
+
+
+        // Draw debug hitboxes
+        if (this.showDebugHitboxes && this.debugGraphics && this.shipHitboxes) {
+            this.debugGraphics.clear();
+            this.debugGraphics.lineStyle(2, 0xff00ff, 1);
+
+            this.shipHitboxes.forEach(shipData => {
+                if (shipData && shipData.parts) {
+                    shipData.parts.forEach(part => {
+                        if (part && part.vertices) {
+                            this.debugGraphics.beginPath();
+                            part.vertices.forEach((vertex, i) => {
+                                if (i === 0) {
+                                    this.debugGraphics.moveTo(vertex.x, vertex.y);
+                                } else {
+                                    this.debugGraphics.lineTo(vertex.x, vertex.y);
+                                }
+                            });
+                            this.debugGraphics.closePath();
+                            this.debugGraphics.strokePath();
+                        }
+                    });
+                }
+            });
+        }
 
         if (players[socket.id]) {
             const player = players[socket.id];

@@ -9,61 +9,85 @@ import Parent from "./parent.js";
  * 
  */
 export default class Ship extends Parent {
-    constructor(scene, x, y) {
+    constructor(scene, x, y, params) {
         super(scene, x, y);
-
-        this.serverData = { x: x, y: y, rotation: 0 };
-
-        this.container.setBody({
-            type: 'rectangle',
-            width: 300,
-            height: 160
-        });
-
-        this.container.setFrictionAir(0.05);
-        this.container.setMass(20);
-
-        // // Draw the hull
-        this.graphics.fillStyle(0x5d4037, 1); // dark brown
-        this.graphics.lineStyle(4, 0x3e2723, 1);
-
-        // // Rectangle
-        this.graphics.fillRect(-150, -80, 200, 160);
-        this.graphics.strokeRect(-150, -80, 200, 160);
-
-        // // Triangle
-        this.graphics.beginPath();
-        this.graphics.moveTo(50, -80);
-        this.graphics.lineTo(130, 0);
-        this.graphics.lineTo(50, 80);
-        this.graphics.closePath();
-        this.graphics.fillPath();
-        this.graphics.strokePath();
-
-        this.container.add(this.graphics);
+        this.params = params;
+        this.hullSprite = null;
+        this.drawHull();
     }
 
-    onServerUpdate(data) {
-        this.serverData = data;
+    drawHull() {
+        if (!this.params) return;
+        const { height, middleWidth, bowLength, sternRadius } = this.params;
+        const halfH = height / 2;
+        const halfW = middleWidth / 2;
+        const segments = 12;
+        const padding = 5;
+        const totalW = middleWidth + bowLength + sternRadius + (padding * 2);
+        const totalH = height + (padding * 2);
+        const offsetX = sternRadius + halfW + padding;
+        const offsetY = halfH + padding;
+
+        const graphics = this.scene.make.graphics({ x: 0, y: 0, add: false });
+        graphics.fillStyle(0x5d4037, 1);
+        graphics.lineStyle(4, 0xffffff, 1);
+        graphics.beginPath();
+
+        // Stern
+        for (let i = 0; i <= segments; i++) {
+            const theta = (Math.PI / 2) + (i / segments) * Math.PI;
+            const px = offsetX + (-halfW + (Math.cos(theta) * sternRadius));
+            const py = offsetY + (Math.sin(theta) * sternRadius);
+            if (i === 0) graphics.moveTo(px, py);
+            else graphics.lineTo(px, py);
+        }
+
+        // Bow top
+        for (let i = 0; i <= segments; i++) {
+            const t = i / segments;
+            const px = offsetX + (halfW + (t * bowLength));
+            const py = offsetY + (-halfH * (1 - (t * t)));
+            graphics.lineTo(px, py);
+        }
+
+        // Bow bottom
+        for (let i = segments; i >= 0; i--) {
+            const t = i / segments;
+            const px = offsetX + (halfW + (t * bowLength));
+            const py = offsetY + (halfH * (1 - (t * t)));
+            graphics.lineTo(px, py);
+        }
+
+        graphics.closePath();
+        graphics.fillPath();
+        graphics.strokePath();
+
+        const textureName = `hull_${this.params.id}`;
+        graphics.generateTexture(textureName, totalW, totalH);
+
+        // Create sprite and set origin to the relative center
+        if (this.hullSprite) this.hullSprite.destroy();
+        this.hullSprite = this.scene.add.sprite(0, 0, textureName);
+
+        this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
+
+        this.container.add(this.hullSprite);
+        this.container.sendToBack(this.hullSprite);
+        this.container.setDepth(10);
     }
 
 
     update() {
         if (!this.target) return;
+        // Interpolate between the client and server positions
+        this.container.x = Phaser.Math.Linear(this.container.x, this.target.x, 0.15);
+        this.container.y = Phaser.Math.Linear(this.container.y, this.target.y, 0.15);
 
-        // Interpolate position
-        this.container.x = Phaser.Math.Linear(this.container.x, this.target.x, 0.2);
-        this.container.y = Phaser.Math.Linear(this.container.y, this.target.y, 0.2);
-
-        // Handle Rotation
-        const targetRot = this.target.r !== undefined ? this.target.r : this.target.rotation;
-
-        const rotationDiff = Phaser.Math.Angle.ShortestBetween(
-            Phaser.Math.RadToDeg(this.container.rotation),
-            Phaser.Math.RadToDeg(targetRot || 0)
+        // Interpolate rotation
+        this.container.rotation = Phaser.Math.Angle.RotateTo(
+            this.container.rotation,
+            this.target.r,
+            0.1
         );
-
-        // Convert back to radians and add 10% of that difference
-        this.container.rotation += Phaser.Math.DegToRad(rotationDiff) * 0.1;
     }
 }
