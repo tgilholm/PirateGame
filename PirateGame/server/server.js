@@ -5,7 +5,7 @@ import express from "express";
 import http from "http";
 import path from "path";
 import fs from 'fs';    // for reading files
-import {CONFIG} from './config.js';
+import { CONFIG } from './config.js';
 
 // @ts-ignore
 import { Server } from "socket.io"
@@ -132,8 +132,10 @@ io.on("connection", (socket) => {
         // Send initialization package only when client is ready
         socket.emit('initGame', {
             shipData,
-            players: players // existing players
+            players: Object.values(players) // existing players
         });
+
+        console.log(`Sent initGame to ${socket.id}`);
     });
 
 
@@ -177,30 +179,75 @@ setInterval(() => {
     Engine.update(engine, 1000 / TICK_RATE);
 }, 1000 / TICK_RATE);
 
+
+const lastBroadcast = {
+    ships: {},
+    players: {}
+};
+
 /*
-    Periodically refresh the clients with the current game state.
+    Periodically refresh the clients with the current game state. Keeping track of
+    lastBroadcast means that the positions of ships need only be updated if they have been
+    changed recently, improving performance for stationary ships
 */
 setInterval(() => {
-    io.volatile.emit('gameState', {
-        // Don't send all the data, just what's important
-        ships: Object.values(ships).map(s => ({
+    const shipUpdates = [];
+
+    Object.values(ships).forEach(s => {
+        const current = {
             id: s.id,
             x: s.body.position.x,
             y: s.body.position.y,
             r: s.body.angle,
             vx: s.body.velocity.x,
             vy: s.body.velocity.y,
-            av: s.body.angularVelocity  // send to client for extrapolation 
-        })),
+            av: s.body.angularVelocity
+        };
 
-        players: Object.values(players).map(p => ({
+        const last = lastBroadcast.ships[s.id];
+
+        // Only send if position changed significantly
+        if (!last ||
+            Math.abs(current.x - last.x) > 1 ||
+            Math.abs(current.y - last.y) > 1 ||
+            Math.abs(current.r - last.r) > 0.05) {
+
+            lastBroadcast.ships[s.id] = current;
+            shipUpdates.push(current);
+        }
+    });
+
+    const playerUpdates = [];
+
+    Object.values(players).forEach(p => {
+        const current = {
             id: p.id,
             parentId: p.parentId,
             x: p.x,
             y: p.y,
             username: p.username
-        })),
+        };
+
+        const last = lastBroadcast.players[p.id];
+
+        // Only send if changed
+        if (!last ||
+            current.parentId !== last.parentId ||
+            Math.abs(current.x - last.x) > 1 ||
+            Math.abs(current.y - last.y) > 1) {
+
+            lastBroadcast.players[p.id] = current;
+            playerUpdates.push(current);
+        }
     });
+
+    // Only broadcast if there are changes
+    if (shipUpdates.length > 0 || playerUpdates.length > 0) {
+        io.volatile.emit('gameState', {
+            ships: shipUpdates,
+            players: playerUpdates
+        });
+    }
 }, 1000 / NET_TICK_RATE);
 
 
@@ -229,8 +276,6 @@ function updateShipPhysics(ship) {
         // Apply the force
         Body.applyForce(body, body.position, force);
     }
-
-    //console.log(body.position)
 }
 
 /**

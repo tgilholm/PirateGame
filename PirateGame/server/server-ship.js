@@ -1,5 +1,5 @@
 import Matter from "matter-js";
-import { CONFIG } from "./config";
+import { CONFIG } from "./config.js";
 const { Bodies, World, Body } = Matter;
 
 
