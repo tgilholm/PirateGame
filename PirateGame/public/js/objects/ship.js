@@ -72,41 +72,10 @@ export default class Ship extends Parent {
         this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
 
         this.container.add(this.hullSprite);
-        this.container.sendToBack(this.hullSprite); // debug is on top
+        this.container.sendToBack(this.hullSprite);
         this.container.setDepth(10);
-
-        this.drawDebugHitbox();
     }
 
-    drawDebugHitbox() {
-        const { height, middleWidth, bowLength, sternRadius } = this.params;
-        const halfH = height / 2;
-        const halfW = middleWidth / 2;
-        const segments = 12;
-
-        const debug = this.scene.add.graphics();
-        debug.lineStyle(2, 0x00ff00, 1);
-        debug.beginPath();
-
-        // Stern
-        for (let i = 0; i <= segments; i++) {
-            const theta = (Math.PI / 2) + (i / segments) * Math.PI;
-            debug[i === 0 ? 'moveTo' : 'lineTo'](-halfW + (Math.cos(theta) * sternRadius), Math.sin(theta) * sternRadius);
-        }
-        // Bow
-        for (let i = 0; i <= segments; i++) {
-            const t = i / segments;
-            debug.lineTo(halfW + (t * bowLength), -halfH * (1 - (t * t)));
-        }
-        for (let i = segments; i >= 0; i--) {
-            const t = i / segments;
-            debug.lineTo(halfW + (t * bowLength), halfH * (1 - (t * t)));
-        }
-
-        debug.closePath();
-        debug.strokePath();
-        this.container.add(debug);
-    }
 
     update() {
         if (!this.target) return;

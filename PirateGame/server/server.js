@@ -75,13 +75,19 @@ if (islands && islands.data) {
         }
     });
 }
+console.log(`Created ${world.bodies.length} island colliders`);
 
 
-
+Matter.Events.on(engine, 'collisionStart', (event) => {
+    console.log('Collision detected between:',
+        event.pairs[0].bodyA.label,
+        event.pairs[0].bodyB.label
+    );
+});
 
 // Array containing the ships in the game
 const ships = {
-    "ship_1": new ServerShip("ship_1", 1000, 1000)  // Create a new ship at the coordinates x = 300, y = 200 
+    "ship_1": new ServerShip("ship_1", 2500, 5000)
 };
 
 const players = {}; // Array containing players
@@ -92,10 +98,31 @@ Object.keys(ships).forEach(id => {
 
     if (ship.body) {
         World.add(world, ship.body);
+        console.log('Ship collision filter:', JSON.stringify(ship.body.collisionFilter));
+        console.log('First island filter:', JSON.stringify(world.bodies[0].collisionFilter))
+        console.log('Body bounds:', JSON.stringify(ship.body.bounds));
     }
 })
 
+console.log(`Total bodies in world: ${world.bodies.length}`);
 
+// Export body hitbox data for client visualization
+function getBodyDebugData(body) {
+    return {
+        vertices: body.vertices.map(v => ({ x: v.x, y: v.y })),
+        position: { x: body.position.x, y: body.position.y },
+        angle: body.angle
+    };
+}
+
+function getShipDebugData(ship) {
+    if (!ship.body || !ship.body.parts) return null;
+
+    return {
+        id: ship.id,
+        parts: ship.body.parts.map(part => getBodyDebugData(part))
+    };
+}
 
 // Dispatch events to clients on specific events- moving, joining game etc
 io.on("connection", (socket) => {
@@ -210,7 +237,11 @@ setInterval(() => {
             x: p.x,
             y: p.y,
             username: p.username
-        }))
+        })),
+
+        debug: {
+            shipHitboxes: Object.values(ships).map(s => getShipDebugData(s))
+        }
 
     });
 }, 1000 / NET_TICK_RATE);
@@ -237,7 +268,7 @@ function updateShipPhysics(ship) {
         Body.applyForce(body, body.position, force);
     }
 
-    console.log(body.position)
+    //console.log(body.position)
 }
 
 function updatePlayerPhysics(player) {

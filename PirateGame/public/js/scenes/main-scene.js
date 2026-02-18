@@ -26,6 +26,8 @@ export class MainScene extends Phaser.Scene {
         this.ui = null;
         this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
+        this.showDebugHitboxes = true;
+        this.debugGraphics = null;
     }
 
 
@@ -45,6 +47,8 @@ export class MainScene extends Phaser.Scene {
      * as setting up user input and socket listeners.
      */
     create(data) {
+        this.debugGraphics = this.add.graphics();
+        this.debugGraphics.setDepth(1000); // Always on top
 
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
@@ -109,6 +113,11 @@ export class MainScene extends Phaser.Scene {
                 ships[shipData.id].target = { x: shipData.x, y: shipData.y, r: shipData.r };
             });
 
+            // Store debug hitbox data if available
+            if (data.debug && data.debug.shipHitboxes) {
+                this.shipHitboxes = data.debug.shipHitboxes;
+            }
+
             // Update player list
             data.players.forEach(playerData => {
                 if (!players[playerData.id]) {
@@ -133,6 +142,32 @@ export class MainScene extends Phaser.Scene {
         // Interpolate all objects 
         Object.values(ships).forEach(ship => ship.update());
         Object.values(players).forEach(player => player.update());
+
+
+        // Draw debug hitboxes
+        if (this.showDebugHitboxes && this.debugGraphics && this.shipHitboxes) {
+            this.debugGraphics.clear();
+            this.debugGraphics.lineStyle(2, 0xff00ff, 1);
+
+            this.shipHitboxes.forEach(shipData => {
+                if (shipData && shipData.parts) {
+                    shipData.parts.forEach(part => {
+                        if (part && part.vertices) {
+                            this.debugGraphics.beginPath();
+                            part.vertices.forEach((vertex, i) => {
+                                if (i === 0) {
+                                    this.debugGraphics.moveTo(vertex.x, vertex.y);
+                                } else {
+                                    this.debugGraphics.lineTo(vertex.x, vertex.y);
+                                }
+                            });
+                            this.debugGraphics.closePath();
+                            this.debugGraphics.strokePath();
+                        }
+                    });
+                }
+            });
+        }
 
         if (players[socket.id]) {
             const player = players[socket.id];

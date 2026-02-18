@@ -1,5 +1,9 @@
 import Matter from "matter-js";
 const { Bodies, World, Body } = Matter;
+import decomp from 'poly-decomp-es';
+global.decomp = decomp;
+
+Matter.Common.setDecomp(decomp);
 
 
 /**
@@ -23,20 +27,81 @@ export default class ServerShip {
 
         this.turnSpeed = 0.0003;
         this.thrust = 0.15;
-
-
+        this.body = this.createComplexBody(x, y);
         // Generate a Matter body from the vector of vertices
-        const vertices = this.generateHullVertices();
-        this.body = Bodies.fromVertices(x, y, [vertices], {
-            frictionAir: 0.05,
-            mass: 150
-        });
-
-        if (!this.body) {
-            console.error("Failed to generate ship body from vertices!");
-        }
+        //this.body = this.createComplexBody(x, y, this.generateHullVertices().reverse());
         this.inputs = { up: false, down: false, left: false, right: false };
 
+    }
+
+    createComplexBody(x, y, vertices) {
+        const Body = Matter.Body;
+        const Bodies = Matter.Bodies;
+
+        // Dimensions from your ship
+        const sternRadius = this.sternRadius;      // 80
+        const middleWidth = this.middleWidth;      // 180
+        const middleHeight = this.height;          // 160
+        const bowLength = this.bowLength;          // 80
+
+        // create stern as a circle
+        const sternBody = Bodies.circle(
+            x - (middleWidth / 2), 
+            y,
+            sternRadius * 0.9,
+            {
+                label: 'ship-stern',
+                friction: 0.5,
+                restitution: 0.2,
+                mass: 50
+            }
+        );
+
+        // create the middle as a rectangle
+        const middleBody = Bodies.rectangle(
+            x,
+            y,
+            middleWidth,
+            middleHeight,
+            {
+                label: 'ship-middle',
+                friction: 0.5,
+                restitution: 0.2,
+                mass: 100
+            }
+        );
+
+        // create the bow as a trapezoid
+        const bowBody = Bodies.trapezoid(
+            x + (middleWidth / 2),
+            y,
+            bowLength,
+            middleHeight,
+            0.65,
+            {
+                label: 'ship-bow',
+                friction: 0.5,
+                restitution: 0.2,
+                mass: 50
+            }
+        );
+        Body.rotate(bowBody, Math.PI / 2);  
+
+
+        // Create compound body from the three parts
+        const body = Body.create({
+            parts: [sternBody, middleBody, bowBody],
+            frictionAir: 0.05,
+            mass: 200,
+            label: 'ship',
+            restitution: 0.2
+        });
+
+        Body.setPosition(body, { x, y });
+        console.log('Created compound body with', body.parts.length, 'parts');
+        console.log('Bounds:', JSON.stringify(body.bounds));
+
+        return body;
     }
 
     /**
@@ -115,5 +180,7 @@ export default class ServerShip {
         else {
             return Math.abs(localY) <= halfHeight;
         }
+
+
     }
 }
