@@ -26,8 +26,6 @@ export class MainScene extends Phaser.Scene {
         this.ui = null;
         this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
-        this.showDebugHitboxes = false;
-        this.debugGraphics = null;
     }
 
 
@@ -119,11 +117,6 @@ export class MainScene extends Phaser.Scene {
 
             });
 
-            // Store debug hitbox data if available
-            if (data.debug && data.debug.shipHitboxes) {
-                this.shipHitboxes = data.debug.shipHitboxes;
-            }
-
             // Update player list
             data.players.forEach(playerData => {
                 if (!players[playerData.id]) {
@@ -145,35 +138,10 @@ export class MainScene extends Phaser.Scene {
     update() {
         const cameraTarget = this.cameraTarget;
 
-        // Interpolate all objects 
+        // Extrapolate and interpolate all game objects
         Object.values(ships).forEach(ship => ship.update());
         Object.values(players).forEach(player => player.update());
 
-
-        // Draw debug hitboxes
-        if (this.showDebugHitboxes && this.debugGraphics && this.shipHitboxes) {
-            this.debugGraphics.clear();
-            this.debugGraphics.lineStyle(2, 0xff00ff, 1);
-
-            this.shipHitboxes.forEach(shipData => {
-                if (shipData && shipData.parts) {
-                    shipData.parts.forEach(part => {
-                        if (part && part.vertices) {
-                            this.debugGraphics.beginPath();
-                            part.vertices.forEach((vertex, i) => {
-                                if (i === 0) {
-                                    this.debugGraphics.moveTo(vertex.x, vertex.y);
-                                } else {
-                                    this.debugGraphics.lineTo(vertex.x, vertex.y);
-                                }
-                            });
-                            this.debugGraphics.closePath();
-                            this.debugGraphics.strokePath();
-                        }
-                    });
-                }
-            });
-        }
 
         if (players[socket.id]) {
             const player = players[socket.id];

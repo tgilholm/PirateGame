@@ -4,6 +4,7 @@ export default class Player {
     constructor(scene, id) {
         this.scene = scene;
         this.id = id;
+
         this.sprite = scene.add.circle(0, 0, 15, 0xff0000); // update to pirate sprite
         this.parentId = null; // parent is null by default
         this.parent = null;
@@ -57,8 +58,8 @@ export default class Player {
     }
 
     update(lInterp = 0.2) {
-        this.sprite.x = Phaser.Math.Linear(this.sprite.x, this.target.x, lInterp);
-        this.sprite.y = Phaser.Math.Linear(this.sprite.y, this.target.y, lInterp);
+        this.sprite.x = Math.round(Phaser.Math.Linear(this.sprite.x, this.target.x, lInterp));
+        this.sprite.y = Math.round(Phaser.Math.Linear(this.sprite.y, this.target.y, lInterp));
 
         // Display name above player in absolute scope
         let worldX = this.sprite.x;

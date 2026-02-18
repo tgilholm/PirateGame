@@ -17,7 +17,7 @@ const config = {
         default: 'matter',  // for complex physics
         matter: {
             gravity: { x: 0, y: 0 },
-            debug: true
+            debug: false
         }
     },
 };
