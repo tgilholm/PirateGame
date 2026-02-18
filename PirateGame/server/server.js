@@ -8,6 +8,32 @@ import fs from 'fs';    // for reading files
 // @ts-ignore
 import { Server } from "socket.io"
 import { fileURLToPath } from "url";
+import ServerShip from "./server-ship.js";
+
+// Create the server
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
+const TICK_RATE = 60;
+const NET_TICK_RATE = 60;
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const rootDir = path.join(__dirname, '..'); // go up a directory
+const publicDir = path.join(rootDir, 'public'); // append "public";
+
+
+// Server static content from the public directory
+app.use(express.static(publicDir));
+
+// Send to the index.html landing page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(publicDir, 'index.html'));
+});
+
+
 
 // aliases for matter modules
 let Engine = Matter.Engine,
@@ -20,7 +46,8 @@ const engine = Engine.create({ gravity: { x: 0, y: 0 } });
 const world = engine.world;
 
 // Read the tilemap & generate collision objects for each tile where "collides" = true
-const mapData = JSON.parse(fs.readFileSync('./public/assets/demo-map.json', 'utf-8'));
+const mapPath = path.join(rootDir, 'public', 'assets', 'demo-map.json');
+const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
 const tileWidth = mapData.tilewidth;
 const mapWidth = mapData.width;
 
@@ -51,70 +78,52 @@ if (islands && islands.data) {
 
 
 
-// Create the server
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
-const TICK_RATE = 60;
-const NET_TICK_RATE = 60;
-
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-
-// Send new connections the index.html landing page
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Array containing the ships in the game
 const ships = {
-    "ship_1": {     // test ship
-        id: "ship_1",
-        body: Bodies.rectangle(300, 200, 200, 120, {
-            frictionAir: 0.05,
-            mass: 150
-        }), // x= 300, y = 400, 200 wide, 120 tall
-
-        turnSpeed: 0.0003,
-        thrust: 0.15,
-        inputs: { up: false, down: false, left: false, right: false }   // arrow keys for ships
-    }
+    "ship_1": new ServerShip("ship_1", 300, 200)  // Create a new ship at the coordinates x = 300, y = 200 
 };
 
+// Add all the ships to the world
+Object.keys(ships).forEach(id => {
+    const ship = ships[id];
+
+    if (ship.body) {
+        World.add(world, ships["ship_1"].body);
+    }
+})
+
+
+
 let players = {};
-
-// Add demo ship to the world
-World.add(world, ships["ship_1"].body);
-
-
-
 // Dispatch events to clients on specific events- moving, joining game etc
 io.on("connection", (socket) => {
     console.log(`Player Connected: ${socket.id}`);
 
-    // init player
+    // Initialise player 
     players[socket.id] = {
         id: socket.id,
         username: "",
         x: 0,
         y: 0,
-        parentId: "ship_1",
+        parentId: "ship_1", // initially parented to the test ship
         speed: 3,
         inputs: { w: false, a: false, s: false, d: false }   // wasd for players
     }
 
-    const shipsForClient = {};
-    Object.keys(ships).forEach(id => {
-        shipsForClient[id] = {
-            id: ships[id].id,
+    // Send the ship x, y, rotation and body parameters to the client to draw new ships with
+    const shipData = {};
+    for (const id in ships) {
+        shipData[id] = {
             x: ships[id].body.position.x,
             y: ships[id].body.position.y,
-            rotation: ships[id].body.angle
-        };
-    });
+            rotation: ships[id].body.angle,
+            params: ships[id].getParams()       // From ServerShip class
+        }
+    }
 
     // Update player with current game state after joining
-    socket.emit('initGame', { shipsForClient, players }); // send only to this player
+    //socket.emit('initGame', { shipsForClient, players }); // send only to this player
 
     // Set the player's name by their socket id
     socket.on('nameSet', (inputData) => {
