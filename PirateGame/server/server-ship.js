@@ -1,9 +1,5 @@
 import Matter from "matter-js";
 const { Bodies, World, Body } = Matter;
-import decomp from 'poly-decomp-es';
-global.decomp = decomp;
-
-Matter.Common.setDecomp(decomp);
 
 
 /**
