@@ -48,7 +48,7 @@ export class MainScene extends Phaser.Scene {
         // Send username to server
         const username = data.username;
         const id = socket.id;
-        socket.emit('nameSet', {username, id});
+        socket.emit('nameSet', { username, id });
 
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
@@ -77,6 +77,11 @@ export class MainScene extends Phaser.Scene {
             Starts a listener on gameState- Whenever the server sends out a "tick"
             with the current state of the game, update all data.
         */
+
+        socket.on('initGame', (data) => {
+
+        });
+
         socket.on('gameState', (data) => {
 
             // Update ship list

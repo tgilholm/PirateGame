@@ -114,12 +114,25 @@ io.on("connection", (socket) => {
     });
 
     // Update player with current game state after joining
-    socket.emit('initGame', { shipsForClient, players, id: socket.id }); // send only to this player
+    socket.emit('initGame', { shipsForClient, players }); // send only to this player
 
     // Set the player's name by their socket id
     socket.on('nameSet', (inputData) => {
         if (players[inputData.id]) {
-            players[inputData.id].username = inputData.username
+
+            const newUsername = inputData.username;
+
+            // Check if the name exceeds 16 chars
+            if (newUsername.length > 16) {
+                const trimmedUsername = newUsername.substring(0, 16);
+
+                // Save the username up until index 16
+                players[inputData.id].username = trimmedUsername
+
+                console.debug(`Invalid username ${newUsername}, trimming to ${trimmedUsername}`);
+            } else {
+                players[inputData.id].username = inputData.username
+            }
         }
     })
 
