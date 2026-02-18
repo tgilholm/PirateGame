@@ -242,8 +242,6 @@ function updateShipPhysics(ship) {
 
 function updatePlayerPhysics(player) {
     const ship = ships[player.parentId];
-    const shipWidth = 300;
-    const shipHeight = 160;
 
 
     // If the player is on the ship, keep them inside it and move with the ship
@@ -254,30 +252,24 @@ function updatePlayerPhysics(player) {
 
         // world position of the player
         let worldPos = localToWorld(shipX, shipY, r, player.x, player.y);
-
-        // apply input in world space
         if (player.inputs.w) worldPos.y -= player.speed;
         if (player.inputs.s) worldPos.y += player.speed;
         if (player.inputs.a) worldPos.x -= player.speed;
         if (player.inputs.d) worldPos.x += player.speed;
 
-        // convert back to local space
+        // convert to local space
         const newLocal = worldToLocal(shipX, shipY, r, worldPos.x, worldPos.y);
 
-        // bind the player inside the ship
-        if (ship.isInside(newLocal.x, newLocal.y)) {
-            // Player is inside, movement allowed
+        // collision check
+        const playerRadius = 15;
+        if (ship.isInside(newLocal.x, newLocal.y, playerRadius)) {
             player.x = newLocal.x;
             player.y = newLocal.y;
         } else {
-            // Check if only the x or y are in the ship
-            const onlyX = { x: newLocal.x, y: player.y };
-            const onlyY = { x: player.x, y: newLocal.y };
-
-            if (ship.isInside(onlyX.x, onlyX.y)) {
-                player.x = onlyX.x;
-            } else if (ship.isInside(onlyY.x, onlyY.y)) {
-                player.y = onlyY.y;
+            if (ship.isInside(newLocal.x, player.y, playerRadius)) {
+                player.x = newLocal.x;
+            } else if (ship.isInside(player.x, newLocal.y, playerRadius)) {
+                player.y = newLocal.y;
             }
         }
 

@@ -12,7 +12,8 @@ export default class Ship extends Parent {
     constructor(scene, x, y, params) {
         super(scene, x, y);
         this.params = params;
-        this.drawHull()
+        this.hullSprite = null;
+        this.drawHull();
     }
 
     drawHull() {
@@ -21,65 +22,103 @@ export default class Ship extends Parent {
         const halfH = height / 2;
         const halfW = middleWidth / 2;
         const segments = 12;
+        const padding = 5;
+        const totalW = middleWidth + bowLength + sternRadius + (padding * 2);
+        const totalH = height + (padding * 2);
+        const offsetX = sternRadius + halfW + padding;
+        const offsetY = halfH + padding;
 
-        this.graphics.clear();
-        this.graphics.fillStyle(0x5d4037, 1);
-        this.graphics.lineStyle(4, 0xffffff, 1);
+        const graphics = this.scene.make.graphics({ x: 0, y: 0, add: false });
+        graphics.fillStyle(0x5d4037, 1);
+        graphics.lineStyle(4, 0xffffff, 1);
+        graphics.beginPath();
 
-        this.graphics.beginPath();
-
-        // STERN
+        // Stern
         for (let i = 0; i <= segments; i++) {
             const theta = (Math.PI / 2) + (i / segments) * Math.PI;
-            const px = -halfW + (Math.cos(theta) * sternRadius);
-            const py = Math.sin(theta) * sternRadius;
-            if (i === 0) this.graphics.moveTo(px, py);
-            else this.graphics.lineTo(px, py);
+            const px = offsetX + (-halfW + (Math.cos(theta) * sternRadius));
+            const py = offsetY + (Math.sin(theta) * sternRadius);
+            if (i === 0) graphics.moveTo(px, py);
+            else graphics.lineTo(px, py);
         }
 
-        // BOW TOP
+        // Bow top
         for (let i = 0; i <= segments; i++) {
             const t = i / segments;
-            const px = halfW + (t * bowLength);
-            const py = -halfH * (1 - (t * t)); // Quadratic curve
-            this.graphics.lineTo(px, py);
+            const px = offsetX + (halfW + (t * bowLength));
+            const py = offsetY + (-halfH * (1 - (t * t)));
+            graphics.lineTo(px, py);
         }
 
-        // BOW BOTTOM
+        // Bow bottom
         for (let i = segments; i >= 0; i--) {
             const t = i / segments;
-            const px = halfW + (t * bowLength);
-            const py = halfH * (1 - (t * t));
-            this.graphics.lineTo(px, py);
+            const px = offsetX + (halfW + (t * bowLength));
+            const py = offsetY + (halfH * (1 - (t * t)));
+            graphics.lineTo(px, py);
         }
 
-        this.graphics.closePath();
-        this.graphics.fillPath();
-        this.graphics.strokePath();
+        graphics.closePath();
+        graphics.fillPath();
+        graphics.strokePath();
 
-        this.container.add(this.graphics);
-        this.container.setDepth(10); // Force above the tilemap
+        const textureName = `hull_${this.params.id}`;
+        graphics.generateTexture(textureName, totalW, totalH);
+
+        // Create sprite and set origin to the relative center
+        if (this.hullSprite) this.hullSprite.destroy();
+        this.hullSprite = this.scene.add.sprite(0, 0, textureName);
+
+        this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
+
+        this.container.add(this.hullSprite);
+        this.container.sendToBack(this.hullSprite); // debug is on top
+        this.container.setDepth(10);
+
+        this.drawDebugHitbox();
     }
 
     drawDebugHitbox() {
+        const { height, middleWidth, bowLength, sternRadius } = this.params;
+        const halfH = height / 2;
+        const halfW = middleWidth / 2;
+        const segments = 12;
+
         const debug = this.scene.add.graphics();
         debug.lineStyle(2, 0x00ff00, 1);
+        debug.beginPath();
+
+        // Stern
+        for (let i = 0; i <= segments; i++) {
+            const theta = (Math.PI / 2) + (i / segments) * Math.PI;
+            debug[i === 0 ? 'moveTo' : 'lineTo'](-halfW + (Math.cos(theta) * sternRadius), Math.sin(theta) * sternRadius);
+        }
+        // Bow
+        for (let i = 0; i <= segments; i++) {
+            const t = i / segments;
+            debug.lineTo(halfW + (t * bowLength), -halfH * (1 - (t * t)));
+        }
+        for (let i = segments; i >= 0; i--) {
+            const t = i / segments;
+            debug.lineTo(halfW + (t * bowLength), halfH * (1 - (t * t)));
+        }
+
+        debug.closePath();
+        debug.strokePath();
         this.container.add(debug);
     }
 
     update() {
         if (!this.target) return;
         // Interpolate between the client and server positions
-        this.container.x = Phaser.Math.Linear(this.container.x, this.target.x, 0.2);
-        this.container.y = Phaser.Math.Linear(this.container.y, this.target.y, 0.2);
+        this.container.x = Phaser.Math.Linear(this.container.x, this.target.x, 0.15);
+        this.container.y = Phaser.Math.Linear(this.container.y, this.target.y, 0.15);
 
         // Interpolate rotation
-        let targetAngle = this.target.r; 
-        let currentAngle = this.container.rotation;
-        let diff = targetAngle - currentAngle;
-
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        this.container.rotation += diff * 0.2;
+        this.container.rotation = Phaser.Math.Angle.RotateTo(
+            this.container.rotation,
+            this.target.r,
+            0.1
+        );
     }
 }
