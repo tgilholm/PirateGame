@@ -114,12 +114,25 @@ io.on("connection", (socket) => {
     });
 
     // Update player with current game state after joining
-    socket.emit('initGame', { shipsForClient, players, id: socket.id }); // send only to this player
+    socket.emit('initGame', { shipsForClient, players }); // send only to this player
 
     // Set the player's name by their socket id
     socket.on('nameSet', (inputData) => {
         if (players[inputData.id]) {
-            players[inputData.id].username = inputData.username
+
+            const newUsername = inputData.username;
+
+            // Check if the name exceeds 16 chars
+            if (newUsername.length > 16) {
+                const trimmedUsername = newUsername.substring(0, 16);
+
+                // Save the username up until index 16
+                players[inputData.id].username = trimmedUsername
+
+                console.debug(`Invalid username ${newUsername}, trimming to ${trimmedUsername}`);
+            } else {
+                players[inputData.id].username = inputData.username
+            }
         }
     })
 
@@ -164,11 +177,18 @@ setInterval(() => {
     io.volatile.emit('gameState', {
         // Don't send all the data, just what's important
         ships: Object.values(ships).map(s => ({
-            id: s.id, x: s.body.position.x, y: s.body.position.y, r: s.body.angle
+            id: s.id,
+            x: s.body.position.x,
+            y: s.body.position.y,
+            r: s.body.angle
         })),
 
         players: Object.values(players).map(p => ({
-            id: p.id, parentId: p.parentId, x: p.x, y: p.y
+            id: p.id,
+            parentId: p.parentId,
+            x: p.x,
+            y: p.y,
+            username: p.username
         }))
     });
 }, 1000 / NET_TICK_RATE);
