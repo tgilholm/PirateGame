@@ -220,13 +220,15 @@ function updateShipPhysics(ship) {
 
 function updatePlayerPhysics(player) {
     const ship = ships[player.parentId];
+    const shipWidth = 300;
+    const shipHeight = 160;
 
+
+    // If the player is on the ship, keep them inside it
     if (ship) {
         const sx = ship.body.position.x;
         const sy = ship.body.position.y;
         const r = ship.body.angle;
-        const shipWidth = 200;
-        const shipHeight = 120;
 
         // world position of the player
         let worldPos = localToWorld(sx, sy, r, player.x, player.y);
@@ -240,19 +242,24 @@ function updatePlayerPhysics(player) {
         // convert back to local space
         const newLocal = worldToLocal(sx, sy, r, worldPos.x, worldPos.y);
 
-        // check if player is outside the ship's bounding box
-        if (Math.abs(newLocal.x) > shipWidth / 2 || Math.abs(newLocal.y) > shipHeight / 2) {
-            // player left the ship – unparent them
-            player.parentId = null;
-            player.x = worldPos.x;
-            player.y = worldPos.y;
-        } else {
-            // player is still on the ship
-            player.x = newLocal.x;
-            player.y = newLocal.y;
-        }
-    } else {
+        // bind the player inside the ship
+        const playerRadius = 10;
+        const maxX = (shipWidth / 2) - playerRadius;    // player cannot leave the "box"
+        const maxY = (shipHeight / 2) - playerRadius
+
+        // if the player ends up outside the box, put them back inside
+        if (newLocal.x > maxX) newLocal.x = maxX;
+        if (newLocal.x < -maxX) newLocal.x = -maxX;
+
+        if (newLocal.y > maxY) newLocal.y = maxY;
+        if (newLocal.y < -maxY) newLocal.y = -maxY;
+
+        // player is still on the ship
+        player.x = newLocal.x;
+        player.y = newLocal.y;
+
         // player is in world space – move freely
+    } else {
         if (player.inputs.w) player.y -= player.speed;
         if (player.inputs.s) player.y += player.speed;
         if (player.inputs.a) player.x -= player.speed;
@@ -263,8 +270,6 @@ function updatePlayerPhysics(player) {
             const ship = ships[shipId];
             const sx = ship.body.position.x;
             const sy = ship.body.position.y;
-            const shipWidth = 200;
-            const shipHeight = 120;
 
             const dx = player.x - sx;
             const dy = player.y - sy;
