@@ -5,6 +5,8 @@ import express from "express";
 import http from "http";
 import path from "path";
 import fs from 'fs';    // for reading files
+import { CONFIG } from './config.js';
+
 // @ts-ignore
 import { Server } from "socket.io"
 import { fileURLToPath } from "url";
@@ -14,8 +16,8 @@ import ServerShip from "./server-ship.js";
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
-const TICK_RATE = 60;
-const NET_TICK_RATE = 20;
+const TICK_RATE = CONFIG.TICK_RATE;
+const NET_TICK_RATE = CONFIG.NET_TICK_RATE;
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,8 +35,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(publicDir, 'index.html'));
 });
 
-
-
 // aliases for matter modules
 let Engine = Matter.Engine,
     World = Matter.World,
@@ -44,6 +44,7 @@ let Engine = Matter.Engine,
 // Create matter engine
 const engine = Engine.create({ gravity: { x: 0, y: 0 } });
 const world = engine.world;
+
 
 // Read the tilemap & generate collision objects for each tile where "collides" = true
 const mapPath = path.join(rootDir, 'public', 'assets', 'demo-map.json');
@@ -75,15 +76,6 @@ if (islands && islands.data) {
         }
     });
 }
-console.log(`Created ${world.bodies.length} island colliders`);
-
-
-Matter.Events.on(engine, 'collisionStart', (event) => {
-    console.log('Collision detected between:',
-        event.pairs[0].bodyA.label,
-        event.pairs[0].bodyB.label
-    );
-});
 
 // Array containing the ships in the game
 const ships = {
@@ -98,97 +90,60 @@ Object.keys(ships).forEach(id => {
 
     if (ship.body) {
         World.add(world, ship.body);
-        console.log('Ship collision filter:', JSON.stringify(ship.body.collisionFilter));
-        console.log('First island filter:', JSON.stringify(world.bodies[0].collisionFilter))
-        console.log('Body bounds:', JSON.stringify(ship.body.bounds));
     }
-})
-
-console.log(`Total bodies in world: ${world.bodies.length}`);
-
-// Export body hitbox data for client visualization
-function getBodyDebugData(body) {
-    return {
-        vertices: body.vertices.map(v => ({ x: v.x, y: v.y })),
-        position: { x: body.position.x, y: body.position.y },
-        angle: body.angle
-    };
-}
-
-function getShipDebugData(ship) {
-    if (!ship.body || !ship.body.parts) return null;
-
-    return {
-        id: ship.id,
-        parts: ship.body.parts.map(part => getBodyDebugData(part))
-    };
-}
+});
 
 // Dispatch events to clients on specific events- moving, joining game etc
 io.on("connection", (socket) => {
     console.log(`Player Connected: ${socket.id}`);
 
+    // Collect current ship states
+    const shipData = {};
+    for (const id in ships) {
+        shipData[id] = {
+            x: ships[id].body.position.x,
+            y: ships[id].body.position.y,
+            r: ships[id].body.angle,
+            params: ships[id].getParams()
+        };
+    }
+
+    // Add the player to the list
+    players[socket.id] = {
+        id: socket.id,
+        username: "",
+        x: 0,   // relative to parent
+        y: 0,
+        parentId: "ship_1", // initially parented to the test ship
+        speed: 3,
+        inputs: { w: false, a: false, s: false, d: false }   // wasd for players
+    }
+
+    // Event received from client when the player has fully loaded in
     socket.on('playerReady', (data) => {
-        // Collect current ship states
-        const shipData = {};
-        for (const id in ships) {
-            shipData[id] = {
-                x: ships[id].body.position.x,
-                y: ships[id].body.position.y,
-                r: ships[id].body.angle,
-                params: ships[id].getParams()
-            };
-        }
+        // Sanitise username
+        const newUsername = String(data.username)
+            .trim()
+            .substring(0, 16)
+            .replace(/[<>]/g, '');   // remove illegal characters
+
+        players[socket.id].username = data.username
 
         // Send initialization package only when client is ready
         socket.emit('initGame', {
             shipData,
-            players: players // existing players
+            players: Object.values(players) // existing players
         });
 
-        players[socket.id] = {
-            id: socket.id,
-            username: "",
-            x: 0,   // relative to parent
-            y: 0,
-            parentId: "ship_1", // initially parented to the test ship
-            speed: 3,
-            inputs: { w: false, a: false, s: false, d: false }   // wasd for players
-        }
-
-        const newUsername = data.username;
-
-        // Check if the name exceeds 16 chars
-        if (newUsername.length > 16) {
-            const trimmedUsername = newUsername.substring(0, 16);
-
-            // Save the username up until index 16
-            players[socket.id].username = trimmedUsername
-
-            console.debug(`Invalid username ${newUsername}, trimming to ${trimmedUsername}`);
-        } else {
-            players[socket.id].username = data.username
-        }
+        console.log(`Sent initGame to ${socket.id}`);
     });
-
-
-    // Send the ship x, y, rotation and body parameters to the client to draw new ships with
-    const shipData = {};
-    for (const id in ships) {
-        shipData[id] = {
-            x: ships[id].body.position.x,       // Extract x & y rather than sending a huge 'body' object
-            y: ships[id].body.position.y,
-            rotation: ships[id].body.angle,
-            params: ships[id].getParams()       // From ServerShip class
-        }
-    }
 
 
     // Handle players movement
     socket.on('playerInput', (inputData) => {
-        if (players[socket.id]) {
-            players[socket.id].inputs = inputData;
-        }
+        if (!players[socket.id]) return;    // if player doesn't exist, break early
+
+        players[socket.id].inputs = inputData;
     })
 
     // Handle ships movement
@@ -205,7 +160,10 @@ io.on("connection", (socket) => {
     })
 })
 
-
+/*
+    Server-side physics simulation. Executed at the same speed as the clients,
+    but updates are only posted back at 1/3 the rate.
+*/
 setInterval(() => {
     // Update ships
     Object.values(ships).forEach(ship => {
@@ -221,33 +179,84 @@ setInterval(() => {
     Engine.update(engine, 1000 / TICK_RATE);
 }, 1000 / TICK_RATE);
 
+
+const lastBroadcast = {
+    ships: {},
+    players: {}
+};
+
+/*
+    Periodically refresh the clients with the current game state. Keeping track of
+    lastBroadcast means that the positions of ships need only be updated if they have been
+    changed recently, improving performance for stationary ships
+*/
 setInterval(() => {
-    io.volatile.emit('gameState', {
-        // Don't send all the data, just what's important
-        ships: Object.values(ships).map(s => ({
+    const shipUpdates = [];
+
+    Object.values(ships).forEach(s => {
+        const current = {
             id: s.id,
             x: s.body.position.x,
             y: s.body.position.y,
-            r: s.body.angle
-        })),
+            r: s.body.angle,
+            vx: s.body.velocity.x,
+            vy: s.body.velocity.y,
+            av: s.body.angularVelocity
+        };
 
-        players: Object.values(players).map(p => ({
+        const last = lastBroadcast.ships[s.id];
+
+        // Only send if position changed significantly
+        if (!last ||
+            Math.abs(current.x - last.x) > 1 ||
+            Math.abs(current.y - last.y) > 1 ||
+            Math.abs(current.r - last.r) > 0.05) {
+
+            lastBroadcast.ships[s.id] = current;
+            shipUpdates.push(current);
+        }
+    });
+
+    const playerUpdates = [];
+
+    Object.values(players).forEach(p => {
+        const current = {
             id: p.id,
             parentId: p.parentId,
             x: p.x,
             y: p.y,
             username: p.username
-        })),
+        };
 
-        debug: {
-            shipHitboxes: Object.values(ships).map(s => getShipDebugData(s))
+        const last = lastBroadcast.players[p.id];
+
+        // Only send if changed
+        if (!last ||
+            current.parentId !== last.parentId ||
+            Math.abs(current.x - last.x) > 1 ||
+            Math.abs(current.y - last.y) > 1) {
+
+            lastBroadcast.players[p.id] = current;
+            playerUpdates.push(current);
         }
-
     });
+
+    // Only broadcast if there are changes
+    if (shipUpdates.length > 0 || playerUpdates.length > 0) {
+        io.volatile.emit('gameState', {
+            ships: shipUpdates,
+            players: playerUpdates
+        });
+    }
 }, 1000 / NET_TICK_RATE);
 
 
-// Handle physics server-side
+/**
+ * Updates the local (server-side) simulation of a ServerShip object.
+ * Applies the user inputs received from events.
+ *
+ * @param {ServerShip} ship the ship to simulate
+ */
 function updateShipPhysics(ship) {
 
     const { up, down, left, right } = ship.inputs;
@@ -267,10 +276,12 @@ function updateShipPhysics(ship) {
         // Apply the force
         Body.applyForce(body, body.position, force);
     }
-
-    //console.log(body.position)
 }
 
+/**
+ * 
+ * @param {any} player 
+ */
 function updatePlayerPhysics(player) {
     const ship = ships[player.parentId];
 
@@ -292,7 +303,7 @@ function updatePlayerPhysics(player) {
         const newLocal = worldToLocal(shipX, shipY, r, worldPos.x, worldPos.y);
 
         // collision check
-        const playerRadius = 15;
+        const playerRadius = CONFIG.PLAYER.RADIUS;
         if (ship.isInside(newLocal.x, newLocal.y, playerRadius)) {
             player.x = newLocal.x;
             player.y = newLocal.y;
@@ -333,7 +344,7 @@ function updatePlayerPhysics(player) {
 }
 
 
-const PORT = process.env.PORT || 3000;  // set port to 3000
+const PORT = process.env.PORT || CONFIG.PORT;
 server.listen(PORT, () => {
     console.log(`Server launched on port ${PORT}`);
 });
