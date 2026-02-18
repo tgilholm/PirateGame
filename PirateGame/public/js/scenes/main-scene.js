@@ -26,7 +26,7 @@ export class MainScene extends Phaser.Scene {
         this.ui = null;
         this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
-        this.showDebugHitboxes = true;
+        this.showDebugHitboxes = false;
         this.debugGraphics = null;
     }
 
@@ -111,6 +111,11 @@ export class MainScene extends Phaser.Scene {
 
                 // Update with server data
                 ships[shipData.id].target = { x: shipData.x, y: shipData.y, r: shipData.r };
+
+                // Send current velocity for extrapolation
+                ships[shipData.id].velocity = { x: shipData.vx, y: shipData.vy };
+                ships[shipData.id].angularVelocity = shipData.av;
+
             });
 
             // Store debug hitbox data if available

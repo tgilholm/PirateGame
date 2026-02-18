@@ -228,7 +228,10 @@ setInterval(() => {
             id: s.id,
             x: s.body.position.x,
             y: s.body.position.y,
-            r: s.body.angle
+            r: s.body.angle,
+            vx: s.body.velocity.x,
+            vy: s.body.velocity.y,
+            av: s.body.angularVelocity  // send to client for extrapolation 
         })),
 
         players: Object.values(players).map(p => ({
