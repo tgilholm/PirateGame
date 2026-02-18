@@ -84,6 +84,7 @@ export default class Ship extends Parent {
     update() {
         if (!this.target) return;
 
+
         // Get the current time
         const now = performance.now();
         const deltaTime = (now - this.lastUpdateTime) / 1000;   // in seconds
@@ -94,8 +95,8 @@ export default class Ship extends Parent {
         const predictedY = this.target.y + this.velocity.y * deltaTime; // Distance = speed * time
 
         // Interpolate between the current and predicted positions instead of waiting for the server to update
-        this.container.x = Phaser.Math.Linear(this.container.x, predictedX, 0.08);
-        this.container.y = Phaser.Math.Linear(this.container.y, predictedY, 0.08);
+        this.container.x = Math.round(Phaser.Math.Linear(this.container.x, predictedX, 0.08));
+        this.container.y = Math.round(Phaser.Math.Linear(this.container.y, predictedY, 0.08));
 
         // Predict the rotation
         const predictedRotation = this.target.r + this.angularVelocity * deltaTime;

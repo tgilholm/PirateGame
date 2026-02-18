@@ -53,6 +53,7 @@ export class MainScene extends Phaser.Scene {
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
+        //this.cameras.main.roundPixels = true;
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
