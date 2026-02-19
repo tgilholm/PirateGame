@@ -2,6 +2,7 @@
 
 import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
+import UI from "../objects/ui.js";
 
 
 const ships = {}
@@ -23,7 +24,6 @@ export class MainScene extends Phaser.Scene {
 
         this.keys = null;
         this.shipKeys = null;
-        this.ui = null;
         this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
     }
@@ -48,13 +48,14 @@ export class MainScene extends Phaser.Scene {
      * as setting up user input and socket listeners.
      */
     create(data) {
+        this.ui = new UI(this);
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
 
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
-        //this.cameras.main.roundPixels = true;
+        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
@@ -67,7 +68,7 @@ export class MainScene extends Phaser.Scene {
         this.matter.world.convertTilemapLayer(islands); // add collision to solid objects
 
         // Keyboard input
-        this.keys = /** @type {any} */ (this.input.keyboard.addKeys("W, A, S, D"));
+        this.keys = /** @type {any} */ (this.input.keyboard.addKeys("W, A, S, D, E, Q, space"));
         this.shipKeys = /** @type {any} */ (this.input.keyboard.addKeys({
             left: Phaser.Input.Keyboard.KeyCodes.LEFT,
             down: Phaser.Input.Keyboard.KeyCodes.DOWN,
@@ -155,8 +156,9 @@ export class MainScene extends Phaser.Scene {
                 const shipParent = ships[playerData.parentId];
                 players[playerData.id].updateState(playerData, shipParent);
             });
-        })
-        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
+        });
+
+        
     }
 
 
@@ -164,6 +166,8 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
+        if (!players[socket.id]) return; // wait for player data to load
+
         const cameraTarget = this.cameraTarget;
 
         // Extrapolate and interpolate all game objects
@@ -171,36 +175,59 @@ export class MainScene extends Phaser.Scene {
         Object.values(players).forEach(player => player.update());
 
 
-        if (players[socket.id]) {
-            const player = players[socket.id];
-            const parentId = player.parentId;
+        const player = players[socket.id];
+        const parentId = player.parentId;
 
-            // Handle camera movement for players in either relative or absolute state
-            if (parentId && ships[parentId]) {
-                // Player is on a ship – convert local to world
-                const ship = ships[parentId];
-                const shipContainer = ship.container;
-                const worldPos = Phaser.Math.RotateAround(
-                    { x: player.sprite.x, y: player.sprite.y },
-                    0, 0,
-                    shipContainer.rotation
-                );
-                // Player is in relative space
-                cameraTarget.x = shipContainer.x + worldPos.x;
-                cameraTarget.y = shipContainer.y + worldPos.y;
+        // Handle camera movement for players in either relative or absolute state
+        if (parentId && ships[parentId]) {
+            // Player is on a ship – convert local to world
+            const ship = ships[parentId];
+            const shipContainer = ship.container;
+            const worldPos = Phaser.Math.RotateAround(
+                { x: player.sprite.x, y: player.sprite.y },
+                0, 0,
+                shipContainer.rotation
+            );
+            // Player is in relative space
+            cameraTarget.x = shipContainer.x + worldPos.x;
+            cameraTarget.y = shipContainer.y + worldPos.y;
+
+            // If near the helm, display the "take control" message
+            const helmPos = { x: ship.helm.x, y: ship.helm.y };
+
+            if (Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, helmPos.x, helmPos.y) < 30) {
+                this.ui.showMessage("[E] - Control Ship");
+
+                // Only send take control command if E is just pressed (not held)
+                if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+                    console.log(`Attempting to take control of ship ${parentId}`);
+                    socket.emit('takeControl', {
+                        // Send ship id 
+                        shipId: parentId
+                    });
+                }
+
             } else {
-                // Player is in world space
-                cameraTarget.x = player.sprite.x;
-                cameraTarget.y = player.sprite.y;
+                this.ui.hideMessage("[E] - Control Ship");
             }
+
+        } else {
+            // Player is in world space
+            cameraTarget.x = player.sprite.x;
+            cameraTarget.y = player.sprite.y;
         }
+
+
 
         // Player movement
         socket.emit('playerInput', {
             w: this.keys.W.isDown,
             a: this.keys.A.isDown,
             s: this.keys.S.isDown,
-            d: this.keys.D.isDown
+            d: this.keys.D.isDown,
+            e: this.keys.E.isDown,
+            q: this.keys.Q.isDown,
+            space: this.keys.space.isDown
         });
 
         socket.emit('shipInput', {
@@ -210,5 +237,7 @@ export class MainScene extends Phaser.Scene {
         });
 
     }
+
+
 }
 

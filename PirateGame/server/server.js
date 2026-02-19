@@ -127,7 +127,7 @@ io.on("connection", (socket) => {
             .substring(0, 16)
             .replace(/[<>]/g, '');   // remove illegal characters
 
-        players[socket.id].username = data.username
+        players[socket.id].username = newUsername
 
         // Send initialization package only when client is ready
         socket.emit('initGame', {
@@ -148,18 +148,66 @@ io.on("connection", (socket) => {
 
     // Handle ships movement
     socket.on('shipInput', (inputData) => { // update to send ship id with packet
-        if (ships["ship_1"]) {
+
+        // Only update if the player is piloting the ship
+        if (ships["ship_1"] && ships["ship_1"].pilotId === socket.id) {
             ships["ship_1"].inputs = inputData;
         }
     })
 
+    // Handle player interacts
+    socket.on('takeControl', (data) => {
+        const ship = ships[data.shipId];
+
+        // Get the position of the helm from the ship's params
+        const helm = ship.getParams().interactables.helm;
+
+        // Check if player is close enough to the helm to take control
+        const player = players[socket.id];
+        const dx = player.x - helm.x;
+        const dy = player.y - helm.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+
+        if (distance < 50) {
+            // Only allow taking control if pilot id is null
+            if (ship.pilotId) {
+                console.log(`Ship ${data.shipId} is already piloted by ${ship.pilotId}`);
+                return;
+            }
+            ship.pilotId = socket.id; // close enough, assign pilot
+
+            // Move the player just behind the helm 
+            player.x = helm.x - 20;
+            player.y = helm.y;
+
+            // Send a confirmation back to the client
+            socket.emit('controlTaken', { shipId: data.shipId });
+
+
+            console.log(`Player ${socket.id} took control of ship ${data.shipId}`);
+        } else {
+            console.log(`Player ${socket.id} is too far to take control of ship ${data.shipId}`);
+        }
+    });
+
+
+
     // Handle disconnects
     socket.on('disconnect', () => {
         console.log(`Player Disconnected: ${socket.id}`);
-        delete players[socket.id];
-    })
-})
 
+        // Remove the player from the helm if they were steering a ship
+        Object.values(ships).forEach(ship => {
+            if (ship.pilotId === socket.id) {
+                ship.pilotId = null;
+                console.log(`Player ${socket.id} released control of ship ${ship.id}`);
+            }
+        });
+
+        delete players[socket.id];
+    });
+});
 /*
     Server-side physics simulation. Executed at the same speed as the clients,
     but updates are only posted back at 1/3 the rate.
@@ -262,6 +310,7 @@ function updateShipPhysics(ship) {
     const { up, down, left, right } = ship.inputs;
     const body = ship.body;
 
+
     // Handle turning
     if (left) Body.setAngularVelocity(body, -ship.turnSpeed * 20);
     if (right) Body.setAngularVelocity(body, ship.turnSpeed * 20);
@@ -288,6 +337,9 @@ function updatePlayerPhysics(player) {
 
     // If the player is on the ship, keep them inside it and move with the ship
     if (ship) {
+        // Player cannot move while steering ship, return early if so
+        if (player.id === ship.pilotId) return;
+
         const shipX = ship.body.position.x;
         const shipY = ship.body.position.y;
         const r = ship.body.angle;
