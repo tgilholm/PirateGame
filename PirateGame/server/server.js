@@ -180,7 +180,7 @@ io.on("connection", (socket) => {
             player.y = helm.y;
 
             // Send a confirmation back to the client
-            socket.emit('controlTaken', { shipId: data.shipId });
+            socket.emit('controlTaken');
             console.log(`Player ${socket.id} took control of ship ${data.shipId}`);
         } else {
             console.log(`Player ${socket.id} is too far to take control of ship ${data.shipId}`);
@@ -194,14 +194,58 @@ io.on("connection", (socket) => {
             console.log(`Player ${socket.id} released control of ship ${data.shipId}`);
 
             // Send confirmation back to client
-            socket.emit('controlReleased', { shipId: data.shipId });
+            socket.emit('controlReleased');
         } else {
             // If player not controlling, don't allow release
             console.log(`Player ${socket.id} attempted to release control of ship ${data.shipId} but is not the pilot`);
         }
     });
 
+    socket.on('exitShip', (data) => {
+        const ship = ships[data.shipId];
+        const player = players[socket.id];
+        let exited = false;
 
+        // If close enough to ladder, allow player to exit ship (re-parent to world)
+        const ladders = ship.getParams().interactables.ladders;
+        for (let i = 0; i < ladders.length; i++) {
+            const ladder = ladders[i];
+            const dx = player.x - ladder.x;
+            const dy = player.y - ladder.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 50) {
+                exited = true; // break loop
+            }
+        }
+
+        if (exited) {
+            player.parentId = null; // re-parent to world
+            socket.emit('exitedShip', { shipId: data.shipId });
+        }
+    });
+
+    socket.on('climbLadder', (data) => {
+        const ship = ships[data.shipId];
+        const player = players[socket.id];
+        let entered = false;
+
+        // If close enough to either ladder, allow player to climb ladder (re-parent to ship)
+        const ladders = ship.getParams().interactables.ladders;
+        for (let i = 0; i < ladders.length; i++) {
+            const ladder = ladders[i];
+            const dx = player.x - ladder.x;
+            const dy = player.y - ladder.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 50) {
+                player.parentId = ship.id; // re-parent to ship
+                entered = true; // break loop
+            }
+        }
+
+        if (entered) {
+            socket.emit('climbedLadder', { shipId: data.shipId });
+        }
+    });
 
     // Handle disconnects
     socket.on('disconnect', () => {
@@ -384,25 +428,6 @@ function updatePlayerPhysics(player) {
         if (player.inputs.a) player.x -= player.speed;
         if (player.inputs.d) player.x += player.speed;
     }
-    // check if player is near any ship and re-parent if so
-    // for (const shipId in ships) {
-    //     const ship = ships[shipId];
-    //     const sx = ship.body.position.x;
-    //     const sy = ship.body.position.y;
-
-    //     const dx = player.x - sx;
-    //     const dy = player.y - sy;
-
-    //     if (Math.abs(dx) < shipWidth / 2 && Math.abs(dy) < shipHeight / 2) {
-    //         // player entered a ship's bounding box – re-parent them
-    //         player.parentId = shipId;
-    //         const r = ship.body.angle;
-    //         const local = worldToLocal(sx, sy, r, player.x, player.y);
-    //         player.x = local.x;
-    //         player.y = local.y;
-    //         break;
-    //     }
-    // }
 }
 
 

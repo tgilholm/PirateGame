@@ -161,16 +161,28 @@ export class MainScene extends Phaser.Scene {
         });
 
         // Respond to server confirmation of control takeover 
-        socket.on('controlTaken', (data) => {
+        socket.on('controlTaken', () => {
             const player = players[socket.id];
             player.isSteering = true;
-        })
+        });
 
-        socket.on('controlReleased', (data) => {
+        socket.on('controlReleased', () => {
             const player = players[socket.id];
             player.isSteering = false;
         });
-        
+
+        socket.on('exitedShip', (data) => {
+            const player = players[socket.id];
+            player.parentId = null;
+        });
+
+        socket.on('climbedLadder', (data) => {
+            const player = players[socket.id];
+            const ship = ships[data.shipId];
+            if (ship) {
+                player.parentId = data.shipId;
+            }
+        });
     }
 
 
@@ -209,6 +221,7 @@ export class MainScene extends Phaser.Scene {
             const dist = Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, helmPos.x, helmPos.y)
 
 
+            // Helm controls
             if (dist < 30 && !player.isSteering) { // only show if not already controlling
                 this.ui.showMessage("[E] - Control Ship");
 
@@ -238,6 +251,39 @@ export class MainScene extends Phaser.Scene {
             } else {
                 this.ui?.hideMessage("[Q] - Release Control");
             }
+
+            // Check if near a ladder
+            const ladderDists = [
+                Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.ladder.x, ship.ladder.y),
+                Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.ladder2.x, ship.ladder2.y)
+            ];
+
+            for (let i = 0; i < ladderDists.length; i++) {
+                // If on ship, ladder lets players exit ship
+                if (ladderDists[i] < 30 && player.parentId === parentId) {
+                    this.ui.showMessage("[E] - Exit Ship");
+                    if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+                        console.log(`Attempting to exit ship ${parentId}`);
+                        socket.emit('exitShip', {
+                            shipId: parentId
+                        });
+                    }
+
+                }
+
+                // If not on ship, ladder lets players enter ship
+                else if (ladderDists[i] < 30 && player.parentId !== parentId) {
+                    this.ui.showMessage("[E] - Climb Ladder");
+                    if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+                        console.log(`Attempting to climb ladder on ship ${parentId}`);
+                        socket.emit('climbLadder', {
+                            shipId: parentId,
+                            ladderIndex: i
+                        });
+                    }
+                }
+            }
+
 
         } else {
             // Player is in world space
