@@ -14,6 +14,7 @@ export default class Ship extends Parent {
         this.params = params;
         this.hullSprite = null;
         this.drawHull();
+        this.setupInteractables()
 
         this.velocity = { x: 0, y: 0 };
         this.angularVelocity = 0;
@@ -79,6 +80,45 @@ export default class Ship extends Parent {
         this.container.sendToBack(this.hullSprite);
         this.container.setDepth(10);
     }
+
+    setupInteractables() {
+        // Get interactable positions from params and create sprites for them
+        const { interactables } = this.params;
+        const helm = interactables.helm;
+        const cannons = interactables.cannons;
+        const ladders = interactables.ladders;
+
+
+        // HELM
+        // move it back by half the middle width, plus a bit of the stern radius
+        this.helm = this.scene.add.sprite(helm.x, helm.y, 'helm');
+        this.container.add(this.helm);
+
+        // CANNONS
+        // Cannon 1
+        const cannonPort = this.scene.add.sprite(cannons[0].x, cannons[0].y, 'cannon');
+        cannonPort.setRotation(0); // Pointing Outward
+        this.container.add(cannonPort);
+
+        // Cannon 2
+        const cannonStarboard = this.scene.add.sprite(cannons[1].x, cannons[1].y, 'cannon');
+        cannonStarboard.setRotation(Math.PI); // Pointing Outward
+        this.container.add(cannonStarboard);
+
+        // LADDER1
+        this.ladder = this.scene.add.sprite(ladders[0].x, ladders[0].y, 'ladder');
+        this.container.add(this.ladder);
+
+        // LADDER2
+        this.ladder2 = this.scene.add.sprite(ladders[1].x, ladders[1].y, 'ladder');
+        this.ladder2.setFlipY(true);
+        this.container.add(this.ladder2);
+        
+
+        // Ensure all these objects are above the hull sprite
+        // (Since hullSprite was sentToBack, new items are naturally on top)
+    }
+
 
 
     update() {

@@ -17,6 +17,7 @@ export default class ServerShip {
      */
     constructor(id, x, y) {
         this.id = id;
+        this.pilotId = null; // id of player controlling ship, default null
         this.height = 160; // height of the entire ship
         this.middleWidth = 200; // width of rectangle
         this.bowLength = 100; // width of frontal curve
@@ -29,9 +30,36 @@ export default class ServerShip {
         //this.body = this.createComplexBody(x, y, this.generateHullVertices().reverse());
         this.inputs = { up: false, down: false, left: false, right: false };
 
+        // Ship parameters to send to clients for drawing and hitbox calculations
+        this.params = {
+            id: this.id,
+            height: this.height,
+            middleWidth: this.middleWidth,
+            bowLength: this.bowLength,
+            sternRadius: this.sternRadius,
+            interactables: {
+                helm: {
+                    x: -this.middleWidth / 2, // relative to center of ship
+                    y: 0
+                },
+                cannons: [
+                    // On both sides, relative to center of ship
+                    { x: 0, y: -this.height / 4 - 15 },
+                    { x: 0, y: this.height / 4 + 15 }
+                ],
+
+                // Ladders should be on the very edges of the ship
+                ladders: [
+                    // on both sides, relative to center of ship
+                    { x: -this.middleWidth / 2 + 20, y: -this.height / 4 - 35 },
+                    { x: -this.middleWidth / 2 + 20, y: this.height / 4 + 35 }
+                ]
+            }
+
+        }
     }
 
-    createComplexBody(x, y, vertices) {
+    createComplexBody(x, y) {
         const Body = Matter.Body;
         const Bodies = Matter.Bodies;
 
@@ -43,7 +71,7 @@ export default class ServerShip {
 
         // create stern as a circle
         const sternBody = Bodies.circle(
-            x - (middleWidth / 2), 
+            x - (middleWidth / 2),
             y,
             sternRadius * 0.9,
             {
@@ -82,7 +110,7 @@ export default class ServerShip {
                 mass: 50
             }
         );
-        Body.rotate(bowBody, Math.PI / 2);  
+        Body.rotate(bowBody, Math.PI / 2);
 
 
         // Create compound body from the three parts
@@ -141,13 +169,7 @@ export default class ServerShip {
     }
 
     getParams() {
-        return {
-            id: this.id,
-            height: this.height,
-            middleWidth: this.middleWidth,
-            bowLength: this.bowLength,
-            sternRadius: this.sternRadius
-        }
+        return this.params;
     }
 
 

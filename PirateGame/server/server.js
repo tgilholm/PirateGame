@@ -127,7 +127,7 @@ io.on("connection", (socket) => {
             .substring(0, 16)
             .replace(/[<>]/g, '');   // remove illegal characters
 
-        players[socket.id].username = data.username
+        players[socket.id].username = newUsername
 
         // Send initialization package only when client is ready
         socket.emit('initGame', {
@@ -143,23 +143,143 @@ io.on("connection", (socket) => {
     socket.on('playerInput', (inputData) => {
         if (!players[socket.id]) return;    // if player doesn't exist, break early
 
-        players[socket.id].inputs = inputData;
-    })
-
-    // Handle ships movement
-    socket.on('shipInput', (inputData) => { // update to send ship id with packet
-        if (ships["ship_1"]) {
+        // if player is controlling ship, send only ship inputs
+        if (ships["ship_1"].pilotId === socket.id) {
             ships["ship_1"].inputs = inputData;
         }
+        else {
+            // otherwise update player inputs
+            players[socket.id].inputs = inputData;
+        }
     })
+
+    // Handle player interacts
+    socket.on('takeControl', (data) => {
+        const ship = ships[data.shipId];
+
+        // Get the position of the helm from the ship's params
+        const helm = ship.getParams().interactables.helm;
+
+        // Check if player is close enough to the helm to take control
+        const player = players[socket.id];
+        const dx = player.x - helm.x;
+        const dy = player.y - helm.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+
+        if (distance < 50) {
+            // Only allow taking control if pilot id is null
+            if (ship.pilotId) {
+                console.log(`Ship ${data.shipId} is already piloted by ${ship.pilotId}`);
+                return;
+            }
+            ship.pilotId = socket.id; // close enough, assign pilot
+
+            // Move the player just behind the helm 
+            player.x = helm.x - 20;
+            player.y = helm.y;
+
+            // Send a confirmation back to the client
+            socket.emit('controlTaken');
+            console.log(`Player ${socket.id} took control of ship ${data.shipId}`);
+        } else {
+            console.log(`Player ${socket.id} is too far to take control of ship ${data.shipId}`);
+        }
+    });
+
+    socket.on('releaseControl', (data) => {
+        const ship = ships[data.shipId];
+        if (ship && ship.pilotId === socket.id) { // double check
+            ship.pilotId = null;
+            console.log(`Player ${socket.id} released control of ship ${data.shipId}`);
+
+            // Send confirmation back to client
+            socket.emit('controlReleased');
+        } else {
+            // If player not controlling, don't allow release
+            console.log(`Player ${socket.id} attempted to release control of ship ${data.shipId} but is not the pilot`);
+        }
+    });
+
+    socket.on('exitShip', (data) => {
+        const ship = ships[data.shipId];
+        const player = players[socket.id];
+        let exited = false;
+
+        // If close enough to ladder, allow player to exit ship (re-parent to world)
+        const ladders = ship.getParams().interactables.ladders;
+        for (let i = 0; i < ladders.length; i++) {
+            const ladder = ladders[i];
+            const dx = player.x - ladder.x;
+            const dy = player.y - ladder.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 50) {
+                exited = true; // break loop
+            }
+        }
+
+        if (exited) {
+            const worldPos = localToWorld(
+                ship.body.position.x,
+                ship.body.position.y,
+                ship.body.angle,
+                player.x,
+                player.y
+            );
+            player.x = worldPos.x;
+            player.y = worldPos.y;
+            player.parentId = null; // re-parent to world
+            socket.emit('exitedShip', { shipId: data.shipId });
+        }
+    });
+
+    socket.on('climbLadder', (data) => {
+        const ship = ships[data.shipId];
+        const player = players[socket.id];
+        let entered = false;
+
+        // If close enough to either ladder, allow player to climb ladder (re-parent to ship)
+        const ladders = ship.getParams().interactables.ladders;
+        for (let i = 0; i < ladders.length; i++) {
+            const ladder = ladders[i];
+            const dx = player.x - ladder.x;
+            const dy = player.y - ladder.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 50) {
+                const localPos = worldToLocal(
+                    ship.body.position.x,
+                    ship.body.position.y,
+                    ship.body.angle,
+                    player.x,
+                    player.y
+                );
+                player.x = localPos.x;
+                player.y = localPos.y;
+                player.parentId = ship.id;
+                entered = true;
+            }
+        }
+
+        if (entered) {
+            socket.emit('climbedLadder', { shipId: data.shipId });
+        }
+    });
 
     // Handle disconnects
     socket.on('disconnect', () => {
         console.log(`Player Disconnected: ${socket.id}`);
-        delete players[socket.id];
-    })
-})
 
+        // Remove the player from the helm if they were steering a ship
+        Object.values(ships).forEach(ship => {
+            if (ship.pilotId === socket.id) {
+                ship.pilotId = null;
+                console.log(`Player ${socket.id} released control of ship ${ship.id}`);
+            }
+        });
+
+        delete players[socket.id];
+    });
+});
 /*
     Server-side physics simulation. Executed at the same speed as the clients,
     but updates are only posted back at 1/3 the rate.
@@ -293,20 +413,23 @@ function updateShipPhysics(ship) {
  */
 function updatePlayerPhysics(player) {
     const ship = ships[player.parentId];
-
+    const { up, down, left, right } = player.inputs;
 
     // If the player is on the ship, keep them inside it and move with the ship
     if (ship) {
+        // Player cannot move while steering ship, return early if so
+        if (player.id === ship.pilotId) return;
+
         const shipX = ship.body.position.x;
         const shipY = ship.body.position.y;
         const r = ship.body.angle;
 
         // world position of the player
         let worldPos = localToWorld(shipX, shipY, r, player.x, player.y);
-        if (player.inputs.w) worldPos.y -= player.speed;
-        if (player.inputs.s) worldPos.y += player.speed;
-        if (player.inputs.a) worldPos.x -= player.speed;
-        if (player.inputs.d) worldPos.x += player.speed;
+        if (up) worldPos.y -= player.speed;
+        if (down) worldPos.y += player.speed;
+        if (left) worldPos.x -= player.speed;
+        if (right) worldPos.x += player.speed;
 
         // convert to local space
         const newLocal = worldToLocal(shipX, shipY, r, worldPos.x, worldPos.y);
@@ -331,25 +454,8 @@ function updatePlayerPhysics(player) {
         if (player.inputs.a) player.x -= player.speed;
         if (player.inputs.d) player.x += player.speed;
     }
-    // check if player is near any ship and re-parent if so
-    // for (const shipId in ships) {
-    //     const ship = ships[shipId];
-    //     const sx = ship.body.position.x;
-    //     const sy = ship.body.position.y;
 
-    //     const dx = player.x - sx;
-    //     const dy = player.y - sy;
-
-    //     if (Math.abs(dx) < shipWidth / 2 && Math.abs(dy) < shipHeight / 2) {
-    //         // player entered a ship's bounding box – re-parent them
-    //         player.parentId = shipId;
-    //         const r = ship.body.angle;
-    //         const local = worldToLocal(sx, sy, r, player.x, player.y);
-    //         player.x = local.x;
-    //         player.y = local.y;
-    //         break;
-    //     }
-    // }
+    console.log(player.username, player.x, player.y);
 }
 
 

@@ -4,9 +4,25 @@
  * rendered on different layer
  */
 export default class UI {
+
+    /**
+     * 
+     * @param {Phaser.Scene} scene 
+     */
     constructor(scene) {
         this.scene = scene;
+        this.instance = null;
         this.elements = [];
+        this.layer = scene.add.layer();
+
+        this.messageText = this.scene.add.text(this.scene.cameras.main.width / 2, 20, '', {
+            fontSize: '18px',
+            fill: '#ffffff',
+            backgroundColor: '#00000088',
+        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1000);
+
+        //this.createAddDeckButton();
+        //this.createGoldCounter();
         this.layer = this.scene.add.layer();
         this.hotbar = this.scene.add.container(0, 0);
         this.hotbarSlots = []; 
@@ -24,6 +40,28 @@ export default class UI {
                 y: element.y
             });
         });
+    }
+
+    /**
+     * Displays a message at the top of the screen
+     * @param {String} message 
+     */
+    showMessage(message) {
+        if (message) {
+            this.messageText.setText(message);
+            this.messageText.setVisible(true);
+        }
+    }
+
+    /**
+     * Hides the message at the top of the screen
+     * @param {String} message 
+     */
+    hideMessage(message) {
+        if (message && this.messageText.text === message) {
+            this.messageText.setVisible(false);
+            this.messageText.setText('');   // reset the text
+        }
     }
 
 

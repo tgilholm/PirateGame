@@ -9,6 +9,7 @@ export default class Player {
         this.parentId = null; // parent is null by default
         this.parent = null;
         this.target = { x: 0, y: 0 }
+        this.isSteering = false;
 
         this.nameText = scene.add.text(0, 0, '', {
             fontSize: '12px',
