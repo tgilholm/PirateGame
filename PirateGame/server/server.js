@@ -266,7 +266,7 @@ function updateShipPhysics(ship) {
     const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2); //finds speed of ship using pythagorean theorem, mrs Yates was right, it is useful i guess
 
     // Handle turning - only if ship is moving
-    if (speed > minSpeedForTurning) {
+    if (speed > 0.1) {
         //scales turning speed with movement speed
         const turnSpeedMultiplier = speed * 0.5;
         const effectiveTurnSpeed = ship.turnSpeed * 20 * turnSpeedMultiplier;
