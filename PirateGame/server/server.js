@@ -383,9 +383,17 @@ function updateShipPhysics(ship) {
     const body = ship.body;
 
 
-    // Handle turning
-    if (left) Body.setAngularVelocity(body, -ship.turnSpeed * 20);
-    if (right) Body.setAngularVelocity(body, ship.turnSpeed * 20);
+    const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2); //finds speed of ship using pythagorean theorem, mrs Yates was right, it is useful i guess
+
+    // Handle turning - only if ship is moving
+    if (speed > 0.2) {
+        //scales turning speed with movement speed
+        const turnSpeedMultiplier = speed * 0.5;
+        const effectiveTurnSpeed = ship.turnSpeed * 20 * turnSpeedMultiplier;
+
+        if (left) Body.setAngularVelocity(body, -effectiveTurnSpeed);
+        if (right) Body.setAngularVelocity(body, effectiveTurnSpeed);
+    }
 
     // Handle thrust
     if (up) {
