@@ -24,16 +24,6 @@ export default class Entity {
     }
 
     /**
-     * Recalculates the location, velocity etc for this entity. Note that
-     * this base class provides no implementation- subclasses must provide
-     * their own implementation
-     * @param {Number} deltaTime a time value for client-side extrapolation 
-     */
-    updatePhysics(deltaTime) {
-        //updatePhysics method must be overriden by subclass
-    }
-
-    /**
      * Converts the relative (to a parent) coordinates of this object to
      * absolute coordinates (relative to the world) using the rotation.
      * @param {Number} localX the x coordinate relative to the parent's origin

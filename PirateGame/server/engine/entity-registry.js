@@ -267,8 +267,8 @@ export default class EntityRegistry {
     }
 
     /**
-     * 
-     * @returns 
+     * Gets the initial setup data for ship objects, to be sent to clients for drawing
+     * @returns {Object} the ship initialisation data
      */
     getShipInitData() {
         /** @type {Ship[]} */ const shipData = {};
@@ -283,11 +283,19 @@ export default class EntityRegistry {
         return shipData;
     }
 
+    /**
+     * Gets the data for all the player object
+     * @returns {Object} the data for players
+     */
     getPlayerData() {
         return this.getPlayers().map(p => p.toData());
     }
 
 
+    /**
+     * Gets an object containing all the details for the entities in the registry
+     * @returns an object with the entity data
+     */
     getStats() {
         const stats = {
             totalEntities: Object.keys(this.entities).length,
@@ -301,8 +309,12 @@ export default class EntityRegistry {
         return stats;
     }
 
+
+    /**
+     * Use for debugging
+     */
     debug() {
-        console.log('=== EntityRegistry Debug ===');
+        console.log('EntityRegistry Debug');
         const stats = this.getStats();
         console.log(`Total entities: ${stats.totalEntities}`);
         console.log('By type:', stats.byType);
@@ -316,6 +328,9 @@ export default class EntityRegistry {
     }
 
 
+    /**
+     * Removes all entities
+     */
     clear() {
         this.entities = {};
         this.entitiesByType = {};

@@ -30,8 +30,4 @@ export default class Player extends Entity {
             space: false
         };
     }
-
-    updatePhysics(deltaTime) {
-        const {up, down, left, right} = this.inputs;
-    }
 }
