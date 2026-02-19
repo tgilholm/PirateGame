@@ -14,6 +14,7 @@ export default class Ship extends Parent {
         this.params = params;
         this.hullSprite = null;
         this.drawHull();
+        this.setupInteractables()
 
         this.velocity = { x: 0, y: 0 };
         this.angularVelocity = 0;
@@ -79,6 +80,36 @@ export default class Ship extends Parent {
         this.container.sendToBack(this.hullSprite);
         this.container.setDepth(10);
     }
+
+    setupInteractables() {
+        const { middleWidth, height, sternRadius } = this.params;
+        const halfW = middleWidth / 2;
+        const halfH = height / 2;
+
+        // HELM: Place at the back (Stern) 
+        // We move it back by half the middle width, plus a bit of the stern radius
+        this.helm = this.scene.add.sprite(-halfW - 20, 0, 'helm');
+        this.container.add(this.helm);
+
+        // CANNONS: Place along the port (top) and starboard (bottom) rails
+        // Cannon 1 (Port Side)
+        const cannonPort = this.scene.add.sprite(0, -halfH + 15, 'cannon');
+        cannonPort.setRotation(-Math.PI / 2); // Pointing Outward
+        this.container.add(cannonPort);
+
+        // Cannon 2 (Starboard Side)
+        const cannonStarboard = this.scene.add.sprite(0, halfH - 15, 'cannon');
+        cannonStarboard.setRotation(Math.PI / 2); // Pointing Outward
+        this.container.add(cannonStarboard);
+
+        // LADDER: Place on the side of the ship
+        this.ladder = this.scene.add.sprite(-halfW, halfH - 5, 'ladder');
+        this.container.add(this.ladder);
+
+        // Ensure all these objects are above the hull sprite
+        // (Since hullSprite was sentToBack, new items are naturally on top)
+    }
+
 
 
     update() {

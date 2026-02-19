@@ -35,6 +35,9 @@ export class MainScene extends Phaser.Scene {
     preload() {
         // Load the tilesheet
         this.load.image("tiles", "/assets/terrain-tilesheet.png");
+        this.load.image('cannon', '/assets/cannon.png');
+        this.load.image('helm', '/assets/helm.png')
+        this.load.image('ladder', '/assets/ladder.png')
 
         // Load the map
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
