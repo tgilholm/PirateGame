@@ -219,6 +219,15 @@ io.on("connection", (socket) => {
         }
 
         if (exited) {
+            const worldPos = localToWorld(
+                ship.body.position.x,
+                ship.body.position.y,
+                ship.body.angle,
+                player.x,
+                player.y
+            );
+            player.x = worldPos.x;
+            player.y = worldPos.y;
             player.parentId = null; // re-parent to world
             socket.emit('exitedShip', { shipId: data.shipId });
         }
@@ -237,8 +246,17 @@ io.on("connection", (socket) => {
             const dy = player.y - ladder.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < 50) {
-                player.parentId = ship.id; // re-parent to ship
-                entered = true; // break loop
+                const localPos = worldToLocal(
+                    ship.body.position.x,
+                    ship.body.position.y,
+                    ship.body.angle,
+                    player.x,
+                    player.y
+                );
+                player.x = localPos.x;
+                player.y = localPos.y;
+                player.parentId = ship.id;
+                entered = true;
             }
         }
 
@@ -428,6 +446,8 @@ function updatePlayerPhysics(player) {
         if (player.inputs.a) player.x -= player.speed;
         if (player.inputs.d) player.x += player.speed;
     }
+
+    console.log(player.username, player.x, player.y);
 }
 
 
