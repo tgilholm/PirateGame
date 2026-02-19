@@ -15,6 +15,7 @@ export const CONFIG = {
     },
     
     PLAYER: {
+        MAX_HEALTH: 100,
         SPEED: 3,
         RADIUS: 15,
         PADDING: 15

@@ -1,5 +1,7 @@
-import Entity from "../entities/entity";
-import PlayerModel from "../entities/player-model";
+import Entity from "../entities/entity.js";
+import NPC from "../entities/npc.js";
+import Player from "../entities/player.js";
+import Ship from "../entities/ship.js";
 
 /**
  * Repository-pattern class implementing CRUD (create, retrieve, update, delete) methods
@@ -13,8 +15,9 @@ export default class EntityRegistry {
 
     /**
      * Adds a new Entity object to the list
-     * @param {Entity} entity the entity to add
-     * @returns {Entity} the entity just added
+     * @template {Entity} T the entity superclass
+     * @param {T} entity the entity (or subclass)
+     * @returns {T} the entity (or subclass) just added
      */
     addEntity(entity) {
         this.entities[entity.id] = entity;
@@ -134,7 +137,7 @@ export default class EntityRegistry {
     /**
      * Gets a specific NPC by its ID, or null if it can't be found
      * @param {String} id the id of the NPC
-     * @returns the NPC, or null if not found
+     * @returns {NPC} the NPC, or null if not found
      */
     getNPC(id) {
         const entity = this.getEntity(id);
@@ -143,65 +146,85 @@ export default class EntityRegistry {
 
 
     /**
-     * Creates a ShipModel (server-side) with the specified id and coordinates,
+     * Creates and adds a Ship (server-side) with the specified id and coordinates,
      * and adds it to the entity list.
      * @param {String} id unique id of the ship
      * @param {Number} x the x coordinate
      * @param {Number} y the y coordinate
-     * @returns {ShipModel} the ship added to the list
+     * @returns {Ship} the ship added to the list
      */
     createShip(id, x, y) {
-        const ship = new ShipModel(id, x, y);
+        const ship = new Ship(id, x, y);
         return this.addEntity(ship);
     }
 
 
-    /*
-     * Creates a PlayerModel (server-side) with the specified id, username, parent id
-     * and coordinates, then adds it to the entity list.
-    */
-
     /**
-     * 
-     * @param {String} id 
-     * @param {Number} x 
-     * @param {Number} y 
-     * @param {String} parentId 
-     * @param {String} username 
-     * @returns 
+     * Creates and adds a Player (server-side) with the specified id, username, parent id
+     * and coordinates, then adds it to the entity list. Note that if a parent id is specified,
+     * then the coordinates given will be *local* coordinates, not absolute.
+     * @param {String} id unique id of the player
+     * @param {Number} x the x coordinate
+     * @param {Number} y the y coordinate
+     * @param {String} parentId the id of the parent object to place this player on
+     * @param {String} username the username of the player
+     * @returns {Player} the player object added 
      */
     createPlayer(id, x, y, parentId, username) {
-        const player = new PlayerModel(id, x, y, parentId, username);
+        const player = new Player(id, x, y, parentId, username);
         return this.addEntity(player);
     }
 
 
     /**
-     * Creates a NPCModel (server-side) with the specified id and coordinates,
-     * and adds it to the entity list.
+     * Creates a NPC (server-side) with the specified id and coordinates,
+     * and adds it to the entity list. Note that if a parent id is specified,
+     * then the coordinates given will be *local* coordinates, not absolute.
      * @param {String} id unique id of the npc
      * @param {Number} x the x coordinate
      * @param {Number} y the y coordinate
-     * @returns {NPCModel} the npc added to the list
+     * @returns {NPC} the npc added to the list
      */
     createNPC(id, name, x, y) {
-        const npc = new NPCModel(id, name, x, y);
+        const npc = new NPC(id, name, x, y);
         return this.addEntity(npc);
     }
 
 
+    /**
+     * Gets all the players "on" a ship- those with a parentId matching the ship's id
+     * @param {String} shipId the ship to compare against the players' parentId
+     * @returns {Entity[]} the list of all players on the ship
+     */
     getPlayersOnShip(shipId) {
         return this.getPlayers().filter(p => p.parentId === shipId);
     }
 
+    /**
+     * Gets all the players "off" ships- those with a parentId of null.
+     * @returns {Entity[]} the list of all players not on ships
+     */
     getPlayersInWorldSpace() {
         return this.getPlayers().filter(p => p.parentId === null);
     }
 
+    /**
+     * Gets the ship being currently being steered by the player with the specified id,
+     * or null if that ship cannot be found
+     * @param {String} playerId the id of the player steering the ship
+     * @returns {Entity} the ship being piloted by the player with id playerId
+     */
     getShipPilotedBy(playerId) {
         return this.getShips().find(s => s.pilotId === playerId) || null;
     }
 
+    /**
+     * Get all the entities near a specified x, y coordinate within a specified radius
+     * @param {Number} x the x coordinate
+     * @param {Number} y the y coordinate
+     * @param {Number} radius the radius of the circle in which to find entities
+     * @returns {Entity[]} all the entities within the radius
+     */
     getEntitiesNear(x, y, radius) {
         return this.getAllEntities().filter(entity => {
             const dx = entity.position.x - x;
@@ -211,6 +234,16 @@ export default class EntityRegistry {
         });
     }
 
+    /**
+     * 
+     * Get all the entities near a specified x, y coordinate within a specified radius,
+     * and matching the specified type
+     * @param {Number} x the x coordinate
+     * @param {Number} y the y coordinate
+     * @param {Number} radius the radius of the circle in which to find entities
+     * @param {String} type the type to filter by
+     * @returns 
+     */
     getEntitiesNearByType(x, y, radius, type) {
         return this.getEntitiesByType(type).filter(entity => {
             const dx = entity.position.x - x;
@@ -221,6 +254,10 @@ export default class EntityRegistry {
     }
 
 
+    /**
+     * Gets the data for all the entities currently in the list
+     * @returns {Object} the data for all entities
+     */
     getEntityData() {
         const data = {};
         Object.entries(this.entitiesByType).forEach(([type, entitiesByType]) => {
@@ -229,8 +266,12 @@ export default class EntityRegistry {
         return data;
     }
 
+    /**
+     * 
+     * @returns 
+     */
     getShipInitData() {
-        const shipData = {};
+        /** @type {Ship[]} */ const shipData = {};
         this.getShips().forEach(ship => {
             shipData[ship.id] = {
                 x: ship.position.x,
