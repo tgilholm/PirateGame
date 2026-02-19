@@ -2,6 +2,10 @@
 
 import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
+import UI from "../objects/ui.js";
+import gameState from "../managers/gameState.js";
+import Plank from "../objects/items/plank.js";
+import PlayerInventory from "../objects/playerInventory.js";
 
 
 const ships = {}
@@ -26,6 +30,12 @@ export class MainScene extends Phaser.Scene {
         this.ui = null;
         this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
+        this.showDebugHitboxes = true;
+        this.debugGraphics = null;
+        this.gameState = new gameState();
+        this.playerInventory = new PlayerInventory(this);
+        
+        
     }
 
 
@@ -38,6 +48,10 @@ export class MainScene extends Phaser.Scene {
 
         // Load the map
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
+        
+        // Load the plank
+        this.load.image("plank", "/assets/plank.png");
+       
     }
 
     /**
@@ -52,6 +66,10 @@ export class MainScene extends Phaser.Scene {
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
         //this.cameras.main.roundPixels = true;
+
+        // Initialize UI
+        this.ui = new UI(this);
+        this.ui.setGold(0); // Start with 0 gold
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
@@ -69,7 +87,9 @@ export class MainScene extends Phaser.Scene {
             left: Phaser.Input.Keyboard.KeyCodes.LEFT,
             down: Phaser.Input.Keyboard.KeyCodes.DOWN,
             right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-            up: Phaser.Input.Keyboard.KeyCodes.UP
+            up: Phaser.Input.Keyboard.KeyCodes.UP,
+            zoom : Phaser.Input.Keyboard.KeyCodes.Z,
+            debug: Phaser.Input.Keyboard.KeyCodes.X
         }));
 
 
@@ -192,18 +212,33 @@ export class MainScene extends Phaser.Scene {
             }
         }
 
-        // Player movement
+        // Player movement (WASD when zoomed in)
         socket.emit('playerInput', {
-            w: this.keys.W.isDown,
-            a: this.keys.A.isDown,
-            s: this.keys.S.isDown,
-            d: this.keys.D.isDown
+            w: this.gameState.canControlPlayer() && this.keys.W.isDown,
+            a: this.gameState.canControlPlayer() && this.keys.A.isDown,
+            s: this.gameState.canControlPlayer() && this.keys.S.isDown,
+            d: this.gameState.canControlPlayer() && this.keys.D.isDown
         });
 
+        // Toggle zoom when Z is pressed
+        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
+            this.gameState.toggleZoom();
+            const zoomValue = this.gameState.getZoomValue();
+            this.cameras.main.setZoom(zoomValue);
+            this.ui.counteractZoom(zoomValue);
+        }
+
+        // Toggle debug menu when X is pressed
+        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.debug)) {
+            this.ui.toggleDebugMenu();
+        }
+
+        // Ship movement (WASD when zoomed out)
         socket.emit('shipInput', {
-            up: this.shipKeys.up.isDown,
-            left: this.shipKeys.left.isDown,
-            right: this.shipKeys.right.isDown
+            up: this.gameState.canControlShip() && this.keys.W.isDown,
+            left: this.gameState.canControlShip() && this.keys.A.isDown,
+            right: this.gameState.canControlShip() && this.keys.D.isDown
+            
         });
 
     }
