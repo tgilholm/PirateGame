@@ -1,5 +1,9 @@
+import { CONFIG } from "../config";
 import EntityRegistry from "./entity-registry";
 
+/**
+ * 
+ */
 export default class GameEngine {
     /**
      * 
@@ -16,26 +20,49 @@ export default class GameEngine {
             ships: {},
             players: {}
         }
+
+        console.log('[GameEngine] Initialised game engine');
     }
 
+    /**
+     * 
+     */
     update() {
-        // For each player, update the player physics relative to ship or world
-        this.playerHandler.updateAllPlayers((player) => {
-            // Pass the ship directly to the physicsHandler- if not found, ship is null
-            const ship = this.shipManager.getShip(player.parentId);
-            this.physicsHandler.updatePlayerPhysics(player, ship);
-        });
-
-        // Update the physics of all ships
-        this.shipHandler.updateAllShips((ship) => {
-            ship.updateShipPhysics();
-        })
-
-        // Send the update to the handler
+        // Update physics for all entities inside entityRegistry
+        this.updateAllEntities();
         this.physicsHandler.update();
+        this.syncShips();   // not sink ships, SYNC ships!
     }
 
-    getStateUpdate() {
+    /**
+     * 
+     */
+    updateAllEntities() {
+        const deltaTime = 1 / CONFIG.TICK_RATE;
 
+        this.entities.getAllEntities().forEach(entity => {
+            // gracefully handles disparate physics implementations
+            entity.updatePhysics(deltaTime);
+        });
+    }
+
+    /**
+     * 
+     */
+    syncShips() {
+        this.entities.getShips().forEach(ship => {
+            ship.syncFromPhysicsBody();
+        });
+    }
+
+
+    /**
+     * 
+     */
+    getStateUpdate() {
+        const shipUpdates = [];
+        const playerUpdates = [];
+
+        this.entities = getAllShips().for
     }
 }

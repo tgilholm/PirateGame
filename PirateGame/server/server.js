@@ -34,6 +34,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(publicDir, 'index.html'));
 });
 
+
+/*
+    Architectural abstractions for the key areas of the server-side code.
+    EntityRegistry follows a repository pattern; it keeps track of all entities
+    GameEngine abstracts the real-time game simulation.
+    SocketHandler handles incoming and outgoing socket events from clients.
+*/
 const entityRegistry = new EntityRegistry();
 const gameEngine = new GameEngine(entityRegistry);
 const socketHandler = new SocketHandler(io, gameEngine, entityRegistry);
@@ -50,12 +57,13 @@ entityRegistry.createShip("ship_1", 2500, 5000);
 */
 io.on("connection", (socket) => {
     console.log(`[Socket] Player Connected: ${socket.id}`);
-    socketHandler.handleConnection(socket);
+    socketHandler.handleConnect(socket);
+    socketHandler.registerHandlers(socket);
 
     // Fires when a player leaves the game
     socket.on('disconnect', () => {
         console.log(`[Socket] Player Disconnected: ${socket.id}`);
-        socketHandler.handleDisconnection(socket);
+        socketHandler.handleDisconnect(socket);
     });
 });
 
