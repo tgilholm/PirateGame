@@ -53,9 +53,6 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics.setDepth(1000); // Always on top
 
         // Cameras
-        this.cameraTarget = this.add.container(0, 0); // follow the player
-        this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
-        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
@@ -66,6 +63,11 @@ export class MainScene extends Phaser.Scene {
         const islands = map.createLayer("islands", tileset, 0, 0);
 
         this.matter.world.convertTilemapLayer(islands); // add collision to solid objects
+
+
+        this.cameraTarget = this.add.container(0, 0); // follow the player
+        this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
+        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
 
         // Keyboard input
         this.keys = /** @type {any} */ (this.input.keyboard.addKeys("W, A, S, D, E, Q, space"));
@@ -158,6 +160,16 @@ export class MainScene extends Phaser.Scene {
             });
         });
 
+        // Respond to server confirmation of control takeover 
+        socket.on('controlTaken', (data) => {
+            const player = players[socket.id];
+            player.isSteering = true;
+        })
+
+        socket.on('controlReleased', (data) => {
+            const player = players[socket.id];
+            player.isSteering = false;
+        });
         
     }
 
@@ -194,8 +206,10 @@ export class MainScene extends Phaser.Scene {
 
             // If near the helm, display the "take control" message
             const helmPos = { x: ship.helm.x, y: ship.helm.y };
+            const dist = Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, helmPos.x, helmPos.y)
 
-            if (Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, helmPos.x, helmPos.y) < 30) {
+
+            if (dist < 30 && !player.isSteering) { // only show if not already controlling
                 this.ui.showMessage("[E] - Control Ship");
 
                 // Only send take control command if E is just pressed (not held)
@@ -211,6 +225,20 @@ export class MainScene extends Phaser.Scene {
                 this.ui.hideMessage("[E] - Control Ship");
             }
 
+            // If controlling, display "release control" message
+            if (player.parentId === parentId && player.isSteering) {
+                this.ui.showMessage("[Q] - Release Control");
+
+                if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) {
+                    console.log(`Releasing control of ship ${parentId}`);
+                    socket.emit('releaseControl', {
+                        shipId: parentId
+                    });
+                }
+            } else {
+                this.ui?.hideMessage("[Q] - Release Control");
+            }
+
         } else {
             // Player is in world space
             cameraTarget.x = player.sprite.x;
@@ -221,21 +249,14 @@ export class MainScene extends Phaser.Scene {
 
         // Player movement
         socket.emit('playerInput', {
-            w: this.keys.W.isDown,
-            a: this.keys.A.isDown,
-            s: this.keys.S.isDown,
-            d: this.keys.D.isDown,
+            up: this.keys.W.isDown,
+            left: this.keys.A.isDown,
+            down: this.keys.S.isDown,
+            right: this.keys.D.isDown,
             e: this.keys.E.isDown,
             q: this.keys.Q.isDown,
             space: this.keys.space.isDown
         });
-
-        socket.emit('shipInput', {
-            up: this.shipKeys.up.isDown,
-            left: this.shipKeys.left.isDown,
-            right: this.shipKeys.right.isDown
-        });
-
     }
 
 

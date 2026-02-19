@@ -143,15 +143,13 @@ io.on("connection", (socket) => {
     socket.on('playerInput', (inputData) => {
         if (!players[socket.id]) return;    // if player doesn't exist, break early
 
-        players[socket.id].inputs = inputData;
-    })
-
-    // Handle ships movement
-    socket.on('shipInput', (inputData) => { // update to send ship id with packet
-
-        // Only update if the player is piloting the ship
-        if (ships["ship_1"] && ships["ship_1"].pilotId === socket.id) {
+        // if player is controlling ship, send only ship inputs
+        if (ships["ship_1"].pilotId === socket.id) {
             ships["ship_1"].inputs = inputData;
+        }
+        else {
+            // otherwise update player inputs
+            players[socket.id].inputs = inputData;
         }
     })
 
@@ -183,11 +181,23 @@ io.on("connection", (socket) => {
 
             // Send a confirmation back to the client
             socket.emit('controlTaken', { shipId: data.shipId });
-
-
             console.log(`Player ${socket.id} took control of ship ${data.shipId}`);
         } else {
             console.log(`Player ${socket.id} is too far to take control of ship ${data.shipId}`);
+        }
+    });
+
+    socket.on('releaseControl', (data) => {
+        const ship = ships[data.shipId];
+        if (ship && ship.pilotId === socket.id) { // double check
+            ship.pilotId = null;
+            console.log(`Player ${socket.id} released control of ship ${data.shipId}`);
+
+            // Send confirmation back to client
+            socket.emit('controlReleased', { shipId: data.shipId });
+        } else {
+            // If player not controlling, don't allow release
+            console.log(`Player ${socket.id} attempted to release control of ship ${data.shipId} but is not the pilot`);
         }
     });
 
@@ -333,7 +343,7 @@ function updateShipPhysics(ship) {
  */
 function updatePlayerPhysics(player) {
     const ship = ships[player.parentId];
-
+    const { up, down, left, right } = player.inputs;
 
     // If the player is on the ship, keep them inside it and move with the ship
     if (ship) {
@@ -346,10 +356,10 @@ function updatePlayerPhysics(player) {
 
         // world position of the player
         let worldPos = localToWorld(shipX, shipY, r, player.x, player.y);
-        if (player.inputs.w) worldPos.y -= player.speed;
-        if (player.inputs.s) worldPos.y += player.speed;
-        if (player.inputs.a) worldPos.x -= player.speed;
-        if (player.inputs.d) worldPos.x += player.speed;
+        if (up) worldPos.y -= player.speed;
+        if (down) worldPos.y += player.speed;
+        if (left) worldPos.x -= player.speed;
+        if (right) worldPos.x += player.speed;
 
         // convert to local space
         const newLocal = worldToLocal(shipX, shipY, r, worldPos.x, worldPos.y);
