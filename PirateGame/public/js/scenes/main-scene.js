@@ -65,6 +65,7 @@ export class MainScene extends Phaser.Scene {
         // Cameras
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
+        //this.cameras.main.roundPixels = true;
 
         // Initialize UI
         this.ui = new UI(this);
@@ -92,16 +93,30 @@ export class MainScene extends Phaser.Scene {
         }));
 
 
+        // Generate the entire game once when the "handshake" is received
         socket.on('initGame', (data) => {
-            console.log("Received Ship Params:", data.shipData);
+            console.log('Initialising game');
             this.shipParams = data.shipData;
 
             // Immediately spawn ships if they don't exist
             Object.entries(data.shipData).forEach(([id, config]) => {
                 if (!ships[id]) {
+                    console.log(`Creating ship: ${id}`);
                     ships[id] = new Ship(this, config.x, config.y, config.params);
                 }
             });
+
+            // Set initial player state if provided
+            if (data.players && Array.isArray(data.players)) {
+                data.players.forEach(playerData => {
+                    if (!players[playerData.id]) {
+                        console.log(`Creating player: ${playerData.id}`);
+                        players[playerData.id] = new Player(this, playerData.id);
+                    }
+                    const shipParent = ships[playerData.parentId];
+                    players[playerData.id].updateState(playerData, shipParent);
+                });
+            }
         });
 
         socket.emit('playerReady', { username: data.username });
@@ -110,16 +125,19 @@ export class MainScene extends Phaser.Scene {
         socket.on('gameState', (data) => {
 
             // Check if ship params have been received first
-            if (!this.shipParams) return; // skip until it has arrived
-
+            if (!this.shipParams) {
+                console.warn('gameState received but initGame was not present- waiting...');
+                return; // skip until it has arrived
+            }
             // Update ship list
             data.ships.forEach(shipData => {
                 if (!ships[shipData.id]) {  // only create if it doesn't already exist
 
                     // Create the ship with the new params
-                    const params = this.shipParams[shipData.id].params;
+                    const params = this.shipParams[shipData.id]?.params;
 
                     if (params) {
+                        console.log(`Creating new ship from gameState: ${shipData.id}`);
                         ships[shipData.id] = new Ship(this, shipData.x, shipData.y, params);
                     } else {
                         console.warn(`Failed to create ship ${shipData.id}`);
@@ -128,17 +146,25 @@ export class MainScene extends Phaser.Scene {
                 }
 
                 // Update with server data
-                ships[shipData.id].target = { x: shipData.x, y: shipData.y, r: shipData.r };
-            });
+                ships[shipData.id].target = {
+                    x: shipData.x,
+                    y: shipData.y,
+                    r: shipData.r
+                };
 
-            // Store debug hitbox data if available
-            if (data.debug && data.debug.shipHitboxes) {
-                this.shipHitboxes = data.debug.shipHitboxes;
-            }
+                // Send current velocity for extrapolation
+                ships[shipData.id].velocity = {
+                    x: shipData.vx || 0,
+                    y: shipData.vy || 0
+                };
+                ships[shipData.id].angularVelocity = shipData.av || 0;
+
+            });
 
             // Update player list
             data.players.forEach(playerData => {
                 if (!players[playerData.id]) {
+                    console.log(`Creating new player from gameState: ${playerData.id}`);
                     players[playerData.id] = new Player(this, playerData.id);   // only create if it doesn't exist
                 }
 
@@ -157,35 +183,10 @@ export class MainScene extends Phaser.Scene {
     update() {
         const cameraTarget = this.cameraTarget;
 
-        // Interpolate all objects 
+        // Extrapolate and interpolate all game objects
         Object.values(ships).forEach(ship => ship.update());
         Object.values(players).forEach(player => player.update());
 
-
-        // Draw debug hitboxes
-        if (this.showDebugHitboxes && this.debugGraphics && this.shipHitboxes) {
-            this.debugGraphics.clear();
-            this.debugGraphics.lineStyle(2, 0xff00ff, 1);
-
-            this.shipHitboxes.forEach(shipData => {
-                if (shipData && shipData.parts) {
-                    shipData.parts.forEach(part => {
-                        if (part && part.vertices) {
-                            this.debugGraphics.beginPath();
-                            part.vertices.forEach((vertex, i) => {
-                                if (i === 0) {
-                                    this.debugGraphics.moveTo(vertex.x, vertex.y);
-                                } else {
-                                    this.debugGraphics.lineTo(vertex.x, vertex.y);
-                                }
-                            });
-                            this.debugGraphics.closePath();
-                            this.debugGraphics.strokePath();
-                        }
-                    });
-                }
-            });
-        }
 
         if (players[socket.id]) {
             const player = players[socket.id];

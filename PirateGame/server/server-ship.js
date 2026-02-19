@@ -1,4 +1,5 @@
 import Matter from "matter-js";
+import { CONFIG } from "./config.js";
 const { Bodies, World, Body } = Matter;
 
 
@@ -21,8 +22,8 @@ export default class ServerShip {
         this.bowLength = 100; // width of frontal curve
         this.sternRadius = 80; // radius of rear hemisphere
 
-        this.turnSpeed = 0.0003;
-        this.thrust = 0.15;
+        this.turnSpeed = CONFIG.SHIP.TURN_SPEED;
+        this.thrust = CONFIG.SHIP.THRUST;
         this.body = this.createComplexBody(x, y);
         // Generate a Matter body from the vector of vertices
         //this.body = this.createComplexBody(x, y, this.generateHullVertices().reverse());

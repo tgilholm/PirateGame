@@ -8,6 +8,7 @@ const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
     height: window.innerHeight,
+    roundPixels: false,
     backgroundColor: '#2d80c9',
     parent: parent,
     scene: [StartScene, MainScene],     // Add all scenes in
@@ -16,7 +17,7 @@ const config = {
         default: 'matter',  // for complex physics
         matter: {
             gravity: { x: 0, y: 0 },
-            debug: true
+            debug: false
         }
     },
 };
