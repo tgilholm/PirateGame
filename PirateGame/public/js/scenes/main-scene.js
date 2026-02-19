@@ -33,8 +33,8 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = null;
         this.gameState = new gameState();
         this.playerInventory = new PlayerInventory(this);
-        
-        
+
+
     }
 
 
@@ -50,10 +50,10 @@ export class MainScene extends Phaser.Scene {
 
         // Load the map
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
-        
+
         // Load the plank
         this.load.image("plank", "/assets/plank.png");
-       
+
     }
 
     /**
@@ -93,7 +93,7 @@ export class MainScene extends Phaser.Scene {
             down: Phaser.Input.Keyboard.KeyCodes.DOWN,
             right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
             up: Phaser.Input.Keyboard.KeyCodes.UP,
-            zoom : Phaser.Input.Keyboard.KeyCodes.Z,
+            zoom: Phaser.Input.Keyboard.KeyCodes.Z,
             debug: Phaser.Input.Keyboard.KeyCodes.X
         }));
 
@@ -322,7 +322,7 @@ export class MainScene extends Phaser.Scene {
             q: this.keys.Q.isDown,
             space: this.keys.space.isDown
         });
-    }
+
 
         // Toggle zoom when Z is pressed
         if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
@@ -342,8 +342,8 @@ export class MainScene extends Phaser.Scene {
             up: this.gameState.canControlShip() && this.keys.W.isDown,
             left: this.gameState.canControlShip() && this.keys.A.isDown,
             right: this.gameState.canControlShip() && this.keys.D.isDown
-            
+
         });
 
+    }
 }
-
