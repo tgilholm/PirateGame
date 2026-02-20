@@ -67,7 +67,7 @@ export class MainScene extends Phaser.Scene {
 
         // Initialize UI
         this.ui = new UI(this);
-        this.ui.setGold(0); // Start with 0 gold
+      
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });

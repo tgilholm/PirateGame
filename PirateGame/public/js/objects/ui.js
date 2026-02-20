@@ -21,15 +21,14 @@ export default class UI {
             backgroundColor: '#00000088',
         }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1000);
 
-        //this.createAddDeckButton();
-        //this.createGoldCounter();
+        
         this.layer = this.scene.add.layer();
         this.hotbar = this.scene.add.container(0, 0);
         this.hotbarSlots = []; 
         this.hotbarIcons = []; 
         this.debugMenuVisible = false;
         this.originalPositions = new Map(); 
-        this.createGoldCounter();
+       
         this.createHotbar();
         this.createGivePlankButton();
         
@@ -40,6 +39,7 @@ export default class UI {
                 y: element.y
             });
         });
+        this.createPrintStatsButton();
     }
 
     /**
@@ -65,33 +65,11 @@ export default class UI {
     }
 
 
-    createGoldCounter() {
-        const paddingRight = 20;
-        const counterX = this.scene.cameras.main.width - paddingRight;
-        const counterY = 30;
-
-        this.goldCounter = this.scene.add.text(counterX, counterY, 'Gold: 0', {
-            fontSize: '24px',
-            fill: '#ffd54f',
-            fontStyle: 'bold'
-        })
-            .setOrigin(1, 0.5)
-            .setScrollFactor(0)
-            .setDepth(10000);
-
-        this.elements.push(this.goldCounter);
-    }
-
-
-
     getLayer() {
         return this.layer;
     }
 
-    setGold(amount) {
-        this.goldCounter.setText(`Gold: ${amount}`);
-    }
-
+    
     createGivePlankButton() {
         const buttonX = 100; // Left side of screen
         const buttonY = this.scene.cameras.main.height / 2; // Center vertically
@@ -126,12 +104,50 @@ export default class UI {
 
 
 
-
-
-
-
-
 //------------temp hotbar and zoom fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
+
+    createPrintStatsButton() {
+        const buttonX = 100; // Left side of screen
+        const buttonY = this.scene.cameras.main.height / 2 + 60; // Below the plank button
+
+        this.printStatsButton = this.scene.add.text(buttonX, buttonY, 'Print Ship Stats', {
+            fontSize: '20px',
+            fill: '#fff',
+            backgroundColor: '#4169e1',
+            padding: { x: 15, y: 8 }
+        })
+            .setOrigin(0.5)
+            .setInteractive()
+            .setScrollFactor(0)
+            .setDepth(10000)
+            .setVisible(false); // Initially hidden
+
+        this.printStatsButton.on('pointerover', () => {
+            this.printStatsButton.setStyle({ fill: '#ffff00' });
+        });
+
+        this.printStatsButton.on('pointerout', () => {
+            this.printStatsButton.setStyle({ fill: '#fff' });
+        });
+
+        this.printStatsButton.on('pointerdown', async () => {
+            console.log('=== SHIP STATS ===');
+
+            try {
+                const module = await import('./ship-components/calculateComponents.js');
+                const stats = await module.calculateShipStats();
+                module.logStats(stats);
+            } catch (error) {
+                console.error('Failed to load ship stats module:', error);
+            }
+        });
+
+        this.elements.push(this.printStatsButton);
+    }
+
+
+
+
 
     createHotbar() {
         const paddingBottom = 20;
@@ -236,6 +252,7 @@ export default class UI {
     toggleDebugMenu() {
         this.debugMenuVisible = !this.debugMenuVisible;
         this.givePlankButton.setVisible(this.debugMenuVisible);
+        this.printStatsButton.setVisible(this.debugMenuVisible);
     }
 
 }
