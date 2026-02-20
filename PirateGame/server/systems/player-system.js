@@ -170,10 +170,13 @@ export default class PlayerSystem {
             return { result: false, reason: `Player ${playerId} could not board, ladder not found` };
         }
 
+        // Player's position is in world space, ladder is in ship space
+        const worldLadderPos = ship.localToWorld(ladders[ladderIndex].x, ladders[ladderIndex].y);
+
         const ladder = ladders[ladderIndex];
         const dist = this.distance(
             player.position.x, player.position.y,
-            ladder.x, ladder.y
+            worldLadderPos.x, worldLadderPos.y
         );
 
         if (dist > 50) {
