@@ -316,11 +316,7 @@ export class MainScene extends Phaser.Scene {
             this.cameras.main.setZoom(zoom.getZoomValue());
         }
 
-        // Toggle debug menu when X is pressed
-        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.debug)) {
-            this.ui.toggleDebugMenu();
-        }
-
+        
         // // Ship movement (WASD when zoomed out)
         // socket.emit('shipInput', {
         //     up: this.gameState.canControlShip() && this.keys.W.isDown,
