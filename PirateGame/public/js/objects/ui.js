@@ -1,12 +1,8 @@
-/**
- * UI class handles all UI elements that are fixed to the screen
- * and unaffected by camera zoom or position.
- * rendered on different layer
- */
-export default class UI {
+//UI class handles all UI elements that are fixed to the screen, should be rendered on different layer and unaffected by camera zoom or position but not working atm.
 
+
+export default class UI {
     /**
-     * 
      * @param {Phaser.Scene} scene 
      */
     constructor(scene) {
@@ -22,7 +18,7 @@ export default class UI {
         }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1000);
 
         
-        this.layer = this.scene.add.layer();
+    
         this.debugMenuVisible = false;
         this.originalPositions = new Map(); 
        
@@ -48,10 +44,7 @@ export default class UI {
         }
     }
 
-    /**
-     * Hides the message at the top of the screen
-     * @param {String} message 
-     */
+    //Hides the message at the top of the screen
     hideMessage(message) {
         if (message && this.messageText.text === message) {
             this.messageText.setVisible(false);
@@ -67,8 +60,19 @@ export default class UI {
     
 //------------temp fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
 
-
-
+    //gets stats from server
+    async fetchShipStats() {
+        try {
+            const response = await fetch('/api/stats');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const stats = await response.json();
+            console.log('=== SHIP STATS ===', stats);
+            return stats;
+        } catch (error) {
+            console.error('Failed to fetch ship stats:', error);
+            return null;
+        }
+    }
 
     createPrintStatsButton() {
         const buttonX = 100; // Left side of screen
@@ -96,51 +100,14 @@ export default class UI {
 
         this.printStatsButton.on('pointerdown', async () => {
             console.log('=== SHIP STATS ===');
-
-            try {
-                const module = await import('./ship-components/calculateComponents.js');
-                const stats = await module.calculateShipStats();
-                module.logStats(stats);
-            } catch (error) {
-                console.error('Failed to load ship stats module:', error);
-            }
+            const stats = await this.fetchShipStats();
         });
 
         this.elements.push(this.printStatsButton);
     }
 
 
-/*
-    counteractZoom(zoomLevel) {
-        //reverses zoom byt scaling and mooving UI elements inversely, temp solution, i cant get seperate UI and main layers rendered, breaks camera
-        const inverseScale = 1 / zoomLevel;
-        
-        // Apply to all UI elements
-        this.elements.forEach(element => {const original = this.originalPositions.get(element);
-            if (original) {
-                // Scale inversely to camera zoom
-                element.setScale(inverseScale);
-                
-                // Reposition: scale position from center
-                const camera = this.scene.cameras.main;
-                const centerX = camera.width / 2;
-                const centerY = camera.height / 2;
-                
-                // Calculate scaled offset from center
-                const offsetX = (original.x - centerX) * inverseScale;
-                const offsetY = (original.y - centerY) * inverseScale;
-                
-                element.setPosition(centerX + offsetX, centerY + offsetY);
-            }
-        });
-    }
-
-*/
 //------------------------------------------------------------------------------------------------------------------
-
-
-
-
 
 
     toggleDebugMenu() {

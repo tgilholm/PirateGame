@@ -4,6 +4,7 @@ import express from "express";
 import http from "http";
 import path from "path";
 import { CONFIG, initializeConfig } from './config.js';
+import shipStatsRouter from './shipStats.js';
 
 // @ts-ignore
 import { Server } from "socket.io"
@@ -14,6 +15,10 @@ import SocketHandler from "./handlers/socket-handler.js";
 
 // Create the server
 const app = express();
+
+app.use('/api', shipStatsRouter); //adds rout for ship stats
+
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 

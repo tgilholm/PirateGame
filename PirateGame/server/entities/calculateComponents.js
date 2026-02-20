@@ -79,7 +79,7 @@ function calculateShipStats() {
         retrieveTime: 3 + types.components.anchor.variants[inputAnchor].stats.retrieveTime, //time it takes to retrieve anchor after deployment (seconds)
         
         //rudder
-        turnSpeed: 25 + types.components.rudder.variants[inputRudder].stats.turnSpeed,//degrees per second at max rudder angle
+        turnSpeed: 50 + types.components.rudder.variants[inputRudder].stats.turnSpeed,//degrees per second at max rudder angle
         responseTime: 3 + types.components.rudder.variants[inputRudder].stats.responseTime, //time for wheel to turn full port/starboard
         
         //crew
