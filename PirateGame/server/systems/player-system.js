@@ -52,8 +52,6 @@ export default class PlayerSystem {
             right: payload.right === true,
         };
 
-        console.log(player.inputs);
-
         return { result: true };
     }
 
@@ -89,6 +87,10 @@ export default class PlayerSystem {
         ship.pilotId = playerId;
         player.isSteering = true;
 
+        // Move the player just behind the helm
+        player.position.x = helm.x - 20; // 20 pixels behind the helm
+        player.position.y = helm.y;
+        
         return { result: true };
     }
 
@@ -179,9 +181,8 @@ export default class PlayerSystem {
         }
 
         // convert world position to ship-local position
-        const localPos = ship.worldToLocal(player.position.x, player.position.y);
-        player.position.x = localPos.x;
-        player.position.y = localPos.y;
+        player.position.x = ladder.x;
+        player.position.y = ladder.y;
         player.parentId = ship.id;
 
         return { result: true };

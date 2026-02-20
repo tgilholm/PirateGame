@@ -36,6 +36,8 @@ export default class Ship extends Entity {
         // Internal physics body
         this.body = this.createPhysicsBody(x, y);
         this.params = this.generateParams(); // for clients to draw
+        this.turnSpeed = CONFIG.SHIP.TURN_SPEED;
+        this.thrust = CONFIG.SHIP.THRUST;
     }
 
     /**
@@ -164,6 +166,31 @@ export default class Ship extends Entity {
             pilotId: this.pilotId,
             health: this.health,
             params: this.params
+        };
+    }
+
+    localToWorld(localX, localY) {
+        const cos = Math.cos(this.rotation);
+        const sin = Math.sin(this.rotation);
+
+        const rotatedX = localX * cos - localY * sin;
+        const rotatedY = localX * sin + localY * cos;
+
+        return {
+            x: this.position.x + rotatedX,
+            y: this.position.y + rotatedY
+        };
+    }
+
+    worldToLocal(worldX, worldY) {
+        const dx = worldX - this.position.x;
+        const dy = worldY - this.position.y;
+        const cos = Math.cos(-this.rotation);
+        const sin = Math.sin(-this.rotation);
+
+        return {
+            x: dx * cos - dy * sin,
+            y: dx * sin + dy * cos
         };
     }
 }

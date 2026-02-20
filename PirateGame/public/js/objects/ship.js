@@ -79,6 +79,8 @@ export default class Ship extends Parent {
         this.container.add(this.hullSprite);
         this.container.sendToBack(this.hullSprite);
         this.container.setDepth(10);
+
+        console.log(`Ship drawn at ${this.container.x}, ${this.container.y}`)
     }
 
     setupInteractables() {
@@ -117,6 +119,9 @@ export default class Ship extends Parent {
 
         // Ensure all these objects are above the hull sprite
         // (Since hullSprite was sentToBack, new items are naturally on top)
+
+        
+        console.log(`Interactables created ${this.container}`)
     }
 
 
@@ -148,5 +153,7 @@ export default class Ship extends Parent {
 
         // Apply same interpolation as position
         this.container.rotation += rotDiff * 0.08;
+
+        //console.log(`Ship updated: ${this.container.x}, ${this.container.y}`);
     }
 }

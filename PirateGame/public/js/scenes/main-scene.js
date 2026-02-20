@@ -192,10 +192,9 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
-        console.log(ships, players);
+        const cameraTarget = this.cameraTarget;
         if (!players[socket.id]) return; // wait for player data to load
 
-        const cameraTarget = this.cameraTarget;
 
         // Extrapolate and interpolate all game objects
         Object.values(ships).forEach(ship => ship.update());

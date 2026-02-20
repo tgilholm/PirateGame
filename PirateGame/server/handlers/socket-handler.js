@@ -25,11 +25,7 @@ export default class SocketHandler {
      * 
      */
     handleConnect(socket) {
-        // For new clients, send the initial data
-        const shipData = EntityRegistry.getShipData()
-        const playerData = EntityRegistry.getPlayerData();
 
-        console.log(shipData, playerData);
         // get some npc data and send it here
 
         socket.on('system:playerReady', (payload) => {
@@ -48,8 +44,12 @@ export default class SocketHandler {
             // Store username
             player.username = payload.username;
 
+            const shipData = EntityRegistry.getShipData()
+            const playerData = EntityRegistry.getPlayerData();
+
             socket.emit('initGame', { shipData, playerData });
-            console.log("[SocketHandler] Dispatching initGame event" )
+            //console.log(shipData, playerData);
+            console.log("[SocketHandler] Dispatching initGame event")
         })
         this.registerHandlers(socket);
     }
@@ -77,12 +77,31 @@ export default class SocketHandler {
     registerHandlers(socket) {
         // Route to the related system- this calls the "handle" method in each system class
 
+
         socket.onAny((eventName, payload) => {
+            //console.log(eventName);
             const [namespace, action] = eventName.split(':');
 
             if (eventName === "system:playerReady") return;
+            if (eventName === "player:moveInput") {
+                const playerId = socket.id;
+                const player = EntityRegistry.getPlayer(playerId);
 
-            if (!namespace || !action){
+                if (player && player.isSteering && player.parentId) {
+                    // Redirect the input to the ShipSystem if steering a ship
+                    ShipSystem.handle(playerId, 'ship:moveInput', {
+                        ...payload,
+                        shipId: player.parentId
+                    });
+                } else {
+                    // Standard player movement otherwise
+                    PlayerSystem.handle(playerId, 'player:moveInput', payload);
+                }
+
+                return;
+            }
+
+            if (!namespace || !action) {
                 console.warn(`Invalid event format: ${eventName}`);
                 return; // break early before anything bad happens
             }
@@ -101,7 +120,6 @@ export default class SocketHandler {
                 console.warn(`${eventName}:error`, { reason: outcome.reason })
                 //socket.emit(`${eventName}:error`, { reason: result.reason });
             } else if (outcome && outcome.data) {
-                //socket.emit(`${eventName}:success`, result.data);
             }
         });
     }

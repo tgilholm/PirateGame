@@ -30,6 +30,7 @@ export default class ShipSystem {
     }
 
     static moveInput(playerId, payload) {
+
         const ship = EntityRegistry.getShip(payload.shipId);
         if (!ship) {
             return { result: false, reason: 'Ship not found' };
@@ -37,7 +38,7 @@ export default class ShipSystem {
 
         // Only the pilot can move
         if (ship.pilotId !== playerId) {
-            return { result: false, reason: `Player ${playerId} is not the pilot, cannot control ship`};
+            return { result: false, reason: `Player ${playerId} is not the pilot, cannot control ship` };
         }
 
         // Validate payload

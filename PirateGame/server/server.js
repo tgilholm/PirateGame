@@ -93,7 +93,8 @@ setInterval(() => {
 setInterval(() => {
     const stats = EntityRegistry.getStats();
     console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
-}, 10000);
+    console.debug(EntityRegistry.getAllEntities());
+}, 3000);
 
 
 const PORT = process.env.PORT || CONFIG.PORT;   // Set default port as fallback

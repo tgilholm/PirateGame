@@ -4,6 +4,8 @@ import fs from 'fs';
 import { fileURLToPath } from "url";
 import { CONFIG } from "../config.js";
 import EntityRegistry from "../engine/entity-registry.js";
+import Player from "../entities/player.js";
+import Ship from "../entities/ship.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -73,13 +75,17 @@ export default class PhysicsHandler {
         Engine.update(this.engine, 1000 / CONFIG.TICK_RATE);
     }
 
+    /**
+     * 
+     * @param {Player} player 
+     * @param {Ship} ship 
+     * @returns 
+     */
     updatePlayerPhysics(player, ship) {
         // Destructure inputs
         const { up, down, left, right } = player.inputs;
 
-        if (ship) {
-            // Player is on a ship (local space)
-
+        if (ship) {// Player is on a ship (local space)
             // Cannot move while steering
             if (player.id === ship.pilotId) return;
 
@@ -88,7 +94,7 @@ export default class PhysicsHandler {
             const r = ship.rotation;
 
             // Get world position of player
-            let worldPos = this.localToWorld(shipX, shipY, r, player.x, player.y);
+            let worldPos = ship.localToWorld(player.position.x, player.position.y);
 
             // Apply movement in world space
             if (up) worldPos.y -= player.speed;
@@ -96,31 +102,37 @@ export default class PhysicsHandler {
             if (left) worldPos.x -= player.speed;
             if (right) worldPos.x += player.speed;
 
+            console.log(worldPos.x, worldPos.y);
+
             // Convert back to local space
-            const newLocal = this.worldToLocal(shipX, shipY, r, worldPos.x, worldPos.y);
+            const newLocal = ship.worldToLocal(worldPos.x, worldPos.y);
 
             // Collision check with ship hull
             const playerRadius = CONFIG.PLAYER.RADIUS;
             if (ship.isInside(newLocal.x, newLocal.y, playerRadius)) {
-                player.x = newLocal.x;
-                player.y = newLocal.y;
+                player.position.x = newLocal.x;
+                player.position.y = newLocal.y;
             } else {
                 // Slide along walls
-                if (ship.isInside(newLocal.x, player.y, playerRadius)) {
-                    player.x = newLocal.x;
-                } else if (ship.isInside(player.x, newLocal.y, playerRadius)) {
-                    player.y = newLocal.y;
+                if (ship.isInside(newLocal.x, player.position.y, playerRadius)) {
+                    player.position.x = newLocal.x;
+                } else if (ship.isInside(player.position.x, newLocal.y, playerRadius)) {
+                    player.position.y = newLocal.y;
                 }
             }
         } else {
             // Player is in world space - move freely
-            if (up) player.y -= player.speed;
-            if (down) player.y += player.speed;
-            if (left) player.x -= player.speed;
-            if (right) player.x += player.speed;
+            if (up) player.position.y -= player.speed;
+            if (down) player.position.y += player.speed;
+            if (left) player.position.x -= player.speed;
+            if (right) player.position.x += player.speed;
         }
     }
 
+    /**
+     * 
+     * @param {Ship} ship 
+     */
     updateShipPhysics(ship) {
         const { up, down, left, right } = ship.inputs;
         const body = ship.body;
@@ -141,34 +153,6 @@ export default class PhysicsHandler {
         ship.rotation = body.angle;
         ship.velocity = { x: body.velocity.x, y: body.velocity.y };
         ship.angularVelocity = body.angularVelocity;
-    }
-
-
-
-    worldToLocal(parentX, parentY, parentRotation, worldX, worldY) {
-        const dx = worldX - parentX;
-        const dy = worldY - parentY;
-        const cos = Math.cos(-parentRotation);
-        const sin = Math.sin(-parentRotation);
-
-        return {
-            x: dx * cos - dy * sin,
-            y: dx * sin + dy * cos
-        };
-    }
-
-
-    localToWorld(parentX, parentY, parentRotation, localX, localY) {
-        const cos = Math.cos(parentRotation);
-        const sin = Math.sin(parentRotation);
-
-        const rotatedX = localX * cos - localY * sin;
-        const rotatedY = localX * sin + localY * cos;
-
-        return {
-            x: parentX + rotatedX,
-            y: parentY + rotatedY
-        };
     }
 
     distance(x1, y1, x2, y2) {

@@ -29,6 +29,7 @@ export default class Player extends Entity {
             q: false,
             space: false
         };
+        this.speed = CONFIG.PLAYER.SPEED;
     }
 
     toData() {
