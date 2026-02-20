@@ -102,7 +102,7 @@ export default class PhysicsHandler {
             if (left) worldPos.x -= player.speed;
             if (right) worldPos.x += player.speed;
 
-            console.log(worldPos.x, worldPos.y);
+            //console.log(worldPos.x, worldPos.y);
 
             // Convert back to local space
             const newLocal = ship.worldToLocal(worldPos.x, worldPos.y);

@@ -47,6 +47,7 @@ EntityRegistry.initialise();
 
 // Create an example ship for testing
 gameEngine.createShip("ship_1", 2500, 5000);
+gameEngine.createShip("ship_2", 2500, 5500);
 
 /*
     New connections- when a player first loads the webpage, the "connection"
@@ -93,8 +94,8 @@ setInterval(() => {
 setInterval(() => {
     const stats = EntityRegistry.getStats();
     console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
-    console.debug(EntityRegistry.getAllEntities());
-}, 3000);
+    //console.debug(EntityRegistry.getAllEntities());
+}, 10000);
 
 
 const PORT = process.env.PORT || CONFIG.PORT;   // Set default port as fallback

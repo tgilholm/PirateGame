@@ -90,7 +90,7 @@ export default class PlayerSystem {
         // Move the player just behind the helm
         player.position.x = helm.x - 20; // 20 pixels behind the helm
         player.position.y = helm.y;
-        
+
         return { result: true };
     }
 
@@ -113,80 +113,59 @@ export default class PlayerSystem {
         return { result: true };
     }
 
-    static exitShip(playerId, payload) {
-        const player = EntityRegistry.getPlayer(playerId);
-        const ship = EntityRegistry.getShip(payload.shipId);
+    static enterShip(playerId, payload) {
+        const player = EntityRegistry.getPlayer(playerId); //
+        const ship = EntityRegistry.getShip(payload.shipId); //
 
-        if (!player || !ship) {
-            return { result: false, reason: 'Entity not found' };
-        }
-        if (player.parentId !== ship.id) {
-            return { result: false, reason: `Player ${playerId} is not on ship ${ship.id}, cannot exit` };
-        }
+        if (!player || !ship) return { result: false, reason: 'Entity not found' }; //
+        if (player.parentId !== null) return { result: false, reason: 'Already on a ship' }; //
 
-        // Check distance between player and ladders
-        const ladders = ship.params.interactables.ladders;
-        let nearLadder = false;
-        for (const ladder of ladders) {
-            const dist = this.distance(
-                player.position.x, player.position.y,
-                ladder.x, ladder.y
-            );
-            if (dist < 50) {
-                nearLadder = true;
-                break;
-            }
-        }
+        const ladders = ship.params.interactables.ladders; //
+        const ladder = ladders[payload.ladderIndex]; //
+        if (!ladder) return { result: false, reason: 'Ladder not found' }; //
 
-        if (!nearLadder) {
-            return { result: false, reason: `Player ${playerId} is not near a ladder, cannot exit` };
-        }
+        // Calculate inward pull: move player towards the ship center by an offset (e.g., 40px)
+        const offset = 40;
+        const distFromCenter = Math.sqrt(ladder.x ** 2 + ladder.y ** 2);
+        const pullX = (ladder.x / distFromCenter) * offset;
+        const pullY = (ladder.y / distFromCenter) * offset;
 
-        // convert local position to world position
-        const worldPos = ship.localToWorld(player.position.x, player.position.y);
-        player.position.x = worldPos.x;
-        player.position.y = worldPos.y;
-        player.parentId = null;
-        player.isSteering = false;
+        // Set player position to local coordinates inside the hull
+        player.position.x = ladder.x - pullX;
+        player.position.y = ladder.y - pullY;
+        player.parentId = ship.id; //
 
         return { result: true };
     }
 
-    static enterShip(playerId, payload) {
-        const player = EntityRegistry.getPlayer(playerId);
-        const ship = EntityRegistry.getShip(payload.shipId);
+    static exitShip(playerId, payload) {
+        const player = EntityRegistry.getPlayer(playerId); //
+        const ship = EntityRegistry.getShip(payload.shipId); //
 
-        if (!player || !ship) {
-            return { result: false, reason: 'Entity not found' };
-        }
-        if (player.parentId !== null) {
-            return { result: false, reason: `Player ${playerId} is already on a ship, cannot board` };
+        if (!player || !ship || player.parentId !== ship.id) { //
+            return { result: false, reason: 'Invalid exit attempt' };
         }
 
-        const ladders = ship.params.interactables.ladders;
-        const ladderIndex = payload.ladderIndex;
+        // Find the nearest ladder to the player's current local position
+        const ladders = ship.params.interactables.ladders; //
+        const ladder = ladders.reduce((prev, curr) => {
+            return this.distance(player.position.x, player.position.y, curr.x, curr.y) <
+                this.distance(player.position.x, player.position.y, prev.x, prev.y) ? curr : prev;
+        });
 
-        if (ladderIndex < 0 || ladderIndex >= ladders.length) {
-            return { result: false, reason: `Player ${playerId} could not board, ladder not found` };
-        }
+        // Calculate outward push: move player away from ship center by an offset (e.g., 50px)
+        const offset = 50;
+        const distFromCenter = Math.sqrt(ladder.x ** 2 + ladder.y ** 2);
+        const pushX = (ladder.x / distFromCenter) * offset;
+        const pushY = (ladder.y / distFromCenter) * offset;
 
-        // Player's position is in world space, ladder is in ship space
-        const worldLadderPos = ship.localToWorld(ladders[ladderIndex].x, ladders[ladderIndex].y);
+        // Convert the "pushed" local position to world coordinates
+        const worldExitPos = ship.localToWorld(ladder.x + pushX, ladder.y + pushY); //
 
-        const ladder = ladders[ladderIndex];
-        const dist = this.distance(
-            player.position.x, player.position.y,
-            worldLadderPos.x, worldLadderPos.y
-        );
-
-        if (dist > 50) {
-            return { result: false, reason: `Player ${playerId} could not board, too far from ladder` };
-        }
-
-        // convert world position to ship-local position
-        player.position.x = ladder.x;
-        player.position.y = ladder.y;
-        player.parentId = ship.id;
+        player.position.x = worldExitPos.x;
+        player.position.y = worldExitPos.y;
+        player.parentId = null; //
+        player.isSteering = false; //
 
         return { result: true };
     }
