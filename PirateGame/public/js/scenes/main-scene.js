@@ -3,6 +3,7 @@
 import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
 import UI from "../objects/ui.js";
+import zoom from "../objects/zoom.js";
 //import PlayerInventory from "../objects/playerInventory.js";
 
 
@@ -301,17 +302,19 @@ export class MainScene extends Phaser.Scene {
             right: this.keys.D.isDown,
             e: this.keys.E.isDown,
             q: this.keys.Q.isDown,
+            zoom: this.shipKeys.zoom.isDown,
             space: this.keys.space.isDown
         });
 
 
         // // Toggle zoom when Z is pressed
-        // if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
-        //     this.gameState.toggleZoom();
-        //     const zoomValue = this.gameState.getZoomValue();
-        //     this.cameras.main.setZoom(zoomValue);
-        //     this.ui.counteractZoom(zoomValue);
-        // }
+        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom) && !player.isSteering) {
+            zoom.toggleZoom(); }
+            if (player.isSteering) {
+                this.cameras.main.setZoom(0.5); }
+            else {
+            this.cameras.main.setZoom(zoom.getZoomValue());
+        }
 
         // Toggle debug menu when X is pressed
         if (Phaser.Input.Keyboard.JustDown(this.shipKeys.debug)) {

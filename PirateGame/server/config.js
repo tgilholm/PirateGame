@@ -1,4 +1,4 @@
-import { calculateShipStats } from "../public/js/objects/ship-components/calculateComponents.js";
+import * as calculateComponents from "./entities/calculateComponents.js"
 
 /**
  * Defines server-side constants, such as the tickrate and
@@ -41,7 +41,7 @@ let configInitialized = false;
 export async function initializeConfig() {
     if (configInitialized) return;
     
-    const stats = await calculateShipStats();
+    const stats = await calculateComponents.calculateShipStats();
     CONFIG.SHIP.MAX_HEALTH = stats.maxHealth;
     CONFIG.SHIP.TURN_SPEED = stats.turnSpeed / 10000;
     CONFIG.SHIP.THRUST = stats.acceleration;

@@ -1,6 +1,7 @@
-const types = require('./entities/types.json');
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const types = require('./types.json');
 const shipPresets = require('./shipPresets.json');
-
 
 //initialise default ship, can be changed to preference
 let inputBody = 'LVL1';
@@ -57,7 +58,7 @@ function calculateShipStats() {
         crewCapacity: 2 + types.components.body.variants[inputBody].stats.crewCapacity, //base number of max crew on ship
         
         //sails
-        acceleration: 0.5 + types.components.sails.variants[inputSails].stats.acceleration,//base acceleration of ship, in grids/s^2
+        acceleration: 0.05 + types.components.sails.variants[inputSails].stats.acceleration,//base acceleration of ship, in grids/s^2
         maxSpeed: 1 + types.components.sails.variants[inputSails].stats.maxSpeed, //base max speed of ship, in grids/s
         
         //cannons
@@ -69,8 +70,8 @@ function calculateShipStats() {
         rammingPower: 100 + types.components.head.variants[inputHead].stats.rammingPower,//how much damage the ship does to other ships and itself when ramming
         
         //crows nest
-        minimapRange: 100 + types.components.crowsnest.variants[inputCrowsnest].stats.minimapRange, //how far teh minimap can see, in grids, (does not affect full map vision)
-        visionRange: 10 + types.components.crowsnest.variants[inputCrowsnest].stats.visionRange, //how far the ship can see/detect other ships, in grids
+        minimapRange: 100 + types.components.crowsNest.variants[inputCrowsnest].stats.minimapRange, //how far teh minimap can see, in grids, (does not affect full map vision)
+        visionRange: 10 + types.components.crowsNest.variants[inputCrowsnest].stats.visionRange, //how far the ship can see/detect other ships, in grids
         
         //anchor
         stopPower: 5 + types.components.anchor.variants[inputAnchor].stats.stopPower, //how quickly ship can stop when anchor is deployed from max speed (seconds)
@@ -78,7 +79,7 @@ function calculateShipStats() {
         retrieveTime: 3 + types.components.anchor.variants[inputAnchor].stats.retrieveTime, //time it takes to retrieve anchor after deployment (seconds)
         
         //rudder
-        turnSpeed: 10 + types.components.rudder.variants[inputRudder].stats.turnSpeed,//degrees per second at max rudder angle
+        turnSpeed: 25 + types.components.rudder.variants[inputRudder].stats.turnSpeed,//degrees per second at max rudder angle
         responseTime: 3 + types.components.rudder.variants[inputRudder].stats.responseTime, //time for wheel to turn full port/starboard
         
         //crew
@@ -90,7 +91,7 @@ function calculateShipStats() {
         types.components.sails.variants[inputSails].stats.weight +
         types.components.cannons.variants[inputCannons].stats.weight +
         types.components.head.variants[inputHead].stats.weight +
-        types.components.crowsnest.variants[inputCrowsnest].stats.weight +
+        types.components.crowsNest.variants[inputCrowsnest].stats.weight +
         types.components.anchor.variants[inputAnchor].stats.weight +
         types.components.rudder.variants[inputRudder].stats.weight +
         types.components.crew.variants[inputCrew].stats.weight
@@ -128,7 +129,6 @@ function logStats(stats) {
     // Rudder Stats
     console.log('Turn Speed:', stats.turnSpeed);
     console.log('Response Time:', stats.responseTime);
-    console.log('Straightening Speed:', stats.straighteningSpeed);
 
     // Crew Stats
     console.log('Fire Rate:', stats.fireRate);
@@ -146,14 +146,12 @@ logStats(totalStats);
 updateShipComponent('sails', 'LVL2');
 
 //allows use of functions in other places
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        calculateShipStats,
-        logStats,
-        updateShipComponent,
-        shipComponents
-    };
-}
+export {
+    calculateShipStats,
+    logStats,
+    updateShipComponent,
+    shipComponents
+};
 
 
 
