@@ -82,6 +82,8 @@ setInterval(() => {
         io.volatile.emit('gameState', updates); 
     }
 
+    //console.log(updates);
+
 }, 1000 / CONFIG.NET_TICK_RATE);
 
 

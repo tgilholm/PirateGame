@@ -100,83 +100,63 @@ export class MainScene extends Phaser.Scene {
 
         // Generate the entire game once when the "handshake" is received
         socket.on('initGame', (data) => {
-            console.log('Initialising game');
-            this.shipParams = data.shipData;
+            console.log('[Client] Received initGame', data);
 
-            // Immediately spawn ships if they don't exist
-            Object.entries(data.shipData).forEach(([id, config]) => {
-                if (!ships[id]) {
-                    console.log(`Creating ship: ${id}`);
-                    ships[id] = new Ship(this, config.x, config.y, config.params);
-                }
-            });
+            // Create all ships from server data
+            if (data.shipData && Array.isArray(data.shipData)) {
+                data.shipData.forEach(shipData => {
+                    if (!ships[shipData.id]) {
+                        console.log(`[Client] Creating ship: ${shipData.id}`);
+                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, shipData.params);
+                    }
+                });
+            }
 
-            // Set initial player state if provided
-            if (data.players && Array.isArray(data.players)) {
-                data.players.forEach(playerData => {
+            // Create all players from server data
+            if (data.playerData && Array.isArray(data.playerData)) {
+                data.playerData.forEach(playerData => {
                     if (!players[playerData.id]) {
-                        console.log(`Creating player: ${playerData.id}`);
+                        console.log(`[Client] Creating player: ${playerData.id}`);
                         players[playerData.id] = new Player(this, playerData.id);
                     }
-                    const shipParent = ships[playerData.parentId];
+
+                    // Update player state
+                    const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
                     players[playerData.id].updateState(playerData, shipParent);
                 });
             }
         });
 
-        socket.emit('system:playerReady', { username: data.username });
 
 
         socket.on('gameState', (data) => {
-
-            // Check if ship params have been received first
-            if (!this.shipParams) {
-                console.warn('gameState received but initGame was not present- waiting...');
-                return; // skip until it has arrived
-            }
-            // Update ship list
-            data.ships.forEach(shipData => {
-                if (!ships[shipData.id]) {  // only create if it doesn't already exist
-
-                    // Create the ship with the new params
-                    const params = this.shipParams[shipData.id]?.params;
-
-                    if (params) {
-                        console.log(`Creating new ship from gameState: ${shipData.id}`);
-                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, params);
-                    } else {
-                        console.warn(`Failed to create ship ${shipData.id}`);
-                        return;
+            // Update ships
+            if (data.ships && Array.isArray(data.ships)) {
+                data.ships.forEach(shipData => {
+                    if (ships[shipData.id]) {
+                        ships[shipData.id].target = {
+                            x: shipData.x,
+                            y: shipData.y,
+                            r: shipData.r
+                        };
+                        ships[shipData.id].velocity = {
+                            x: shipData.vx || 0,
+                            y: shipData.vy || 0
+                        };
+                        ships[shipData.id].angularVelocity = shipData.av || 0;
                     }
-                }
+                });
+            }
 
-                // Update with server data
-                ships[shipData.id].target = {
-                    x: shipData.x,
-                    y: shipData.y,
-                    r: shipData.r
-                };
-
-                // Send current velocity for extrapolation
-                ships[shipData.id].velocity = {
-                    x: shipData.vx || 0,
-                    y: shipData.vy || 0
-                };
-                ships[shipData.id].angularVelocity = shipData.av || 0;
-
-            });
-
-            // Update player list
-            data.players.forEach(playerData => {
-                if (!players[playerData.id]) {
-                    console.log(`Creating new player from gameState: ${playerData.id}`);
-                    players[playerData.id] = new Player(this, playerData.id);   // only create if it doesn't exist
-                }
-
-                // Assign the parent id, or null if no parent
-                const shipParent = ships[playerData.parentId];
-                players[playerData.id].updateState(playerData, shipParent);
-            });
+            // Update players
+            if (data.players && Array.isArray(data.players)) {
+                data.players.forEach(playerData => {
+                    if (players[playerData.id]) {
+                        const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
+                        players[playerData.id].updateState(playerData, shipParent);
+                    }
+                });
+            }
         });
 
         // Respond to server confirmation of control takeover 
@@ -202,6 +182,9 @@ export class MainScene extends Phaser.Scene {
                 player.parentId = data.shipId;
             }
         });
+
+
+        socket.emit('system:playerReady', { username: data.username });
     }
 
 
@@ -209,6 +192,7 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
+        console.log(ships, players);
         if (!players[socket.id]) return; // wait for player data to load
 
         const cameraTarget = this.cameraTarget;
@@ -343,6 +327,7 @@ export class MainScene extends Phaser.Scene {
         //     left: this.gameState.canControlShip() && this.keys.A.isDown,
         //     right: this.gameState.canControlShip() && this.keys.D.isDown
         // });
+
 
     }
 }

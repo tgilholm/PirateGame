@@ -28,6 +28,8 @@ export default class SocketHandler {
         // For new clients, send the initial data
         const shipData = EntityRegistry.getShipData()
         const playerData = EntityRegistry.getPlayerData();
+
+        console.log(shipData, playerData);
         // get some npc data and send it here
 
         socket.on('system:playerReady', (payload) => {
