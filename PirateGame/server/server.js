@@ -58,7 +58,6 @@ entityRegistry.createShip("ship_1", 2500, 5000);
 io.on("connection", (socket) => {
     console.log(`[Socket] Player Connected: ${socket.id}`);
     socketHandler.handleConnect(socket);
-    socketHandler.registerHandlers(socket);
 
     // Fires when a player leaves the game
     socket.on('disconnect', () => {
@@ -78,7 +77,7 @@ setInterval(() => {
     Network loop- broadcast the current state of the game at the network tick rate to all listeners
 */
 setInterval(() => {
-    const updates = gameEngine.getStateUpdate();
+    const updates = gameEngine.getRecentUpdates();
     if (updates.ships.length > 0 || updates.players.length > 0) {   // Only send state if someone's connected!
         io.volatile.emit('gameState', updates); 
     }

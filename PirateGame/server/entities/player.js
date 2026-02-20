@@ -30,4 +30,12 @@ export default class Player extends Entity {
             space: false
         };
     }
+
+    toData() {
+        return {
+            ...super.toData(),
+            username: this.username,
+            health: this.health
+        };
+    }
 }

@@ -1,5 +1,6 @@
-import { CONFIG } from "../config";
-import EntityRegistry from "./entity-registry";
+import PhysicsHandler from "server/handlers/physics-handler.js";
+import { CONFIG } from "../config.js";
+import EntityRegistry from "./entity-registry.js";
 
 /**
  * 
