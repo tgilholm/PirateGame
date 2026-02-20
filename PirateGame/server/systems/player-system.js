@@ -52,6 +52,8 @@ export default class PlayerSystem {
             right: payload.right === true,
         };
 
+        console.log(player.inputs);
+
         return { result: true };
     }
 

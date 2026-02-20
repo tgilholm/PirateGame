@@ -162,7 +162,8 @@ export default class Ship extends Entity {
         return {
             ...super.toData(),  // "spread" the underlying entity data, append ship stuff
             pilotId: this.pilotId,
-            health: this.health
+            health: this.health,
+            params: this.params
         };
     }
 }

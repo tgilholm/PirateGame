@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from "url";
 import { CONFIG } from "../config.js";
+import EntityRegistry from "../engine/entity-registry.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,11 +61,20 @@ export default class PhysicsHandler {
     }
 
     update() {
+        EntityRegistry.getPlayers().forEach(player => {
+            const ship = player.parentId ? EntityRegistry.getShip(player.parentId) : null;
+            this.updatePlayerPhysics(player, ship);
+        });
+
+        // Update all ships
+        EntityRegistry.getShips().forEach(ship => {
+            this.updateShipPhysics(ship);
+        });
         Engine.update(this.engine, 1000 / CONFIG.TICK_RATE);
     }
 
     updatePlayerPhysics(player, ship) {
-        // Destructure inputs - these now correctly match what client sends
+        // Destructure inputs
         const { up, down, left, right } = player.inputs;
 
         if (ship) {

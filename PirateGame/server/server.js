@@ -43,9 +43,10 @@ app.get('/', (req, res) => {
 */
 const gameEngine = new GameEngine();
 const socketHandler = new SocketHandler(io, gameEngine);
+EntityRegistry.initialise();
 
 // Create an example ship for testing
-EntityRegistry.createShip("ship_1", 2500, 5000);
+gameEngine.createShip("ship_1", 2500, 5000);
 
 /*
     New connections- when a player first loads the webpage, the "connection"
@@ -80,6 +81,7 @@ setInterval(() => {
     if (updates.ships.length > 0 || updates.players.length > 0) {   // Only send state if someone's connected!
         io.volatile.emit('gameState', updates); 
     }
+
 }, 1000 / CONFIG.NET_TICK_RATE);
 
 
@@ -88,7 +90,7 @@ setInterval(() => {
 */
 setInterval(() => {
     const stats = EntityRegistry.getStats();
-    console.debug(`[Stats] Ships: ${stats.ships}, Players: ${stats.players}`);
+    console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
 }, 10000);
 
 
