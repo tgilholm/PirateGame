@@ -2,7 +2,7 @@ import Matter from "matter-js";
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from "url";
-import { CONFIG } from "server/config";
+import { CONFIG } from "../config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,8 +13,12 @@ let Engine = Matter.Engine,
     Body = Matter.Body;
 
 export default class PhysicsHandler {
-    constructor() {
-        this.engine = Engine.create({ gravity: { x: 0, y: 0 } }); // top down- no gravity
+    /**
+     * 
+     * @param {Matter.Engine} matterEngine 
+     */
+    constructor(matterEngine) {
+        this.engine = matterEngine;
         this.world = this.engine.world;
         this.lastUpdateTime = 0;
 

@@ -1,4 +1,4 @@
-import { CONFIG } from "server/config.js";
+import { CONFIG } from "../config.js"
 import Entity from "./entity.js";
 import Matter from "matter-js";
 const { Bodies, Body } = Matter; // destructure

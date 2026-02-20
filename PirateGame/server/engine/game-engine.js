@@ -1,25 +1,24 @@
-import PhysicsHandler from "server/handlers/physics-handler.js";
+// @ts-nocheck
+import PhysicsHandler from "../handlers/physics-handler.js"
 import { CONFIG } from "../config.js";
 import EntityRegistry from "./entity-registry.js";
+import Matter from "matter-js";
 
 /**
  * 
  */
 export default class GameEngine {
-    /**
-     * 
-     * @param {EntityRegistry} entityRegistry 
-     */
-    constructor(entityRegistry) {
+    constructor() {
 
         // Functionality is delegated to handlers for each domain
-        this.entities = entityRegistry;
-        this.physicsHandler = new PhysicsHandler();
+        const matterEngine = Matter.Engine.create({ gravity: { x: 0, y: 0 } });
+        this.physicsHandler = new PhysicsHandler(matterEngine);
 
         // Used for only updating clients with deltas instead of re-sending the entire game state
         this.lastBroadcast = {
             ships: {},
-            players: {}
+            players: {},
+            npcs: {}
         }
 
         console.log('[GameEngine] Initialised game engine');
@@ -30,30 +29,7 @@ export default class GameEngine {
      */
     update() {
         // Update physics for all entities inside entityRegistry
-        this.updateAllEntities();
-        this.physicsHandler.update();
-        this.syncShips();   // not sink ships, SYNC ships!
-    }
-
-    /**
-     * 
-     */
-    updateAllEntities() {
-        const deltaTime = 1 / CONFIG.TICK_RATE;
-
-        this.entities.getAllEntities().forEach(entity => {
-            // gracefully handles disparate physics implementations
-            entity.updatePhysics(deltaTime);
-        });
-    }
-
-    /**
-     * 
-     */
-    syncShips() {
-        this.entities.getShips().forEach(ship => {
-            ship.syncFromPhysicsBody();
-        });
+        this.physicsHandler.update()
     }
 
 
@@ -63,9 +39,10 @@ export default class GameEngine {
     getRecentUpdates() {
         const shipUpdates = [];
         const playerUpdates = [];
+        const npcUpdates = [];
 
-        // Check ships for changes
-        this.entities.getShips().forEach(ship => {
+        // Check ships
+        EntityRegistry.getShips().forEach(ship => {
             const current = {
                 id: ship.id,
                 x: Math.round(ship.position.x),
@@ -79,8 +56,6 @@ export default class GameEngine {
             };
 
             const last = this.lastBroadcast.ships[ship.id];
-
-            // Only send updates if the data changed enough
             if (!last ||
                 Math.abs(current.x - last.x) > 1 ||
                 Math.abs(current.y - last.y) > 1 ||
@@ -93,15 +68,12 @@ export default class GameEngine {
             }
         });
 
-        // Check players for changes
-        this.entities.getPlayers().forEach(player => {
+        // Check players
+        EntityRegistry.getPlayers().forEach(player => {
             const current = {
                 id: player.id,
                 x: Math.round(player.position.x),
                 y: Math.round(player.position.y),
-                r: player.rotation,
-                vx: 0,  // Players don't use velocity
-                vy: 0,
                 parentId: player.parentId,
                 username: player.username,
                 health: player.health,
@@ -109,7 +81,6 @@ export default class GameEngine {
             };
 
             const last = this.lastBroadcast.players[player.id];
-
             if (!last ||
                 current.parentId !== last.parentId ||
                 current.health !== last.health ||
@@ -122,15 +93,26 @@ export default class GameEngine {
             }
         });
 
-        /*
-            Future entity updates can be aggregated here
-        */
+        // Check NPCs
+        EntityRegistry.getNPCs().forEach(npc => {
+            const current = {
+                id: npc.id,
+                x: Math.round(npc.position.x),
+                y: Math.round(npc.position.y),
+                r: npc.rotation
+            };
 
-        // Connect all updates in a single object
-        return {
-            ships: shipUpdates,
-            players: playerUpdates
-        }
+            const last = this.lastBroadcast.npcs[npc.id];
+            if (!last ||
+                Math.abs(current.x - last.x) > 2 ||
+                Math.abs(current.y - last.y) > 2) {
+
+                this.lastBroadcast.npcs[npc.id] = current;
+                npcUpdates.push(current);
+            }
+        });
+
+        return { ships: shipUpdates, players: playerUpdates, npcs: npcUpdates };
     }
 
     /**
@@ -139,14 +121,14 @@ export default class GameEngine {
     getGameState() {
         return {
             // Extract all entity data
-            entities: this.entities.getStats(),
-            ships: this.entities.getShips().map(ship => ({
+            entities: EntityRegistry.getStats(),
+            ships: EntityRegistry.getShips().map(ship => ({
                 id: ship.id,
                 position: ship.position,
                 health: ship.health,
                 pilotId: ship.pilotId
             })),
-            players: this.entities.getPlayers().map(p => ({
+            players: EntityRegistry.getPlayers().map(p => ({
                 id: p.id,
                 username: p.username,
                 position: p.position,

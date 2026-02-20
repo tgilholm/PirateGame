@@ -41,12 +41,11 @@ app.get('/', (req, res) => {
     GameEngine abstracts the real-time game simulation.
     SocketHandler handles incoming and outgoing socket events from clients.
 */
-const entityRegistry = new EntityRegistry();
-const gameEngine = new GameEngine(entityRegistry);
-const socketHandler = new SocketHandler(io, gameEngine, entityRegistry);
+const gameEngine = new GameEngine();
+const socketHandler = new SocketHandler(io, gameEngine);
 
 // Create an example ship for testing
-entityRegistry.createShip("ship_1", 2500, 5000);
+EntityRegistry.createShip("ship_1", 2500, 5000);
 
 /*
     New connections- when a player first loads the webpage, the "connection"
@@ -88,7 +87,7 @@ setInterval(() => {
     Debug loop- output the state of the game every 10 seconds with the ships and players
 */
 setInterval(() => {
-    const stats = entityRegistry.getStats();
+    const stats = EntityRegistry.getStats();
     console.debug(`[Stats] Ships: ${stats.ships}, Players: ${stats.players}`);
 }, 10000);
 
