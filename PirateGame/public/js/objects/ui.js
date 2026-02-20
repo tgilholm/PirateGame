@@ -23,14 +23,9 @@ export default class UI {
 
         
         this.layer = this.scene.add.layer();
-        this.hotbar = this.scene.add.container(0, 0);
-        this.hotbarSlots = []; 
-        this.hotbarIcons = []; 
         this.debugMenuVisible = false;
         this.originalPositions = new Map(); 
        
-        this.createHotbar();
-        this.createGivePlankButton();
         
         // Store original positions for zoom counteraction
         this.elements.forEach(element => {
@@ -70,41 +65,10 @@ export default class UI {
     }
 
     
-    createGivePlankButton() {
-        const buttonX = 100; // Left side of screen
-        const buttonY = this.scene.cameras.main.height / 2; // Center vertically
-
-        this.givePlankButton = this.scene.add.text(buttonX, buttonY, 'Give Plank', {
-            fontSize: '20px',
-            fill: '#fff',
-            backgroundColor: '#8b4513',
-            padding: { x: 15, y: 8 }
-        })
-            .setOrigin(0.5)
-            .setInteractive()
-            .setScrollFactor(0)
-            .setDepth(10000)
-            .setVisible(false); // Initially hidden
-
-        this.givePlankButton.on('pointerover', () => {
-            this.givePlankButton.setStyle({ fill: '#ffff00' });
-        });
-
-        this.givePlankButton.on('pointerout', () => {
-            this.givePlankButton.setStyle({ fill: '#fff' });
-        });
-
-        this.givePlankButton.on('pointerdown', () => {
-            this.scene.playerInventory.addToInventory({ type: 'plank', name: 'Plank' });
-            this.updateHotbar();
-        });
-
-        this.elements.push(this.givePlankButton);
-    }
+//------------temp fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
 
 
 
-//------------temp hotbar and zoom fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
 
     createPrintStatsButton() {
         const buttonX = 100; // Left side of screen
@@ -146,77 +110,7 @@ export default class UI {
     }
 
 
-
-
-
-    createHotbar() {
-        const paddingBottom = 20;
-        const hotbarX = this.scene.cameras.main.width / 2;
-        const hotbarY = this.scene.cameras.main.height - paddingBottom;
-        
-        const slotSize = 50;
-        const slotSpacing = 5;
-        const totalSlots = 9;
-        const padding = 10;
-        const totalWidth = (slotSize * totalSlots) + (slotSpacing * (totalSlots - 1)) + (padding * 2);
-        const totalHeight = slotSize + (padding * 2);
-        
-        // Create transparent background rectangle
-        const hotbarBg = this.scene.add.rectangle(0, 0, totalWidth, totalHeight, 0x333333, 0.5);
-        this.hotbar.add(hotbarBg);
-        
-        // Create 9 slots (more opaque) inside the background
-        for (let i = 0; i < totalSlots; i++) {
-            const xPos = (i * (slotSize + slotSpacing)) - (totalWidth / 2) + padding + (slotSize / 2);
-            const slot = this.scene.add.rectangle(xPos, 0, slotSize, slotSize, 0x555555, 0.9)
-                .setStrokeStyle(2, 0x888888);
-            this.hotbar.add(slot);
-            
-            // Store slot position for later use
-            this.hotbarSlots.push({ x: xPos, y: 0 });
-            
-            // Initialize empty icon slot
-            this.hotbarIcons.push(null);
-        }
-
-        this.hotbar.setPosition(hotbarX, hotbarY);
-        this.hotbar.setScrollFactor(0);
-        this.hotbar.setDepth(10000);
-
-        this.elements.push(this.hotbar);
-    }
-
-    updateHotbar() {
-        const inventory = this.scene.playerInventory.getInventory();
-        
-        // Update each hotbar slot
-        for (let i = 0; i < 9; i++) {
-            // Remove existing icon if any
-            if (this.hotbarIcons[i]) {
-                this.hotbarIcons[i].destroy();
-                this.hotbarIcons[i] = null;
-            }
-            
-            // Add new icon if item exists
-            if (inventory[i] !== null) {
-                const item = inventory[i];
-                const slotPos = this.hotbarSlots[i];
-                
-                // Create item icon based on type
-                let iconKey = 'plank'; // Default to plank for now
-                if (item.type === 'plank') {
-                    iconKey = 'plank';
-                }
-                
-                const icon = this.scene.add.image(slotPos.x, slotPos.y, iconKey)
-                    .setDisplaySize(40, 40); // Scale to fit in the slot
-                
-                this.hotbar.add(icon);
-                this.hotbarIcons[i] = icon;
-            }
-        }
-    }
-
+/*
     counteractZoom(zoomLevel) {
         //reverses zoom byt scaling and mooving UI elements inversely, temp solution, i cant get seperate UI and main layers rendered, breaks camera
         const inverseScale = 1 / zoomLevel;
@@ -241,7 +135,7 @@ export default class UI {
         });
     }
 
-
+*/
 //------------------------------------------------------------------------------------------------------------------
 
 
@@ -251,7 +145,6 @@ export default class UI {
 
     toggleDebugMenu() {
         this.debugMenuVisible = !this.debugMenuVisible;
-        this.givePlankButton.setVisible(this.debugMenuVisible);
         this.printStatsButton.setVisible(this.debugMenuVisible);
     }
 

@@ -81,7 +81,6 @@ export async function calculateShipStats(components = {}) {
         //crows nest
         minimapRange: 0 + types.components.crowsNest.variants[selection.crowsNest].stats.minimapRange,
         visionRange: 0 + types.components.crowsNest.variants[selection.crowsNest].stats.visionRange,
-        crewSlots: 0 + types.components.crowsNest.variants[selection.crowsNest].stats.crewSlots,
 
         //anchor
         stopPower: 0 + types.components.anchor.variants[selection.anchor].stats.stopPower,
@@ -91,7 +90,6 @@ export async function calculateShipStats(components = {}) {
         //rudder
         turnSpeed: 0 + types.components.rudder.variants[selection.rudder].stats.turnSpeed,
         responseTime: 0 + types.components.rudder.variants[selection.rudder].stats.responseTime,
-        straighteningSpeed: 0 + types.components.rudder.variants[selection.rudder].stats.straighteningSpeed,
 
         //crew
         fireRate: 0 + types.components.crew.variants[selection.crew].stats.fireRate,
@@ -130,7 +128,6 @@ export function logStats(stats) {
     // Crow's Nest Stats
     console.log('Minimap Range:', stats.minimapRange);
     console.log('Vision Range:', stats.visionRange);
-    console.log('Crew Slots:', stats.crewSlots);
 
     // Anchor Stats
     console.log('Stop Power:', stats.stopPower);
@@ -140,7 +137,6 @@ export function logStats(stats) {
     // Rudder Stats
     console.log('Turn Speed:', stats.turnSpeed);
     console.log('Response Time:', stats.responseTime);
-    console.log('Straightening Speed:', stats.straighteningSpeed);
 
     // Crew Stats
     console.log('Fire Rate:', stats.fireRate);
