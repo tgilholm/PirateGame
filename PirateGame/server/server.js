@@ -3,7 +3,7 @@
 import express from "express";
 import http from "http";
 import path from "path";
-import { CONFIG } from './config.js';
+import { CONFIG, initializeConfig } from './config.js';
 
 // @ts-ignore
 import { Server } from "socket.io"
@@ -44,6 +44,9 @@ app.get('/', (req, res) => {
 const gameEngine = new GameEngine();
 const socketHandler = new SocketHandler(io, gameEngine);
 EntityRegistry.initialise();
+
+// Initialize configuration and create ships after stats are loaded
+await initializeConfig();
 
 // Create an example ship for testing
 gameEngine.createShip("ship_1", 2500, 5000);
@@ -88,13 +91,13 @@ setInterval(() => {
 
 
 /*
-    Debug loop- output the state of the game every 10 seconds with the ships and players
+    Debug loop- output the state of the game every 30 seconds with the ships and players
 */
 setInterval(() => {
     const stats = EntityRegistry.getStats();
-    console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
+    //console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
     console.debug(EntityRegistry.getAllEntities());
-}, 3000);
+}, 30000); //every 30 seconds
 
 
 const PORT = process.env.PORT || CONFIG.PORT;   // Set default port as fallback

@@ -24,6 +24,7 @@ export default class PhysicsHandler {
         this.engine = matterEngine;
         this.world = this.engine.world;
         this.lastUpdateTime = 0;
+        this.lastSpeedLogTime = 0;
 
         // Load the tilemap
         this.initialiseTilemapCollisions();
@@ -136,9 +137,24 @@ export default class PhysicsHandler {
     updateShipPhysics(ship) {
         const { up, down, left, right } = ship.inputs;
         const body = ship.body;
+        const now = Date.now();
+        const shouldLogTurn = now - this.lastSpeedLogTime >= 1000;
 
-        if (left) Body.setAngularVelocity(body, -ship.turnSpeed * 20);
-        if (right) Body.setAngularVelocity(body, ship.turnSpeed * 20);
+        if (left) {
+            Body.setAngularVelocity(body, -ship.turnSpeed);
+            if (shouldLogTurn) {//prevernts excessive logs, only 1 a second when turning
+                console.log("left turn max speed:" + ship.turnSpeed);
+                this.lastSpeedLogTime = now;
+            }
+        }
+
+        if (right) {
+            Body.setAngularVelocity(body, ship.turnSpeed);
+            if (shouldLogTurn) { //prevernts excessive logs, only 1 a second when turning
+                console.log("right turn max speed:" + ship.turnSpeed);
+                this.lastSpeedLogTime = now;
+            }
+        }
 
         if (up) {
             const force = {
@@ -146,6 +162,10 @@ export default class PhysicsHandler {
                 y: Math.sin(body.angle) * ship.thrust
             };
             Body.applyForce(body, body.position, force);
+            if (shouldLogTurn) {//prevernts excessive logs, only 1 a second when turning
+                console.log("forward max speed:" + ship.thrust);
+                this.lastSpeedLogTime = now;
+            }
         }
 
         // Sync ship position from matter

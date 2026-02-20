@@ -13,8 +13,22 @@ const DEFAULT_COMPONENTS = {
 
 let cachedTypes = null;
 
+const IS_NODE = typeof process !== 'undefined' && !!process.versions?.node;
+
+async function loadTypesFromNode() {
+    const fileUrl = new URL('./types.json', import.meta.url);
+    const { readFile } = await import('node:fs/promises');
+    const contents = await readFile(fileUrl, 'utf-8');
+    return JSON.parse(contents);
+}
+
 async function getTypes() {
     if (cachedTypes) {
+        return cachedTypes;
+    }
+
+    if (IS_NODE) {
+        cachedTypes = await loadTypesFromNode();
         return cachedTypes;
     }
 

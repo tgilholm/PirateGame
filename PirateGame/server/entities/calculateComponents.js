@@ -51,45 +51,50 @@ function updateShipComponent(componentType, variant) {
 // sets ship stats to 0 and re-calculates all
 function calculateShipStats() {
 
-    let totalStats = {
+    let totalStats = {//WIP, comments are what the final functions will be, some are calculated differently for testing
         //body
-        maxHealth: 0 + types.components.body.variants[inputBody].stats.maxHealth,
-        crewCapacity: 0 + types.components.body.variants[inputBody].stats.crewCapacity,
+        maxHealth: 250 + types.components.body.variants[inputBody].stats.maxHealth, //base max health of ship
+        crewCapacity: 2 + types.components.body.variants[inputBody].stats.crewCapacity, //base number of max crew on ship
         
         //sails
-        acceleration: 0 + types.components.sails.variants[inputSails].stats.acceleration,
-        maxSpeed: 0 + types.components.sails.variants[inputSails].stats.maxSpeed,
+        acceleration: 0.5 + types.components.sails.variants[inputSails].stats.acceleration,//base acceleration of ship, in grids/s^2
+        maxSpeed: 1 + types.components.sails.variants[inputSails].stats.maxSpeed, //base max speed of ship, in grids/s
         
         //cannons
-        damage: 0 + types.components.cannons.variants[inputCannons].stats.damage,
-        range: 0 + types.components.cannons.variants[inputCannons].stats.range,
-        cannonCount: 0 + types.components.cannons.variants[inputCannons].stats.cannonCount,
+        damage: 100 + types.components.cannons.variants[inputCannons].stats.damage,//base damage of cannons
+        range: 8 + types.components.cannons.variants[inputCannons].stats.range, //distance cannonballs can travel before disappearing, in grids
+        cannonCount: 1 + types.components.cannons.variants[inputCannons].stats.cannonCount, //number of cannons per side, so total cannons is double
         
         //head
-        rammingPower: 0 + types.components.head.variants[inputHead].stats.rammingPower,
+        rammingPower: 100 + types.components.head.variants[inputHead].stats.rammingPower,//how much damage the ship does to other ships and itself when ramming
         
         //crows nest
-        minimapRange: 0 + types.components.crowsnest.variants[inputCrowsnest].stats.minimapRange,
-        visionRange: 0 + types.components.crowsnest.variants[inputCrowsnest].stats.visionRange,
-        crewSlots: 0 + types.components.crowsnest.variants[inputCrowsnest].stats.crewSlots,
+        minimapRange: 100 + types.components.crowsnest.variants[inputCrowsnest].stats.minimapRange, //how far teh minimap can see, in grids, (does not affect full map vision)
+        visionRange: 10 + types.components.crowsnest.variants[inputCrowsnest].stats.visionRange, //how far the ship can see/detect other ships, in grids
         
         //anchor
-        stopPower: 0 + types.components.anchor.variants[inputAnchor].stats.stopPower,
-        deployTime: 0 + types.components.anchor.variants[inputAnchor].stats.deployTime,
-        retrieveTime: 0 + types.components.anchor.variants[inputAnchor].stats.retrieveTime,
+        stopPower: 5 + types.components.anchor.variants[inputAnchor].stats.stopPower, //how quickly ship can stop when anchor is deployed from max speed (seconds)
+        deployTime: 3 + types.components.anchor.variants[inputAnchor].stats.deployTime, //time it takes to deploy anchor (seconds)
+        retrieveTime: 3 + types.components.anchor.variants[inputAnchor].stats.retrieveTime, //time it takes to retrieve anchor after deployment (seconds)
         
         //rudder
-        turnSpeed: 0 + types.components.rudder.variants[inputRudder].stats.turnSpeed,
-        responseTime: 0 + types.components.rudder.variants[inputRudder].stats.responseTime,
-        straighteningSpeed: 0 + types.components.rudder.variants[inputRudder].stats.straighteningSpeed,
+        turnSpeed: 10 + types.components.rudder.variants[inputRudder].stats.turnSpeed,//degrees per second at max rudder angle
+        responseTime: 3 + types.components.rudder.variants[inputRudder].stats.responseTime, //time for wheel to turn full port/starboard
         
         //crew
-        fireRate: 0 + types.components.crew.variants[inputCrew].stats.fireRate,
-        accuracy: 0 + types.components.crew.variants[inputCrew].stats.accuracy,
+        fireRate: 3 + types.components.crew.variants[inputCrew].stats.fireRate, //length of time before cannon can be fired again (seconds)
+        accuracy: 10 + types.components.crew.variants[inputCrew].stats.accuracy, //size of shooting cone for cannons, in degrees
         
         //universal
-        weight: 0 + types.components.body.variants[inputBody].stats.weight + types.components.sails.variants[inputSails].stats.weight + types.components.cannons.variants[inputCannons].stats.weight + types.components.head.variants[inputHead].stats.weight + types.components.crowsnest.variants[inputCrowsnest].stats.weight + types.components.anchor.variants[inputAnchor].stats.weight + types.components.rudder.variants[inputRudder].stats.weight + types.components.crew.variants[inputCrew].stats.weight
-    };
+        weight: 100 + types.components.body.variants[inputBody].stats.weight +
+        types.components.sails.variants[inputSails].stats.weight +
+        types.components.cannons.variants[inputCannons].stats.weight +
+        types.components.head.variants[inputHead].stats.weight +
+        types.components.crowsnest.variants[inputCrowsnest].stats.weight +
+        types.components.anchor.variants[inputAnchor].stats.weight +
+        types.components.rudder.variants[inputRudder].stats.weight +
+        types.components.crew.variants[inputCrew].stats.weight
+    };//base weight of ship
 
     return totalStats;
 }
@@ -114,7 +119,6 @@ function logStats(stats) {
     // Crow's Nest Stats
     console.log('Minimap Range:', stats.minimapRange);
     console.log('Vision Range:', stats.visionRange);
-    console.log('Crew Slots:', stats.crewSlots);
 
     // Anchor Stats
     console.log('Stop Power:', stats.stopPower);
