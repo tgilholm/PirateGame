@@ -1,5 +1,5 @@
 //stores player inventory and handles adding/removing items
-import gameState from "../managers/gameState.js";
+import gameState from "../managers/GameState.js";
 
 export default class PlayerInventory {
     constructor(scene) {
