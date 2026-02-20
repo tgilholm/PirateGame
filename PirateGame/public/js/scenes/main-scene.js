@@ -3,9 +3,7 @@
 import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
 import UI from "../objects/ui.js";
-import gameState from "../managers/gameState.js";
-import Plank from "../objects/items/plank.js";
-import PlayerInventory from "../objects/playerInventory.js";
+//import PlayerInventory from "../objects/playerInventory.js";
 
 
 const ships = {}
@@ -31,8 +29,8 @@ export class MainScene extends Phaser.Scene {
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
-        this.gameState = new gameState();
-        this.playerInventory = new PlayerInventory(this);
+        //this.gameState = new gameState();
+        //this.playerInventory = new PlayerInventory(this);
 
 
     }
@@ -307,13 +305,13 @@ export class MainScene extends Phaser.Scene {
         });
 
 
-        // Toggle zoom when Z is pressed
-        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
-            this.gameState.toggleZoom();
-            const zoomValue = this.gameState.getZoomValue();
-            this.cameras.main.setZoom(zoomValue);
-            this.ui.counteractZoom(zoomValue);
-        }
+        // // Toggle zoom when Z is pressed
+        // if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
+        //     this.gameState.toggleZoom();
+        //     const zoomValue = this.gameState.getZoomValue();
+        //     this.cameras.main.setZoom(zoomValue);
+        //     this.ui.counteractZoom(zoomValue);
+        // }
 
         // Toggle debug menu when X is pressed
         if (Phaser.Input.Keyboard.JustDown(this.shipKeys.debug)) {
