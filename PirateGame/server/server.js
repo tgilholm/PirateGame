@@ -46,8 +46,14 @@ const socketHandler = new SocketHandler(io, gameEngine);
 EntityRegistry.initialise();
 
 // Create an example ship for testing
-gameEngine.createShip("ship_1", 2500, 5000);
-gameEngine.createShip("ship_2", 2500, 5500);
+gameEngine.createShip("ship_1", 1000, 1000);
+
+// Create 10 ships for testing
+for (let i = 0; i < 10; i++) {
+    gameEngine.createShip(`ship_${i + 1}`, 1000 + i * 200, 1000 + i * 200);
+}
+
+
 
 /*
     New connections- when a player first loads the webpage, the "connection"
@@ -80,7 +86,7 @@ setInterval(() => {
 setInterval(() => {
     const updates = gameEngine.getRecentUpdates();
     if (updates.ships.length > 0 || updates.players.length > 0) {   // Only send state if someone's connected!
-        io.volatile.emit('gameState', updates); 
+        io.volatile.emit('gameState', updates);
     }
 
     //console.log(updates);
