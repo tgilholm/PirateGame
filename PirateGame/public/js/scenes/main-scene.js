@@ -124,7 +124,7 @@ export class MainScene extends Phaser.Scene {
             }
         });
 
-        socket.emit('playerReady', { username: data.username });
+        socket.emit('system:playerReady', { username: data.username });
 
 
         socket.on('gameState', (data) => {
@@ -247,7 +247,7 @@ export class MainScene extends Phaser.Scene {
                 // Only send take control command if E is just pressed (not held)
                 if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
                     console.log(`Attempting to take control of ship ${parentId}`);
-                    socket.emit('takeControl', {
+                    socket.emit('player:takeControl', {
                         // Send ship id 
                         shipId: parentId
                     });
@@ -263,7 +263,7 @@ export class MainScene extends Phaser.Scene {
 
                 if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) {
                     console.log(`Releasing control of ship ${parentId}`);
-                    socket.emit('releaseControl', {
+                    socket.emit('player:releaseControl', {
                         shipId: parentId
                     });
                 }
@@ -283,7 +283,7 @@ export class MainScene extends Phaser.Scene {
                     this.ui.showMessage("[E] - Exit Ship");
                     if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
                         console.log(`Attempting to exit ship ${parentId}`);
-                        socket.emit('exitShip', {
+                        socket.emit('player:exitShip', {
                             shipId: parentId
                         });
                     }
@@ -295,7 +295,7 @@ export class MainScene extends Phaser.Scene {
                     this.ui.showMessage("[E] - Climb Ladder");
                     if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
                         console.log(`Attempting to climb ladder on ship ${parentId}`);
-                        socket.emit('climbLadder', {
+                        socket.emit('player:enterShip', {
                             shipId: parentId,
                             ladderIndex: i
                         });
@@ -313,7 +313,7 @@ export class MainScene extends Phaser.Scene {
 
 
         // Player movement
-        socket.emit('playerInput', {
+        socket.emit('player:moveInput', {
             up: this.keys.W.isDown,
             left: this.keys.A.isDown,
             down: this.keys.S.isDown,
@@ -337,13 +337,12 @@ export class MainScene extends Phaser.Scene {
             this.ui.toggleDebugMenu();
         }
 
-        // Ship movement (WASD when zoomed out)
-        socket.emit('shipInput', {
-            up: this.gameState.canControlShip() && this.keys.W.isDown,
-            left: this.gameState.canControlShip() && this.keys.A.isDown,
-            right: this.gameState.canControlShip() && this.keys.D.isDown
-
-        });
+        // // Ship movement (WASD when zoomed out)
+        // socket.emit('shipInput', {
+        //     up: this.gameState.canControlShip() && this.keys.W.isDown,
+        //     left: this.gameState.canControlShip() && this.keys.A.isDown,
+        //     right: this.gameState.canControlShip() && this.keys.D.isDown
+        // });
 
     }
 }

@@ -32,6 +32,7 @@ export default class PlayerSystem {
         enterShip: PlayerSystem.enterShip
     };
 
+
     static moveInput(playerId, payload) {
         const player = EntityRegistry.getPlayer(playerId);
         if (!player) {
@@ -155,14 +156,14 @@ export default class PlayerSystem {
             return { result: false, reason: 'Entity not found' };
         }
         if (player.parentId !== null) {
-            return { result: false, reason: `Player ${playerId} is already on a ship, cannot board`};
+            return { result: false, reason: `Player ${playerId} is already on a ship, cannot board` };
         }
 
         const ladders = ship.params.interactables.ladders;
         const ladderIndex = payload.ladderIndex;
 
         if (ladderIndex < 0 || ladderIndex >= ladders.length) {
-            return { result: false, reason: `Player ${playerId} could not board, ladder not found`};
+            return { result: false, reason: `Player ${playerId} could not board, ladder not found` };
         }
 
         const ladder = ladders[ladderIndex];
@@ -172,7 +173,7 @@ export default class PlayerSystem {
         );
 
         if (dist > 50) {
-            return { result: false, reason: `Player ${playerId} could not board, too far from ladder`};
+            return { result: false, reason: `Player ${playerId} could not board, too far from ladder` };
         }
 
         // convert world position to ship-local position

@@ -6,8 +6,8 @@ import ShipSystem from "../systems/ship-system.js"
 
 
 const systems = {
-    player_event: PlayerSystem.handle,
-    ship_event: ShipSystem.handle
+    player: PlayerSystem,
+    ship: ShipSystem
     //npc_event: NpcSystem.handle
 };
 
@@ -30,7 +30,25 @@ export default class SocketHandler {
         const playerData = EntityRegistry.getPlayerData();
         // get some npc data and send it here
 
-        socket.emit('initGame', { shipData, playerData });
+        socket.on('system:playerReady', (payload) => {
+            console.log("[SocketHandler] Received new player")
+
+            const player = EntityRegistry.createPlayer(socket.id, 0, 0, "ship_1", "");
+            if (!player) {
+                console.log(`[SocketHandler] Player: ${socket.id} not found`);
+            }
+
+            // Validate payload
+            if (typeof payload !== 'object') {
+                console.log(`[SocketHandler] Invalid payload`);
+            }
+
+            // Store username
+            player.username = payload.username;
+
+            socket.emit('initGame', { shipData, playerData });
+            console.log("[SocketHandler] Dispatching initGame event" )
+        })
         this.registerHandlers(socket);
     }
 
@@ -56,10 +74,13 @@ export default class SocketHandler {
      */
     registerHandlers(socket) {
         // Route to the related system- this calls the "handle" method in each system class
+
         socket.onAny((eventName, payload) => {
             const [namespace, action] = eventName.split(':');
 
-            if (!namespace || !action) {
+            if (eventName === "system:playerReady") return;
+
+            if (!namespace || !action){
                 console.warn(`Invalid event format: ${eventName}`);
                 return; // break early before anything bad happens
             }
@@ -71,13 +92,13 @@ export default class SocketHandler {
             }
 
             // Call system handler
-            const result = system.handle(socket.id, eventName, payload || {});
+            const outcome = system.handle(socket.id, eventName, payload || {});
 
             // Send response
-            if (result && !result.success) {
-                console.warn(`${eventName}:error`, { reason: result.reason })
+            if (outcome && !outcome.result) {
+                console.warn(`${eventName}:error`, { reason: outcome.reason })
                 //socket.emit(`${eventName}:error`, { reason: result.reason });
-            } else if (result && result.data) {
+            } else if (outcome && outcome.data) {
                 //socket.emit(`${eventName}:success`, result.data);
             }
         });
