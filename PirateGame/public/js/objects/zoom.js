@@ -33,7 +33,7 @@ const zoom = {
 
     getZoomValue() {
         if (onShip) {
-            return shipZoom[shipZoomIndex];
+            return shipZoom[shipZoomIndex];  
         } else {
             return playerZoom[playerZoomIndex];
         }

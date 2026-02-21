@@ -40,24 +40,15 @@ export default class UI {
     initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
+
+        // Show minimap now that the scene has started
+        if (this.minimapContainer) {
+            this.minimapContainer.style.display = 'block';
+        }
+
         this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
     }
 
-    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) { 
-        const minimapWidth = this.minimap.displayWidth;
-        const minimapHeight = this.minimap.displayHeight;
-        const minimapX = this.minimap.x;
-        const minimapY = this.minimap.y;
-        
-        const markerX = minimapX + (playerX / mapWidth) * minimapWidth;
-        const markerY = minimapY + (playerY / mapHeight) * minimapHeight;
-        
-        this.playerMarker.setPosition(markerX, markerY);
-    }initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
-        this.mapWidth = mapWidth;
-        this.mapHeight = mapHeight;
-        this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
-    }
 
     updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {//Scale player position to minimap coordinates
         const canvas = this.minimapCanvas;
