@@ -20,6 +20,8 @@ export default class Player {
         });
         this.nameText.setOrigin(0.5, 1);
         this.nameText.setDepth(100);
+
+        console.log(`Player drawn at ${this.sprite.x}, ${this.sprite.y}`);
     }
 
     /**
@@ -28,6 +30,7 @@ export default class Player {
      * @param {Parent} parentObject 
      */
     updateState(data, parentObject) {
+         console.log(`Player updateState called with x: ${data.x}, y: ${data.y}, parentId: ${data.parentId}`);
 
         this.parent = parentObject;
 

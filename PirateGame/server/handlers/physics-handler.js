@@ -86,6 +86,10 @@ export default class PhysicsHandler {
         // Destructure inputs
         const { up, down, left, right } = player.inputs;
 
+        //walking vs swimming speed
+        const speed = ship ? CONFIG.PLAYER.SPEED : CONFIG.PLAYER.SWIM_SPEED;
+
+
         if (ship) {// Player is on a ship (local space)
             // Cannot move while steering
             if (player.id === ship.pilotId) return;
@@ -98,10 +102,10 @@ export default class PhysicsHandler {
             let worldPos = ship.localToWorld(player.position.x, player.position.y);
 
             // Apply movement in world space
-            if (up) worldPos.y -= player.speed;
-            if (down) worldPos.y += player.speed;
-            if (left) worldPos.x -= player.speed;
-            if (right) worldPos.x += player.speed;
+            if (up) worldPos.y -= speed;
+            if (down) worldPos.y += speed;
+            if (left) worldPos.x -= speed;
+            if (right) worldPos.x += speed;
 
             //console.log(worldPos.x, worldPos.y);
 
@@ -123,10 +127,10 @@ export default class PhysicsHandler {
             }
         } else {
             // Player is in world space - move freely
-            if (up) player.position.y -= player.speed;
-            if (down) player.position.y += player.speed;
-            if (left) player.position.x -= player.speed;
-            if (right) player.position.x += player.speed;
+            if (up) player.position.y -= speed;
+            if (down) player.position.y += speed;
+            if (left) player.position.x -= speed;
+            if (right) player.position.x += speed;
         }
     }
 

@@ -1,10 +1,13 @@
 export default class UI {
-    constructor(scene) {
+    constructor(scene) { //singleton class constructs UI elements 
         if (UI.instance) return UI.instance;
         UI.instance = this;
 
         this.scene = scene;
         this.debugMenuVisible = false;
+
+        // Map dimensions
+        let minimapScale = 0.2; //minimap scale
 
         // Top message text 
         this.messageText = scene.add.text(
@@ -22,9 +25,39 @@ export default class UI {
         .setDepth(1000)
         .setVisible(false);
 
+        // Minimap
+        this.minimap = scene.add.image(10, 10, 'minimap')
+            .setOrigin(0, 0)
+            .setScrollFactor(0)
+            .setDepth(1000)
+            .setScale(minimapScale);
+
+        // creates player marker on minimap
+        this.playerMarker = scene.add.circle(0, 0, 5, 0xff0000)
+            .setOrigin(0.5, 0.5)
+            .setScrollFactor(0)
+            .setDepth(1001);
+
         this.createDebugControls();
     }
 
+    initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
+        this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
+    }
+
+    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) { //Scale player position to minimap coordinates
+        const minimapWidth = this.minimap.displayWidth;
+        const minimapHeight = this.minimap.displayHeight;
+        const minimapX = this.minimap.x;
+        const minimapY = this.minimap.y;
+        
+        const markerX = minimapX + (playerX / mapWidth) * minimapWidth;
+        const markerY = minimapY + (playerY / mapHeight) * minimapHeight;
+        
+        this.playerMarker.setPosition(markerX, markerY);
+    }
 
     showMessage(message) {
         this.messageText.setText(message);

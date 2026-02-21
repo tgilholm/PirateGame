@@ -30,8 +30,7 @@ export class MainScene extends Phaser.Scene {
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
-        //this.gameState = new gameState();
-        //this.playerInventory = new PlayerInventory(this);
+        this.map = null;
 
 
     }
@@ -46,6 +45,9 @@ export class MainScene extends Phaser.Scene {
         this.load.image('cannon', '/assets/cannon.png');
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
+
+        // Load the minimap
+        this.load.image('minimap', '/assets/minimap.png');
 
         // Load the map
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
@@ -71,19 +73,19 @@ export class MainScene extends Phaser.Scene {
       
 
         // Generate the tilemap from the .json
-        const map = this.make.tilemap({ key: "map" });
-        const tileset = map.addTilesetImage("terrain-tilesheet", "tiles");
+        this.map = this.make.tilemap({ key: "map" });
+        const tileset = this.map.addTilesetImage("terrain-tilesheet", "tiles");
 
-        map.createLayer("sea", tileset, 0, 0); // Add at 0, 0
-        map.createLayer("shallows", tileset, 0, 0);
-        const islands = map.createLayer("islands", tileset, 0, 0);
+        this.map.createLayer("sea", tileset, 0, 0); // Add at 0, 0
+        this.map.createLayer("shallows", tileset, 0, 0);
+        const islands = this.map.createLayer("islands", tileset, 0, 0);
 
         this.matter.world.convertTilemapLayer(islands); // add collision to solid objects
 
 
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
-        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);   // don't leave the map
 
         // Keyboard input
         this.keys = /** @type {any} */ (this.input.keyboard.addKeys("W, A, S, D, E, Q, space"));
@@ -123,6 +125,16 @@ export class MainScene extends Phaser.Scene {
                     const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
                     players[playerData.id].updateState(playerData, shipParent);
                 });
+            }
+            //initialise minimap marker
+            const player = players[socket.id];
+            if (player) {
+                this.ui.initializeMarker(
+                    player.sprite.x, 
+                    player.sprite.y, 
+                    this.map.widthInPixels, 
+                    this.map.heightInPixels
+                );
             }
         });
 
@@ -202,6 +214,25 @@ export class MainScene extends Phaser.Scene {
 
         const player = players[socket.id];
         const parentId = player.parentId;
+        
+        // Calculate world position for minimap
+        let worldX, worldY;
+        if (parentId && ships[parentId]) {
+            // Player is on a ship world coords
+            const ship = ships[parentId];
+            const worldPos = ship.toWorld(player.sprite.x, player.sprite.y);
+            worldX = worldPos.x;
+            worldY = worldPos.y;
+        } else {
+            // Player is not on a ship local coords
+            worldX = player.sprite.x;
+            worldY = player.sprite.y;
+        }
+
+        // Update minimap marker with world coordinates
+        this.ui.updatePlayerMarker(worldX, worldY, this.map.widthInPixels, this.map.heightInPixels);
+
+
 
         // Handle camera movement for players in either relative or absolute state
         if (parentId && ships[parentId]) {

@@ -9,6 +9,17 @@ export let CONFIG = {
     NET_TICK_RATE: 20,
     PORT: 3000,
 
+    SPAWN: { //spawn coordinates
+        PLAYER: {// RELATIVE TO SHIP
+            X: 0,
+            Y: 0
+        },
+        SHIP: {
+            X: 2500,
+            Y: 5000
+        }
+    },
+
     SHIP: {
         DIMENSIONS: { 
             HEIGHT: 160,
@@ -16,25 +27,27 @@ export let CONFIG = {
             BOWLENGTH: 100,
             STERNRADIUS: 80
         },
-        MAX_HEALTH: 0, //set default value in calculateComponents.calculateShipStats() not here (at least for now)
-        TURN_SPEED: 0, //set default value in calculateComponents.calculateShipStats() not here (at least for now)
-        THRUST: 0, //set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        MAX_HEALTH: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        TURN_SPEED: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        THRUST: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
         FRICTION_AIR: 0.05, 
-        MASS: 0, //set default value in calculateComponents.calculateShipStats() not here (at least for now)
-        MAX_SPEED: 0 //set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        MASS: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        MAX_SPEED: 0//set default value in calculateComponents.calculateShipStats() not here (at least for now)
     },
     
     PLAYER: {
         MAX_HEALTH: 100,
-        SPEED: 3,
+        SPEED: 3,           // Speed on ship and land
+        SWIM_SPEED: 50,    // Speed swimming 
         RADIUS: 15,
         PADDING: 15
     }
+
 };
 
 let configInitialized = false;
 
-/**
+/*
  * Initializes ship configuration from component stats.
  * Must be called and awaited before creating ships.
  */

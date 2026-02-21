@@ -79,3 +79,17 @@ input {
 button {
     cursor: grab;
 }
+
+#printStatsButton {
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: royalblue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#printStatsButton:hover {
+    background-color: deepskyblue;
+}

@@ -54,7 +54,7 @@ EntityRegistry.initialise();
 await initializeConfig();
 
 // Create an example ship for testing
-gameEngine.createShip("ship_1", 2500, 5000);
+gameEngine.createShip("ship_1", CONFIG.SPAWN.SHIP.X, CONFIG.SPAWN.SHIP.Y);
 
 /*
     New connections- when a player first loads the webpage, the "connection"
