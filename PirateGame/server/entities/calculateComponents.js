@@ -8,7 +8,7 @@ let inputBody = 'LVL1';
 let inputSails = 'LVL1';
 let inputCannons = 'LVL1';
 let inputHead = 'LVL1';
-let inputCrowsnest = 'LVL1';
+let inputCrowsnest = 'LVL2';
 let inputAnchor = 'LVL1';
 let inputRudder = 'LVL1';
 let inputCrew = 'LVL1';
@@ -71,7 +71,7 @@ function calculateShipStats() {
         
         //crows nest
         minimapRange: 100 + types.components.crowsNest.variants[inputCrowsnest].stats.minimapRange, //how far teh minimap can see, in grids, (does not affect full map vision)
-        visionRange: 10 + types.components.crowsNest.variants[inputCrowsnest].stats.visionRange, //how far the ship can see/detect other ships, in grids
+        visionRange: 1 + types.components.crowsNest.variants[inputCrowsnest].stats.visionRange, //how many zoom toggles the ship has (1-5)
         
         //anchor
         stopPower: 5 + types.components.anchor.variants[inputAnchor].stats.stopPower, //how quickly ship can stop when anchor is deployed from max speed (seconds)

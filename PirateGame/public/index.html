@@ -26,13 +26,108 @@
         </div>
     </form>
 
-    <!--hidden button for ship stats -->
-    <button id="printStatsButton" style="display:none; position: fixed; left: 20px; top: 100px; z-index:1000;">
-        Print Ship Stats
-    </button>
 
-    
-    <!-- <img src="/assets/pirate.png" alt="Pirate Image" width="800" height="600" /> -->
+    <!-- Debug Menu Window -->
+    <div id="debug-menu" style="display:none;">
+        <h3>Debug Menu</h3>
+
+        <div class="debug-section"> <!-- container for each component, makes it easier to read and organize -->
+            <span class="debug-label">Body</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('body','LVL1')">LVL1</button>
+                <button onclick="setComponent('body','LVL2')">LVL2</button>
+                <button onclick="setComponent('body','LVL3')">LVL3</button>
+                <button onclick="setComponent('body','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Sails</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('sails','LVL1')">LVL1</button>
+                <button onclick="setComponent('sails','LVL2')">LVL2</button>
+                <button onclick="setComponent('sails','LVL3')">LVL3</button>
+                <button onclick="setComponent('sails','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Cannons</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('cannons','LVL1')">LVL1</button>
+                <button onclick="setComponent('cannons','LVL2')">LVL2</button>
+                <button onclick="setComponent('cannons','LVL3')">LVL3</button>
+                <button onclick="setComponent('cannons','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Head</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('head','LVL1')">LVL1</button>
+                <button onclick="setComponent('head','LVL2')">LVL2</button>
+                <button onclick="setComponent('head','LVL3')">LVL3</button>
+                <button onclick="setComponent('head','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Crows Nest</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('crowsNest','LVL1')">LVL1</button>
+                <button onclick="setComponent('crowsNest','LVL2')">LVL2</button>
+                <button onclick="setComponent('crowsNest','LVL3')">LVL3</button>
+                <button onclick="setComponent('crowsNest','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Anchor</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('anchor','LVL1')">LVL1</button>
+                <button onclick="setComponent('anchor','LVL2')">LVL2</button>
+                <button onclick="setComponent('anchor','LVL3')">LVL3</button>
+                <button onclick="setComponent('anchor','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Rudder</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('rudder','LVL1')">LVL1</button>
+                <button onclick="setComponent('rudder','LVL2')">LVL2</button>
+                <button onclick="setComponent('rudder','LVL3')">LVL3</button>
+                <button onclick="setComponent('rudder','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section">
+            <span class="debug-label">Crew</span>
+            <div class="debug-buttons">
+                <button onclick="setComponent('crew','LVL1')">LVL1</button>
+                <button onclick="setComponent('crew','LVL2')">LVL2</button>
+                <button onclick="setComponent('crew','LVL3')">LVL3</button>
+                <button onclick="setComponent('crew','kraken')">Kraken</button>
+            </div>
+        </div>
+
+        <div class="debug-section" style="margin-top: 10px;">
+            <button id="printStatsButton">Print Ship Stats</button>
+        </div>
+    </div>
+
+    <!-- Stats panel -->
+    <div id="stats-overlay">
+        <h3>Ship Stats</h3>
+        <div id="stats-content"></div>
+    </div>
+
+    <!-- Minimap -->
+    <div id="minimap-container">
+        <img id="minimap-img" src="/assets/minimap.png" />
+        <canvas id="minimap-marker-canvas"></canvas>
+    </div>
+
 </body>
 
 

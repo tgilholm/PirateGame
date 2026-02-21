@@ -159,28 +159,28 @@
         "LVL1": {
           "stats": {
             "minimapRange": 100,
-            "visionRange": 100,
+            "visionRange": 1,
             "weight": 20
           }
         },
         "LVL2": {
           "stats": {
             "minimapRange": 150,
-            "visionRange": 150,
+            "visionRange": 2,
             "weight": 40
           }
         },
         "LVL3": {
           "stats": {
             "minimapRange": 200,
-            "visionRange": 200,
+            "visionRange": 3,
             "weight": 60
           }
         },
         "kraken": {
           "stats": {
             "minimapRange": 300,
-            "visionRange": 300,
+            "visionRange": 2,
             "weight": 250
           }
         }

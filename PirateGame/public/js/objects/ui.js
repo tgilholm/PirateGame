@@ -25,18 +25,14 @@ export default class UI {
         .setDepth(1000)
         .setVisible(false);
 
-        // Minimap
-        this.minimap = scene.add.image(10, 10, 'minimap')
-            .setOrigin(0, 0)
-            .setScrollFactor(0)
-            .setDepth(1000)
-            .setScale(minimapScale);
+        // HTML minimap
+        this.minimapContainer = document.getElementById('minimap-container');
+        this.minimapCanvas = document.getElementById('minimap-marker-canvas');
+        this.minimapCtx = this.minimapCanvas.getContext('2d');
 
-        // creates player marker on minimap
-        this.playerMarker = scene.add.circle(0, 0, 5, 0xff0000)
-            .setOrigin(0.5, 0.5)
-            .setScrollFactor(0)
-            .setDepth(1001);
+        //sets canvas reso to display size
+        this.minimapCanvas.width = this.minimapContainer.offsetWidth;
+        this.minimapCanvas.height = this.minimapContainer.offsetHeight;
 
         this.createDebugControls();
     }
@@ -47,7 +43,7 @@ export default class UI {
         this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
     }
 
-    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) { //Scale player position to minimap coordinates
+    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) { 
         const minimapWidth = this.minimap.displayWidth;
         const minimapHeight = this.minimap.displayHeight;
         const minimapX = this.minimap.x;
@@ -57,6 +53,36 @@ export default class UI {
         const markerY = minimapY + (playerY / mapHeight) * minimapHeight;
         
         this.playerMarker.setPosition(markerX, markerY);
+    }initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
+        this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
+    }
+
+    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {//Scale player position to minimap coordinates
+        const canvas = this.minimapCanvas;
+        const ctx = this.minimapCtx;
+
+        if (canvas.width !== this.minimapContainer.offsetWidth) { //resises canvas if container changes
+            canvas.width = this.minimapContainer.offsetWidth;
+            canvas.height = this.minimapContainer.offsetHeight;
+        }
+
+        //clear previous marker
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //calculated marker position
+        const markerX = (playerX / mapWidth) * canvas.width;
+        const markerY = (playerY / mapHeight) * canvas.height;
+
+        // Draw red dot marker
+        ctx.beginPath();
+        ctx.arc(markerX, markerY, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff0000';
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
     }
 
     showMessage(message) {
@@ -72,14 +98,54 @@ export default class UI {
 
     //connects keyboard button (X) to HTML logic
     createDebugControls() {
+        this.debugMenu = document.getElementById('debug-menu');
         this.printStatsButton = document.getElementById('printStatsButton');
+        this.statsOverlay = document.getElementById('stats-overlay');
+        this.statsContent = document.getElementById('stats-content');
+        this.statsVisible = false;
 
         if (this.printStatsButton) {
             this.printStatsButton.addEventListener('click', async () => {
                 const stats = await this.fetchShipStats();
-                if (stats) console.log('=== SHIP STATS ===', stats);
+                if (stats) {
+                    console.log('=== SHIP STATS ===', stats);
+                    this.toggleStatsOverlay(stats);
+                }
             });
         }
+
+        //onclick 
+        window.setComponent = async (componentType, variant) => {
+            try {
+                await fetch('/api/component', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ componentType, variant })
+                });
+
+                //highlight the active button
+                const sections = this.debugMenu.querySelectorAll('.debug-section');
+                sections.forEach(section => {
+                    const label = section.querySelector('.debug-label');
+                    if (label && label.textContent.toLowerCase().replace(/\s/g, '') === componentType.toLowerCase().replace(/\s/g, '')) {
+                        section.querySelectorAll('button').forEach(btn => {
+                            btn.classList.toggle('active', btn.textContent.toLowerCase() === variant.toLowerCase());
+                        });
+                    }
+                });
+
+                //if stats are visible, refresh
+                if (this.statsVisible) {
+                    const stats = await this.fetchShipStats();
+                    if (stats) {
+                        console.log('=== SHIP STATS (updated) ===', stats); //logs stats
+                        this.updateStatsOverlay(stats);
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to set component:', e);
+            }
+        };
 
         // X key toggles debug menu
         this.debugKey = this.scene.input.keyboard.addKey(
@@ -94,15 +160,60 @@ export default class UI {
         });
     }
 
-    //shows or hides debug menue HTML buttons
     toggleDebugMenu() {
         this.debugMenuVisible = !this.debugMenuVisible;
-
-        if (this.printStatsButton) {
-            this.printStatsButton.style.display =
-                this.debugMenuVisible ? 'block' : 'none';
+        if (this.debugMenu) {
+            this.debugMenu.style.display = this.debugMenuVisible ? 'block' : 'none';
         }
     }
+
+    toggleStatsOverlay(stats) {
+        if (!this.statsOverlay) return;
+
+        if (this.statsVisible) {
+            this.statsOverlay.style.display = 'none';
+            this.statsVisible = false;
+            return;
+        }
+
+        this.updateStatsOverlay(stats);
+        this.statsOverlay.style.display = 'block';
+        this.statsVisible = true;
+    }
+
+    updateStatsOverlay(stats) {
+        const statLabels = {
+            maxHealth:      'Max Health',
+            crewCapacity:   'Crew Capacity',
+            acceleration:   'Acceleration',
+            maxSpeed:       'Max Speed',
+            damage:         'Damage',
+            range:          'Range',
+            cannonCount:    'Cannon Count',
+            rammingPower:   'Ramming Power',
+            minimapRange:   'Minimap Range',
+            visionRange:    'Vision Range',
+            stopPower:      'Stop Power',
+            deployTime:     'Deploy Time',
+            retrieveTime:   'Retrieve Time',
+            turnSpeed:      'Turn Speed',
+            responseTime:   'Response Time',
+            fireRate:       'Fire Rate',
+            accuracy:       'Accuracy',
+            weight:         'Weight'
+        };
+
+        this.statsContent.innerHTML = Object.entries(statLabels)
+            .map(([key, label]) => `
+                <div class="stat-row">
+                    <span class="stat-label">${label}</span>
+                    <span class="stat-value">${stats[key] ?? 'N/A'}</span>
+                </div>`)
+            .join('');
+    }
+
+
+
 
     //API
     async fetchShipStats() {
@@ -115,4 +226,7 @@ export default class UI {
             return null;
         }
     }
+
+
+    
 }

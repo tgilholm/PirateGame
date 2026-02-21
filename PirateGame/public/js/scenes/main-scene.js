@@ -1,6 +1,7 @@
 /* global Phaser, io */
 
 import Player from "../objects/player.js";
+import ship from "../objects/ship.js";
 import Ship from "../objects/ship.js";
 import UI from "../objects/ui.js";
 import zoom from "../objects/zoom.js";
@@ -184,6 +185,7 @@ export class MainScene extends Phaser.Scene {
         socket.on('exitedShip', (data) => {
             const player = players[socket.id];
             player.parentId = null;
+            zoom.setOnShip(false); //resets zoom
         });
 
         socket.on('climbedLadder', (data) => {
@@ -191,6 +193,8 @@ export class MainScene extends Phaser.Scene {
             const ship = ships[data.shipId];
             if (ship) {
                 player.parentId = data.shipId;
+                zoom.setOnShip(true); 
+                zoom.setVisionRange(data.visionRange);//set zoom
             }
         });
 
