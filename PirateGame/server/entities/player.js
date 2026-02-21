@@ -1,4 +1,4 @@
-import { CONFIG } from "../config.js";
+import { CONFIG } from "../server/src/config.js";
 import Entity from "./entity.js";
 
 export default class Player extends Entity {

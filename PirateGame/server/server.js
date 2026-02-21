@@ -3,7 +3,7 @@
 import express from "express";
 import http from "http";
 import path from "path";
-import { CONFIG } from './config.js';
+import { CONFIG } from './server/src/config.js';
 
 // @ts-ignore
 import { Server } from "socket.io"
