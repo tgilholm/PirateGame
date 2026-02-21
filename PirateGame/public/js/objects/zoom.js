@@ -39,7 +39,7 @@ const zoom = {
         }
     },
  
-    setZoomValue(value) { )
+    setZoomValue(value) { 
         if (onShip) {
             const idx = shipZoom.indexOf(value);
             if (idx !== -1 && idx < currentVisionRange) shipZoomIndex = idx;
