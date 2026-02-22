@@ -9,7 +9,10 @@ import PlayerController from "../controllers/player-controller";
 import ShipController from "../controllers/ship-controller";
 import WorldController, { GameControllers } from "../controllers/world-controller";
 
-
+export interface WorldConfig {
+    worldId: string;
+    maxPlayers: number;
+}
 
 /**
  * Creates new game worlds. All dependencies - systems, registries, game engine, are created
@@ -17,14 +20,24 @@ import WorldController, { GameControllers } from "../controllers/world-controlle
  * encapsulates the world creation logic in one place.
  */
 export default class WorldFactory {
+    constructor(
+        private upgradeConfig: any) {
+    }
 
+
+    getSharedConfig(): WorldConfig {
+        return {
+            worldId: '',
+            maxPlayers: 32
+        }
+    }
 
     /**
      * Creates and returns the world object with the injected dependencies.
      * @param config 
      * @returns 
      */
-    static createWorld(): World {
+    createWorld(worldId: string, config: any): World {
         const entityRegistry = new EntityRegistry();
 
         // Create all the systems the gameEngine depends on
@@ -47,7 +60,7 @@ export default class WorldFactory {
 
         // Pass controllers to the worldController, then to the world
         const worldController = new WorldController(entityRegistry, controllers);
-        
+
 
         const world = new World(
             entityRegistry,
