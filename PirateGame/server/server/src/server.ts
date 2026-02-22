@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const upgradeConfig = JSON.parse(fs.readFileSync('/path/to/json', 'utf-8'));
 const worldFactory = new WorldFactory(upgradeConfig);
 const worldManager = new WorldManager(worldFactory);
-const socketHandler = new SocketService(this.io, this.worldManager);
+const socketHandler = new SocketService(io, worldManager);
 socketHandler.initialise();
 
 const PORT = process.env.PORT || CONFIG.PORT
