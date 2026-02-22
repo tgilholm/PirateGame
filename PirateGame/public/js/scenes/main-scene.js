@@ -145,30 +145,35 @@ export class MainScene extends Phaser.Scene {
             // Update ships
             if (data.ships && Array.isArray(data.ships)) {
                 data.ships.forEach(shipData => {
-                    if (ships[shipData.id]) {
-                        ships[shipData.id].target = {
-                            x: shipData.x,
-                            y: shipData.y,
-                            r: shipData.r
-                        };
-                        ships[shipData.id].velocity = {
-                            x: shipData.vx || 0,
-                            y: shipData.vy || 0
-                        };
-                        ships[shipData.id].angularVelocity = shipData.av || 0;
+                    // If the ship doesn't exist yet, create it
+                    if (!ships[shipData.id]) {
+                        console.log(`[Client] New ship detected: ${shipData.id}`);
+                        // use default params if not found
+                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, shipData.params || {});
                     }
+
+                    // Standard update logic
+                    const ship = ships[shipData.id];
+                    ship.target = {
+                        x: shipData.x,
+                        y: shipData.y,
+                        r: shipData.r
+                    };
+                    ship.velocity = { x: shipData.vx || 0, y: shipData.vy || 0 };
+                    ship.angularVelocity = shipData.av || 0;
                 });
             }
 
-            // Update players
-            if (data.players && Array.isArray(data.players)) {
-                data.players.forEach(playerData => {
-                    if (players[playerData.id]) {
-                        const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
-                        players[playerData.id].updateState(playerData, shipParent);
-                    }
-                });
-            }
+            data.players.forEach(playerData => {
+                // If the player doesn't exist in our local list, create them now
+                if (!players[playerData.id]) {
+                    console.log(`[Client] New player joined: ${playerData.id}`);
+                    players[playerData.id] = new Player(this, playerData.id);
+                }
+
+                const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
+                players[playerData.id].updateState(playerData, shipParent);
+            });
         });
 
         // Respond to server confirmation of control takeover 
@@ -207,6 +212,9 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
+        this.ui?.clear(); // Clear UI messages each frame- they will be re-added if still relevant
+
+
         const cameraTarget = this.cameraTarget;
         if (!players[socket.id]) return; // wait for player data to load
 
@@ -214,6 +222,7 @@ export class MainScene extends Phaser.Scene {
         // Extrapolate and interpolate all game objects
         Object.values(ships).forEach(ship => ship.update());
         Object.values(players).forEach(player => player.update());
+
 
 
         const player = players[socket.id];
@@ -269,9 +278,6 @@ export class MainScene extends Phaser.Scene {
                         shipId: parentId
                     });
                 }
-
-            } else {
-                this.ui.hideMessage("[E] - Control Ship");
             }
 
             // If controlling, display "release control" message
@@ -284,8 +290,6 @@ export class MainScene extends Phaser.Scene {
                         shipId: parentId
                     });
                 }
-            } else {
-                this.ui?.hideMessage("[Q] - Release Control");
             }
 
             // Check if near a ladder
@@ -293,6 +297,8 @@ export class MainScene extends Phaser.Scene {
                 Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.ladder.x, ship.ladder.y),
                 Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.ladder2.x, ship.ladder2.y)
             ];
+
+            //console.log(ladderDists[0], ladderDists[1]);
 
             for (let i = 0; i < ladderDists.length; i++) {
                 // If on ship, ladder lets players exit ship
@@ -304,28 +310,57 @@ export class MainScene extends Phaser.Scene {
                             shipId: parentId
                         });
                     }
-
                 }
+            }
 
-                // If not on ship, ladder lets players enter ship
-                else if (ladderDists[i] < 30 && player.parentId !== parentId) {
+
+            // Player is not on a ship
+        } else {
+            // Calculate distance to all ladders in the world and show "climb ladder" message if near one
+
+            for (const shipId in ships) {
+                const ship = ships[shipId];
+
+                // Convert the two ladder positions to world space
+                const ladderWorldPos = [
+                    Phaser.Math.RotateAround(
+                        { x: ship.ladder.x, y: ship.ladder.y },
+                        0, 0,
+                        ship.container.rotation
+                    ),
+                    Phaser.Math.RotateAround(
+                        { x: ship.ladder2.x, y: ship.ladder2.y },
+                        0, 0,
+                        ship.container.rotation
+                    )
+                ];
+
+                // Calculate the player's distance to the two ladders
+                const ladderDists = [
+                    Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.container.x + ladderWorldPos[0].x, ship.container.y + ladderWorldPos[0].y),
+                    Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.container.x + ladderWorldPos[1].x, ship.container.y + ladderWorldPos[1].y)
+                ];
+
+                // If close enough, display the message to climb the ladder and send the command if E is pressed
+                if (ladderDists[0] < 30 || ladderDists[1] < 30) {
                     this.ui.showMessage("[E] - Climb Ladder");
                     if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
-                        console.log(`Attempting to climb ladder on ship ${parentId}`);
+                        console.log(`Attempting to climb ladder on ship ${shipId}`);
                         socket.emit('player:enterShip', {
-                            shipId: parentId,
-                            ladderIndex: i
+                            shipId: shipId,
+                            ladderIndex: ladderDists[0] < 30 ? 0 : 1
                         });
                     }
                 }
             }
 
 
-        } else {
             // Player is in world space
             cameraTarget.x = player.sprite.x;
             cameraTarget.y = player.sprite.y;
         }
+
+
 
 
 

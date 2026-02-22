@@ -39,7 +39,7 @@ export default class Player {
             this.nameText.setText(data.username);
         }
 
-
+        this.isSteering = data.isSteering || false;
 
         if (this.parentId !== data.parentId) {
             this.parentId = data.parentId; // re-parenting

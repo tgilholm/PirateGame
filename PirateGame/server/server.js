@@ -54,7 +54,15 @@ EntityRegistry.initialise();
 await initializeConfig();
 
 // Create an example ship for testing
+
 gameEngine.createShip("ship_1", CONFIG.SPAWN.SHIP.X, CONFIG.SPAWN.SHIP.Y);
+
+// Create 10 ships for testing
+for (let i = 0; i < 10; i++) {
+    gameEngine.createShip(`ship_${i + 1}`, 1000 + i * 200, 1000 + i * 200);
+}
+
+
 
 /*
     New connections- when a player first loads the webpage, the "connection"
@@ -87,7 +95,7 @@ setInterval(() => {
 setInterval(() => {
     const updates = gameEngine.getRecentUpdates();
     if (updates.ships.length > 0 || updates.players.length > 0) {   // Only send state if someone's connected!
-        io.volatile.emit('gameState', updates); 
+        io.volatile.emit('gameState', updates);
     }
 
     //console.log(updates);
@@ -100,9 +108,9 @@ setInterval(() => {
 */
 setInterval(() => {
     const stats = EntityRegistry.getStats();
-    //console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
-    console.debug(EntityRegistry.getAllEntities());
-}, 30000); //every 30 seconds
+    console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
+    //console.debug(EntityRegistry.getAllEntities());
+}, 10000);
 
 
 const PORT = process.env.PORT || CONFIG.PORT;   // Set default port as fallback
