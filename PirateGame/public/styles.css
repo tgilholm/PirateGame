@@ -82,7 +82,7 @@ button {
 
 
 
-/*--------------------AI CSS FOR NOW!!! for new debug menu and minimap, will be changed to real css later on, need temp stuff for now and is a lil boring---------------------*/
+/*--------------------for new debug menu and minimap, will be changed to real css later on, need temp stuff for now and is a lil boring---------------------*/
 
 #printStatsButton {
     font-size: 18px;
@@ -256,4 +256,4 @@ button {
     pointer-events: none;
 }
 
-/*---------------------END OF AI CSS, feel free to change now but if not i will when we start working of game visuals---------------------*/
+/*---------------------feel free to change now but if not i will when we start working of game visuals---------------------*/
