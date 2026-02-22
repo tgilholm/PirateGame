@@ -3,7 +3,8 @@
 import express from "express";
 import http from "http";
 import path from "path";
-import { CONFIG, initializeConfig } from './config.js';
+import { initConfig, INIT_CONFIG } from './config.js';
+import { SERVER_CONFIG } from "./server-config.js";
 import shipStatsRouter from './shipStats.js';
 
 // @ts-ignore
@@ -51,11 +52,11 @@ const socketHandler = new SocketHandler(io, gameEngine);
 EntityRegistry.initialise();
 
 // Initialize configuration and create ships after stats are loaded
-await initializeConfig();
+await initConfig();
 
 // Create an example ship for testing
 
-gameEngine.createShip("ship_1", CONFIG.SPAWN.SHIP.X, CONFIG.SPAWN.SHIP.Y);
+gameEngine.createShip("ship_1", INIT_CONFIG.SPAWN.SHIP.X, INIT_CONFIG.SPAWN.SHIP.Y);
 
 // Create 10 ships for testing
 for (let i = 0; i < 10; i++) {
@@ -87,7 +88,7 @@ io.on("connection", (socket) => {
 */
 setInterval(() => {
     gameEngine.update();    // Update the internal model of the game
-}, 1000 / CONFIG.TICK_RATE);
+}, 1000 / SERVER_CONFIG.TICK_RATE);
 
 /*
     Network loop- broadcast the current state of the game at the network tick rate to all listeners
@@ -100,7 +101,7 @@ setInterval(() => {
 
     //console.log(updates);
 
-}, 1000 / CONFIG.NET_TICK_RATE);
+}, 1000 / SERVER_CONFIG.NET_TICK_RATE);
 
 
 /*
@@ -113,7 +114,7 @@ setInterval(() => {
 }, 10000);
 
 
-const PORT = process.env.PORT || CONFIG.PORT;   // Set default port as fallback
+const PORT = process.env.PORT || SERVER_CONFIG.PORT;   // Set default port as fallback
 server.listen(PORT, () => { // Open on the specified port and listen for traffic
     console.log(`[Server] launched on port: ${PORT}`);
 });

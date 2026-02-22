@@ -1,13 +1,8 @@
 import * as calculateComponents from "./entities/calculateComponents.js"
 
-/**
- * Defines server-side constants, such as the tickrate and
- * maximum speeds for players.
- */
-export let CONFIG = {
-    TICK_RATE: 45,
-    NET_TICK_RATE: 20,
-    PORT: 3000,
+
+
+export let INIT_CONFIG = {
 
     SPAWN: { //spawn coordinates
         PLAYER: {// RELATIVE TO SHIP
@@ -48,25 +43,25 @@ export let CONFIG = {
 let configInitialized = false;
 
 /*
- * Initializes ship configuration from component stats.
+ * Initializes ship INIT_CONFIGuration from component stats.
  * Must be called and awaited before creating ships.
  */
-export async function initializeConfig() {
+export async function initConfig() {
     if (configInitialized) return;
     
     const stats = await calculateComponents.calculateShipStats();
-    CONFIG.SHIP.MAX_HEALTH = stats.maxHealth;
-    CONFIG.SHIP.TURN_SPEED = stats.turnSpeed / 10000;
-    CONFIG.SHIP.THRUST = stats.acceleration;
-    CONFIG.SHIP.MASS = stats.weight;
-    CONFIG.SHIP.MAX_SPEED = stats.maxSpeed;
+    INIT_CONFIG.SHIP.MAX_HEALTH = stats.maxHealth;
+    INIT_CONFIG.SHIP.TURN_SPEED = stats.turnSpeed / 10000;
+    INIT_CONFIG.SHIP.THRUST = stats.acceleration;
+    INIT_CONFIG.SHIP.MASS = stats.weight;
+    INIT_CONFIG.SHIP.MAX_SPEED = stats.maxSpeed;
     
     configInitialized = true;
-    console.log('[Config] Ship stats initialized:', {
-        turnSpeed: CONFIG.SHIP.TURN_SPEED,
-        maxHealth: CONFIG.SHIP.MAX_HEALTH,
-        thrust: CONFIG.SHIP.THRUST,
-        mass: CONFIG.SHIP.MASS,
-        maxSpeed: CONFIG.SHIP.MAX_SPEED
+    console.log('[INIT_CONFIG] Ship stats initialized:', {
+        turnSpeed: INIT_CONFIG.SHIP.TURN_SPEED,
+        maxHealth: INIT_CONFIG.SHIP.MAX_HEALTH,
+        thrust: INIT_CONFIG.SHIP.THRUST,
+        mass: INIT_CONFIG.SHIP.MASS,
+        maxSpeed: INIT_CONFIG.SHIP.MAX_SPEED
     });
 }
