@@ -139,7 +139,7 @@ export default class PhysicsHandler {
      * @param {Ship} ship 
      */
     updateShipPhysics(ship) {
-        const { up, down, left, right } = ship.inputs;
+        const { up, down, left, right } = ship.inputs || {};
         const body = ship.body;
         const now = Date.now();
         const shouldLogTurn = now - this.lastSpeedLogTime >= 1000;

@@ -1,7 +1,6 @@
 /* global Phaser, io */
 
 import Player from "../objects/player.js";
-import ship from "../objects/ship.js";
 import Ship from "../objects/ship.js";
 import UI from "../objects/ui.js";
 import zoom from "../objects/zoom.js";

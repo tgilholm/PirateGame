@@ -57,171 +57,173 @@ export default class UI {
     initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
+    }
 
 
-createGoldCounter() {
-    const paddingRight = 20;
-    const counterX = this.scene.cameras.main.width - paddingRight;
-    const counterY = 30;
+    createGoldCounter() {
+        const paddingRight = 20;
+        const counterX = this.scene.cameras.main.width - paddingRight;
+        const counterY = 30;
 
-    this.goldCounter = this.scene.add.text(counterX, counterY, 'Gold: 0', {
-        fontSize: '24px',
-        fill: '#ffd54f',
-        fontStyle: 'bold'
-    })
-        .setOrigin(1, 0.5)
-        .setScrollFactor(0)
-        .setDepth(10000);
+        this.goldCounter = this.scene.add.text(counterX, counterY, 'Gold: 0', {
+            fontSize: '24px',
+            fill: '#ffd54f',
+            fontStyle: 'bold'
+        })
+            .setOrigin(1, 0.5)
+            .setScrollFactor(0)
+            .setDepth(10000);
 
-    this.elements.push(this.goldCounter);
-}
+        this.elements.push(this.goldCounter);
+    }
 
     updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {//Scale player position to minimap coordinates
         const canvas = this.minimapCanvas;
         const ctx = this.minimapCtx;
-
-
-getLayer() {
-    return this.layer;
-}
-
-setGold(amount) {
-    this.goldCounter.setText(`Gold: ${amount}`);
-}
-
-createGivePlankButton() {
-    const buttonX = 100; // Left side of screen
-    const buttonY = this.scene.cameras.main.height / 2; // Center vertically
-
-    this.givePlankButton = this.scene.add.text(buttonX, buttonY, 'Give Plank', {
-        fontSize: '20px',
-        fill: '#fff',
-        backgroundColor: '#8b4513',
-        padding: { x: 15, y: 8 }
-    })
-        .setOrigin(0.5)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(10000)
-        .setVisible(false); // Initially hidden
-
-    this.givePlankButton.on('pointerover', () => {
-        this.givePlankButton.setStyle({ fill: '#ffff00' });
-    });
-
-    this.givePlankButton.on('pointerout', () => {
-        this.givePlankButton.setStyle({ fill: '#fff' });
-    });
-
-    this.givePlankButton.on('pointerdown', () => {
-        this.scene.playerInventory.addToInventory({ type: 'plank', name: 'Plank' });
-        this.updateHotbar();
-    });
-
-    this.elements.push(this.givePlankButton);
-}
-
-
-
-
-
-
-
-
-//------------temp hotbar and zoom fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
-
-createHotbar() {
-    const paddingBottom = 20;
-    const hotbarX = this.scene.cameras.main.width / 2;
-    const hotbarY = this.scene.cameras.main.height - paddingBottom;
-
-    const slotSize = 50;
-    const slotSpacing = 5;
-    const totalSlots = 9;
-    const padding = 10;
-    const totalWidth = (slotSize * totalSlots) + (slotSpacing * (totalSlots - 1)) + (padding * 2);
-    const totalHeight = slotSize + (padding * 2);
-
-    // Create transparent background rectangle
-    const hotbarBg = this.scene.add.rectangle(0, 0, totalWidth, totalHeight, 0x333333, 0.5);
-    this.hotbar.add(hotbarBg);
-
-    // Create 9 slots (more opaque) inside the background
-    for (let i = 0; i < totalSlots; i++) {
-        const xPos = (i * (slotSize + slotSpacing)) - (totalWidth / 2) + padding + (slotSize / 2);
-        const slot = this.scene.add.rectangle(xPos, 0, slotSize, slotSize, 0x555555, 0.9)
-            .setStrokeStyle(2, 0x888888);
-        this.hotbar.add(slot);
-
-        // Store slot position for later use
-        this.hotbarSlots.push({ x: xPos, y: 0 });
-
-        // Initialize empty icon slot
-        this.hotbarIcons.push(null);
     }
 
-    this.hotbar.setPosition(hotbarX, hotbarY);
-    this.hotbar.setScrollFactor(0);
-    this.hotbar.setDepth(10000);
 
-    this.elements.push(this.hotbar);
-}
+    getLayer() {
+        return this.layer;
+    }
 
-updateHotbar() {
-    const inventory = this.scene.playerInventory.getInventory();
+    setGold(amount) {
+        this.goldCounter.setText(`Gold: ${amount}`);
+    }
 
-    // Update each hotbar slot
-    for (let i = 0; i < 9; i++) {
-        // Remove existing icon if any
-        if (this.hotbarIcons[i]) {
-            this.hotbarIcons[i].destroy();
-            this.hotbarIcons[i] = null;
+    createGivePlankButton() {
+        const buttonX = 100; // Left side of screen
+        const buttonY = this.scene.cameras.main.height / 2; // Center vertically
+
+        this.givePlankButton = this.scene.add.text(buttonX, buttonY, 'Give Plank', {
+            fontSize: '20px',
+            fill: '#fff',
+            backgroundColor: '#8b4513',
+            padding: { x: 15, y: 8 }
+        })
+            .setOrigin(0.5)
+            .setInteractive()
+            .setScrollFactor(0)
+            .setDepth(10000)
+            .setVisible(false); // Initially hidden
+
+        this.givePlankButton.on('pointerover', () => {
+            this.givePlankButton.setStyle({ fill: '#ffff00' });
+        });
+
+        this.givePlankButton.on('pointerout', () => {
+            this.givePlankButton.setStyle({ fill: '#fff' });
+        });
+
+        this.givePlankButton.on('pointerdown', () => {
+            this.scene.playerInventory.addToInventory({ type: 'plank', name: 'Plank' });
+            this.updateHotbar();
+        });
+
+        this.elements.push(this.givePlankButton);
+    }
+
+
+
+
+
+
+
+
+    //------------temp hotbar and zoom fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
+
+    createHotbar() {
+        const paddingBottom = 20;
+        const hotbarX = this.scene.cameras.main.width / 2;
+        const hotbarY = this.scene.cameras.main.height - paddingBottom;
+
+        const slotSize = 50;
+        const slotSpacing = 5;
+        const totalSlots = 9;
+        const padding = 10;
+        const totalWidth = (slotSize * totalSlots) + (slotSpacing * (totalSlots - 1)) + (padding * 2);
+        const totalHeight = slotSize + (padding * 2);
+
+        // Create transparent background rectangle
+        const hotbarBg = this.scene.add.rectangle(0, 0, totalWidth, totalHeight, 0x333333, 0.5);
+        this.hotbar.add(hotbarBg);
+
+        // Create 9 slots (more opaque) inside the background
+        for (let i = 0; i < totalSlots; i++) {
+            const xPos = (i * (slotSize + slotSpacing)) - (totalWidth / 2) + padding + (slotSize / 2);
+            const slot = this.scene.add.rectangle(xPos, 0, slotSize, slotSize, 0x555555, 0.9)
+                .setStrokeStyle(2, 0x888888);
+            this.hotbar.add(slot);
+
+            // Store slot position for later use
+            this.hotbarSlots.push({ x: xPos, y: 0 });
+
+            // Initialize empty icon slot
+            this.hotbarIcons.push(null);
         }
 
-        // Add new icon if item exists
-        if (inventory[i] !== null) {
-            const item = inventory[i];
-            const slotPos = this.hotbarSlots[i];
+        this.hotbar.setPosition(hotbarX, hotbarY);
+        this.hotbar.setScrollFactor(0);
+        this.hotbar.setDepth(10000);
 
-            // Create item icon based on type
-            let iconKey = 'plank'; // Default to plank for now
-            if (item.type === 'plank') {
-                iconKey = 'plank';
+        this.elements.push(this.hotbar);
+    }
+
+    updateHotbar() {
+        const inventory = this.scene.playerInventory.getInventory();
+
+        // Update each hotbar slot
+        for (let i = 0; i < 9; i++) {
+            // Remove existing icon if any
+            if (this.hotbarIcons[i]) {
+                this.hotbarIcons[i].destroy();
+                this.hotbarIcons[i] = null;
             }
 
-            const icon = this.scene.add.image(slotPos.x, slotPos.y, iconKey)
-                .setDisplaySize(40, 40); // Scale to fit in the slot
+            // Add new icon if item exists
+            if (inventory[i] !== null) {
+                const item = inventory[i];
+                const slotPos = this.hotbarSlots[i];
 
-            this.hotbar.add(icon);
-            this.hotbarIcons[i] = icon;
+                // Create item icon based on type
+                let iconKey = 'plank'; // Default to plank for now
+                if (item.type === 'plank') {
+                    iconKey = 'plank';
+                }
+
+                const icon = this.scene.add.image(slotPos.x, slotPos.y, iconKey)
+                    .setDisplaySize(40, 40); // Scale to fit in the slot
+
+                this.hotbar.add(icon);
+                this.hotbarIcons[i] = icon;
+            }
         }
     }
-}
 
-counteractZoom(zoomLevel) {
-    //reverses zoom byt scaling and mooving UI elements inversely, temp solution, i cant get seperate UI and main layers rendered, breaks camera
-    const inverseScale = 1 / zoomLevel;
+    counteractZoom(zoomLevel) {
+        //reverses zoom byt scaling and mooving UI elements inversely, temp solution, i cant get seperate UI and main layers rendered, breaks camera
+        const inverseScale = 1 / zoomLevel;
 
-    // Apply to all UI elements
-    this.elements.forEach(element => {
-        const original = this.originalPositions.get(element);
-        if (original) {
-            // Scale inversely to camera zoom
-            element.setScale(inverseScale);
+        // Apply to all UI elements
+        this.elements.forEach(element => {
+            const original = this.originalPositions.get(element);
+            if (original) {
+                // Scale inversely to camera zoom
+                element.setScale(inverseScale);
 
-            // Reposition: scale position from center
-            const camera = this.scene.cameras.main;
-            const centerX = camera.width / 2;
-            const centerY = camera.height / 2;
+                // Reposition: scale position from center
+                const camera = this.scene.cameras.main;
+                const centerX = camera.width / 2;
+                const centerY = camera.height / 2;
 
-            // Calculate scaled offset from center
-            const offsetX = (original.x - centerX) * inverseScale;
-            const offsetY = (original.y - centerY) * inverseScale;
+                // Calculate scaled offset from center
+                const offsetX = (original.x - centerX) * inverseScale;
+                const offsetY = (original.y - centerY) * inverseScale;
 
-            element.setPosition(centerX + offsetX, centerY + offsetY);
-        }
-    });
-}
+                element.setPosition(centerX + offsetX, centerY + offsetY);
+            }
+        });
+    }
 
     toggleDebugMenu() {
         this.debugMenuVisible = !this.debugMenuVisible;
@@ -246,24 +248,24 @@ counteractZoom(zoomLevel) {
 
     updateStatsOverlay(stats) {
         const statLabels = {
-            maxHealth:      'Max Health',
-            crewCapacity:   'Crew Capacity',
-            acceleration:   'Acceleration',
-            maxSpeed:       'Max Speed',
-            damage:         'Damage',
-            range:          'Range',
-            cannonCount:    'Cannon Count',
-            rammingPower:   'Ramming Power',
-            minimapRange:   'Minimap Range',
-            visionRange:    'Vision Range',
-            stopPower:      'Stop Power',
-            deployTime:     'Deploy Time',
-            retrieveTime:   'Retrieve Time',
-            turnSpeed:      'Turn Speed',
-            responseTime:   'Response Time',
-            fireRate:       'Fire Rate',
-            accuracy:       'Accuracy',
-            weight:         'Weight'
+            maxHealth: 'Max Health',
+            crewCapacity: 'Crew Capacity',
+            acceleration: 'Acceleration',
+            maxSpeed: 'Max Speed',
+            damage: 'Damage',
+            range: 'Range',
+            cannonCount: 'Cannon Count',
+            rammingPower: 'Ramming Power',
+            minimapRange: 'Minimap Range',
+            visionRange: 'Vision Range',
+            stopPower: 'Stop Power',
+            deployTime: 'Deploy Time',
+            retrieveTime: 'Retrieve Time',
+            turnSpeed: 'Turn Speed',
+            responseTime: 'Response Time',
+            fireRate: 'Fire Rate',
+            accuracy: 'Accuracy',
+            weight: 'Weight'
         };
 
         this.statsContent.innerHTML = Object.entries(statLabels)
@@ -277,10 +279,10 @@ counteractZoom(zoomLevel) {
 
 
 
-toggleDebugMenu() {
-    this.debugMenuVisible = !this.debugMenuVisible;
-    this.givePlankButton.setVisible(this.debugMenuVisible);
-}
+    toggleDebugMenu() {
+        this.debugMenuVisible = !this.debugMenuVisible;
+        this.givePlankButton.setVisible(this.debugMenuVisible);
+    }
 
     //API
     async fetchShipStats() {
@@ -295,5 +297,5 @@ toggleDebugMenu() {
     }
 
 
-    
+
 }

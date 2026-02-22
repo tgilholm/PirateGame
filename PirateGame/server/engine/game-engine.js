@@ -33,7 +33,7 @@ export default class GameEngine {
     }
 
     createShip(id, x, y) {
-        const ship = EntityRegistry.createShip(id, 2500, 5000);
+        const ship = EntityRegistry.createShip(id, x, y);
         this.physicsHandler.addShipBody(ship.body);
         return ship;
     }
