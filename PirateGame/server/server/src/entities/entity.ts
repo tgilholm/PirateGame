@@ -1,6 +1,6 @@
 export default abstract class Entity {
     public id: string;
-    public type: String;
+    public type: string;
     public x: number;   // x coord
     public y: number;   // y coord
     public vx: number;  // velocity in x axis

@@ -10,8 +10,8 @@ import ShipController from "../controllers/ship-controller";
 import WorldController, { GameControllers } from "../controllers/world-controller";
 import UpgradeHandler from "../handlers/upgrade-handler";
 import EntityFactory from "../entities/entity-factory";
+import { EntityConfig } from "../types";
 
-type EntityConfig = typeof import("../entity-config.json");
 
 
 /**
@@ -28,12 +28,6 @@ export default class WorldFactory {
     }
 
 
-
-    /**
-     * Creates and returns the world object with the injected dependencies.
-     * @param config 
-     * @returns 
-     */
     createWorld(worldId: string): World {
         const entityFactory = new EntityFactory(this.entityConfig);
         const entityRegistry = new EntityRegistry(entityFactory);
