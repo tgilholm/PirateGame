@@ -1,51 +1,27 @@
+import { ShipConfig } from "../types";
 import Entity from "./entity";
 
-/**
- * Defines the contract by which ship physics body parameters
- * are provided to this ship object
- */
-export interface IShipBodyParameters {
-    height: number;
-    middleWidth: number;
-    bowLength: number;
-    sternRadius: number;
-}
 
 
-/**
- * Defines the contract by which physics parameters, such as turn speed,
- * thrust, mass, friction and restitution factor are provided to this ship
- */
-export interface IShipPhysicsParameters
-{
-    turnSpeed: number,
-    thrust: number,
-    frictionAir: number,
-    mass: number,
-    label: number,
-    restitution: number
-}
 
 export default class Ship extends Entity {
 
     pilotId: string | null;
-    bodyParameters: IShipBodyParameters;
-    physicsParameters: IShipPhysicsParameters;
+    dimensions: any;
+    physics: any;
     inputs: any;
 
     constructor(
         id: string,
         x: number,
         y: number,
-        maxHealth: number,
-        bodyParameters: IShipBodyParameters,
-        physicsParameters: IShipPhysicsParameters
+        config: ShipConfig
     ) {
-        super(id, "ship", x, y, maxHealth);
+        super(id, "ship", x, y, config.maxHealth);
 
         this.pilotId = null;    // Nobody piloting at startup
-        this.bodyParameters = bodyParameters;
-        this.physicsParameters = physicsParameters;
+        this.dimensions = config.dimensions;
+        this.physics = config.physics;
         this.inputs = {
             up: false,
             down: false,
@@ -75,7 +51,7 @@ export default class Ship extends Entity {
         return {
             ...super.serialise(),
             pilotId: this.pilotId,  // For client side messages
-            bodyParameters: this.bodyParameters // For client side drawing
+            dimensions: this.dimensions // For client side drawing
         }
     }
 }

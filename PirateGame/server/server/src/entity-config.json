@@ -1,9 +1,21 @@
 {
     "player": {
-        "max_health": 100
+        "maxHealth": 100
     },
-
     "ship": {
-        "max_health": 1000
+        "maxHealth": 1000,
+        "dimensions": {
+            "height": 160,
+            "middleWidth": 200,
+            "bowLength": 100,
+            "sternRadius": 80
+        },
+        "physics": {
+            "turnSpeed": 0.003,
+            "mass": 200,
+            "frictionAir": 0.05,
+            "restitution": 0.2,
+            "thrust": 0.05
+        }
     }
 }

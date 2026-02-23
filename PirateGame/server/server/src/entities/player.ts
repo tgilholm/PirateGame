@@ -1,5 +1,9 @@
 import Entity from "./entity";
 
+type PlayerConfig = typeof import("../entity-config.json")["player"];
+
+
+
 export default class Player extends Entity {
     parentId: string | null;
     username: string;
@@ -22,9 +26,9 @@ export default class Player extends Entity {
         y: number,
         parentId: string | null,
         username: string,
-        maxHealth: number
+        config: PlayerConfig
     ) {
-        super(id, "player", x, y, maxHealth);
+        super(id, "player", x, y, config.maxHealth);
         this.parentId = parentId || null;   // default to no parent
         this.username = username || "";     // default to no uname
 

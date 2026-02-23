@@ -11,6 +11,8 @@ import WorldController, { GameControllers } from "../controllers/world-controlle
 import UpgradeHandler from "../handlers/upgrade-handler";
 import EntityFactory from "../entities/entity-factory";
 
+type EntityConfig = typeof import("../entity-config.json");
+
 
 /**
  * Creates new game worlds. All dependencies - systems, registries, game engine, are created
@@ -21,7 +23,7 @@ import EntityFactory from "../entities/entity-factory";
  */
 export default class WorldFactory {
     constructor(
-        private entityConfig: any,
+        private entityConfig: EntityConfig,
         private worldConfig: any) {
     }
 

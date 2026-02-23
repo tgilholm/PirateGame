@@ -13,6 +13,7 @@ import WorldFactory from './application/world-factory';
 import WorldManager from './application/world-manager';
 import SocketService from './application/socket-service';
 import { CONFIG } from './config';
+import entityConfig from './entity-config.json';
 
 // Create the express app & server
 const app = express();
@@ -29,7 +30,6 @@ const worldConfig = {
 
 
 // Composition root- create all dependencies and inject
-const entityConfig = JSON.parse(fs.readFileSync('entity-config.json', 'utf-8'));
 const worldFactory = new WorldFactory(entityConfig, worldConfig);
 const worldManager = new WorldManager(worldFactory);
 const socketService = new SocketService(io, worldManager);
