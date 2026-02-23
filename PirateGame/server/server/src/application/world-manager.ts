@@ -1,7 +1,12 @@
 import { Worker } from 'node:worker_threads'  // use node.js workers instead of default js ones
 import WorldFactory from "./world-factory";
 import { EventEmitter } from 'node:stream';
-import { ManagerEvent } from './socket-service';
+
+export enum ManagerEvent {
+    WORLD_STATE_UPDATE = "WORLD_STATE_UPDATE",
+    PLAYER_SYNC = "PLAYER_SYNC",
+    PLAYER_KICKED = 'PLAYER_KICKED',
+}
 
 export enum WorkerEvent {
     READY = 'READY',

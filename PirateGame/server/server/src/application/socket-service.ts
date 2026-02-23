@@ -1,12 +1,8 @@
 import { Server } from "socket.io";
 import { ClientEvent, ServerEvent } from "../shared/socket-protocol";
-import WorldManager from "./world-manager";
+import WorldManager, { ManagerEvent } from "./world-manager";
 
-export enum ManagerEvent {
-    WORLD_STATE_UPDATE = "WORLD_STATE_UPDATE",
-    PLAYER_SYNC = "PLAYER_SYNC",
-    PLAYER_KICKED = 'PLAYER_KICKED',
-}
+
 
 export default class SocketService {
     constructor(private io: Server, private worldManager: WorldManager) { }

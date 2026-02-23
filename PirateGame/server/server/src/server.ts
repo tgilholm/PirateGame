@@ -32,8 +32,8 @@ const worldConfig = {
 const entityConfig = JSON.parse(fs.readFileSync('entity-config.json', 'utf-8'));
 const worldFactory = new WorldFactory(entityConfig, worldConfig);
 const worldManager = new WorldManager(worldFactory);
-const socketHandler = new SocketService(io, worldManager);
-socketHandler.initialise();
+const socketService = new SocketService(io, worldManager);
+socketService.initialise();
 
 const PORT = process.env.PORT || CONFIG.PORT
 server.listen(PORT, () => {
