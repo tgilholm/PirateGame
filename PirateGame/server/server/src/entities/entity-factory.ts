@@ -7,9 +7,8 @@ import Player from "./player";
  */
 export default class EntityFactory {
 
-    entityConfig: any = JSON.parse("entity-config.json");
 
-    constructor() {}
+    constructor(entityConfig: object) {}
 
     public createPlayer(id: string, x: number, y: number, parentId: string | null, username: string): Player {
         const playerConfig = this.entityConfig.player
