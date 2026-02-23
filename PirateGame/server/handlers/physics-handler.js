@@ -2,7 +2,7 @@ import Matter from "matter-js";
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from "url";
-import { CONFIG } from "../config.js";
+import { CONFIG } from "../server/src/config.js";
 import EntityRegistry from "../engine/entity-registry.js";
 import Player from "../entities/player.js";
 import Ship from "../entities/ship.js";

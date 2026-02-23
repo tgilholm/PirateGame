@@ -1,0 +1,9 @@
+{
+    "player": {
+        "max_health": 100
+    },
+
+    "ship": {
+        "max_health": 1000
+    }
+}
