@@ -17,4 +17,8 @@ export default class WorldController {
         this.controllers.set('ship', controllers.shipController);
     }
 
+    public handle(playerId: string, action: string, payload: any) {
+        // Handle specific methods
+    }
+
 }

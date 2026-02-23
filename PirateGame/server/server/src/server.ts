@@ -38,8 +38,4 @@ socketService.initialise();
 const PORT = process.env.PORT || CONFIG.PORT
 server.listen(PORT, () => {
   console.log(`[Server] Server launched on port: ${PORT}`);
-})
-
-setInterval(() => {
-  worldManager.update();  // Update all worlds
-}, 1000 / CONFIG.TICK_RATE);
+});

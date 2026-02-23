@@ -30,7 +30,7 @@ export default class WorldFactory {
 
     createWorld(worldId: string): World {
         const entityFactory = new EntityFactory(this.entityConfig);
-        const entityRegistry = new EntityRegistry(entityFactory);
+        const entityRegistry = new EntityRegistry();
 
         // Create all the systems the gameEngine depends on
         const systems: GameSystems = {
@@ -59,6 +59,7 @@ export default class WorldFactory {
         const world = new World(
             worldId,
             entityRegistry,
+            entityFactory,
             gameEngine,
             worldController
         );

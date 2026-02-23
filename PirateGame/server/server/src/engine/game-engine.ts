@@ -1,3 +1,4 @@
+import { BaseSystem } from "../systems/base-system";
 import MessageSystem from "../systems/message-system";
 import MovementSystem from "../systems/movement-system";
 import PhysicsSystem from "../systems/physics-system";
@@ -15,17 +16,21 @@ export interface GameSystems {
 }
 
 export default class GameEngine {
+    private systems: Map<string, BaseSystem> = new Map();
 
     constructor(systems: GameSystems) {
-        this.physicsSystem = systems.physicsSystem;
-        this.movementSystem = systems.movementSystem;
-        this.projectileSystem = systems.projectileSystem;
-        this.messageSystem = systems.messageSystem;
+        this.systems.set('physics', systems.physicsSystem);
+        this.systems.set('movement', systems.movementSystem);
+        this.systems.set('projectile', systems.projectileSystem);
+        this.systems.set('message', systems.messageSystem);
     }
 
+    public tick(dt: number) {
+        const systemArray = Array.from(this.systems.values());
 
-    physicsSystem: PhysicsSystem;
-    movementSystem: MovementSystem;
-    projectileSystem: ProjectileSystem;
-    messageSystem: MessageSystem;
+        // Update all systems
+        systemArray.forEach((system) => {
+            system.update(dt);
+        })
+    }
 }

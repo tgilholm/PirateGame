@@ -1,4 +1,5 @@
 import WorldController from "../controllers/world-controller";
+import EntityFactory from "../entities/entity-factory";
 import EntityRegistry from "./entity-registry";
 import GameEngine from "./game-engine";
 
@@ -9,6 +10,7 @@ export default class World {
     constructor(
         public readonly worldId: string,
         public readonly entityRegistry: EntityRegistry,
+        public readonly entityFactory: EntityFactory,
         public readonly gameEngine: GameEngine,
         public readonly worldController: WorldController
     ) { }
