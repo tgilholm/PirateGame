@@ -79,3 +79,198 @@ input {
 button {
     cursor: grab;
 }
+
+
+
+/*--------------------for new debug menu and minimap, will be changed to real css later on, need temp stuff for now and is a lil boring---------------------*/
+
+#printStatsButton {
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: royalblue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#printStatsButton:hover {
+    background-color: deepskyblue;
+}
+
+#debug-menu {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    z-index: 1000;
+    background-color: rgba(13, 47, 79, 0.95);
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    padding: 16px 20px;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    min-width: 280px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#debug-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* true center of screen */
+    z-index: 1000;
+    background-color: rgba(13, 47, 79, 0.95);
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    padding: 16px 20px;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    min-width: 280px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.debug-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    gap: 8px;
+}
+
+.debug-label {
+    color: #aad4ff;
+    min-width: 80px;
+    font-size: 12px;
+}
+
+.debug-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.debug-buttons button {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid #ffffff55;
+    border-radius: 4px;
+    padding: 3px 7px;
+    font-size: 11px;
+    font-family: 'Courier New', Courier, monospace;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.debug-buttons button:hover {
+    background-color: rgba(255,255,255,0.25);
+}
+
+.debug-buttons button.active {
+    background-color: royalblue;
+    border-color: white;
+}
+
+#printStatsButton {
+    font-size: 13px;
+    padding: 8px 12px;
+    background-color: royalblue;
+    color: white;
+    border: 1px solid white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Courier New', Courier, monospace;
+    width: 100%;
+}
+
+#printStatsButton:hover {
+    background-color: deepskyblue;
+}
+
+#stats-overlay {
+    display: none;
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    z-index: 1000;
+    background-color: rgba(13, 47, 79, 0.92);
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    padding: 16px 20px;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    min-width: 220px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+#stats-overlay h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    text-align: center;
+    border-bottom: 1px solid #ffffff55;
+    padding-bottom: 6px;
+}
+
+#stats-overlay .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 2px 0;
+}
+
+#stats-overlay .stat-label {
+    color: #aad4ff;
+}
+
+#stats-overlay .stat-value {
+    font-weight: bold;
+}
+
+#interaction-prompt {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background-color: rgba(13, 47, 79, 0.85);
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    padding: 8px 20px;
+    border: 2px solid #ffffff88;
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+#minimap-container { 
+    position: fixed;
+    top: 20px;      
+    left: 20px;    
+    z-index: 1000;
+    width: 350px;    
+    height: 350px;    
+
+#minimap-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#minimap-marker-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+}
+/*--------------------- feel free to change now but if not i will when we start working of game visuals---------------------*/

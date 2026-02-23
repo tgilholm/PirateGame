@@ -20,6 +20,8 @@ export default class Player {
         });
         this.nameText.setOrigin(0.5, 1);
         this.nameText.setDepth(100);
+
+        console.log(`Player drawn at ${this.sprite.x}, ${this.sprite.y}`);
     }
 
     /**
@@ -28,31 +30,34 @@ export default class Player {
      * @param {Parent} parentObject 
      */
     updateState(data, parentObject) {
-
-        this.parent = parentObject;
+         console.log(`Player updateState called with x: ${data.x}, y: ${data.y}, parentId: ${data.parentId}`);
 
         // if username provided and not already set
         if (data.username && this.nameText.text !== data.username) {
             this.nameText.setText(data.username);
         }
 
-        this.isSteering = data.isSteering || false;
-
         if (this.parentId !== data.parentId) {
-            this.parentId = data.parentId; // re-parenting
-
-            if (parentObject) {
-                // Add to the parent's container
-                parentObject.container.add(this.sprite);
-            } else {
-                // return to the absolute scope
+            // Remove sprite from old container before re-parenting
+            if (this.parent && this.parent.container) {
+                this.parent.container.remove(this.sprite);
                 this.scene.add.existing(this.sprite);
             }
 
-            // If re-parenting, update position immediately without lerp
+            this.parentId = data.parentId;
+            this.parent = parentObject;
+
+            if (parentObject) {
+                parentObject.container.add(this.sprite);
+            }
+
+            //re-position immediately on ship enter
             this.sprite.x = data.x;
             this.sprite.y = data.y;
         }
+
+        // Always keep parent reference in sync
+        this.parent = parentObject;
 
         this.target.x = data.x;
         this.target.y = data.y;

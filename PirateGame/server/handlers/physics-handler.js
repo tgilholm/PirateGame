@@ -24,6 +24,7 @@ export default class PhysicsHandler {
         this.engine = matterEngine;
         this.world = this.engine.world;
         this.lastUpdateTime = 0;
+        this.lastSpeedLogTime = 0;
 
         // Load the tilemap
         this.initialiseTilemapCollisions();
@@ -85,6 +86,10 @@ export default class PhysicsHandler {
         // Destructure inputs
         const { up, down, left, right } = player.inputs;
 
+        //walking vs swimming speed
+        const speed = ship ? CONFIG.PLAYER.SPEED : CONFIG.PLAYER.SWIM_SPEED;
+
+
         if (ship) {// Player is on a ship (local space)
             // Cannot move while steering
             if (player.id === ship.pilotId) return;
@@ -97,10 +102,10 @@ export default class PhysicsHandler {
             let worldPos = ship.localToWorld(player.position.x, player.position.y);
 
             // Apply movement in world space
-            if (up) worldPos.y -= player.speed;
-            if (down) worldPos.y += player.speed;
-            if (left) worldPos.x -= player.speed;
-            if (right) worldPos.x += player.speed;
+            if (up) worldPos.y -= speed;
+            if (down) worldPos.y += speed;
+            if (left) worldPos.x -= speed;
+            if (right) worldPos.x += speed;
 
             //console.log(worldPos.x, worldPos.y);
 
@@ -122,10 +127,10 @@ export default class PhysicsHandler {
             }
         } else {
             // Player is in world space - move freely
-            if (up) player.position.y -= player.speed;
-            if (down) player.position.y += player.speed;
-            if (left) player.position.x -= player.speed;
-            if (right) player.position.x += player.speed;
+            if (up) player.position.y -= speed;
+            if (down) player.position.y += speed;
+            if (left) player.position.x -= speed;
+            if (right) player.position.x += speed;
         }
     }
 
@@ -136,9 +141,24 @@ export default class PhysicsHandler {
     updateShipPhysics(ship) {
         const { up, down, left, right } = ship.inputs;
         const body = ship.body;
+        const now = Date.now();
+        const shouldLogTurn = now - this.lastSpeedLogTime >= 1000;
 
-        if (left) Body.setAngularVelocity(body, -ship.turnSpeed * 20);
-        if (right) Body.setAngularVelocity(body, ship.turnSpeed * 20);
+        if (left) {
+            Body.setAngularVelocity(body, -ship.turnSpeed);
+            if (shouldLogTurn) {//prevernts excessive logs, only 1 a second when turning
+                console.log("left turn max speed:" + ship.turnSpeed);
+                this.lastSpeedLogTime = now;
+            }
+        }
+
+        if (right) {
+            Body.setAngularVelocity(body, ship.turnSpeed);
+            if (shouldLogTurn) { //prevernts excessive logs, only 1 a second when turning
+                console.log("right turn max speed:" + ship.turnSpeed);
+                this.lastSpeedLogTime = now;
+            }
+        }
 
         if (up) {
             const force = {
@@ -146,6 +166,10 @@ export default class PhysicsHandler {
                 y: Math.sin(body.angle) * ship.thrust
             };
             Body.applyForce(body, body.position, force);
+            if (shouldLogTurn) {//prevernts excessive logs, only 1 a second when turning
+                console.log("forward max speed:" + ship.thrust);
+                this.lastSpeedLogTime = now;
+            }
         }
 
         // Sync ship position from matter

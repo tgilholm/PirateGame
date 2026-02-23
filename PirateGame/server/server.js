@@ -3,8 +3,9 @@
 import express from "express";
 import http from "http";
 import path from "path";
-import { CONFIG } from './config.js';
-
+import { CONFIG} from './config.js';
+import shipStatsRouter from './shipStats.js';
+import { initConfig } from "./entities/calculateComponents.js";
 // @ts-ignore
 import { Server } from "socket.io"
 import { fileURLToPath } from "url";
@@ -14,6 +15,10 @@ import SocketHandler from "./handlers/socket-handler.js";
 
 // Create the server
 const app = express();
+
+app.use('/api', shipStatsRouter); //adds rout for ship stats
+
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
@@ -45,15 +50,11 @@ const gameEngine = new GameEngine();
 const socketHandler = new SocketHandler(io, gameEngine);
 EntityRegistry.initialise();
 
+// Initialize configuration and create ships after stats are loaded
+await initConfig();
+
 // Create an example ship for testing
-gameEngine.createShip("ship_1", 1000, 1000);
-
-// Create 10 ships for testing
-for (let i = 0; i < 10; i++) {
-    gameEngine.createShip(`ship_${i + 1}`, 1000 + i * 200, 1000 + i * 200);
-}
-
-
+gameEngine.createShip("ship_1", CONFIG.SPAWN.SHIP.X, CONFIG.SPAWN.SHIP.Y);
 
 /*
     New connections- when a player first loads the webpage, the "connection"
@@ -86,7 +87,7 @@ setInterval(() => {
 setInterval(() => {
     const updates = gameEngine.getRecentUpdates();
     if (updates.ships.length > 0 || updates.players.length > 0) {   // Only send state if someone's connected!
-        io.volatile.emit('gameState', updates);
+        io.volatile.emit('gameState', updates); 
     }
 
     //console.log(updates);
@@ -95,13 +96,13 @@ setInterval(() => {
 
 
 /*
-    Debug loop- output the state of the game every 10 seconds with the ships and players
+    Debug loop- output the state of the game every 30 seconds with the ships and players
 */
 setInterval(() => {
     const stats = EntityRegistry.getStats();
-    console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
-    //console.debug(EntityRegistry.getAllEntities());
-}, 10000);
+    //console.debug(`[Server] Total Entities: ${stats.totalEntities} Ships: ${stats.byType.ship}, Players: ${stats.byType.player}`);
+    console.debug(EntityRegistry.getAllEntities());
+}, 30000); //every 30 seconds
 
 
 const PORT = process.env.PORT || CONFIG.PORT;   // Set default port as fallback

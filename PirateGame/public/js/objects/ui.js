@@ -1,242 +1,238 @@
-/**
- * UI class handles all UI elements that are fixed to the screen
- * and unaffected by camera zoom or position.
- * rendered on different layer
- */
 export default class UI {
+    constructor(scene) { //singleton class constructs UI elements 
+        
 
-    /**
-     * 
-     * @param {Phaser.Scene} scene 
-     */
-    constructor(scene) {
         this.scene = scene;
-        this.instance = null;
-        this.elements = [];
-        this.layer = scene.add.layer();
-
-        this.messageText = this.scene.add.text(this.scene.cameras.main.width / 2, 20, '', {
-            fontSize: '18px',
-            fill: '#ffffff',
-            backgroundColor: '#00000088',
-        }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1000);
-
-        //this.createAddDeckButton();
-        //this.createGoldCounter();
-        this.layer = this.scene.add.layer();
-        this.hotbar = this.scene.add.container(0, 0);
-        this.hotbarSlots = [];
-        this.hotbarIcons = [];
         this.debugMenuVisible = false;
-        this.originalPositions = new Map();
-        this.createGoldCounter();
-        this.createHotbar();
-        this.createGivePlankButton();
 
-        // Store original positions for zoom counteraction
-        this.elements.forEach(element => {
-            this.originalPositions.set(element, {
-                x: element.x,
-                y: element.y
+        // Map dimensions
+        let minimapScale = 0.2; //minimap scale
+
+        // Top message text 
+        this.messageText = scene.add.text(
+            scene.cameras.main.width / 2,
+            20,
+            "",
+            {
+                fontSize: "18px",
+                fill: "#ffffff",
+                backgroundColor: "#00000088"
+            }
+        )
+        .setOrigin(0.5, 0)
+        .setScrollFactor(0)
+        .setDepth(1000)
+        .setVisible(false);
+
+        // HTML minimap
+        this.minimapContainer = document.getElementById("minimap-container");
+        this.minimapCanvas = document.getElementById("minimap-marker-canvas");
+        this.minimapCtx = this.minimapCanvas.getContext("2d");
+
+        //sets canvas resolotiom to display size
+        this.minimapCanvas.width = this.minimapContainer.offsetWidth;
+        this.minimapCanvas.height = this.minimapContainer.offsetHeight;
+
+        this.createDebugControls();
+
+        // Interaction prompt
+        this.promptEl = document.getElementById("interaction-prompt");
+    }
+
+    initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
+        this.mapWidth = mapWidth;
+        this.mapHeight = mapHeight;
+
+        // Show minimap now that the scene has started
+        if (this.minimapContainer) {
+            this.minimapContainer.style.display = "block";
+        }
+
+        this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
+    }
+
+
+    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {//Scale player position to minimap coordinates
+        const canvas = this.minimapCanvas;
+        const ctx = this.minimapCtx;
+
+        if (canvas.width !== this.minimapContainer.offsetWidth) { //resises canvas if container changes
+            canvas.width = this.minimapContainer.offsetWidth;
+            canvas.height = this.minimapContainer.offsetHeight;
+        }
+
+        //clear previous marker
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //calculated marker position
+        const markerX = (playerX / mapWidth) * canvas.width;
+        const markerY = (playerY / mapHeight) * canvas.height;
+
+        // Draw red dot marker
+        ctx.beginPath();
+        ctx.arc(markerX, markerY, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff0000";
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+    }
+
+
+    //connects keyboard button (X) to HTML logic
+    createDebugControls() {
+        this.debugMenu = document.getElementById("debug-menu");
+        this.printStatsButton = document.getElementById("printStatsButton");
+        this.statsOverlay = document.getElementById("stats-overlay");
+        this.statsContent = document.getElementById("stats-content");
+        this.statsVisible = false;
+
+        if (this.printStatsButton) {
+            this.printStatsButton.addEventListener("click", async () => {
+                const stats = await this.fetchShipStats();
+                if (stats) {
+                    console.log("=== SHIP STATS ===", stats);
+                    this.toggleStatsOverlay(stats);
+                }
             });
+        }
+
+        //onclick 
+        window.setComponent = async (componentType, variant) => {
+            try {
+                await fetch("/api/component", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ componentType, variant })
+                });
+
+                //highlight the active button
+                const sections = this.debugMenu.querySelectorAll(".debug-section");
+                sections.forEach(section => {
+                    const label = section.querySelector(".debug-label");
+                    if (label && label.textContent.toLowerCase().replace(/\s/g, "") === componentType.toLowerCase().replace(/\s/g, "")) {
+                        section.querySelectorAll("button").forEach(btn => {
+                            btn.classList.toggle("active", btn.textContent.toLowerCase() === variant.toLowerCase());
+                        });
+                    }
+                });
+
+                //if stats are visible, refresh
+                if (this.statsVisible) {
+                    const stats = await this.fetchShipStats();
+                    if (stats) {
+                        console.log("=== SHIP STATS (updated) ===", stats); //logs stats
+                        this.updateStatsOverlay(stats);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to set component:", e);
+            }
+        };
+
+        // X key toggles debug menu
+        this.debugKey = this.scene.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.X
+        );
+
+        this.debugKey.on("down", () => this.toggleDebugMenu());
+
+        this.scene.events.once("shutdown", () => {
+            this.debugKey?.off("down");
+            this.debugKey = null;
         });
     }
 
-    /**
-     * Displays a message at the top of the screen
-     * @param {String} message 
-     */
-    showMessage(message) {
-        if (message) {
-            this.messageText.setText(message);
-            this.messageText.setVisible(true);
+
+    showPrompt(text) {
+        if (this.promptEl) {
+            this.promptEl.textContent = text;
+            this.promptEl.style.display = "block";
         }
     }
 
-    /**
-     * Hides the message at the top of the screen
-     */
+    hidePrompt() {
+        if (this.promptEl) {
+            this.promptEl.style.display = "none";
+        }
+    }
+
+    // Called every frame to reset transient UI state
     clear() {
-        this.messageText.setVisible(false);
-        this.messageText.setText('');   // reset the text
+        this.hidePrompt();
+    }
+
+    setGold(amount) {
+        // placeholder for future gold display
+    }
+
+    toggleDebugMenu() {
+        this.debugMenuVisible = !this.debugMenuVisible;
+        if (this.debugMenu) {
+            this.debugMenu.style.display = this.debugMenuVisible ? "block" : "none";
+        }
+    }
+
+    toggleStatsOverlay(stats) {
+        if (!this.statsOverlay) return;
+
+        if (this.statsVisible) {
+            this.statsOverlay.style.display = "none";
+            this.statsVisible = false;
+            return;
+        }
+
+        this.updateStatsOverlay(stats);
+        this.statsOverlay.style.display = "block";
+        this.statsVisible = true;
+    }
+
+    updateStatsOverlay(stats) {
+        const statLabels = {
+            maxHealth:"Max Health",
+            crewCapacity:"Crew Capacity",
+            acceleration:"Acceleration",
+            maxSpeed:"Max Speed",
+            cannonDamage:"Cannon Damage",
+            cannonRange:"Cannon Range",
+            cannonCount:"Cannon Count",
+            rammingPower:"Ramming Power",
+            minimapRange:"Minimap Range",
+            visionRange:"Vision Range",
+            stopPower:"Stop Power",
+            deployTime:"Deploy Time",
+            retrieveTime:"Retrieve Time",
+            turnSpeed: "Turn Speed",
+            responseTime:"Response Time",
+            fireRate: "Fire Rate",
+            accuracy:"Accuracy",
+            weight:"Weight"
+        };
+
+        this.statsContent.innerHTML = Object.entries(statLabels)
+            .map(([key, label]) => `
+                <div class="stat-row">
+                    <span class="stat-label">${label}</span>
+                    <span class="stat-value">${stats[key] ?? "N/A"}</span>
+                </div>`)
+            .join("");
     }
 
 
 
-createGoldCounter() {
-    const paddingRight = 20;
-    const counterX = this.scene.cameras.main.width - paddingRight;
-    const counterY = 30;
 
-    this.goldCounter = this.scene.add.text(counterX, counterY, 'Gold: 0', {
-        fontSize: '24px',
-        fill: '#ffd54f',
-        fontStyle: 'bold'
-    })
-        .setOrigin(1, 0.5)
-        .setScrollFactor(0)
-        .setDepth(10000);
-
-    this.elements.push(this.goldCounter);
-}
-
-
-
-getLayer() {
-    return this.layer;
-}
-
-setGold(amount) {
-    this.goldCounter.setText(`Gold: ${amount}`);
-}
-
-createGivePlankButton() {
-    const buttonX = 100; // Left side of screen
-    const buttonY = this.scene.cameras.main.height / 2; // Center vertically
-
-    this.givePlankButton = this.scene.add.text(buttonX, buttonY, 'Give Plank', {
-        fontSize: '20px',
-        fill: '#fff',
-        backgroundColor: '#8b4513',
-        padding: { x: 15, y: 8 }
-    })
-        .setOrigin(0.5)
-        .setInteractive()
-        .setScrollFactor(0)
-        .setDepth(10000)
-        .setVisible(false); // Initially hidden
-
-    this.givePlankButton.on('pointerover', () => {
-        this.givePlankButton.setStyle({ fill: '#ffff00' });
-    });
-
-    this.givePlankButton.on('pointerout', () => {
-        this.givePlankButton.setStyle({ fill: '#fff' });
-    });
-
-    this.givePlankButton.on('pointerdown', () => {
-        this.scene.playerInventory.addToInventory({ type: 'plank', name: 'Plank' });
-        this.updateHotbar();
-    });
-
-    this.elements.push(this.givePlankButton);
-}
-
-
-
-
-
-
-
-
-//------------temp hotbar and zoom fixes, not my own code, just testing stuff, will be replaced with something better later, but cant get anything else done without-------------------
-
-createHotbar() {
-    const paddingBottom = 20;
-    const hotbarX = this.scene.cameras.main.width / 2;
-    const hotbarY = this.scene.cameras.main.height - paddingBottom;
-
-    const slotSize = 50;
-    const slotSpacing = 5;
-    const totalSlots = 9;
-    const padding = 10;
-    const totalWidth = (slotSize * totalSlots) + (slotSpacing * (totalSlots - 1)) + (padding * 2);
-    const totalHeight = slotSize + (padding * 2);
-
-    // Create transparent background rectangle
-    const hotbarBg = this.scene.add.rectangle(0, 0, totalWidth, totalHeight, 0x333333, 0.5);
-    this.hotbar.add(hotbarBg);
-
-    // Create 9 slots (more opaque) inside the background
-    for (let i = 0; i < totalSlots; i++) {
-        const xPos = (i * (slotSize + slotSpacing)) - (totalWidth / 2) + padding + (slotSize / 2);
-        const slot = this.scene.add.rectangle(xPos, 0, slotSize, slotSize, 0x555555, 0.9)
-            .setStrokeStyle(2, 0x888888);
-        this.hotbar.add(slot);
-
-        // Store slot position for later use
-        this.hotbarSlots.push({ x: xPos, y: 0 });
-
-        // Initialize empty icon slot
-        this.hotbarIcons.push(null);
-    }
-
-    this.hotbar.setPosition(hotbarX, hotbarY);
-    this.hotbar.setScrollFactor(0);
-    this.hotbar.setDepth(10000);
-
-    this.elements.push(this.hotbar);
-}
-
-updateHotbar() {
-    const inventory = this.scene.playerInventory.getInventory();
-
-    // Update each hotbar slot
-    for (let i = 0; i < 9; i++) {
-        // Remove existing icon if any
-        if (this.hotbarIcons[i]) {
-            this.hotbarIcons[i].destroy();
-            this.hotbarIcons[i] = null;
-        }
-
-        // Add new icon if item exists
-        if (inventory[i] !== null) {
-            const item = inventory[i];
-            const slotPos = this.hotbarSlots[i];
-
-            // Create item icon based on type
-            let iconKey = 'plank'; // Default to plank for now
-            if (item.type === 'plank') {
-                iconKey = 'plank';
-            }
-
-            const icon = this.scene.add.image(slotPos.x, slotPos.y, iconKey)
-                .setDisplaySize(40, 40); // Scale to fit in the slot
-
-            this.hotbar.add(icon);
-            this.hotbarIcons[i] = icon;
+    //API
+    async fetchShipStats() {
+        try {
+            const res = await fetch("/api/stats");
+            if (!res.ok) throw new Error(res.status);
+            return await res.json();
+        } catch (e) {
+            console.error("Failed to fetch ship stats:", e);
+            return null;
         }
     }
+
+
+    
 }
-
-counteractZoom(zoomLevel) {
-    //reverses zoom byt scaling and mooving UI elements inversely, temp solution, i cant get seperate UI and main layers rendered, breaks camera
-    const inverseScale = 1 / zoomLevel;
-
-    // Apply to all UI elements
-    this.elements.forEach(element => {
-        const original = this.originalPositions.get(element);
-        if (original) {
-            // Scale inversely to camera zoom
-            element.setScale(inverseScale);
-
-            // Reposition: scale position from center
-            const camera = this.scene.cameras.main;
-            const centerX = camera.width / 2;
-            const centerY = camera.height / 2;
-
-            // Calculate scaled offset from center
-            const offsetX = (original.x - centerX) * inverseScale;
-            const offsetY = (original.y - centerY) * inverseScale;
-
-            element.setPosition(centerX + offsetX, centerY + offsetY);
-        }
-    });
-}
-
-
-//------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-toggleDebugMenu() {
-    this.debugMenuVisible = !this.debugMenuVisible;
-    this.givePlankButton.setVisible(this.debugMenuVisible);
-}
-
-}
-
-

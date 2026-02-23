@@ -11,6 +11,7 @@ export default class Player extends Entity {
      * @param {String} username 
      */
     constructor(id, x, y, parentId = null, username = "") {
+
         super(id, "player", x, y);  // All players have type "player"
 
         this.username = username;

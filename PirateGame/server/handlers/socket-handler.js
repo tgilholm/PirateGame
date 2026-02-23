@@ -3,7 +3,7 @@ import GameEngine from "../engine/game-engine.js";
 import NpcSystem from "../systems/npc-system.js"
 import PlayerSystem from "../systems/player-system.js"
 import ShipSystem from "../systems/ship-system.js"
-
+import { CONFIG } from "../config.js";
 
 const systems = {
     player: PlayerSystem,
@@ -31,7 +31,9 @@ export default class SocketHandler {
         socket.on('system:playerReady', (payload) => {
             console.log("[SocketHandler] Received new player")
 
-            const player = EntityRegistry.createPlayer(socket.id, 0, 0, "ship_1", "");
+            const player = EntityRegistry.createPlayer(socket.id, CONFIG.SPAWN.PLAYER.X, CONFIG.SPAWN.PLAYER.Y, "ship_1", "");
+
+            
             if (!player) {
                 console.log(`[SocketHandler] Player: ${socket.id} not found`);
             }
@@ -119,7 +121,19 @@ export default class SocketHandler {
             if (outcome && !outcome.result) {
                 console.warn(`${eventName}:error`, { reason: outcome.reason })
                 //socket.emit(`${eventName}:error`, { reason: result.reason });
-            } else if (outcome && outcome.data) {
+            } else if (outcome && outcome.result) {
+
+                
+                //emits events to client
+                if (eventName === 'player:takeControl') {
+                    socket.emit('controlTaken');
+                } else if (eventName === 'player:releaseControl') {
+                    socket.emit('controlReleased');
+                } else if (eventName === 'player:enterShip') {
+                    socket.emit('climbedLadder', { shipId: payload.shipId });
+                } else if (eventName === 'player:exitShip') {
+                    socket.emit('exitedShip', {});
+                }
             }
         });
     }
