@@ -8,37 +8,33 @@ import GameEngine, { GameSystems } from "../engine/game-engine";
 import PlayerController from "../controllers/player-controller";
 import ShipController from "../controllers/ship-controller";
 import WorldController, { GameControllers } from "../controllers/world-controller";
+import UpgradeHandler from "../handlers/upgrade-handler";
+import EntityFactory from "../entities/entity-factory";
 
-export interface WorldConfig {
-    worldId: string;
-    maxPlayers: number;
-}
 
 /**
  * Creates new game worlds. All dependencies - systems, registries, game engine, are created
  * and provided to the world here. This allows the creation of multiple worlds, if needed, and
- * encapsulates the world creation logic in one place.
+ * encapsulates the world creation logic in one place. It serves as the composition root for
+ * the "world-scoped" entities- there exists a one-to-many relationship between the worldManager
+ * and the managed Worlds.
  */
 export default class WorldFactory {
     constructor(
-        private upgradeConfig: any) {
+        private entityConfig: any,
+        private worldConfig: any) {
     }
 
 
-    getSharedConfig(): WorldConfig {
-        return {
-            worldId: '',
-            maxPlayers: 32
-        }
-    }
 
     /**
      * Creates and returns the world object with the injected dependencies.
      * @param config 
      * @returns 
      */
-    createWorld(worldId: string, config: any): World {
-        const entityRegistry = new EntityRegistry();
+    createWorld(worldId: string): World {
+        const entityFactory = new EntityFactory(this.entityConfig);
+        const entityRegistry = new EntityRegistry(entityFactory);
 
         // Create all the systems the gameEngine depends on
         const systems: GameSystems = {
@@ -51,10 +47,12 @@ export default class WorldFactory {
         // Pass systems into the game engine, then to the world
         const gameEngine = new GameEngine(systems);
 
+        // Create handlers for dependent controllers
+        const upgradeHandler = new UpgradeHandler(this.entityConfig);
 
         // Create all the controllers the gameController depends on
         const controllers: GameControllers = {
-            playerController: new PlayerController(entityRegistry),
+            playerController: new PlayerController(entityRegistry, upgradeHandler),
             shipController: new ShipController(entityRegistry)
         };
 
@@ -63,12 +61,14 @@ export default class WorldFactory {
 
 
         const world = new World(
+            worldId,
             entityRegistry,
             gameEngine,
             worldController
         );
 
         world.start();
+        world.setConfig(this.worldConfig);
         return world;
     }
 }

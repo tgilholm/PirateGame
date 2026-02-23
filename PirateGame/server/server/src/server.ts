@@ -22,10 +22,15 @@ const io = new Server(server, { cors: { origin: "*" } });
 // Route files to the public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Define world configuration
+const worldConfig = {
+  maxPlayers: 32
+}
+
 
 // Composition root- create all dependencies and inject
-const upgradeConfig = JSON.parse(fs.readFileSync('/path/to/json', 'utf-8'));
-const worldFactory = new WorldFactory(upgradeConfig);
+const entityConfig = JSON.parse(fs.readFileSync('entity-config.json', 'utf-8'));
+const worldFactory = new WorldFactory(entityConfig, worldConfig);
 const worldManager = new WorldManager(worldFactory);
 const socketHandler = new SocketService(io, worldManager);
 socketHandler.initialise();

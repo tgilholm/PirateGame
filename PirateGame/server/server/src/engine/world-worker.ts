@@ -8,6 +8,7 @@ import { ClientEvent } from "../shared/socket-protocol";
 
 let world: World;
 let isInitialized = false;
+let worldFactory: WorldFactory;
 
 parentPort?.postMessage({ type: WorkerEvent.READY });  // Tell the manager this thread has started
 
@@ -16,7 +17,8 @@ parentPort?.on('message', (message: any) => {
     
     // Create the world
     if (message.type === WorkerEvent.INIT) {
-        world = WorldFactory.createWorld(message.worldId, message.config);
+        worldFactory = message.worldFactory;    // pass dependencies in via message
+        world = worldFactory.createWorld(message.worldId);
         isInitialized = true;
         startHeartbeat();
         return;
@@ -50,6 +52,7 @@ parentPort?.on('message', (message: any) => {
 });
 
 
+// TODO-  Improve interval method and account for time fluctuation
 
 function startHeartbeat() {
     // Keep track of last time to account for fluctuations

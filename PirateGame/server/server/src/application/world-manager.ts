@@ -46,8 +46,8 @@ export default class WorldManager extends EventEmitter {
                 // Worker has started- send the config
                 worker.postMessage({
                     type: WorkerEvent.INIT,
-                    worldId: worldId,
-                    config: this.worldFactory.getSharedConfig()
+                    worldFactory: this.worldFactory,
+                    worldId: worldId
                 });
             } else if (message.type === WorkerEvent.STATE_UPDATE) {
 

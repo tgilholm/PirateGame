@@ -7,10 +7,37 @@ import GameEngine from "./game-engine";
 
 export default class World {
     constructor(
+        public readonly worldId: string,
         public readonly entityRegistry: EntityRegistry,
         public readonly gameEngine: GameEngine,
         public readonly worldController: WorldController
-    ) {
+    ) { }
+
+    public start() {
+
     }
 
+    public setConfig() {
+
+    }
+
+    public createPlayer() {
+
+    }
+
+    public removePlayer() {
+
+    }
+
+    public handleAction() {
+
+    }
+
+    public update() {
+
+    }
+
+    public getSnapshot() {
+
+    }
 }
