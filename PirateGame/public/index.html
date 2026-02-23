@@ -15,7 +15,15 @@
 </head>
 
 <body>
-    <div id="game-container"></div> 
+    <div id="game-container"></div>
+
+    <!-- shop menu -->
+    <div id="shop-menu" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+         background:#222; color:white; padding:30px; border:2px solid red; z-index:1000; min-width:300px;">
+        <h2>SHOP</h2>
+        <p>shop things here</p>
+        <button onclick="document.getElementById('shop-menu').style.display='none'">Close</button>
+    </div>
 
     <form id="input-form">
         <div class="border">

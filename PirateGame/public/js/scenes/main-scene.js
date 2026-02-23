@@ -5,6 +5,7 @@ import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
 import UI from "../objects/ui.js";
 import zoom from "../objects/zoom.js";
+import Shop from "../objects/shop.js";
 //import PlayerInventory from "../objects/playerInventory.js";
 
 
@@ -82,6 +83,10 @@ export class MainScene extends Phaser.Scene {
 
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
+
+        // Shop object
+        this.shop = new Shop(this, 3000, 5250);
+
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
         this.mapWidth = map.widthInPixels;
         this.mapHeight = map.heightInPixels;
@@ -335,6 +340,9 @@ export class MainScene extends Phaser.Scene {
                     }
                 }
             }
+
+            // Check distance to the shop
+            this.shop.update(player, this.keys, this.ui);
 
 
             // Player is in world space

@@ -48,9 +48,14 @@ export let CONFIG = {
     PLAYER: {
         MAX_HEALTH: 100,
         SPEED: 3,           // Speed on ship and land
-        SWIM_SPEED: 5,    // Speed swimming 
+        SWIM_SPEED: 50,    // Speed swimming 
         RADIUS: 15,
         PADDING: 15
+    },
+
+    SHOP: {
+        X: 2600,
+        Y: 5100
     }
 
 };
