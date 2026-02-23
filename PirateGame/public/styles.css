@@ -230,6 +230,23 @@ button {
     font-weight: bold;
 }
 
+#interaction-prompt {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background-color: rgba(13, 47, 79, 0.85);
+    color: #ffffff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 16px;
+    padding: 8px 20px;
+    border: 2px solid #ffffff88;
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 #minimap-container { 
     position: fixed;
     top: 20px;      
@@ -255,5 +272,5 @@ button {
     height: 100%;
     pointer-events: none;
 }
-
-/*---------------------feel free to change now but if not i will when we start working of game visuals---------------------*/
+}
+/*--------------------- feel free to change now but if not i will when we start working of game visuals---------------------*/

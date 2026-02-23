@@ -1,4 +1,4 @@
-import { INIT_CONFIG } from "../config.js";
+import { CONFIG } from "../config.js";
 import Entity from "./entity.js";
 
 export default class Player extends Entity {
@@ -11,11 +11,12 @@ export default class Player extends Entity {
      * @param {String} username 
      */
     constructor(id, x, y, parentId = null, username = "") {
+
         super(id, "player", x, y);  // All players have type "player"
 
         this.username = username;
-        this.maxHealth = INIT_CONFIG.PLAYER.MAX_HEALTH
-        this.health = INIT_CONFIG.PLAYER.MAX_HEALTH; // max health for new players
+        this.maxHealth = CONFIG.PLAYER.MAX_HEALTH
+        this.health = CONFIG.PLAYER.MAX_HEALTH; // max health for new players
         this.inventory = [];    // empty inventory to start
         this.parentId = parentId;
 
@@ -29,7 +30,7 @@ export default class Player extends Entity {
             q: false,
             space: false
         };
-        this.speed = INIT_CONFIG.PLAYER.SPEED;
+        this.speed = CONFIG.PLAYER.SPEED;
     }
 
     toData() {

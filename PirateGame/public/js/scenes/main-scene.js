@@ -1,3 +1,4 @@
+
 /* global Phaser, io */
 
 import Player from "../objects/player.js";
@@ -30,7 +31,8 @@ export class MainScene extends Phaser.Scene {
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
-        this.map = null;
+        //this.gameState = new gameState();
+        //this.playerInventory = new PlayerInventory(this);
 
 
     }
@@ -46,9 +48,6 @@ export class MainScene extends Phaser.Scene {
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
 
-        // Load the minimap
-        this.load.image('minimap', '/assets/minimap.png');
-
         // Load the map
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
 
@@ -62,7 +61,6 @@ export class MainScene extends Phaser.Scene {
      * as setting up user input and socket listeners.
      */
     create(data) {
-        this.ui = new UI(this);
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
 
@@ -70,22 +68,23 @@ export class MainScene extends Phaser.Scene {
 
         // Initialize UI
         this.ui = new UI(this);
-      
 
         // Generate the tilemap from the .json
-        this.map = this.make.tilemap({ key: "map" });
-        const tileset = this.map.addTilesetImage("terrain-tilesheet", "tiles");
+        const map = this.make.tilemap({ key: "map" });
+        const tileset = map.addTilesetImage("terrain-tilesheet", "tiles");
 
-        this.map.createLayer("sea", tileset, 0, 0); // Add at 0, 0
-        this.map.createLayer("shallows", tileset, 0, 0);
-        const islands = this.map.createLayer("islands", tileset, 0, 0);
+        map.createLayer("sea", tileset, 0, 0); // Add at 0, 0
+        map.createLayer("shallows", tileset, 0, 0);
+        const islands = map.createLayer("islands", tileset, 0, 0);
 
         this.matter.world.convertTilemapLayer(islands); // add collision to solid objects
 
 
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
-        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);   // don't leave the map
+        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
+        this.mapWidth = map.widthInPixels;
+        this.mapHeight = map.heightInPixels;
 
         // Keyboard input
         this.keys = /** @type {any} */ (this.input.keyboard.addKeys("W, A, S, D, E, Q, space"));
@@ -126,15 +125,26 @@ export class MainScene extends Phaser.Scene {
                     players[playerData.id].updateState(playerData, shipParent);
                 });
             }
-            //initialise minimap marker
-            const player = players[socket.id];
-            if (player) {
-                this.ui.initializeMarker(
-                    player.sprite.x, 
-                    player.sprite.y, 
-                    this.map.widthInPixels, 
-                    this.map.heightInPixels
-                );
+
+            //move camera immediately to the local players world position
+            const localPlayer = players[socket.id];
+            if (localPlayer) {
+                if (localPlayer.parentId && ships[localPlayer.parentId]) {
+                    const ship = ships[localPlayer.parentId];
+                    const worldPos = Phaser.Math.RotateAround(
+                        { x: localPlayer.sprite.x, y: localPlayer.sprite.y },
+                        0, 0,
+                        ship.container.rotation
+                    );
+                    this.cameraTarget.x = ship.container.x + worldPos.x;
+                    this.cameraTarget.y = ship.container.y + worldPos.y;
+                } else {
+                    this.cameraTarget.x = localPlayer.sprite.x;
+                    this.cameraTarget.y = localPlayer.sprite.y;
+                }
+
+                // Show the minimap and place the initial marker
+                this.ui.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
             }
         });
 
@@ -187,19 +197,11 @@ export class MainScene extends Phaser.Scene {
         });
 
         socket.on('exitedShip', (data) => {
-            const player = players[socket.id];
-            player.parentId = null;
-            zoom.setOnShip(false); //resets zoom
+            // Let updateState handle the re-parenting and position snap
         });
 
         socket.on('climbedLadder', (data) => {
-            const player = players[socket.id];
-            const ship = ships[data.shipId];
-            if (ship) {
-                player.parentId = data.shipId;
-                zoom.setOnShip(true); 
-                zoom.setVisionRange(data.visionRange);//set zoom
-            }
+            // Let updateState handle the re-parenting and position snap
         });
 
 
@@ -226,25 +228,6 @@ export class MainScene extends Phaser.Scene {
 
         const player = players[socket.id];
         const parentId = player.parentId;
-        
-        // Calculate world position for minimap
-        let worldX, worldY;
-        if (parentId && ships[parentId]) {
-            // Player is on a ship world coords
-            const ship = ships[parentId];
-            const worldPos = ship.toWorld(player.sprite.x, player.sprite.y);
-            worldX = worldPos.x;
-            worldY = worldPos.y;
-        } else {
-            // Player is not on a ship local coords
-            worldX = player.sprite.x;
-            worldY = player.sprite.y;
-        }
-
-        // Update minimap marker with world coordinates
-        this.ui.updatePlayerMarker(worldX, worldY, this.map.widthInPixels, this.map.heightInPixels);
-
-
 
         // Handle camera movement for players in either relative or absolute state
         if (parentId && ships[parentId]) {
@@ -267,7 +250,7 @@ export class MainScene extends Phaser.Scene {
 
             // Helm controls
             if (dist < 30 && !player.isSteering) { // only show if not already controlling
-                this.ui.showMessage("[E] - Control Ship");
+                this.ui.showPrompt("(E) Start Steering");
 
                 // Only send take control command if E is just pressed (not held)
                 if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
@@ -281,7 +264,7 @@ export class MainScene extends Phaser.Scene {
 
             // If controlling, display "release control" message
             if (player.parentId === parentId && player.isSteering) {
-                this.ui.showMessage("[Q] - Release Control");
+                this.ui.showPrompt("(Q) Stop Steering");
 
                 if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) {
                     console.log(`Releasing control of ship ${parentId}`);
@@ -302,7 +285,7 @@ export class MainScene extends Phaser.Scene {
             for (let i = 0; i < ladderDists.length; i++) {
                 // If on ship, ladder lets players exit ship
                 if (ladderDists[i] < 30 && player.parentId === parentId) {
-                    this.ui.showMessage("[E] - Exit Ship");
+                    this.ui.showPrompt("(E) Exit Ship");
                     if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
                         console.log(`Attempting to exit ship ${parentId}`);
                         socket.emit('player:exitShip', {
@@ -342,7 +325,7 @@ export class MainScene extends Phaser.Scene {
 
                 // If close enough, display the message to climb the ladder and send the command if E is pressed
                 if (ladderDists[0] < 30 || ladderDists[1] < 30) {
-                    this.ui.showMessage("[E] - Climb Ladder");
+                    this.ui.showPrompt("(E) Climb Ladder");
                     if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
                         console.log(`Attempting to climb ladder on ship ${shipId}`);
                         socket.emit('player:enterShip', {
@@ -371,21 +354,19 @@ export class MainScene extends Phaser.Scene {
             right: this.keys.D.isDown,
             e: this.keys.E.isDown,
             q: this.keys.Q.isDown,
-            zoom: this.shipKeys.zoom.isDown,
             space: this.keys.space.isDown
         });
 
 
-        // // Toggle zoom when Z is pressed
-        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom) && !player.isSteering) {
-            zoom.toggleZoom(); }
-            if (player.isSteering) {
-                this.cameras.main.setZoom(0.5); }
-            else {
-            this.cameras.main.setZoom(zoom.getZoomValue());
+        // Toggle zoom when Z is pressed
+        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
+            const zoomValue = zoom.toggleZoom();
+            this.cameras.main.setZoom(zoomValue);
         }
 
-        
+        // Update minimap marker with current world position
+        this.ui.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+
         // // Ship movement (WASD when zoomed out)
         // socket.emit('shipInput', {
         //     up: this.gameState.canControlShip() && this.keys.W.isDown,

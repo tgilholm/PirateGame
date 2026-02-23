@@ -1,8 +1,8 @@
-import * as calculateComponents from "./entities/calculateComponents.js"
+export let CONFIG = {
 
-
-
-export let INIT_CONFIG = {
+    TICK_RATE: 45,
+    NET_TICK_RATE: 20,
+    PORT: 3000,
 
     SPAWN: { //spawn coordinates
         PLAYER: {// RELATIVE TO SHIP
@@ -22,46 +22,35 @@ export let INIT_CONFIG = {
             BOWLENGTH: 100,
             STERNRADIUS: 80
         },
-        MAX_HEALTH: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
-        TURN_SPEED: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
-        THRUST: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        MAX_HEALTH:250,
+        CREW_CAPACITY:5,
+        ACCELERATION:0.1,
+        MAX_SPEED:100,
+        CANNON_DAMAGE:100,
+        CANNON_RANGE:10,
+        CANNON_COUNT:2,
+        RAMMING_POWER:10,
+        MINIMAP_RANGE:10,
+        VISION_RANGE:10,
+        STOP_POWER:10,
+        DEPLOY_TIME:5,
+        RETRIEVE_TIME:5,
+        TURN_SPEED:50,
+        RESPONSE_TIME:5,
+        FIRE_RATE: 5,
+        ACCURACY: 20,
+        WEIGHT: 100,
         FRICTION_AIR: 0.05, 
-        MASS: 0,//set default value in calculateComponents.calculateShipStats() not here (at least for now)
-        MAX_SPEED: 0//set default value in calculateComponents.calculateShipStats() not here (at least for now)
+        //MASS: 0, //can replace weight?
+        //THRUST: 0, // can replace acceleration?
     },
     
     PLAYER: {
         MAX_HEALTH: 100,
         SPEED: 3,           // Speed on ship and land
-        SWIM_SPEED: 50,    // Speed swimming 
+        SWIM_SPEED: 5,    // Speed swimming 
         RADIUS: 15,
         PADDING: 15
     }
 
 };
-
-let configInitialized = false;
-
-/*
- * Initializes ship INIT_CONFIGuration from component stats.
- * Must be called and awaited before creating ships.
- */
-export async function initConfig() {
-    if (configInitialized) return;
-    
-    const stats = await calculateComponents.calculateShipStats();
-    INIT_CONFIG.SHIP.MAX_HEALTH = stats.maxHealth;
-    INIT_CONFIG.SHIP.TURN_SPEED = stats.turnSpeed / 10000;
-    INIT_CONFIG.SHIP.THRUST = stats.acceleration;
-    INIT_CONFIG.SHIP.MASS = stats.weight;
-    INIT_CONFIG.SHIP.MAX_SPEED = stats.maxSpeed;
-    
-    configInitialized = true;
-    console.log('[INIT_CONFIG] Ship stats initialized:', {
-        turnSpeed: INIT_CONFIG.SHIP.TURN_SPEED,
-        maxHealth: INIT_CONFIG.SHIP.MAX_HEALTH,
-        thrust: INIT_CONFIG.SHIP.THRUST,
-        mass: INIT_CONFIG.SHIP.MASS,
-        maxSpeed: INIT_CONFIG.SHIP.MAX_SPEED
-    });
-}

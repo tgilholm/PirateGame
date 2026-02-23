@@ -2,7 +2,7 @@ import Matter from "matter-js";
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from "url";
-import { INIT_CONFIG } from "../config.js";
+import { CONFIG } from "../config.js";
 import EntityRegistry from "../engine/entity-registry.js";
 import Player from "../entities/player.js";
 import Ship from "../entities/ship.js";
@@ -73,7 +73,7 @@ export default class PhysicsHandler {
         EntityRegistry.getShips().forEach(ship => {
             this.updateShipPhysics(ship);
         });
-        Engine.update(this.engine, 1000 / INIT_CONFIG.TICK_RATE);
+        Engine.update(this.engine, 1000 / CONFIG.TICK_RATE);
     }
 
     /**
@@ -87,7 +87,7 @@ export default class PhysicsHandler {
         const { up, down, left, right } = player.inputs;
 
         //walking vs swimming speed
-        const speed = ship ? INIT_CONFIG.PLAYER.SPEED : INIT_CONFIG.PLAYER.SWIM_SPEED;
+        const speed = ship ? CONFIG.PLAYER.SPEED : CONFIG.PLAYER.SWIM_SPEED;
 
 
         if (ship) {// Player is on a ship (local space)
@@ -113,7 +113,7 @@ export default class PhysicsHandler {
             const newLocal = ship.worldToLocal(worldPos.x, worldPos.y);
 
             // Collision check with ship hull
-            const playerRadius = INIT_CONFIG.PLAYER.RADIUS;
+            const playerRadius = CONFIG.PLAYER.RADIUS;
             if (ship.isInside(newLocal.x, newLocal.y, playerRadius)) {
                 player.position.x = newLocal.x;
                 player.position.y = newLocal.y;
@@ -139,7 +139,7 @@ export default class PhysicsHandler {
      * @param {Ship} ship 
      */
     updateShipPhysics(ship) {
-        const { up, down, left, right } = ship.inputs || {};
+        const { up, down, left, right } = ship.inputs;
         const body = ship.body;
         const now = Date.now();
         const shouldLogTurn = now - this.lastSpeedLogTime >= 1000;

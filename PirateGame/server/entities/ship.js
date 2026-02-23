@@ -1,4 +1,4 @@
-import { INIT_CONFIG } from "../config.js";
+import { CONFIG } from "../config.js"
 import Entity from "./entity.js";
 import Matter from "matter-js";
 const { Bodies, Body } = Matter; // destructure
@@ -17,13 +17,13 @@ export default class Ship extends Entity {
         super(id, "ship", x, y);
 
         this.pilotId = null;
-        this.maxHealth = INIT_CONFIG.SHIP.MAX_HEALTH;
+        this.maxHealth = CONFIG.SHIP.MAX_HEALTH;
         this.health = this.maxHealth;
 
-        this.height = INIT_CONFIG.SHIP.DIMENSIONS.HEIGHT;
-        this.middleWidth = INIT_CONFIG.SHIP.DIMENSIONS.MIDDLEWIDTH;
-        this.bowLength = INIT_CONFIG.SHIP.DIMENSIONS.BOWLENGTH;
-        this.sternRadius = INIT_CONFIG.SHIP.DIMENSIONS.STERNRADIUS;
+        this.height = CONFIG.SHIP.DIMENSIONS.HEIGHT;
+        this.middleWidth = CONFIG.SHIP.DIMENSIONS.MIDDLEWIDTH;
+        this.bowLength = CONFIG.SHIP.DIMENSIONS.BOWLENGTH;
+        this.sternRadius = CONFIG.SHIP.DIMENSIONS.STERNRADIUS;
 
         // Input from pilot
         this.inputs = {
@@ -36,8 +36,8 @@ export default class Ship extends Entity {
         // Internal physics body
         this.body = this.createPhysicsBody(x, y);
         this.params = this.generateParams(); // for clients to draw
-        this.turnSpeed = INIT_CONFIG.SHIP.TURN_SPEED;
-        this.thrust = INIT_CONFIG.SHIP.THRUST;
+        this.turnSpeed = CONFIG.SHIP.TURN_SPEED;
+        this.thrust = CONFIG.SHIP.THRUST;
     }
 
     /**

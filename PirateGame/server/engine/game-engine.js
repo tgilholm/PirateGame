@@ -1,6 +1,6 @@
 // @ts-nocheck
 import PhysicsHandler from "../handlers/physics-handler.js"
-import { INIT_CONFIG } from "../config.js";
+import { CONFIG } from "../config.js";
 import EntityRegistry from "./entity-registry.js";
 import Matter from "matter-js";
 
@@ -33,11 +33,15 @@ export default class GameEngine {
     }
 
     createShip(id, x, y) {
-        const ship = EntityRegistry.createShip(id, x, y);
+        const ship = EntityRegistry.createShip("ship_1", 2500, 5000);
         this.physicsHandler.addShipBody(ship.body);
         return ship;
     }
 
+
+    /**
+     * 
+     */
     getRecentUpdates() {
         const shipUpdates = [];
         const playerUpdates = [];
@@ -52,27 +56,19 @@ export default class GameEngine {
                 r: ship.rotation,
                 vx: ship.velocity.x,
                 vy: ship.velocity.y,
-                av: ship.angularVelocity
+                av: ship.angularVelocity,
+                pilotId: ship.pilotId,
+                health: ship.health
             };
 
             const last = this.lastBroadcast.ships[ship.id];
-
-            // If 'last' is undefined, this is the first time this specific broadcast loop has seen this ship.
-            if (!last) {
-                console.log(`[GameEngine] Broadcasting new ship to clients: ${ship.id}`);
-
-                // Attach the full params so the client can actually construct the object
-                current.params = ship.params;
-
-                this.lastBroadcast.ships[ship.id] = current;
-                shipUpdates.push(current);
-            }
-            // Otherwise, only send if it has moved significantly
-            else if (
+            if (!last ||
                 Math.abs(current.x - last.x) > 1 ||
                 Math.abs(current.y - last.y) > 1 ||
-                Math.abs(current.r - last.r) > 0.01
-            ) {
+                Math.abs(current.r - last.r) > 0.05 ||
+                current.pilotId !== last.pilotId ||
+                current.health !== last.health) {
+
                 this.lastBroadcast.ships[ship.id] = current;
                 shipUpdates.push(current);
             }

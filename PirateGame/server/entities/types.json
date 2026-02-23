@@ -76,82 +76,82 @@
     },
     "cannons": {
       "name": "Cannons",
-      "description": "Cannons component - affects cannons damage, range and amount",
+      "description": "Cannons component - affects cannons cannon damage, cannonRange and amount",
       "variants": {
         "LVL1": {
           "stats": {
-            "damage": 10,
-            "range": 150,
+            "cannonDamage": 10,
+            "cannonRange": 150,
             "cannonCount": 4,
             "weight": 50
           }
         },
         "LVL2": {
           "stats": {
-            "damage": 20,
-            "range": 200,
+            "cannonDamage": 20,
+            "cannonRange": 200,
             "cannonCount": 6,
             "weight": 75
           }
         },
         "LVL3": {
           "stats": {
-            "damage": 40,
-            "range": 250,
+            "cannonDamage": 40,
+            "cannonRange": 250,
             "cannonCount": 8,
             "weight": 100
           }
         },
         "kraken": {
           "stats": {
-            "damage": 60,
-            "range": 300,
+            "cannonDamage": 60,
+            "cannonRange": 300,
             "cannonCount": 12,
             "weight": 250
           }
         },
         "temp1": {
           "stats": {
-            "damage": 15,
-            "range": 160,
+            "cannonDamage": 15,
+            "cannonRange": 160,
             "cannonCount": 5,
             "weight": 60
           }
         },
         "temp2": {
           "stats": {
-            "damage": 25,
-            "range": 180,
+            "cannonDamage": 25,
+            "cannonRange": 180,
             "cannonCount": 6,
             "weight": 80
           }
         },
         "temp3": {
           "stats": {
-            "damage": 35,
-            "range": 220,
+            "cannonDamage": 35,
+            "cannonRange": 220,
             "cannonCount": 7,
             "weight": 90
           }
         },
         "temp4": {
           "stats": {
-            "damage": 45,
-            "range": 240,
+            "cannonDamage": 45,
+            "cannonRange": 240,
             "cannonCount": 8,
             "weight": 110
           }
         },
         "temp5": {
           "stats": {
-            "damage": 50,
-            "range": 260,
+            "cannonDamage": 50,
+            "cannonRange": 260,
             "cannonCount": 9,
             "weight": 120
           }
         }
       },
-      "affects": ["damage", "range", "cannonCount", "weight"]
+      "affects": ["cannonDamage", "cannonRange", "cannonCount", "weight"]
     },
     "head": {
       "name": "Head",

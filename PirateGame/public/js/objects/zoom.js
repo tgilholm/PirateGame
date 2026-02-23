@@ -1,5 +1,5 @@
-const playerZoom = [2, 1];
-const shipZoom = [2, 1, 0.75, 0.55, 0.4];
+const playerZoom = [1, 2];
+const shipZoom = [1, 0.75, 0.55, 0.4, 2];
 let playerZoomIndex = 0;
 let shipZoomIndex = 0;
 let currentVisionRange = 2; // default
