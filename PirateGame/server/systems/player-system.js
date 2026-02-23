@@ -142,8 +142,17 @@ export default class PlayerSystem {
             return { result: false, reason: `Player ${playerId} is not near a ladder, cannot exit` };
         }
 
+        //finds which ladder the player is nearest to
+        let nearestLadder = ladders[0];
+        let nearestDist = Infinity;
+        for (const ladder of ladders) {
+            const d = this.distance(player.position.x, player.position.y, ladder.x, ladder.y);
+            if (d < nearestDist) { nearestDist = d; nearestLadder = ladder; }
+        }
+        const exitYDir = nearestLadder.y > 0 ? 1 : -1;
+        const worldPos = ship.localToWorld(player.position.x, player.position.y + exitYDir * 50);
+
         // convert local position to world position, offset outward to avoid placing in collision boundary
-        const worldPos = ship.localToWorld(player.position.x, player.position.y - 50);
         player.position.x = worldPos.x;
         player.position.y = worldPos.y;
         player.parentId = null;
@@ -184,8 +193,9 @@ export default class PlayerSystem {
         }
 
         // convert world position to ship-local position
-        player.position.x = ladder.x;   
-        player.position.y = ladder.y + 30; //offset to avoid placing in collision boundry   
+        const enterYDir = ladder.y > 0 ? -1 : 1; //finds the ladder side then offsets acordingly
+        player.position.x = ladder.x;
+        player.position.y = ladder.y + enterYDir * 30; //offsets to avoid placing player  in collision hitbox
         player.parentId = ship.id;
 
         return { result: true };
