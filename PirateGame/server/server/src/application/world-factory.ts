@@ -64,8 +64,8 @@ export default class WorldFactory {
             worldController
         );
 
-        world.start();
         world.setConfig(this.worldConfig);
+        world.start();
         return world;
     }
 }

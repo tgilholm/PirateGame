@@ -1,12 +1,15 @@
 import EntityRegistry from "../engine/entity-registry";
-import { BaseController } from "./base-controller";
+import Ship from "../entities/ship";
+import { MoveData } from "../shared/socket-protocol";
 
-export default class ShipController extends BaseController {
+export default class ShipController {
     constructor(entityRegistry: EntityRegistry) {
-        super(entityRegistry);
     }
 
-    handle(playerId: string, action: string, payload: any): void {
-        throw new Error("Method not implemented.");
+    handleMove(ship: Ship, data: MoveData): void {
+        ship.inputs.up = data.up;
+        ship.inputs.down = data.down;
+        ship.inputs.left = data.left;
+        ship.inputs.right = data.right;
     }
 }
