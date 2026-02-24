@@ -79,3 +79,22 @@ input {
 button {
     cursor: grab;
 }
+
+/* game chat syling */
+#chat-header{
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    border-bottom: 1px;
+    
+}
+
+#chat-window {
+    position: absolute;
+    right: 14px;
+    bottom: 15px;
+    border-radius: 12px;
+}
+
+#chatbox {
+    border-top: 1px solid red;
+}
