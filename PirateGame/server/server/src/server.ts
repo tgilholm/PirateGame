@@ -7,7 +7,6 @@
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import fs from 'fs'
 import path from 'path';
 import WorldFactory from './application/world-factory';
 import WorldManager from './application/world-manager';
@@ -23,6 +22,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 // Route files to the public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 // Define world configuration
 const worldConfig = {
   maxPlayers: 32
@@ -30,8 +30,7 @@ const worldConfig = {
 
 
 // Composition root- create all dependencies and inject
-const worldFactory = new WorldFactory(entityConfig, worldConfig);
-const worldManager = new WorldManager(worldFactory);
+const worldManager = new WorldManager(entityConfig, worldConfig);
 const socketService = new SocketService(io, worldManager);
 socketService.initialise();
 
