@@ -85,7 +85,7 @@ button {
     font-weight: bold;
     font-family: 'Courier New', Courier, monospace;
     border-bottom: 1px;
-    
+
 }
 
 #chat-window {
@@ -97,4 +97,5 @@ button {
 
 #chatbox {
     border-top: 1px solid red;
+    border-radius: 12px;
 }
