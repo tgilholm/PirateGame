@@ -11,17 +11,20 @@ document.addEventListener("keydown", function(event){
     // send message with enter if chatbox is 'active'
     if (event.key === "Enter" && document.activeElement === chatbox){
         event.preventDefault();
-        const chatMessage = chatbox.value.trim();
-        if (chatMessage.length() > 0){
+        const chatMessage = chatbox.ariaValueMax.trim();
+        if (chatMessage.length > 0){
             testMessage.innerText = chatMessage;
             // send message to server and have that echo it
         }
     }
-
     // leave chat with escape
-    if (event.key === "Escape"){
+    if (event.key === "Escape" && document.activeElement === chatbox){
         event.preventDefault();
-        chatbox.classList.remove("active");
-        chatbox.blur();
+        closeChat();
     }
 })
+
+function closeChat(){
+    chatbox.blur();
+    chatbox.classList.remove("active")
+} 
