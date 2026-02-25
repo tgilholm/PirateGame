@@ -1,4 +1,5 @@
-const chatbox = document.getElementById("chat-input");
+// below const needs type wrapping or else vscode will flag as error, thanks vscode
+const chatbox = (/** @type {HTMLInputElement} */ (document.getElementById("chat-input")));
 const testMessage = document.getElementById("testMessage");
 
 document.addEventListener("keydown", function(event){
@@ -11,10 +12,11 @@ document.addEventListener("keydown", function(event){
     // send message with enter if chatbox is 'active'
     if (event.key === "Enter" && document.activeElement === chatbox){
         event.preventDefault();
-        const chatMessage = chatbox.ariaValueMax.trim();
+        const chatMessage = chatbox.value.trim();
         if (chatMessage.length > 0){
             testMessage.innerText = chatMessage;
-            // send message to server and have that echo it
+            // send message to server and have that echo it then close the chat
+            closeChat();
         }
     }
     // leave chat with escape
