@@ -1,10 +1,10 @@
-import { BaseController } from "./base-controller";
 import EntityRegistry from "../engine/entity-registry";
 import PlayerController from "./player-controller";
 import ShipController from "./ship-controller";
 import { ActionType, PlayerAction } from "../shared/socket-protocol";
 import Player from "../entities/player";
 import Ship from "../entities/ship";
+import MessageController from "./message-controller";
 
 export interface GameControllers {
     playerController: PlayerController,
@@ -33,10 +33,10 @@ export default class WorldController {
             case ActionType.MOVE:
 
                 // If player is controlling a ship, send move inputs to the ship
-                if (player.parentId && player.isSteering) {
-                    const ship = this.entityRegistry.get<Ship>(player.parentId);
+                if (player.parent && player.isSteering) {
+                    const ship = player.parent as Ship;
 
-                    if (ship) {
+                    if (parent) {
                         this.shipController.handleMove(ship, action.data);  // Send the move inputs to the ship
                     }
                 } else {
@@ -51,21 +51,25 @@ export default class WorldController {
             case ActionType.FIRE:
                 // Again check if controlling a cannon- but not necessarily on a ship- land cannons?
                 if (player.isUsingCannon) {
-                    this.playerController.handleCannonFire();
+                    this.playerController.handleCannonFire(player);
                 } else {
                     // If not controlling a cannon, fire the player's personal gun
-                    this.playerController.handleGunFire();
+                    this.playerController.handleGunFire(player);
                 }
                 break;
 
             case ActionType.DIG:
-                this.playerController.handleDig();
+                this.playerController.handleDig(player);
                 break;
             case ActionType.INTERACT:
-                this.playerController.handleInteract();
+                this.playerController.handleInteract(player);
+                break;
+
+            case ActionType.RELEASE:
+                this.playerController.handleRelease(player);
                 break;
             case ActionType.MESSAGE:
-                this.messageController.handleMessage(action.data);
+                this.messageController.handleMessage(player, action.data);
                 break;
         }
     }

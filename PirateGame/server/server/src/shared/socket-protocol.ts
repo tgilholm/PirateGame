@@ -23,7 +23,8 @@ export enum ActionType {
     UPGRADE = 'UPGRADE',
     MESSAGE = 'MESSAGE',
     INTERACT = 'INTERACT',
-    DIG = 'DIG'
+    DIG = 'DIG',
+    RELEASE = 'RELEASE'
 }
 
 export interface MoveData {
@@ -43,7 +44,8 @@ export type PlayerAction =
     | { type: ActionType.INTERACT; data?: never } // Cannot provide data
     | { type: ActionType.MESSAGE; data?: { text: string } } // the message
     | { type: ActionType.DIG; data?: never }
-    | { type: ActionType.FIRE; data?: never };
+    | { type: ActionType.FIRE; data?: never }
+    | { type: ActionType.RELEASE; data?: never}
 
 
 export interface Action {

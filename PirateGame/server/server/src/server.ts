@@ -23,16 +23,32 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-// Define world configuration
-const worldConfig = {
-  maxPlayers: 32
-}
-
-
 // Composition root- create all dependencies and inject
-const worldManager = new WorldManager(entityConfig, worldConfig);
+const worldManager = new WorldManager(entityConfig);
 const socketService = new SocketService(io, worldManager);
 socketService.initialise();
+
+/*
+Start with two worlds initially- WorldManager can dynamically expand the map
+with new worlds when they fill up
+*/
+worldManager.createWorld({
+  maxPlayers: 32,
+  mode: GameMode.FREE_FOR_ALL
+});
+
+worldManager.createWorld({
+  maxPlayers: 32,
+  mode: GameMode.TEAMS
+});
+
+/*
+  Player is presented with the choice of free-for-all or teams- socketService
+  accepts their choice and uses WorldManager to route to the correct world.
+
+  If the world is "full", a new one is started and the players are re-distributed
+  between the new worlds.
+*/
 
 const PORT = process.env.PORT || CONFIG.PORT
 server.listen(PORT, () => {

@@ -1,5 +1,6 @@
 
 import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
+import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
 
@@ -18,13 +19,12 @@ export default class EntityFactory {
         this.shipConfig = entityConfig.ship;
     }
 
-    public createPlayer(id: string, x: number, y: number, parentId: string | null, username: string): Player {
-        return new Player(id, x, y, parentId, username, this.playerConfig);
+    public createPlayer(x: number, y: number, parent: Entity | null, username: string): Player {
+        return new Player(x, y, parent, username, this.playerConfig);
     }
 
-    public createShip(id: string, x: number, y: number): Ship {
-        return new Ship(id,
-            x,
+    public createShip(x: number, y: number): Ship {
+        return new Ship(x,
             y,
             this.shipConfig
         );

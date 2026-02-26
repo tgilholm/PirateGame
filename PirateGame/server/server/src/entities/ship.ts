@@ -5,21 +5,20 @@ import Entity from "./entity";
 
 
 export default class Ship extends Entity {
-
     pilotId: string | null;
     dimensions: any;
     physics: any;
     inputs: any;
 
     constructor(
-        id: string,
         x: number,
         y: number,
         config: ShipConfig
     ) {
-        super(id, "ship", x, y, config.maxHealth);
+        super("ship", x, y, config.maxHealth, null);    // ships have no parents
 
         this.pilotId = null;    // Nobody piloting at startup
+        this.parent = null;
         this.dimensions = config.dimensions;
         this.physics = config.physics;
         this.inputs = {
@@ -36,7 +35,6 @@ export default class Ship extends Entity {
     serialise(): any {
         /*
             ... - spread operator. Prepends all base entity data:
-            id: this.id,
             type: this.type,
             x: this.x,
             y: this.y,

@@ -3,6 +3,7 @@ import { EntityConfig } from '../types';
 import WorldFactory from "./world-factory";
 import { EventEmitter } from 'node:stream';
 import { PlayerAction } from '../shared/socket-protocol';
+import { WorldConfig } from '../server';
 
 export enum ManagerEvent {
     WORLD_STATE_UPDATE = "WORLD_STATE_UPDATE",
@@ -29,14 +30,13 @@ export default class WorldManager extends EventEmitter {
     private playerToWorld: Map<string, string> = new Map(); // Links players to worlds
 
     constructor(private entityConfig: EntityConfig,
-        private worldConfig: any
     ) { super(); }
 
     /**
      * Starts a new worker thread with the worldID and sets up listeners to respond
      * to status information from the worker
      */
-    public createWorld() {
+    public createWorld(worldConfig: WorldConfig) {
         const worldId = `world_${Date.now()}`;
 
         // Note the .js suffix- run npm build before trying to start!!!
@@ -57,7 +57,7 @@ export default class WorldManager extends EventEmitter {
                     type: WorkerEvent.INIT,
                     worldId: worldId,
                     entityConfig: this.entityConfig,
-                    worldConfig: this.worldConfig
+                    worldConfig: worldConfig
                 });
             } else if (message.type === WorkerEvent.STATE_UPDATE) {
 
@@ -116,13 +116,13 @@ export default class WorldManager extends EventEmitter {
      * @param worldId the id of the world the player is attempting to join
      * @returns {boolean} true if the joining succeeded, false otherwise
      */
-    public joinWorld(playerId: string, worldId: string): boolean {
+    public joinWorld(playerId: string, worldId: string, username: string): boolean {
         // Get the world by the provided id
         const worker = this.worlds.get(worldId);
         if (!worker) return false;
 
         this.playerToWorld.set(playerId, worldId);
-        worker.postMessage({ type: WorkerEvent.JOINED, playerId });
+        worker.postMessage({ type: WorkerEvent.JOINED, playerId, username });
         return true;
     }
 
@@ -146,6 +146,10 @@ export default class WorldManager extends EventEmitter {
         return this.playerToWorld.get(playerId);
     }
 
+    /**
+     * Sends a message to the worker thread of the requested world to retrieve a full sync
+     * @param playerId the id of a player in the world
+     */
     public requestSync(playerId: string) {
         const worker = this.getWorker(playerId);
 

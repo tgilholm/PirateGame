@@ -1,5 +1,4 @@
 export default abstract class Entity {
-    public id: string;
     public type: string;
     public x: number;   // x coord
     public y: number;   // y coord
@@ -9,9 +8,9 @@ export default abstract class Entity {
     public av: number;  // angular velocity
     public health: number;
     public maxHealth: number;
+    public parent: Entity | null;
 
-    constructor(id: string, type: string, x: number, y: number, maxHealth: number) {
-        this.id = id;
+    constructor(type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
         this.type = type;
         this.x = x;
         this.y = y;
@@ -23,6 +22,7 @@ export default abstract class Entity {
         this.av = 0;
 
         // All entities have health and can be destroyed
+        this.parent = parent;
         this.maxHealth = maxHealth;
         this.health = maxHealth;    // Start at maximum
     }
@@ -32,7 +32,6 @@ export default abstract class Entity {
      */
     serialise(): any {
         return {
-            id: this.id,
             type: this.type,
             x: this.x,
             y: this.y,

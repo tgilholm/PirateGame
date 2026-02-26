@@ -11,6 +11,7 @@ import WorldController, { GameControllers } from "../controllers/world-controlle
 import UpgradeHandler from "../handlers/upgrade-handler";
 import EntityFactory from "../entities/entity-factory";
 import { EntityConfig } from "../types";
+import MessageController from "../controllers/message-controller";
 
 
 
@@ -49,7 +50,8 @@ export default class WorldFactory {
         // Create all the controllers the gameController depends on
         const controllers: GameControllers = {
             playerController: new PlayerController(entityRegistry, upgradeHandler),
-            shipController: new ShipController(entityRegistry)
+            shipController: new ShipController(entityRegistry),
+            messageController: new MessageController()
         };
 
         // Pass controllers to the worldController, then to the world

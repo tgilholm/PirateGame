@@ -17,6 +17,7 @@ const ActionSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) }).strict(),
     z.object({ type: z.literal(ActionType.DIG) }).strict(),
     z.object({ type: z.literal(ActionType.FIRE) }).strict(),
+    z.object({ type: z.literal(ActionType.RELEASE)}).strict()
 ])
 
 export default class SocketService {

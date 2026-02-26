@@ -37,11 +37,11 @@ parentPort?.on('message', (message: any) => {
 
     switch (message.type) {
         case WorkerEvent.JOINED:
-            world.entityRegistry.createPlayer(message.playerId);
+            world.createPlayer(message.playerId, message.username);
             break;
 
         case WorkerEvent.LEFT:
-            world.entityRegistry.removePlayer(message.playerId);
+            world.removePlayer(message.playerId);
             break;
 
         case WorkerEvent.ACTION:
