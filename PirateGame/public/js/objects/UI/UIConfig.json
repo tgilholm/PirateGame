@@ -1,0 +1,26 @@
+{
+    "MINIMAP": {
+        "SIZE": 350,
+        "IMG_SRC": "/assets/minimap.png",
+        "POSITION": {
+            "TOP":  "20px",
+            "LEFT": "20px"
+        },
+        "MARKER": {
+            "RADIUS":     5,
+            "FILL":       "#ff0000",
+            "STROKE":     "#ffffff",
+            "LINE_WIDTH": 1.5
+        }
+    },
+    "MESSAGE_TEXT": {
+        "FONT_SIZE":  "18px",
+        "COLOR":      "#ffffff",
+        "BACKGROUND": "#00000088"
+    },
+    "DEBUG_MENU": {
+        "TOGGLE_KEY": "X"
+    },
+    "INTERACTION_PROMPT": {},
+    "SHOP": {}
+}
