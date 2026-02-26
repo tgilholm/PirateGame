@@ -1,3 +1,4 @@
+import Entity from "server/entities/entity.js";
 import EntityRegistry from "../engine/entity-registry.js";
 import GameEngine from "../engine/game-engine.js";
 import NpcSystem from "../systems/npc-system.js"
@@ -122,5 +123,17 @@ export default class SocketHandler {
             } else if (outcome && outcome.data) {
             }
         });
+        
+        // post message to chat when server recieves one
+        socket.on("chat:message", (message) => {
+            const player = EntityRegistry.getPlayer(socket.id);
+            const username = player?.username;
+
+            this.io.emit("chat:message", {
+                playerId: socket.id,
+                username,
+                message
+            });
+        })
     }
 }

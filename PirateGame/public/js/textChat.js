@@ -1,7 +1,7 @@
 // below const needs type wrapping or else vscode will flag as error, thanks vscode
-/* global io */
 const chatbox = (/** @type {HTMLInputElement} */ (document.getElementById("chat-input")));
 const testMessage = document.getElementById("testMessage");
+// @ts-ignore
 const socket = io();
 
 document.addEventListener("keydown", function(event){
