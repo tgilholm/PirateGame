@@ -9,6 +9,11 @@ import UI_CONFIG from "./UIConfig.json" with { type: "json" };
  */
 export default class Minimap {
 
+    /**
+     * @param {HTMLElement} containerEl - The #minimap-container element to populate.
+     * @param {string}      [imgSrc]    - URL of the map background image. Defaults to UIConfig value.
+     * @param {number}      [size]      - Width and height of the minimap in pixels. Defaults to UIConfig value.
+     */
     constructor(containerEl,
                 imgSrc = UI_CONFIG.MINIMAP.IMG_SRC,
                 size   = UI_CONFIG.MINIMAP.SIZE) {
@@ -39,6 +44,10 @@ export default class Minimap {
     /**
      * Shows the minimap and draws the initial player marker.
      * Call once when the game world is ready (e.g. inside the initGame socket event).
+     * @param {number} spawnX     - Initial world X position of the player.
+     * @param {number} spawnY     - Initial world Y position of the player.
+     * @param {number} mapWidth   - Full pixel width of the game world.
+     * @param {number} mapHeight  - Full pixel height of the game world.
      */
     initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
         this.mapWidth  = mapWidth;
@@ -50,6 +59,10 @@ export default class Minimap {
     /**
      * Redraws the player dot at the given world position.
      * Call every frame.
+     * @param {number} playerX    - Current world X position of the player.
+     * @param {number} playerY    - Current world Y position of the player.
+     * @param {number} mapWidth   - Full pixel width of the game world.
+     * @param {number} mapHeight  - Full pixel height of the game world.
      */
     updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {
         this._syncSize();

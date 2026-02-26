@@ -119,6 +119,8 @@ export default class DebugMenu {
     /**
      * POSTs the chosen component variant to the server, highlights the button,
      * and fires onComponentChange with the returned stats.
+     * @param {string} componentType - Key identifying the component (e.g. "hull", "sails").
+     * @param {string} variant       - Variant name to apply (e.g. "heavy", "light").
      */
     async _applyComponent(componentType, variant) {
         try {
@@ -146,7 +148,11 @@ export default class DebugMenu {
         }
     }
 
-    /** Marks the chosen variant button as active and clears the others in that row. */
+    /**
+     * Marks the chosen variant button as active and clears the others in that row.
+     * @param {string} componentType - Key of the component section to update.
+     * @param {string} variant       - Variant name whose button should be marked active.
+     */
     _highlightButton(componentType, variant) {
         this.menuEl.querySelectorAll(".debug-section[data-component-key]").forEach(section => {
             if (section.dataset.componentKey === componentType) {
@@ -161,6 +167,10 @@ export default class DebugMenu {
     // Private — stats overlay
     // -------------------------------------------------------------------------
 
+    /**
+     * Toggles the stats overlay panel. Opens and populates on first call; hides on second.
+     * @param {Object} stats - Key/value ship stat data returned from /api/stats.
+     */
     _toggleStatsOverlay(stats) {
         if (this.statsVisible) {
             this.statsOverlay.style.display = "none";
@@ -206,6 +216,10 @@ export default class DebugMenu {
             .replace(/^./, c => c.toUpperCase());
     }
 
+    /**
+     * Rebuilds the stats overlay content from the provided stats object.
+     * @param {Object} stats - Key/value ship stat data to display.
+     */
     _updateStatsOverlay(stats) {
         const keys = this._getStatKeys(stats);
 

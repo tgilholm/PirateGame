@@ -3,7 +3,7 @@
 
 import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
-import UI from "../objects/UI/ui.js";
+import UI from "../objects/UI/createUI.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
 import InputHandler from "../objects/inputHandler.js";

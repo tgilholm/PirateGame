@@ -16,6 +16,9 @@ import UI_CONFIG from "./UIConfig.json" with { type: "json" };
  *   .promptEl      — #interaction-prompt DOM element
  */
 export default class CreateUI {
+    /**
+     * @param {Phaser.Scene} scene - The active Phaser scene used to create Phaser text objects and bind keyboard input.
+     */
     constructor(scene) {
         this.scene = scene;
 

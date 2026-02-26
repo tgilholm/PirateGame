@@ -1,11 +1,11 @@
 ﻿import DomFactory from "./domFactory.js";
 
 /**
- * ShopUI  builds and manages the shop overlay.
+ * ShopUI — builds and manages the shop overlay.
  *
- * Uses CreateUI to generate 6 placeholder item cards.
- * Items currently do nothing; wire up onBuy callbacks when
- * real shop logic is implemented.
+ * Creates its own #shop-menu container and appends it to document.body.
+ * Uses DomFactory to generate placeholder item cards.
+ * Wire up onBuy callbacks when real shop logic is implemented.
  */
 export default class ShopUI {
 
@@ -31,10 +31,12 @@ export default class ShopUI {
     // Public
     // -------------------------------------------------------------------------
 
+    /** Makes the shop overlay visible. */
     open() {
         this.menuEl.style.display = "block";
     }
 
+    /** Hides the shop overlay. */
     close() {
         this.menuEl.style.display = "none";
     }
