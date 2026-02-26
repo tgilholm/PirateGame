@@ -26,8 +26,8 @@ export default class Player {
 
     /**
      * 
-     * @param {*} data 
-     * @param {Parent} parentObject 
+     * @param {*} data - must include { x, y, parentId, username (optional) }
+     * @param {Parent} parentObject - the Parent instance this player belongs to, or null if in world scope
      */
     updateState(data, parentObject) {
         console.log(`Player updateState called with x: ${data.x}, y: ${data.y}, parentId: ${data.parentId}`);

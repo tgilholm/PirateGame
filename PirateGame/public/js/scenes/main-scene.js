@@ -7,7 +7,8 @@ import UI from "../objects/UI/createUI.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
 import InputHandler from "../objects/inputHandler.js";
-//import PlayerInventory from "../objects/playerInventory.js";
+import InteractionSystem from "../objects/interactionSystem.js";
+import ClientSocketHandler from "../objects/clientSocketHandler.js";
 
 
 const ships = {}
@@ -95,113 +96,11 @@ export class MainScene extends Phaser.Scene {
         // Keyboard input
         this.inputHandler = new InputHandler(this);
 
+        // Interaction system — helm, ladders, shop
+        this.interactionSystem = new InteractionSystem(socket);
 
-        // Generate the entire game once when the "handshake" is received
-        socket.on('initGame', (data) => {
-            console.log('[Client] Received initGame', data);
-
-            // Create all ships from server data
-            if (data.shipData && Array.isArray(data.shipData)) {
-                data.shipData.forEach(shipData => {
-                    if (!ships[shipData.id]) {
-                        console.log(`[Client] Creating ship: ${shipData.id}`);
-                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, shipData.params);
-                    }
-                });
-            }
-
-            // Create all players from server data
-            if (data.playerData && Array.isArray(data.playerData)) {
-                data.playerData.forEach(playerData => {
-                    if (!players[playerData.id]) {
-                        console.log(`[Client] Creating player: ${playerData.id}`);
-                        players[playerData.id] = new Player(this, playerData.id);
-                    }
-
-                    // Update player state
-                    const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
-                    players[playerData.id].updateState(playerData, shipParent);
-                });
-            }
-
-            //move camera immediately to the local players world position
-            const localPlayer = players[socket.id];
-            if (localPlayer) {
-                if (localPlayer.parentId && ships[localPlayer.parentId]) {
-                    const ship = ships[localPlayer.parentId];
-                    const worldPos = Phaser.Math.RotateAround(
-                        { x: localPlayer.sprite.x, y: localPlayer.sprite.y },
-                        0, 0,
-                        ship.container.rotation
-                    );
-                    this.cameraTarget.x = ship.container.x + worldPos.x;
-                    this.cameraTarget.y = ship.container.y + worldPos.y;
-                } else {
-                    this.cameraTarget.x = localPlayer.sprite.x;
-                    this.cameraTarget.y = localPlayer.sprite.y;
-                }
-
-                // Show the minimap and place the initial marker
-                this.ui.minimap.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
-            }
-        });
-
-
-
-        socket.on('gameState', (data) => {
-            // Update ships
-            if (data.ships && Array.isArray(data.ships)) {
-                data.ships.forEach(shipData => {
-                    // If the ship doesn't exist yet, create it
-                    if (!ships[shipData.id]) {
-                        console.log(`[Client] New ship detected: ${shipData.id}`);
-                        // use default params if not found
-                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, shipData.params || {});
-                    }
-
-                    // Standard update logic
-                    const ship = ships[shipData.id];
-                    ship.target = {
-                        x: shipData.x,
-                        y: shipData.y,
-                        r: shipData.r
-                    };
-                    ship.velocity = { x: shipData.vx || 0, y: shipData.vy || 0 };
-                    ship.angularVelocity = shipData.av || 0;
-                });
-            }
-
-            data.players.forEach(playerData => {
-                // If the player doesn't exist in our local list, create them now
-                if (!players[playerData.id]) {
-                    console.log(`[Client] New player joined: ${playerData.id}`);
-                    players[playerData.id] = new Player(this, playerData.id);
-                }
-
-                const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
-                players[playerData.id].updateState(playerData, shipParent);
-            });
-        });
-
-        // Respond to server confirmation of control takeover 
-        socket.on('controlTaken', () => {
-            const player = players[socket.id];
-            player.isSteering = true;
-        });
-
-        socket.on('controlReleased', () => {
-            const player = players[socket.id];
-            player.isSteering = false;
-        });
-
-        socket.on('exitedShip', (data) => {
-            // Let updateState handle the re-parenting and position snap
-        });
-
-        socket.on('climbedLadder', (data) => {
-            // Let updateState handle the re-parenting and position snap
-        });
-
+        // Socket event handlers
+        new ClientSocketHandler(socket, this, ships, players);
 
         socket.emit('system:playerReady', { username: data.username });
     }
@@ -211,149 +110,32 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
-        this.ui?.promptEl && (this.ui.promptEl.style.display = "none"); // Clear UI messages each frame- they will be re-added if still relevant
+        this.ui?.promptEl && (this.ui.promptEl.style.display = "none"); // Clear UI messages each frame
 
-
-        const cameraTarget = this.cameraTarget;
         if (!players[socket.id]) return; // wait for player data to load
-
 
         // Extrapolate and interpolate all game objects
         Object.values(ships).forEach(ship => ship.update());
         Object.values(players).forEach(player => player.update());
 
-
-
-        const player = players[socket.id];
+        const player   = players[socket.id];
         const parentId = player.parentId;
 
-        // Handle camera movement for players in either relative or absolute state
+        // Update camera position
         if (parentId && ships[parentId]) {
-            // Player is on a ship – convert local to world
-            const ship = ships[parentId];
-            const shipContainer = ship.container;
-            const worldPos = Phaser.Math.RotateAround(
-                { x: player.sprite.x, y: player.sprite.y },
-                0, 0,
-                shipContainer.rotation
-            );
-            // Player is in relative space
-            cameraTarget.x = shipContainer.x + worldPos.x;
-            cameraTarget.y = shipContainer.y + worldPos.y;
-
-            // If near the helm, display the "take control" message
-            const helmPos = { x: ship.helm.x, y: ship.helm.y };
-            const dist = Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, helmPos.x, helmPos.y)
-
-
-            // Helm controls
-            if (dist < 30 && !player.isSteering) { // only show if not already controlling
-                this.ui.promptEl.textContent = "(E) Start Steering";
-                this.ui.promptEl.style.display = "block";
-
-                // Only send take control command if E is just pressed (not held)
-                if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
-                    console.log(`Attempting to take control of ship ${parentId}`);
-                    socket.emit('player:takeControl', {
-                        // Send ship id 
-                        shipId: parentId
-                    });
-                }
-            }
-
-            // If controlling, display "release control" message
-            if (player.parentId === parentId && player.isSteering) {
-                this.ui.promptEl.textContent = "(Q) Stop Steering";
-                this.ui.promptEl.style.display = "block";
-
-                if (this.inputHandler.justPressed(this.inputHandler.keys.Q)) {
-                    console.log(`Releasing control of ship ${parentId}`);
-                    socket.emit('player:releaseControl', {
-                        shipId: parentId
-                    });
-                }
-            }
-
-            // Check if near a ladder
-            const ladderDists = [
-                Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.ladder.x, ship.ladder.y),
-                Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.ladder2.x, ship.ladder2.y)
-            ];
-
-            //console.log(ladderDists[0], ladderDists[1]);
-
-            for (let i = 0; i < ladderDists.length; i++) {
-                // If on ship, ladder lets players exit ship
-                if (ladderDists[i] < 30 && player.parentId === parentId) {
-                    this.ui.promptEl.textContent = "(E) Exit Ship";
-                    this.ui.promptEl.style.display = "block";
-                    if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
-                        console.log(`Attempting to exit ship ${parentId}`);
-                        socket.emit('player:exitShip', {
-                            shipId: parentId
-                        });
-                    }
-                }
-            }
-
-
-            // Player is not on a ship
+            const worldPos = ships[parentId].getPlayerWorldPos(player);
+            this.cameraTarget.x = worldPos.x;
+            this.cameraTarget.y = worldPos.y;
         } else {
-            // Calculate distance to all ladders in the world and show "climb ladder" message if near one
-
-            for (const shipId in ships) {
-                const ship = ships[shipId];
-
-                // Convert the two ladder positions to world space
-                const ladderWorldPos = [
-                    Phaser.Math.RotateAround(
-                        { x: ship.ladder.x, y: ship.ladder.y },
-                        0, 0,
-                        ship.container.rotation
-                    ),
-                    Phaser.Math.RotateAround(
-                        { x: ship.ladder2.x, y: ship.ladder2.y },
-                        0, 0,
-                        ship.container.rotation
-                    )
-                ];
-
-                // Calculate the player's distance to the two ladders
-                const ladderDists = [
-                    Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.container.x + ladderWorldPos[0].x, ship.container.y + ladderWorldPos[0].y),
-                    Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, ship.container.x + ladderWorldPos[1].x, ship.container.y + ladderWorldPos[1].y)
-                ];
-
-                // If close enough, display the message to climb the ladder and send the command if E is pressed
-                if (ladderDists[0] < 30 || ladderDists[1] < 30) {
-                    this.ui.promptEl.textContent = "(E) Climb Ladder";
-                    this.ui.promptEl.style.display = "block";
-                    if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
-                        console.log(`Attempting to climb ladder on ship ${shipId}`);
-                        socket.emit('player:enterShip', {
-                            shipId: shipId,
-                            ladderIndex: ladderDists[0] < 30 ? 0 : 1
-                        });
-                    }
-                }
-            }
-
-            // Check distance to the shop
-            this.shop.update(player, this.inputHandler.keys, this.ui);
-
-
-            // Player is in world space
-            cameraTarget.x = player.sprite.x;
-            cameraTarget.y = player.sprite.y;
+            this.cameraTarget.x = player.sprite.x;
+            this.cameraTarget.y = player.sprite.y;
         }
 
-
-
-
+        // Run proximity interactions (helm, ladders, shop)
+        this.interactionSystem.update(player, parentId, ships, this.inputHandler, this.ui, this.shop);
 
         // Player movement
         socket.emit('player:moveInput', this.inputHandler.getMovementInput());
-
 
         // Toggle zoom when Z is pressed
         if (this.inputHandler.justPressed(this.inputHandler.shipKeys.zoom)) {
@@ -363,14 +145,5 @@ export class MainScene extends Phaser.Scene {
 
         // Update minimap marker with current world position
         this.ui.minimap.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
-
-        // // Ship movement (WASD when zoomed out)
-        // socket.emit('shipInput', {
-        //     up: this.gameState.canControlShip() && this.keys.W.isDown,
-        //     left: this.gameState.canControlShip() && this.keys.A.isDown,
-        //     right: this.gameState.canControlShip() && this.keys.D.isDown
-        // });
-
-
     }
 }

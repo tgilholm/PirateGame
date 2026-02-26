@@ -125,34 +125,90 @@ export default class Ship extends Parent {
         console.log(`Interactables created ${this.container}`)
     }
 
+    //---------------------getters to avoid putting logic in main-scene--------------------------
+    /**
+     * Distance from a local point to the helm sprite, use when player is on ship 
+     * @param {number} localX - local X coordinate
+     * @param {number} localY - local Y coordinate
+     * @returns {number}
+     */
+    getDistanceToHelm(localX, localY) {
+        return Phaser.Math.Distance.Between(localX, localY, this.helm.x, this.helm.y);
+    }
+
+    /**
+     * distances from a local point to each ladder, Use when the player is on ship.
+     * @param {number} localX - local X coordinate
+     * @param {number} localY - local Y coordinate
+     * @returns {[number, number]}
+     */
+    getLadderLocalDistances(localX, localY) {
+        return [
+            Phaser.Math.Distance.Between(localX, localY, this.ladder.x, this.ladder.y),
+            Phaser.Math.Distance.Between(localX, localY, this.ladder2.x, this.ladder2.y)
+        ];
+    }
+
+    /**
+     * distances from a global point to each ladders world position, use when the player is not on ship
+     * @param {number} worldX - world X coordinate  
+     * @param {number} worldY - world Y coordinate
+     * @returns {[number, number]}
+     */
+    getLadderWorldDistances(worldX, worldY) {
+        const p0 = Phaser.Math.RotateAround(
+            { x: this.ladder.x,  y: this.ladder.y  }, 0, 0, this.container.rotation
+        );
+        const p1 = Phaser.Math.RotateAround(
+            { x: this.ladder2.x, y: this.ladder2.y }, 0, 0, this.container.rotation
+        );
+        return [
+            Phaser.Math.Distance.Between(worldX, worldY, this.container.x + p0.x, this.container.y + p0.y),
+            Phaser.Math.Distance.Between(worldX, worldY, this.container.x + p1.x, this.container.y + p1.y)
+        ];
+    }
+
+    /**
+     * Converts a player's local-space position into world-space coordinates.
+     * Use to position the camera when the player is on this ship.
+     * @param {Player} player - The player whose sprite position is in local (container) space.
+     * @returns {{ x: number, y: number }}
+     */
+    getPlayerWorldPos(player) {
+        const rotated = Phaser.Math.RotateAround(
+            { x: player.sprite.x, y: player.sprite.y }, 0, 0, this.container.rotation
+        );
+        return { x: this.container.x + rotated.x, y: this.container.y + rotated.y };
+    }
+//------------------------------------------------------------------------------------------
 
     //extrapolation + interpolation to smooth movement client-side
     update() {
         if (!this.target) return;
 
 
-        // Get the current time
+        //get the current time
         const now = performance.now();
         const deltaTime = (now - this.lastUpdateTime) / 1000;   //in seconds
         this.lastUpdateTime = now;
 
-        // Extrapolate "expected position" from velocity and time
+        //extrapolate "expected position" from velocity and time
         const predictedX = this.target.x + this.velocity.x * deltaTime; // where x is in however many milliseconds
         const predictedY = this.target.y + this.velocity.y * deltaTime; // Distance = speed * time
 
-        // Interpolate between the current and predicted positions instead of waiting for the server to update
+        //interpolate between the current and predicted positions instead of waiting for the server to update
         this.container.x = Math.round(Phaser.Math.Linear(this.container.x, predictedX, 0.08));
         this.container.y = Math.round(Phaser.Math.Linear(this.container.y, predictedY, 0.08));
 
-        // Predict the rotation
+        //predict the rotation
         const predictedRotation = this.target.r + this.angularVelocity * deltaTime;
         let rotDiff = predictedRotation - this.container.rotation;
 
-        // Normalize to shortest path
+        //normalize to shortest path
         while (rotDiff > Math.PI) rotDiff -= 2 * Math.PI;
         while (rotDiff < -Math.PI) rotDiff += 2 * Math.PI;
 
-        // Apply same interpolation as position
+        //apply same interpolation as position
         this.container.rotation += rotDiff * 0.08;
 
     }

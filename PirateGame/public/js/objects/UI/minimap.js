@@ -77,7 +77,7 @@ export default class Minimap {
         ctx.stroke();
     }
 
-    //Keeps canvas in sync with container display size
+    //keeps canvas in sync with container display size
     syncSize() {
         if (this.canvas.width !== this.container.offsetWidth) {
             this.canvas.width = this.container.offsetWidth;

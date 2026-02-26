@@ -2,9 +2,9 @@ import Parent from "./parent";
 
 export default class Interactable extends Phaser.GameObjects.Sprite {
     /**
-     * @param {Phaser.Scene} scene 
-     * @param {Parent} parent 
-     * @param {Object} data 
+     * @param {Phaser.Scene} scene  - active scene
+     * @param {Parent} parent  - the parent object this interactable belongs to (e.g. a ship)
+     * @param {Object} data  - initialization data from the server, must include { x, y, type }
      */
     constructor(scene, parent, data) {
         super(scene, data.x, data.y, data.type);
