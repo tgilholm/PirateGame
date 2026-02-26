@@ -7,10 +7,10 @@
 export default class DomFactory {
 
     /**
-     * Creates a DOM element with optional CSS classes and HTML attributes.
-     * @param {string} tag - Element tag name (e.g. "div", "button", "span")
+     * Creates a DOM element with HTML attributes.
+     * @param {string} tag - element tag name (div, button, span)
      * @param {string[]} [classes] - CSS class names to add
-     * @param {Object} [attrs] - Key/value pairs set as HTML attributes
+     * @param {Object} [attrs] - (key / value) pairs set as HTML attributes
      * @returns {HTMLElement}
      */
     static createElement(tag, classes = [], attrs = {}) {
@@ -23,7 +23,7 @@ export default class DomFactory {
     }
 
     /**
-     * Creates a styled button element.
+     * Creates styled button element
      * @param {string} label - Button text content
      * @param {Function} onClick - Click event handler
      * @param {string[]} [extraClasses] - Additional CSS classes to add
@@ -37,9 +37,7 @@ export default class DomFactory {
     }
 
     /**
-     * Creates and appends the minimap <img> and <canvas> into a container element.
-     * Returns references to both so the caller can use them directly.
-     *
+     * creates and appends minimap and marker canvas into container element, returns references to both
      * @param {HTMLElement} containerEl - The element to populate (e.g. #minimap-container)
      * @param {string} imgSrc - src attribute for the map image
      * @returns {{ img: HTMLImageElement, canvas: HTMLCanvasElement }}
@@ -58,7 +56,8 @@ export default class DomFactory {
     }
 
     /**
-     * Creates a shop item card.
+     * Creates a shop item card
+     * e.g.
      *   <div class="shop-card">
      *     <span class="shop-card-name">Name</span>
      *     <p class="shop-card-description">Description</p>
@@ -76,7 +75,7 @@ export default class DomFactory {
         const nameEl = DomFactory.createElement("span", ["shop-card-name"]);
         nameEl.textContent = name;
         card.appendChild(nameEl);
-
+        
         const descEl = DomFactory.createElement("p", ["shop-card-description"]);
         descEl.textContent = description;
         card.appendChild(descEl);
@@ -87,7 +86,8 @@ export default class DomFactory {
     }
 
     /**
-     * Creates a labelled section with a row of buttons.
+     * Creates a labelled section with a row of buttons
+     * e.g.
      *   <div class="debug-section" data-component-key="">
      *     <span class="debug-label">Label</span>
      *     <div class="debug-buttons">...buttons...</div>
@@ -114,9 +114,7 @@ export default class DomFactory {
     }
 
     /**
-     * Builds and appends the debug menu DOM to the given container.
-     * Returns references to the key elements for wiring up by DebugMenu.
-     *
+     * Builds and appends the debug menu DOM to the container.
      * @param {HTMLElement} [container=document.body]
      * @returns {{ menu, statsSection, statsBtn, statsOverlay, statsContent }}
      */

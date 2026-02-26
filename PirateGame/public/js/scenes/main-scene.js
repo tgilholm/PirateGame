@@ -34,8 +34,6 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = null;
         //this.gameState = new gameState();
         //this.playerInventory = new PlayerInventory(this);
-
-
     }
 
 

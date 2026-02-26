@@ -11,43 +11,38 @@ export default class Minimap {
 
     /**
      * @param {HTMLElement} containerEl - The #minimap-container element to populate.
-     * @param {string}      [imgSrc]    - URL of the map background image. Defaults to UIConfig value.
-     * @param {number}      [size]      - Width and height of the minimap in pixels. Defaults to UIConfig value.
+     * @param {string} [imgSrc] - URL of the map background image. Defaults to UIConfig value.
+     * @param {number} [size] - Width and height of the minimap in pixels. Defaults to UIConfig value.
      */
     constructor(containerEl,
-                imgSrc = UI_CONFIG.MINIMAP.IMG_SRC,
-                size   = UI_CONFIG.MINIMAP.SIZE) {
+        imgSrc = UI_CONFIG.MINIMAP.IMG_SRC,
+        size = UI_CONFIG.MINIMAP.SIZE) {
         this.container = containerEl;
 
-        // Apply dimensions — size is owned here, not in CSS
+        //apply dimensions
         containerEl.style.width  = `${size}px`;
         containerEl.style.height = `${size}px`;
 
-        // Build inner elements via CreateUI
+        //build inner elements via CreateUI
         const { img, canvas } = DomFactory.createMinimapContent(containerEl, imgSrc);
-        this.img    = img;
+        this.img = img;
         this.canvas = canvas;
-        this.ctx    = canvas.getContext("2d");
+        this.ctx = canvas.getContext("2d");
 
-        // Sync canvas resolution to container size
-        this._syncSize();
+        //sync canvas resolution to container size
+        this.syncSize();
 
-        // Map world dimensions – set when initializeMarker() is first called
+        //map world dimensions – set when initializeMarker() is first called
         this.mapWidth  = 0;
         this.mapHeight = 0;
     }
 
-    // -------------------------------------------------------------------------
-    // Public
-    // -------------------------------------------------------------------------
-
     /**
-     * Shows the minimap and draws the initial player marker.
-     * Call once when the game world is ready (e.g. inside the initGame socket event).
-     * @param {number} spawnX     - Initial world X position of the player.
-     * @param {number} spawnY     - Initial world Y position of the player.
-     * @param {number} mapWidth   - Full pixel width of the game world.
-     * @param {number} mapHeight  - Full pixel height of the game world.
+     * shows the minimap and draws the initial player marker, calls once when the game world is ready
+     * @param {number} spawnX - Initial world X position of the player.
+     * @param {number} spawnY - Initial world Y position of the player.
+     * @param {number} mapWidth - pixel width of the game world.
+     * @param {number} mapHeight - pixel height of the game world.
      */
     initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
         this.mapWidth  = mapWidth;
@@ -57,15 +52,14 @@ export default class Minimap {
     }
 
     /**
-     * Redraws the player dot at the given world position.
-     * Call every frame.
-     * @param {number} playerX    - Current world X position of the player.
-     * @param {number} playerY    - Current world Y position of the player.
-     * @param {number} mapWidth   - Full pixel width of the game world.
-     * @param {number} mapHeight  - Full pixel height of the game world.
+    * redraws the player dot at the given world position, calls every frame
+     * @param {number} playerX - Current world X position of the player.
+     * @param {number} playerY - Current world Y position of the player.
+     * @param {number} mapWidth - pixel width of the game world.
+     * @param {number} mapHeight - pixel height of the game world.
      */
     updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {
-        this._syncSize();
+        this.syncSize();
 
         const { canvas, ctx } = this;
 
@@ -76,19 +70,15 @@ export default class Minimap {
 
         ctx.beginPath();
         ctx.arc(markerX, markerY, UI_CONFIG.MINIMAP.MARKER.RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle   = UI_CONFIG.MINIMAP.MARKER.FILL;
+        ctx.fillStyle = UI_CONFIG.MINIMAP.MARKER.FILL;
         ctx.fill();
         ctx.strokeStyle = UI_CONFIG.MINIMAP.MARKER.STROKE;
-        ctx.lineWidth   = UI_CONFIG.MINIMAP.MARKER.LINE_WIDTH;
+        ctx.lineWidth = UI_CONFIG.MINIMAP.MARKER.LINE_WIDTH;
         ctx.stroke();
     }
 
-    // -------------------------------------------------------------------------
-    // Private
-    // -------------------------------------------------------------------------
-
-    /** Keeps canvas pixel dimensions in sync with the container's display size. */
-    _syncSize() {
+    //Keeps canvas in sync with container display size
+    syncSize() {
         if (this.canvas.width !== this.container.offsetWidth) {
             this.canvas.width  = this.container.offsetWidth;
             this.canvas.height = this.container.offsetHeight;

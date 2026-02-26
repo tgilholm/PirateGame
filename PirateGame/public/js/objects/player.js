@@ -84,6 +84,7 @@ export default class Player {
         this.nameText.y = worldY - 20;
     }
 
+    //cleanup when player leaves
     destroy() {
         this.sprite.destroy();
         this.nameText.destroy();

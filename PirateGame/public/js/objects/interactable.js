@@ -2,7 +2,6 @@ import Parent from "./parent";
 
 export default class Interactable extends Phaser.GameObjects.Sprite {
     /**
-     * 
      * @param {Phaser.Scene} scene 
      * @param {Parent} parent 
      * @param {Object} data 
