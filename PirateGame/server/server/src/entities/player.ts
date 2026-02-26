@@ -2,13 +2,11 @@ import Entity from "./entity";
 
 type PlayerConfig = typeof import("../entity-config.json")["player"];
 
-
-
 export default class Player extends Entity {
-    parentId: string | null;
     username: string;
     isSteering: boolean;
     isUsingCannon: boolean;
+    isCarrying: boolean;
     inputs: {
         up: boolean;
         down: boolean;
@@ -21,20 +19,19 @@ export default class Player extends Entity {
 
 
     constructor(
-        id: string,
         x: number,
         y: number,
-        parentId: string | null,
+        parent: Entity | null,
         username: string,
         config: PlayerConfig
     ) {
-        super(id, "player", x, y, config.maxHealth);
-        this.parentId = parentId || null;   // default to no parent
+        super("player", x, y, config.maxHealth, parent);
         this.username = username || "";     // default to no uname
 
         // Player-specific detail
         this.isSteering = false;
         this.isUsingCannon = false;
+        this.isCarrying = false;
         this.inputs = {
             up: false,
             down: false,

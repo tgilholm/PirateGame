@@ -7,6 +7,7 @@ export default class ProjectileSystem implements BaseSystem {
     }
 
     update(dt: number): void {
+        // Updates all projectiles in the simulation
         
     }
 }

@@ -14,13 +14,14 @@ export default class EntityRegistry {
      * @param entity the pre-constructed Entity to add
      */
     public create(entity: Entity): void {
+        this.entities.set(entity.id, entity);
         // Update type index
         if (!this.entitiesByType.has(entity.type)) {
             this.entitiesByType.set(entity.type, new Set());
         }
         this.entitiesByType.get(entity.type)!.add(entity.id);
 
-        console.debug(`[Registry] Registered ${entity.type}:${entity.id}`);
+        console.debug(`[Registry] Added ${entity.type}:${entity.id}`);
     }
 
     /**
@@ -39,6 +40,15 @@ export default class EntityRegistry {
      */
     public getAll(): Entity[] {
         return Array.from(this.entities.values());
+    }
+
+    public getByType<T extends Entity>(type: string): T[] {
+        const ids = this.entitiesByType.get(type);
+        if (!ids) return [];
+
+        return Array.from(ids)
+            .map(id => this.entities.get(id) as T)
+            .filter(e => e !== undefined);
     }
 
     /**

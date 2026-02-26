@@ -1,21 +1,24 @@
 import { Worker } from 'node:worker_threads'  // use node.js workers instead of default js ones
+import { EntityConfig } from '../types';
 import WorldFactory from "./world-factory";
 import { EventEmitter } from 'node:stream';
+import { PlayerAction } from '../shared/socket-protocol';
+import { WorldConfig } from '../server';
 
 export enum ManagerEvent {
     WORLD_STATE_UPDATE = "WORLD_STATE_UPDATE",
-    PLAYER_SYNC = "PLAYER_SYNC",
-    PLAYER_KICKED = 'PLAYER_KICKED',
+    SYNC = "PLAYER_SYNC",
+    KICKED = 'PLAYER_KICKED',
 }
 
 export enum WorkerEvent {
     READY = 'READY',
     INIT = 'INIT',
     STATE_UPDATE = 'STATE_UPDATE',
-    PLAYER_JOINED = 'PLAYER_JOINED',
-    PLAYER_LEFT = 'PLAYER_LEFT',
-    PLAYER_ACTION = 'PLAYER_ACTION',
-    PLAYER_SYNC = 'PLAYER_SYNC',
+    JOINED = 'PLAYER_JOINED',
+    LEFT = 'PLAYER_LEFT',
+    ACTION = 'PLAYER_ACTION',
+    SYNC = 'PLAYER_SYNC',
 }
 
 /**
@@ -26,13 +29,14 @@ export default class WorldManager extends EventEmitter {
     private worlds: Map<string, Worker> = new Map();    // Each world runs in a separate thread
     private playerToWorld: Map<string, string> = new Map(); // Links players to worlds
 
-    constructor(private worldFactory: WorldFactory) { super(); }
+    constructor(private entityConfig: EntityConfig,
+    ) { super(); }
 
     /**
      * Starts a new worker thread with the worldID and sets up listeners to respond
      * to status information from the worker
      */
-    public createWorld() {
+    public createWorld(worldConfig: WorldConfig) {
         const worldId = `world_${Date.now()}`;
 
         // Note the .js suffix- run npm build before trying to start!!!
@@ -51,8 +55,9 @@ export default class WorldManager extends EventEmitter {
                 // Worker has started- send the config
                 worker.postMessage({
                     type: WorkerEvent.INIT,
-                    worldFactory: this.worldFactory,
-                    worldId: worldId
+                    worldId: worldId,
+                    entityConfig: this.entityConfig,
+                    worldConfig: worldConfig
                 });
             } else if (message.type === WorkerEvent.STATE_UPDATE) {
 
@@ -60,9 +65,9 @@ export default class WorldManager extends EventEmitter {
                 this.emit(ManagerEvent.WORLD_STATE_UPDATE, worldId, message.data);
 
                 // After player:ready is received, the worker thread sends back the world data
-            } else if (message.type === WorkerEvent.PLAYER_SYNC) {
+            } else if (message.type === WorkerEvent.SYNC) {
                 // Send it to the player
-                this.emit(ManagerEvent.PLAYER_SYNC, message.playerId, message.data);
+                this.emit(ManagerEvent.SYNC, message.playerId, message.data);
             }
         });
 
@@ -94,13 +99,13 @@ export default class WorldManager extends EventEmitter {
      * @param event the event code
      * @param payload any parameters sent by the player to execute the event
      */
-    public routeAction(playerId: string, event: string, payload: any) {
+    public routeAction(playerId: string, action: PlayerAction) {
 
         const worker = this.getWorker(playerId);
 
         if (worker) {
             worker.postMessage({
-                type: WorkerEvent.PLAYER_ACTION, playerId, event, payload
+                type: WorkerEvent.ACTION, playerId, action: action
             });
         }
     }
@@ -111,13 +116,13 @@ export default class WorldManager extends EventEmitter {
      * @param worldId the id of the world the player is attempting to join
      * @returns {boolean} true if the joining succeeded, false otherwise
      */
-    public joinWorld(playerId: string, worldId: string): boolean {
+    public joinWorld(playerId: string, worldId: string, username: string): boolean {
         // Get the world by the provided id
         const worker = this.worlds.get(worldId);
         if (!worker) return false;
 
         this.playerToWorld.set(playerId, worldId);
-        worker.postMessage({ type: WorkerEvent.PLAYER_JOINED, playerId });
+        worker.postMessage({ type: WorkerEvent.JOINED, playerId, username });
         return true;
     }
 
@@ -128,7 +133,7 @@ export default class WorldManager extends EventEmitter {
     public leaveWorld(playerId: string) {
         const worldId = this.playerToWorld.get(playerId);
         if (worldId) {
-            this.worlds.get(worldId)?.postMessage({ type: WorkerEvent.PLAYER_LEFT, playerId });
+            this.worlds.get(worldId)?.postMessage({ type: WorkerEvent.LEFT, playerId });
             this.playerToWorld.delete(playerId);
         }
     }
@@ -140,6 +145,20 @@ export default class WorldManager extends EventEmitter {
     public getPlayerWorldId(playerId: string): string | undefined {
         return this.playerToWorld.get(playerId);
     }
+
+    /**
+     * Sends a message to the worker thread of the requested world to retrieve a full sync
+     * @param playerId the id of a player in the world
+     */
+    public requestSync(playerId: string) {
+        const worker = this.getWorker(playerId);
+
+        if (worker) {
+
+            worker.postMessage({ type: WorkerEvent.SYNC, playerId });
+        }
+    }
+
 
     /**
      * Helper method to retrieve a worker and 
@@ -179,7 +198,7 @@ export default class WorldManager extends EventEmitter {
         for (const [playerId, playerWorldId] of this.playerToWorld.entries()) {
             if (playerWorldId === worldId) {
                 this.playerToWorld.delete(playerId);
-                this.emit(ManagerEvent.PLAYER_KICKED, playerId, 'World Crashed');
+                this.emit(ManagerEvent.KICKED, playerId, 'World Crashed');
             }
         }
     }

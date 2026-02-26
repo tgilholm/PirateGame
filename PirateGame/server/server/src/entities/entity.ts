@@ -1,4 +1,6 @@
 export default abstract class Entity {
+    private static idCounter = 0;   // for unique ids
+
     public id: string;
     public type: string;
     public x: number;   // x coord
@@ -9,9 +11,10 @@ export default abstract class Entity {
     public av: number;  // angular velocity
     public health: number;
     public maxHealth: number;
+    public parent: Entity | null;
 
-    constructor(id: string, type: string, x: number, y: number, maxHealth: number) {
-        this.id = id;
+    constructor(type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
+        this.id = `${this.constructor.name}:${++Entity.idCounter}`;  // increment before return
         this.type = type;
         this.x = x;
         this.y = y;
@@ -23,6 +26,7 @@ export default abstract class Entity {
         this.av = 0;
 
         // All entities have health and can be destroyed
+        this.parent = parent;
         this.maxHealth = maxHealth;
         this.health = maxHealth;    // Start at maximum
     }
