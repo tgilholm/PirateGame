@@ -18,9 +18,10 @@ export default class Shop {
         const dist = Phaser.Math.Distance.Between(player.sprite.x, player.sprite.y, this.x, this.y);
 
         if (dist < this.interactRange) {
-            ui.showPrompt("(E) Enter Shop");
+            ui.promptEl.textContent = "(E) Enter Shop";
+            ui.promptEl.style.display = "block";
             if (Phaser.Input.Keyboard.JustDown(keys.E)) {
-                ui.openShop();
+                ui.shopUI.open();
             }
         }
     }

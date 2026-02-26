@@ -1,4 +1,4 @@
-﻿import CreateUI from "./createUI.js";
+﻿import DomFactory from "./domFactory.js";
 
 /**
  * ShopUI  builds and manages the shop overlay.
@@ -19,11 +19,11 @@ export default class ShopUI {
         { name: "Item 6", description: "Placeholder item." },
     ];
 
-    /**
-     * @param {HTMLElement} menuEl - The #shop-menu container element
-     */
-    constructor(menuEl) {
-        this.menuEl = menuEl;
+    constructor() {
+        // Build and mount own container — no #shop-menu needed in index.html
+        this.menuEl = DomFactory.createElement("div", [], { id: "shop-menu" });
+        this.menuEl.style.display = "none";
+        document.body.appendChild(this.menuEl);
         this._build();
     }
 
@@ -47,15 +47,15 @@ export default class ShopUI {
         this.menuEl.innerHTML = "";
 
         // Title
-        const title = CreateUI.createElement("h2", ["shop-title"]);
+        const title = DomFactory.createElement("h2", ["shop-title"]);
         title.textContent = "SHOP";
         this.menuEl.appendChild(title);
 
         // 6-item grid
-        const grid = CreateUI.createElement("div", ["shop-grid"]);
+        const grid = DomFactory.createElement("div", ["shop-grid"]);
         for (const item of ShopUI.ITEMS) {
             grid.appendChild(
-                CreateUI.createCard(item.name, item.description, () => {
+                DomFactory.createCard(item.name, item.description, () => {
                     console.log(`[ShopUI] Clicked: ${item.name}`);
                 })
             );
@@ -64,7 +64,7 @@ export default class ShopUI {
 
         // Close button
         this.menuEl.appendChild(
-            CreateUI.createButton("Close", () => this.close(), ["shop-close-btn"])
+            DomFactory.createButton("Close", () => this.close(), ["shop-close-btn"])
         );
     }
 }

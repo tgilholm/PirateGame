@@ -1,4 +1,4 @@
-import CreateUI from "./createUI.js";
+import DomFactory from "./domFactory.js";
 import UI_CONFIG from "./UIConfig.json" with { type: "json" };
 
 /**
@@ -29,7 +29,7 @@ export default class DebugMenu {
 
         // Build all DOM elements via CreateUI
         const { menu, statsSection, statsBtn, statsOverlay, statsContent } =
-            CreateUI.createDebugMenuDOM();
+            DomFactory.createDebugMenuDOM();
 
         this.menuEl       = menu;
         this.statsSection = statsSection; // component sections are inserted before this
@@ -67,7 +67,7 @@ export default class DebugMenu {
                 onClick: () => this._applyComponent(componentKey, variant)
             }));
 
-            const section = CreateUI.createSection(componentData.name, buttons);
+            const section = DomFactory.createSection(componentData.name, buttons);
             section.dataset.componentKey = componentKey;
 
             // Always keep the stats button at the bottom

@@ -1,10 +1,10 @@
-import CreateUI from "./createUI.js";
+import DomFactory from "./domFactory.js";
 import UI_CONFIG from "./UIConfig.json" with { type: "json" };
 
 /**
  * Minimap — owns all minimap DOM elements and marker-drawing logic.
  *
- * Uses CreateUI.createMinimapContent() to inject the <img> and <canvas>
+ * Uses DomFactory.createMinimapContent() to inject the <img> and <canvas>
  * into the #minimap-container placeholder, keeping index.html clean.
  */
 export default class Minimap {
@@ -19,7 +19,7 @@ export default class Minimap {
         containerEl.style.height = `${size}px`;
 
         // Build inner elements via CreateUI
-        const { img, canvas } = CreateUI.createMinimapContent(containerEl, imgSrc);
+        const { img, canvas } = DomFactory.createMinimapContent(containerEl, imgSrc);
         this.img    = img;
         this.canvas = canvas;
         this.ctx    = canvas.getContext("2d");

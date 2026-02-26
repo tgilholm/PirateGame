@@ -141,7 +141,7 @@ export class MainScene extends Phaser.Scene {
                 }
 
                 // Show the minimap and place the initial marker
-                this.ui.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+                this.ui.minimap.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
             }
         });
 
@@ -210,7 +210,7 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
-        this.ui?.clear(); // Clear UI messages each frame- they will be re-added if still relevant
+        this.ui?.promptEl && (this.ui.promptEl.style.display = "none"); // Clear UI messages each frame- they will be re-added if still relevant
 
 
         const cameraTarget = this.cameraTarget;
@@ -247,7 +247,8 @@ export class MainScene extends Phaser.Scene {
 
             // Helm controls
             if (dist < 30 && !player.isSteering) { // only show if not already controlling
-                this.ui.showPrompt("(E) Start Steering");
+                this.ui.promptEl.textContent = "(E) Start Steering";
+                this.ui.promptEl.style.display = "block";
 
                 // Only send take control command if E is just pressed (not held)
                 if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
@@ -261,7 +262,8 @@ export class MainScene extends Phaser.Scene {
 
             // If controlling, display "release control" message
             if (player.parentId === parentId && player.isSteering) {
-                this.ui.showPrompt("(Q) Stop Steering");
+                this.ui.promptEl.textContent = "(Q) Stop Steering";
+                this.ui.promptEl.style.display = "block";
 
                 if (this.inputHandler.justPressed(this.inputHandler.keys.Q)) {
                     console.log(`Releasing control of ship ${parentId}`);
@@ -282,7 +284,8 @@ export class MainScene extends Phaser.Scene {
             for (let i = 0; i < ladderDists.length; i++) {
                 // If on ship, ladder lets players exit ship
                 if (ladderDists[i] < 30 && player.parentId === parentId) {
-                    this.ui.showPrompt("(E) Exit Ship");
+                    this.ui.promptEl.textContent = "(E) Exit Ship";
+                    this.ui.promptEl.style.display = "block";
                     if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
                         console.log(`Attempting to exit ship ${parentId}`);
                         socket.emit('player:exitShip', {
@@ -322,7 +325,8 @@ export class MainScene extends Phaser.Scene {
 
                 // If close enough, display the message to climb the ladder and send the command if E is pressed
                 if (ladderDists[0] < 30 || ladderDists[1] < 30) {
-                    this.ui.showPrompt("(E) Climb Ladder");
+                    this.ui.promptEl.textContent = "(E) Climb Ladder";
+                    this.ui.promptEl.style.display = "block";
                     if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
                         console.log(`Attempting to climb ladder on ship ${shipId}`);
                         socket.emit('player:enterShip', {
@@ -357,7 +361,7 @@ export class MainScene extends Phaser.Scene {
         }
 
         // Update minimap marker with current world position
-        this.ui.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+        this.ui.minimap.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
 
         // // Ship movement (WASD when zoomed out)
         // socket.emit('shipInput', {
