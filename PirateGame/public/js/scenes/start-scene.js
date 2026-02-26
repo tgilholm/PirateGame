@@ -13,6 +13,10 @@ export class StartScene extends Phaser.Scene {
         this.load.image('background', 'assets/water.png');
         this.load.image('title', 'assets/title.png');
         this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
+    
+        window.addEventListener('resize', () => {
+            this.scale.resize(window.innerWidth, window.innerHeight);
+        });
     }
 
     create() {
