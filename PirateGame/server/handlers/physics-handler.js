@@ -64,10 +64,6 @@ export default class PhysicsHandler {
     }
 
     update() {
-        EntityRegistry.getPlayers().forEach(player => {
-            const ship = player.parentId ? EntityRegistry.getShip(player.parentId) : null;
-            this.updatePlayerPhysics(player, ship);
-        });
 
         // Update all ships
         EntityRegistry.getShips().forEach(ship => {
@@ -76,68 +72,7 @@ export default class PhysicsHandler {
         Engine.update(this.engine, 1000 / CONFIG.TICK_RATE);
     }
 
-    /**
-     * 
-     * @param {Player} player 
-     * @param {Ship} ship 
-     * @returns 
-     */
-    updatePlayerPhysics(player, ship) {
-        // Destructure inputs
-        const { up, down, left, right } = player.inputs;
 
-        //walking vs swimming speed
-        const speed = ship ? CONFIG.PLAYER.SPEED : CONFIG.PLAYER.SWIM_SPEED;
-
-
-        if (ship) {// Player is on a ship (local space)
-            // Cannot move while steering
-            if (player.id === ship.pilotId) return;
-
-            const shipX = ship.position.x;
-            const shipY = ship.position.y;
-            const r = ship.rotation;
-
-            // Get world position of player
-            let worldPos = ship.localToWorld(player.position.x, player.position.y);
-
-            // Apply movement in world space
-            if (up) worldPos.y -= speed;
-            if (down) worldPos.y += speed;
-            if (left) worldPos.x -= speed;
-            if (right) worldPos.x += speed;
-
-            //console.log(worldPos.x, worldPos.y);
-
-            // Convert back to local space
-            const newLocal = ship.worldToLocal(worldPos.x, worldPos.y);
-
-            // Collision check with ship hull
-            const playerRadius = CONFIG.PLAYER.RADIUS;
-            if (ship.isInside(newLocal.x, newLocal.y, playerRadius)) {
-                player.position.x = newLocal.x;
-                player.position.y = newLocal.y;
-            } else {
-                // Slide along walls
-                if (ship.isInside(newLocal.x, player.position.y, playerRadius)) {
-                    player.position.x = newLocal.x;
-                } else if (ship.isInside(player.position.x, newLocal.y, playerRadius)) {
-                    player.position.y = newLocal.y;
-                }
-            }
-        } else {
-            // Player is in world space - move freely
-            if (up) player.position.y -= speed;
-            if (down) player.position.y += speed;
-            if (left) player.position.x -= speed;
-            if (right) player.position.x += speed;
-        }
-    }
-
-    /**
-     * 
-     * @param {Ship} ship 
-     */
     updateShipPhysics(ship) {
         const { up, down, left, right } = ship.inputs;
         const body = ship.body;

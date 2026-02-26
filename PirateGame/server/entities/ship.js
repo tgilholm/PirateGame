@@ -141,56 +141,7 @@ export default class Ship extends Entity {
         return this.params;
     }
 
-    isInside(localX, localY, padding = 15) {
-        const halfMidWidth = (this.middleWidth / 2) - padding;
-        const halfHeight = (this.height / 2) - padding;
-        const paddedSternRadius = this.sternRadius - padding;
-        const paddedBowLength = this.bowLength - padding;
 
-        if (localX < -halfMidWidth) {
-            const dx = localX + halfMidWidth;
-            return (dx ** 2 + localY ** 2) <= (paddedSternRadius ** 2);
-        } else if (localX > halfMidWidth) {
-            const t = (localX - halfMidWidth) / paddedBowLength;
-            if (t > 1) return false;
-            const hullLimitY = halfHeight * (1 - (t ** 2));
-            return Math.abs(localY) <= hullLimitY;
-        } else {
-            return Math.abs(localY) <= halfHeight;
-        }
-    }
 
-    toData() {
-        return {
-            ...super.toData(),  // "spread" the underlying entity data, append ship stuff
-            pilotId: this.pilotId,
-            health: this.health,
-            params: this.params
-        };
-    }
 
-    localToWorld(localX, localY) {
-        const cos = Math.cos(this.rotation);
-        const sin = Math.sin(this.rotation);
-
-        const rotatedX = localX * cos - localY * sin;
-        const rotatedY = localX * sin + localY * cos;
-
-        return {
-            x: this.position.x + rotatedX,
-            y: this.position.y + rotatedY
-        };
-    }
-
-    worldToLocal(worldX, worldY) {
-        const dx = worldX - this.position.x;
-        const dy = worldY - this.position.y;
-        const cos = Math.cos(-this.rotation);
-        const sin = Math.sin(-this.rotation);
-
-        return {
-            x: dx * cos - dy * sin,
-            y: dx * sin + dy * cos
-        };
-    }
 }

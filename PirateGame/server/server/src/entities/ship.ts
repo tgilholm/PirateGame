@@ -6,8 +6,8 @@ import Entity from "./entity";
 
 export default class Ship extends Entity {
     pilotId: string | null;
-    dimensions: any;
-    physics: any;
+    dimensions: ShipConfig["dimensions"];
+    physics: ShipConfig["physics"];
     inputs: any;
 
     constructor(
@@ -51,6 +51,52 @@ export default class Ship extends Entity {
             ...super.serialise(),
             pilotId: this.pilotId,  // For client side messages
             dimensions: this.dimensions // For client side drawing
+        }
+    }
+
+
+    localToWorld(localX: number, localY: number) {
+        const cos = Math.cos(this.r);
+        const sin = Math.sin(this.r);
+
+        const rotatedX = localX * cos - localY * sin;
+        const rotatedY = localX * sin + localY * cos;
+
+        return {
+            x: this.x + rotatedX,
+            y: this.y + rotatedY
+        };
+    }
+
+    worldToLocal(worldX: number, worldY: number) {
+        const dx = worldX - this.x;
+        const dy = worldY - this.y;
+        const cos = Math.cos(-this.r);
+        const sin = Math.sin(-this.r);
+
+        return {
+            x: dx * cos - dy * sin,
+            y: dx * sin + dy * cos
+        };
+    }
+
+
+    isInside(localX: number, localY: number, padding = 15) {
+        const halfMidWidth = (this.dimensions.middleWidth / 2) - padding;
+        const halfHeight = (this.dimensions.height / 2) - padding;
+        const paddedSternRadius = this.dimensions.sternRadius - padding;
+        const paddedBowLength = this.dimensions.bowLength - padding;
+
+        if (localX < -halfMidWidth) {
+            const dx = localX + halfMidWidth;
+            return (dx ** 2 + localY ** 2) <= (paddedSternRadius ** 2);
+        } else if (localX > halfMidWidth) {
+            const t = (localX - halfMidWidth) / paddedBowLength;
+            if (t > 1) return false;
+            const hullLimitY = halfHeight * (1 - (t ** 2));
+            return Math.abs(localY) <= hullLimitY;
+        } else {
+            return Math.abs(localY) <= halfHeight;
         }
     }
 }

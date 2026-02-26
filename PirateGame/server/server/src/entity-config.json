@@ -1,6 +1,9 @@
 {
     "player": {
-        "maxHealth": 100
+        "maxHealth": 100,
+        "runSpeed": 5,
+        "swimSpeed": 3,
+        "radius": 15
     },
     "ship": {
         "maxHealth": 1000,
