@@ -7,7 +7,7 @@ let onShip = false;
 
 const zoom = {
     //player enteres/leaves a shipw, change zoom mode
-    setOnShip(isOnShip) { 
+    setOnShip(isOnShip) {
         onShip = isOnShip;
         //reset zoom index
         playerZoomIndex = 0;
@@ -17,7 +17,7 @@ const zoom = {
     //when ship components update
     setVisionRange(visionRange) {
         currentVisionRange = Math.max(1, Math.min(visionRange, shipZoom.length));
-        
+
         shipZoomIndex = Math.min(shipZoomIndex, currentVisionRange - 1);
     },
 
@@ -34,7 +34,7 @@ const zoom = {
     //gets the current zoom value
     getZoomValue() {
         if (onShip) {
-            return shipZoom[shipZoomIndex];  
+            return shipZoom[shipZoomIndex];
         } else {
             return playerZoom[playerZoomIndex];
         }

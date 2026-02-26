@@ -116,12 +116,12 @@ export default class Ship extends Parent {
         this.ladder2 = this.scene.add.sprite(ladders[1].x, ladders[1].y, 'ladder');
         this.ladder2.setFlipY(true);
         this.container.add(this.ladder2);
-        
+
 
         // Ensure all these objects are above the hull sprite
         // (Since hullSprite was sentToBack, new items are naturally on top)
 
-        
+
         console.log(`Interactables created ${this.container}`)
     }
 

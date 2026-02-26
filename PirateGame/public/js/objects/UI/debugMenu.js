@@ -31,9 +31,9 @@ export default class DebugMenu {
         const { menu, statsSection, statsBtn, statsOverlay, statsContent } =
             DomFactory.createDebugMenuDOM();
 
-        this.menuEl       = menu;
+        this.menuEl = menu;
         this.statsSection = statsSection; // component sections are inserted before this
-        this.statsBtn     = statsBtn;
+        this.statsBtn = statsBtn;
         this.statsOverlay = statsOverlay;
         this.statsContent = statsContent;
 

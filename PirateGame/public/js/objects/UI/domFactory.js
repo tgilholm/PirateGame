@@ -75,7 +75,7 @@ export default class DomFactory {
         const nameEl = DomFactory.createElement("span", ["shop-card-name"]);
         nameEl.textContent = name;
         card.appendChild(nameEl);
-        
+
         const descEl = DomFactory.createElement("p", ["shop-card-description"]);
         descEl.textContent = description;
         card.appendChild(descEl);

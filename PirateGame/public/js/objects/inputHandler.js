@@ -25,11 +25,11 @@ export default class InputHandler {
 
         // Camera / utility keys
         this.shipKeys = /** @type {any} */ (scene.input.keyboard.addKeys({
-            left:  Phaser.Input.Keyboard.KeyCodes.LEFT,
-            down:  Phaser.Input.Keyboard.KeyCodes.DOWN,
+            left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+            down: Phaser.Input.Keyboard.KeyCodes.DOWN,
             right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-            up:    Phaser.Input.Keyboard.KeyCodes.UP,
-            zoom:  Phaser.Input.Keyboard.KeyCodes.Z,
+            up: Phaser.Input.Keyboard.KeyCodes.UP,
+            zoom: Phaser.Input.Keyboard.KeyCodes.Z,
         }));
 
         // Auto-cleanup when the owning scene shuts down
@@ -57,12 +57,12 @@ export default class InputHandler {
     getMovementInput() {
         const k = this.keys;
         return {
-            up:    k.W.isDown,
-            left:  k.A.isDown,
-            down:  k.S.isDown,
+            up: k.W.isDown,
+            left: k.A.isDown,
+            down: k.S.isDown,
             right: k.D.isDown,
-            e:     k.E.isDown,
-            q:     k.Q.isDown,
+            e: k.E.isDown,
+            q: k.Q.isDown,
             space: k.space.isDown
         };
     }

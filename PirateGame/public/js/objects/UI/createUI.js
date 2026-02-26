@@ -13,19 +13,17 @@ export default class CreateUI {
 
         //top message text
         this.messageText = scene.add.text(
-            scene.cameras.main.width / 2,
-            20,
-            "",
+            scene.cameras.main.width / 2, 20, "",
             {
-            fontSize: UI_CONFIG.MESSAGE_TEXT.FONT_SIZE,
-            fill: UI_CONFIG.MESSAGE_TEXT.COLOR,
-            backgroundColor: UI_CONFIG.MESSAGE_TEXT.BACKGROUND
+                fontSize: UI_CONFIG.MESSAGE_TEXT.FONT_SIZE,
+                fill: UI_CONFIG.MESSAGE_TEXT.COLOR,
+                backgroundColor: UI_CONFIG.MESSAGE_TEXT.BACKGROUND
             }
         )
-        .setOrigin(0.5, 0)
-        .setScrollFactor(0)
-        .setDepth(1000)
-        .setVisible(false);
+            .setOrigin(0.5, 0)
+            .setScrollFactor(0)
+            .setDepth(1000)
+            .setVisible(false);
 
         //minimap
         this.minimap = new Minimap(document.getElementById("minimap-container"));

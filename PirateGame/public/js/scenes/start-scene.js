@@ -50,9 +50,9 @@ export class StartScene extends Phaser.Scene {
 
         let startBtn = document.getElementById('start-btn');
         startBtn.addEventListener('click', () => {
-            let inputText =  document.getElementById('input-text')
+            let inputText = document.getElementById('input-text')
             // @ts-ignore because getElementById returns HTMLElement, not HTMLInputElement- it works regardless
-            let username = inputText.value; 
+            let username = inputText.value;
 
             if (username) // not null or empty
             {

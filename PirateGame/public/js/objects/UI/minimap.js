@@ -20,7 +20,7 @@ export default class Minimap {
         this.container = containerEl;
 
         //apply dimensions
-        containerEl.style.width  = `${size}px`;
+        containerEl.style.width = `${size}px`;
         containerEl.style.height = `${size}px`;
 
         //build inner elements via CreateUI
@@ -33,7 +33,7 @@ export default class Minimap {
         this.syncSize();
 
         //map world dimensions – set when initializeMarker() is first called
-        this.mapWidth  = 0;
+        this.mapWidth = 0;
         this.mapHeight = 0;
     }
 
@@ -45,7 +45,7 @@ export default class Minimap {
      * @param {number} mapHeight - pixel height of the game world.
      */
     initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
-        this.mapWidth  = mapWidth;
+        this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
         this.container.style.display = "block";
         this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
@@ -80,7 +80,7 @@ export default class Minimap {
     //Keeps canvas in sync with container display size
     syncSize() {
         if (this.canvas.width !== this.container.offsetWidth) {
-            this.canvas.width  = this.container.offsetWidth;
+            this.canvas.width = this.container.offsetWidth;
             this.canvas.height = this.container.offsetHeight;
         }
     }

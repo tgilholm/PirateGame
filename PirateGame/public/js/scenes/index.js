@@ -1,5 +1,5 @@
 import { StartScene } from "./start-scene.js";
-import { MainScene} from "./main-scene.js";
+import { MainScene } from "./main-scene.js";
 
 const parent = document.getElementById('game-container');
 
