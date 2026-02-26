@@ -1,3 +1,4 @@
+import { Bodies, Body } from "matter-js";
 import { ShipConfig } from "../types";
 import Entity from "./entity";
 
@@ -8,6 +9,7 @@ export default class Ship extends Entity {
     pilotId: string | null;
     dimensions: ShipConfig["dimensions"];
     physics: ShipConfig["physics"];
+    body: Matter.Body
     inputs: any;
 
     constructor(
@@ -27,6 +29,8 @@ export default class Ship extends Entity {
             left: false,
             right: false
         }
+
+        this.body = this.createPhysicsBody(x, y);
     }
 
     /**
@@ -98,5 +102,63 @@ export default class Ship extends Entity {
         } else {
             return Math.abs(localY) <= halfHeight;
         }
+    }
+
+    createPhysicsBody(x: number, y: number) {
+        const sternRadius = this.dimensions.sternRadius;
+        const middleWidth = this.dimensions.middleWidth;
+        const middleHeight = this.dimensions.height;
+        const bowLength = this.dimensions.bowLength;
+
+        const sternBody = Bodies.circle(
+            x - (middleWidth / 2),
+            y,
+            sternRadius * 0.9,
+            {
+                label: 'ship-stern',
+                friction: 0.5,
+                restitution: 0.2,
+                mass: 50
+            }
+        );
+
+        const middleBody = Bodies.rectangle(
+            x,
+            y,
+            middleWidth,
+            middleHeight,
+            {
+                label: 'ship-middle',
+                friction: 0.5,
+                restitution: 0.2,
+                mass: 100
+            }
+        );
+
+        const bowBody = Bodies.trapezoid(
+            x + (middleWidth / 2),
+            y,
+            bowLength,
+            middleHeight,
+            0.65,
+            {
+                label: 'ship-bow',
+                friction: 0.5,
+                restitution: 0.2,
+                mass: 50
+            }
+        );
+        Body.rotate(bowBody, Math.PI / 2);
+
+        const body = Body.create({
+            parts: [sternBody, middleBody, bowBody],
+            frictionAir: 0.05,
+            mass: 200,
+            label: 'ship',
+            restitution: 0.2
+        });
+
+        Body.setPosition(body, { x, y });
+        return body;
     }
 }

@@ -1,3 +1,4 @@
+import { Body } from "matter-js";
 import EntityRegistry from "../engine/entity-registry";
 import TerrainMap from "../engine/terrain-map";
 import Player from "../entities/player";
@@ -71,7 +72,21 @@ export default class MovementSystem implements BaseSystem {
 
 
     updateShip(ship: Ship, dt: number) {
+        const {up, left, right} = ship.inputs;
+        const body = ship.body;
+        const {turnSpeed, thrust} = ship.physics;
+        
+        if (left) Body.setAngularVelocity(body, -turnSpeed);
+        if (right) Body.setAngularVelocity(body, turnSpeed);
 
+        if (up) {
+            const force = {
+                x: Math.cos(body.angle) * thrust,
+                y: Math.sin(body.angle) * thrust
+            };
+
+            Body.applyForce(body, body.position, force);
+        }
     }
 
 }

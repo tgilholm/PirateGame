@@ -39,4 +39,14 @@ export default class TerrainMap {
         const tileY = Math.floor(worldY / this.tileWidth);
         return this.islandTiles.has(`${tileX},${tileY}`);
     }
+
+    public getIslandTiles(): { worldX: number, worldY: number }[] {
+        return Array.from(this.islandTiles).map(key => {
+            const [tileX, tileY] = key.split(',').map(Number);
+            return {
+                worldX: tileX * this.tileWidth + this.tileWidth / 2,
+                worldY: tileY * this.tileWidth + this.tileWidth / 2
+            };
+        });
+    }
 }

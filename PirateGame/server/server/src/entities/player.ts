@@ -6,6 +6,7 @@ export default class Player extends Entity {
     username: string;
     isSteering: boolean;
     isUsingCannon: boolean;
+    isCarrying: boolean;
     inputs: {
         up: boolean;
         down: boolean;
@@ -30,6 +31,7 @@ export default class Player extends Entity {
         // Player-specific detail
         this.isSteering = false;
         this.isUsingCannon = false;
+        this.isCarrying = false;
         this.inputs = {
             up: false,
             down: false,
