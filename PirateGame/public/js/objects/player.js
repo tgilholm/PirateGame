@@ -30,7 +30,7 @@ export default class Player {
      * @param {Parent} parentObject 
      */
     updateState(data, parentObject) {
-         console.log(`Player updateState called with x: ${data.x}, y: ${data.y}, parentId: ${data.parentId}`);
+        console.log(`Player updateState called with x: ${data.x}, y: ${data.y}, parentId: ${data.parentId}`);
 
         // if username provided and not already set
         if (data.username && this.nameText.text !== data.username) {
@@ -84,6 +84,7 @@ export default class Player {
         this.nameText.y = worldY - 20;
     }
 
+    //cleanup when player leaves
     destroy() {
         this.sprite.destroy();
         this.nameText.destroy();

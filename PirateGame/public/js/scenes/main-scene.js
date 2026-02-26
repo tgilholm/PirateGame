@@ -3,9 +3,10 @@
 
 import Player from "../objects/player.js";
 import Ship from "../objects/ship.js";
-import UI from "../objects/ui.js";
+import UI from "../objects/UI/createUI.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
+import InputHandler from "../objects/inputHandler.js";
 //import PlayerInventory from "../objects/playerInventory.js";
 
 
@@ -27,16 +28,13 @@ export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
 
-        this.keys = null;
-        this.shipKeys = null;
+        this.inputHandler = null;
         this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
         //this.gameState = new gameState();
         //this.playerInventory = new PlayerInventory(this);
-
-
     }
 
 
@@ -70,8 +68,6 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
 
-        // Cameras
-
         // Initialize UI
         this.ui = new UI(this);
 
@@ -97,15 +93,7 @@ export class MainScene extends Phaser.Scene {
         this.mapHeight = map.heightInPixels;
 
         // Keyboard input
-        this.keys = /** @type {any} */ (this.input.keyboard.addKeys("W, A, S, D, E, Q, space"));
-        this.shipKeys = /** @type {any} */ (this.input.keyboard.addKeys({
-            left: Phaser.Input.Keyboard.KeyCodes.LEFT,
-            down: Phaser.Input.Keyboard.KeyCodes.DOWN,
-            right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-            up: Phaser.Input.Keyboard.KeyCodes.UP,
-            zoom: Phaser.Input.Keyboard.KeyCodes.Z,
-            debug: Phaser.Input.Keyboard.KeyCodes.X
-        }));
+        this.inputHandler = new InputHandler(this);
 
 
         // Generate the entire game once when the "handshake" is received
@@ -154,7 +142,7 @@ export class MainScene extends Phaser.Scene {
                 }
 
                 // Show the minimap and place the initial marker
-                this.ui.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+                this.ui.minimap.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
             }
         });
 
@@ -223,7 +211,7 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
-        this.ui?.clear(); // Clear UI messages each frame- they will be re-added if still relevant
+        this.ui?.promptEl && (this.ui.promptEl.style.display = "none"); // Clear UI messages each frame- they will be re-added if still relevant
 
 
         const cameraTarget = this.cameraTarget;
@@ -260,10 +248,11 @@ export class MainScene extends Phaser.Scene {
 
             // Helm controls
             if (dist < 30 && !player.isSteering) { // only show if not already controlling
-                this.ui.showPrompt("(E) Start Steering");
+                this.ui.promptEl.textContent = "(E) Start Steering";
+                this.ui.promptEl.style.display = "block";
 
                 // Only send take control command if E is just pressed (not held)
-                if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+                if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
                     console.log(`Attempting to take control of ship ${parentId}`);
                     socket.emit('player:takeControl', {
                         // Send ship id 
@@ -274,9 +263,10 @@ export class MainScene extends Phaser.Scene {
 
             // If controlling, display "release control" message
             if (player.parentId === parentId && player.isSteering) {
-                this.ui.showPrompt("(Q) Stop Steering");
+                this.ui.promptEl.textContent = "(Q) Stop Steering";
+                this.ui.promptEl.style.display = "block";
 
-                if (Phaser.Input.Keyboard.JustDown(this.keys.Q)) {
+                if (this.inputHandler.justPressed(this.inputHandler.keys.Q)) {
                     console.log(`Releasing control of ship ${parentId}`);
                     socket.emit('player:releaseControl', {
                         shipId: parentId
@@ -295,8 +285,9 @@ export class MainScene extends Phaser.Scene {
             for (let i = 0; i < ladderDists.length; i++) {
                 // If on ship, ladder lets players exit ship
                 if (ladderDists[i] < 30 && player.parentId === parentId) {
-                    this.ui.showPrompt("(E) Exit Ship");
-                    if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+                    this.ui.promptEl.textContent = "(E) Exit Ship";
+                    this.ui.promptEl.style.display = "block";
+                    if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
                         console.log(`Attempting to exit ship ${parentId}`);
                         socket.emit('player:exitShip', {
                             shipId: parentId
@@ -335,8 +326,9 @@ export class MainScene extends Phaser.Scene {
 
                 // If close enough, display the message to climb the ladder and send the command if E is pressed
                 if (ladderDists[0] < 30 || ladderDists[1] < 30) {
-                    this.ui.showPrompt("(E) Climb Ladder");
-                    if (Phaser.Input.Keyboard.JustDown(this.keys.E)) {
+                    this.ui.promptEl.textContent = "(E) Climb Ladder";
+                    this.ui.promptEl.style.display = "block";
+                    if (this.inputHandler.justPressed(this.inputHandler.keys.E)) {
                         console.log(`Attempting to climb ladder on ship ${shipId}`);
                         socket.emit('player:enterShip', {
                             shipId: shipId,
@@ -347,7 +339,7 @@ export class MainScene extends Phaser.Scene {
             }
 
             // Check distance to the shop
-            this.shop.update(player, this.keys, this.ui);
+            this.shop.update(player, this.inputHandler.keys, this.ui);
 
 
             // Player is in world space
@@ -360,25 +352,17 @@ export class MainScene extends Phaser.Scene {
 
 
         // Player movement
-        socket.emit('player:moveInput', {
-            up: this.keys.W.isDown,
-            left: this.keys.A.isDown,
-            down: this.keys.S.isDown,
-            right: this.keys.D.isDown,
-            e: this.keys.E.isDown,
-            q: this.keys.Q.isDown,
-            space: this.keys.space.isDown
-        });
+        socket.emit('player:moveInput', this.inputHandler.getMovementInput());
 
 
         // Toggle zoom when Z is pressed
-        if (Phaser.Input.Keyboard.JustDown(this.shipKeys.zoom)) {
+        if (this.inputHandler.justPressed(this.inputHandler.shipKeys.zoom)) {
             const zoomValue = zoom.toggleZoom();
             this.cameras.main.setZoom(zoomValue);
         }
 
         // Update minimap marker with current world position
-        this.ui.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+        this.ui.minimap.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
 
         // // Ship movement (WASD when zoomed out)
         // socket.emit('shipInput', {

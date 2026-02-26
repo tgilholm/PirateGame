@@ -21,6 +21,7 @@ export default class Ship extends Parent {
         this.lastUpdateTime = 0;
     }
 
+    //draws ship hull based on parameters in params
     drawHull() {
         if (!this.params) return;
         const { height, middleWidth, bowLength, sternRadius } = this.params;
@@ -115,24 +116,24 @@ export default class Ship extends Parent {
         this.ladder2 = this.scene.add.sprite(ladders[1].x, ladders[1].y, 'ladder');
         this.ladder2.setFlipY(true);
         this.container.add(this.ladder2);
-        
+
 
         // Ensure all these objects are above the hull sprite
         // (Since hullSprite was sentToBack, new items are naturally on top)
 
-        
+
         console.log(`Interactables created ${this.container}`)
     }
 
 
-
+    //extrapolation + interpolation to smooth movement client-side
     update() {
         if (!this.target) return;
 
 
         // Get the current time
         const now = performance.now();
-        const deltaTime = (now - this.lastUpdateTime) / 1000;   // in seconds
+        const deltaTime = (now - this.lastUpdateTime) / 1000;   //in seconds
         this.lastUpdateTime = now;
 
         // Extrapolate "expected position" from velocity and time
@@ -154,6 +155,5 @@ export default class Ship extends Parent {
         // Apply same interpolation as position
         this.container.rotation += rotDiff * 0.08;
 
-        //console.log(`Ship updated: ${this.container.x}, ${this.container.y}`);
     }
 }

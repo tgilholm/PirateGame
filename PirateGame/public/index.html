@@ -17,18 +17,11 @@
 <body>
     <div id="game-container"></div>
 
-    <!-- shop menu -->
-    <div id="shop-menu" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-         background:#222; color:white; padding:30px; border:2px solid red; z-index:1000; min-width:300px;">
-        <h2>SHOP</h2>
-        <p>shop things here</p>
-        <button onclick="document.getElementById('shop-menu').style.display='none'">Close</button>
-    </div>
-
     <form id="input-form">
         <div class="border">
-            <input class="formElement" id="input-text" type="text" name="username" placeholder="Enter Username" required maxlength="16">
-        </div> 
+            <input class="formElement" id="input-text" type="text" name="username" placeholder="Enter Username" required
+                maxlength="16">
+        </div>
         <div class="border">
             <button class="formElement" id="start-btn" type="button">Start Game</button>
         </div>
@@ -36,149 +29,11 @@
 
     
 
-    <!-- Debug Menu Window -->
-    <div id="debug-menu" style="display:none;">
-        <h3>Debug Menu</h3>
-
-        <div class="debug-section"> <!-- container for each component, makes it easier to read and organize -->
-            <span class="debug-label">Body</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('body','LVL1')">LVL1</button>
-                <button onclick="setComponent('body','LVL2')">LVL2</button>
-                <button onclick="setComponent('body','LVL3')">LVL3</button>
-                <button onclick="setComponent('body','kraken')">Kraken</button>
-                <button onclick="setComponent('body','temp1')">Temp1</button>
-                <button onclick="setComponent('body','temp2')">Temp2</button>
-                <button onclick="setComponent('body','temp3')">Temp3</button>
-                <button onclick="setComponent('body','temp4')">Temp4</button>
-                <button onclick="setComponent('body','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Sails</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('sails','LVL1')">LVL1</button>
-                <button onclick="setComponent('sails','LVL2')">LVL2</button>
-                <button onclick="setComponent('sails','LVL3')">LVL3</button>
-                <button onclick="setComponent('sails','kraken')">Kraken</button>
-                <button onclick="setComponent('sails','temp1')">Temp1</button>
-                <button onclick="setComponent('sails','temp2')">Temp2</button>
-                <button onclick="setComponent('sails','temp3')">Temp3</button>
-                <button onclick="setComponent('sails','temp4')">Temp4</button>
-                <button onclick="setComponent('sails','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Cannons</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('cannons','LVL1')">LVL1</button>
-                <button onclick="setComponent('cannons','LVL2')">LVL2</button>
-                <button onclick="setComponent('cannons','LVL3')">LVL3</button>
-                <button onclick="setComponent('cannons','kraken')">Kraken</button>
-                <button onclick="setComponent('cannons','temp1')">Temp1</button>
-                <button onclick="setComponent('cannons','temp2')">Temp2</button>
-                <button onclick="setComponent('cannons','temp3')">Temp3</button>
-                <button onclick="setComponent('cannons','temp4')">Temp4</button>
-                <button onclick="setComponent('cannons','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Head</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('head','LVL1')">LVL1</button>
-                <button onclick="setComponent('head','LVL2')">LVL2</button>
-                <button onclick="setComponent('head','LVL3')">LVL3</button>
-                <button onclick="setComponent('head','kraken')">Kraken</button>
-                <button onclick="setComponent('head','temp1')">Temp1</button>
-                <button onclick="setComponent('head','temp2')">Temp2</button>
-                <button onclick="setComponent('head','temp3')">Temp3</button>
-                <button onclick="setComponent('head','temp4')">Temp4</button>
-                <button onclick="setComponent('head','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Crows Nest</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('crowsNest','LVL1')">LVL1</button>
-                <button onclick="setComponent('crowsNest','LVL2')">LVL2</button>
-                <button onclick="setComponent('crowsNest','LVL3')">LVL3</button>
-                <button onclick="setComponent('crowsNest','kraken')">Kraken</button>
-                <button onclick="setComponent('crowsNest','temp1')">Temp1</button>
-                <button onclick="setComponent('crowsNest','temp2')">Temp2</button>
-                <button onclick="setComponent('crowsNest','temp3')">Temp3</button>
-                <button onclick="setComponent('crowsNest','temp4')">Temp4</button>
-                <button onclick="setComponent('crowsNest','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Anchor</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('anchor','LVL1')">LVL1</button>
-                <button onclick="setComponent('anchor','LVL2')">LVL2</button>
-                <button onclick="setComponent('anchor','LVL3')">LVL3</button>
-                <button onclick="setComponent('anchor','kraken')">Kraken</button>
-                <button onclick="setComponent('anchor','temp1')">Temp1</button>
-                <button onclick="setComponent('anchor','temp2')">Temp2</button>
-                <button onclick="setComponent('anchor','temp3')">Temp3</button>
-                <button onclick="setComponent('anchor','temp4')">Temp4</button>
-                <button onclick="setComponent('anchor','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Rudder</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('rudder','LVL1')">LVL1</button>
-                <button onclick="setComponent('rudder','LVL2')">LVL2</button>
-                <button onclick="setComponent('rudder','LVL3')">LVL3</button>
-                <button onclick="setComponent('rudder','kraken')">Kraken</button>
-                <button onclick="setComponent('rudder','temp1')">Temp1</button>
-                <button onclick="setComponent('rudder','temp2')">Temp2</button>
-                <button onclick="setComponent('rudder','temp3')">Temp3</button>
-                <button onclick="setComponent('rudder','temp4')">Temp4</button>
-                <button onclick="setComponent('rudder','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section">
-            <span class="debug-label">Crew</span>
-            <div class="debug-buttons">
-                <button onclick="setComponent('crew','LVL1')">LVL1</button>
-                <button onclick="setComponent('crew','LVL2')">LVL2</button>
-                <button onclick="setComponent('crew','LVL3')">LVL3</button>
-                <button onclick="setComponent('crew','kraken')">Kraken</button>
-                <button onclick="setComponent('crew','temp1')">Temp1</button>
-                <button onclick="setComponent('crew','temp2')">Temp2</button>
-                <button onclick="setComponent('crew','temp3')">Temp3</button>
-                <button onclick="setComponent('crew','temp4')">Temp4</button>
-                <button onclick="setComponent('crew','temp5')">Temp5</button>
-            </div>
-        </div>
-
-        <div class="debug-section" style="margin-top: 10px;">
-            <button id="printStatsButton">Print Ship Stats</button>
-        </div>
-    </div>
-
-    <!-- Stats panel -->
-    <div id="stats-overlay">
-        <h3>Ship Stats</h3>
-        <div id="stats-content"></div>
-    </div>
-
     <!-- Interaction prompt -->
     <div id="interaction-prompt" style="display:none;"></div>
 
-     <!-- Minimap -->
-    <div id="minimap-container" style="display:none;">
-        <img id="minimap-img" src="/assets/minimap.png" />
-        <canvas id="minimap-marker-canvas"></canvas>
-    </div>
+    <!-- Minimap — content generated dynamically by Minimap.js -->
+    <div id="minimap-container" style="display:none;"></div>
 
 </body>
 
