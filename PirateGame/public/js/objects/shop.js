@@ -20,7 +20,7 @@ export default class Shop {
         if (dist < this.interactRange) {
             ui.showPrompt("(E) Enter Shop");
             if (Phaser.Input.Keyboard.JustDown(keys.E)) {
-                document.getElementById('shop-menu').style.display = 'block';
+                ui.openShop();
             }
         }
     }
