@@ -14,6 +14,7 @@ const ships = {}
 const players = {}
 const socket = globalThis.io();
 
+
 /**
  * The "Main Class" for the game. Contains client-side image loading and
  * socket events including user input. Note that content inside these files
@@ -52,6 +53,10 @@ export class MainScene extends Phaser.Scene {
 
         // Load the plank
         this.load.image("plank", "/assets/plank.png");
+
+        window.addEventListener('resize', () => {
+            this.scale.resize(window.innerWidth, window.innerHeight);
+        });
 
     }
 
