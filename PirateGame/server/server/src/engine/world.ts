@@ -34,7 +34,7 @@ export default class World {
         const gameMode = this.config.mode;
 
         // Add via entity factory
-        this.entityRegistry.create(this.entityFactory.createPlayer(playerId, 0, 0, null, username));
+        this.entityRegistry.create(this.entityFactory.createPlayer(0, 0, null, username));
 
         /*
         Free for all- put the player on a ship at a random location

@@ -2,8 +2,6 @@ import Entity from "./entity";
 
 type PlayerConfig = typeof import("../entity-config.json")["player"];
 
-
-
 export default class Player extends Entity {
     username: string;
     isSteering: boolean;
@@ -51,6 +49,7 @@ export default class Player extends Entity {
     serialise(): any {
         /*
             ... - spread operator. Prepends all base entity data:
+            id: this.id,
             type: this.type,
             x: this.x,
             y: this.y,

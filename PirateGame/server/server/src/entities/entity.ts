@@ -1,4 +1,7 @@
 export default abstract class Entity {
+    private static idCounter = 0;   // for unique ids
+
+    public id: string;
     public type: string;
     public x: number;   // x coord
     public y: number;   // y coord
@@ -11,6 +14,7 @@ export default abstract class Entity {
     public parent: Entity | null;
 
     constructor(type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
+        this.id = `${this.constructor.name}:${++Entity.idCounter}`;  // increment before return
         this.type = type;
         this.x = x;
         this.y = y;
@@ -32,6 +36,7 @@ export default abstract class Entity {
      */
     serialise(): any {
         return {
+            id: this.id,
             type: this.type,
             x: this.x,
             y: this.y,

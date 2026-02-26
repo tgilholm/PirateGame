@@ -35,6 +35,7 @@ export default class Ship extends Entity {
     serialise(): any {
         /*
             ... - spread operator. Prepends all base entity data:
+            id: this.id
             type: this.type,
             x: this.x,
             y: this.y,

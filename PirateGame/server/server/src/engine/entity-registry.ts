@@ -14,28 +14,14 @@ export default class EntityRegistry {
      * @param entity the pre-constructed Entity to add
      */
     public create(entity: Entity): void {
-
-        // Calculate id index
+        this.entities.set(entity.id, entity);
+        // Update type index
         if (!this.entitiesByType.has(entity.type)) {
             this.entitiesByType.set(entity.type, new Set());
         }
+        this.entitiesByType.get(entity.type)!.add(entity.id);
 
-        const typeSet = this.entitiesByType.get(entity.type);
-
-        if (!typeSet) {
-            console.error("Failed to create unique ID for entity");
-            return;
-        }
-
-
-        // Create the entity id: "ship:1"
-        const typeCount = typeSet.size;
-        const entityId = `${entity.constructor.name}:${typeCount + 1}`;
-
-        this.entities.set(entityId, entity);
-        typeSet.add(entityId);
-
-        console.debug(`[Registry] Registered ${entity.constructor.name}:${entityId}`);
+        console.debug(`[Registry] Added ${entity.type}:${entity.id}`);
     }
 
     /**
@@ -43,7 +29,8 @@ export default class EntityRegistry {
      * @param id the id of the entity to retrieve
      * @returns the entity or subtype of Entity
      */
-    public get<T extends Entity>(id: string): T | undefined {
+    public get<T extends Entity>(id: string): T | undefined 
+    {
         return this.entities.get(id) as T;  // Cast to the subtype
     }
 
@@ -86,7 +73,7 @@ export default class EntityRegistry {
         this.entitiesByType.forEach((ids, type) => {
             stats[type] = ids.size;
         });
-        return { total: this.entities.size, byType: stats };
+        return {total: this.entities.size, byType: stats};
     }
 
     /**
