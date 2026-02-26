@@ -1,6 +1,6 @@
 // below const needs type wrapping or else vscode will flag as error, thanks vscode
 const chatbox = (/** @type {HTMLInputElement} */ (document.getElementById("chat-input")));
-const testMessage = document.getElementById("testMessage");
+const chatContent = document.getElementById("chat-content");
 // @ts-ignore
 const socket = io();
 
@@ -16,7 +16,7 @@ document.addEventListener("keydown", function(event){
         event.preventDefault();
         let chatMessage = chatbox.value.trim();
         if (chatMessage.length > 0){
-            socket.emit("chatMessage", chatMessage);
+            socket.emit("chat:message", chatMessage);
             chatbox.value = "";
             closeChat();
         }
@@ -32,3 +32,14 @@ function closeChat(){
     chatbox.blur();
     chatbox.classList.remove("active")
 } 
+
+socket.on("chat:message", (data) => {
+    const msgEl = document.createElement("p"); // Use <p> for each message
+    const time = new Date(data.timestamp).toLocaleTimeString();
+
+    msgEl.textContent = `[${time}] ${data.username}: ${data.message}`;
+    chatContent.appendChild(msgEl);
+
+    // Scroll to bottom
+    chatContent.scrollTop = chatContent.scrollHeight;
+});

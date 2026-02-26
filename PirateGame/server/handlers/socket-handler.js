@@ -84,6 +84,8 @@ export default class SocketHandler {
             const [namespace, action] = eventName.split(':');
 
             if (eventName === "system:playerReady") return;
+            if (namespace === "chat") return;
+            
             if (eventName === "player:moveInput") {
                 const playerId = socket.id;
                 const player = EntityRegistry.getPlayer(playerId);
