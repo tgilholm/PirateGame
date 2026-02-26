@@ -1,4 +1,4 @@
-import Entity from "server/entities/entity.js";
+import Entity from "../entities/entity.js";
 import EntityRegistry from "../engine/entity-registry.js";
 import GameEngine from "../engine/game-engine.js";
 import NpcSystem from "../systems/npc-system.js"

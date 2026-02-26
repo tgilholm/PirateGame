@@ -89,6 +89,7 @@ button {
 }
 
 #chat-window {
+    z-index: 1000; 
     position: absolute;
     right: 14px;
     bottom: 15px;
