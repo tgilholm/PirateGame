@@ -86,5 +86,69 @@ export default class CreateUI {
         return card;
     }
 
-    
+    /**
+     * Creates a labelled section with a row of buttons.
+     *   <div class="debug-section" data-component-key="">
+     *     <span class="debug-label">Label</span>
+     *     <div class="debug-buttons">...buttons...</div>
+     *   </div>
+     *
+     * @param {string} labelText
+     * @param {{ label: string, onClick: Function }[]} buttons
+     * @returns {HTMLElement}
+     */
+    static createSection(labelText, buttons) {
+        const section = CreateUI.createElement("div", ["debug-section"]);
+
+        const label = CreateUI.createElement("span", ["debug-label"]);
+        label.textContent = labelText;
+        section.appendChild(label);
+
+        const btnContainer = CreateUI.createElement("div", ["debug-buttons"]);
+        for (const { label: btnLabel, onClick } of buttons) {
+            btnContainer.appendChild(CreateUI.createButton(btnLabel, onClick));
+        }
+        section.appendChild(btnContainer);
+
+        return section;
+    }
+
+    /**
+     * Builds and appends the debug menu DOM to the given container.
+     * Returns references to the key elements for wiring up by DebugMenu.
+     *
+     * @param {HTMLElement} [container=document.body]
+     * @returns {{ menu, statsSection, statsBtn, statsOverlay, statsContent }}
+     */
+    static createDebugMenuDOM(container = document.body) {
+        const menu = CreateUI.createElement("div", [], { id: "debug-menu" });
+        menu.style.display = "none";
+
+        const heading = CreateUI.createElement("h3");
+        heading.textContent = "Debug Menu";
+        menu.appendChild(heading);
+
+        const statsSection = CreateUI.createElement("div", ["debug-section"]);
+        statsSection.style.marginTop = "8px";
+
+        const statsBtn = /** @type {HTMLButtonElement} */ (
+            CreateUI.createElement("button", [], { id: "printStatsButton" })
+        );
+        statsBtn.textContent = "Print Ship Stats";
+        statsSection.appendChild(statsBtn);
+        menu.appendChild(statsSection);
+
+        const statsOverlay = CreateUI.createElement("div", [], { id: "stats-overlay" });
+        const overlayHeading = CreateUI.createElement("h3");
+        overlayHeading.textContent = "Ship Stats";
+        statsOverlay.appendChild(overlayHeading);
+
+        const statsContent = CreateUI.createElement("div", [], { id: "stats-content" });
+        statsOverlay.appendChild(statsContent);
+
+        container.appendChild(menu);
+        container.appendChild(statsOverlay);
+
+        return { menu, statsSection, statsBtn, statsOverlay, statsContent };
+    }
 }
