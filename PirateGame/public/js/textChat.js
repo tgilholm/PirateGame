@@ -1,10 +1,12 @@
 // below const needs type wrapping or else vscode will flag as error, thanks vscode
+/* global io */
 const chatbox = (/** @type {HTMLInputElement} */ (document.getElementById("chat-input")));
 const testMessage = document.getElementById("testMessage");
+const socket = io();
 
 document.addEventListener("keydown", function(event){
     // enter chat with /
-    if (event.key === "/"){
+    if (event.key === "/" && document.activeElement !== chatbox){
         event.preventDefault();
         chatbox.focus();
         chatbox.classList.add("active");
@@ -14,8 +16,8 @@ document.addEventListener("keydown", function(event){
         event.preventDefault();
         let chatMessage = chatbox.value.trim();
         if (chatMessage.length > 0){
-            testMessage.innerText = chatMessage;
-            // send message to server and have that echo it then close the chat
+            socket.emit("chatMessage", chatMessage);
+            chatbox.value = "";
             closeChat();
         }
     }

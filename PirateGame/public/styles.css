@@ -101,8 +101,12 @@ button {
 }
 
 #chat-content{
-    background-color: antiquewhite;
+    background-color: rgba(0, 0, 0, 0.35); /*rgb needed to set backgroun opacity without changing the text*/
     border: 2px double;
     height: 150px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px
 }
