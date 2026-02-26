@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "outDir": "./built",
-        "module": "ESNext",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
         "target": "ESNext",
         "declaration": true
     },
