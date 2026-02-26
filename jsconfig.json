@@ -3,7 +3,9 @@
     "module": "ESNext",
     "target": "ESNext",
     "checkJs": true,
-    "baseUrl": "./",
+    "noImplicitAny": false,
+    "baseUrl": "./",  // fix this
+    
     "paths": {
       "*": ["src/*"],
       "shared/*": ["./shared/*"]
