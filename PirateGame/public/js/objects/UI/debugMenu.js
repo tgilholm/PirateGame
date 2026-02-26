@@ -1,53 +1,35 @@
 import DomFactory from "./domFactory.js";
 import UI_CONFIG from "./UIConfig.json" with { type: "json" };
 
-/**
- * DebugMenu — owns the entire debug panel: DOM creation, CSS injection,
- * component-switcher sections, stats overlay, and the X-key toggle.
- *
- * Usage:
- *   const debugMenu = new DebugMenu(scene);
- *   debugMenu.init(); // async — safe to fire-and-forget
- *
- * Adding or removing components/variants in types.json is all that is needed
- * to update the component sections — no HTML, CSS, or JS changes required.
- */
+//has debug panel logic/DOM creation. adding/removing components/variants in types.json automatically updates the menu
 export default class DebugMenu {
 
     /**
-     * @param {Phaser.Scene} scene - The active Phaser scene (used for keyboard binding).
-     * @param {Function} [onComponentChange]
-     *   Optional external callback fired after a variant is applied.
-     *   Signature: (componentType: string, variant: string, updatedStats: Object|null) => void
+     * @param {Phaser.Scene} scene - active scene
+     * @param {Function} [onComponentChange] - (componentType: string, variant: string, updatedStats: Object|null) => void
      */
     constructor(scene, onComponentChange = null) {
         this.scene = scene;
         this.onComponentChange = onComponentChange;
         this.menuVisible = false;
         this.statsVisible = false;
-        this.types = null; // populated in init()
+        this.types = null; //populated in init()
 
-        // Build all DOM elements via CreateUI
+        //builds DOM elements via CreateUI
         const { menu, statsSection, statsBtn, statsOverlay, statsContent } =
             DomFactory.createDebugMenuDOM();
 
         this.menuEl = menu;
-        this.statsSection = statsSection; // component sections are inserted before this
+        this.statsSection = statsSection; //component sections are inserted before this
         this.statsBtn = statsBtn;
         this.statsOverlay = statsOverlay;
         this.statsContent = statsContent;
 
-        this._wireEvents();
+        this.wireevents();
     }
 
-    // -------------------------------------------------------------------------
-    // Public
-    // -------------------------------------------------------------------------
-
-    /**
-     * Fetches component types from /api/types and populates the menu with
-     * one button-row per component.  Safe to call once; resolves async.
-     */
+   
+    //fetches component types from /api/types and populates the menu with one button-row per component
     async init() {
         let types;
         try {
@@ -64,38 +46,36 @@ export default class DebugMenu {
         for (const [componentKey, componentData] of Object.entries(types.components)) {
             const buttons = Object.keys(componentData.variants).map(variant => ({
                 label: variant,
-                onClick: () => this._applyComponent(componentKey, variant)
+                onClick: () => this.applyComponent(componentKey, variant)
             }));
 
             const section = DomFactory.createSection(componentData.name, buttons);
             section.dataset.componentKey = componentKey;
 
-            // Always keep the stats button at the bottom
+            //always keep the stats button at the bottom
             this.menuEl.insertBefore(section, this.statsSection);
         }
 
-        // Keep window.setComponent wired for console/external callers
+        //keep window.setComponent wired for console/external callers
         window.setComponent = (componentType, variant) =>
-            this._applyComponent(componentType, variant);
+            this.applyComponent(componentType, variant);
     }
 
-    /** Shows or hides the debug menu panel. */
+    //Shows or hides the debug menu panel
     toggle() {
         this.menuVisible = !this.menuVisible;
         this.menuEl.style.display = this.menuVisible ? "block" : "none";
     }
 
-    // -------------------------------------------------------------------------
-    // Private — event wiring
-    // -------------------------------------------------------------------------
 
-    _wireEvents() {
+    
+    wireevents() {
         // Print-stats button
         this.statsBtn.addEventListener("click", async () => {
-            const stats = await this._fetchShipStats();
+            const stats = await this.fetchShipStats();
             if (stats) {
                 console.log("=== SHIP STATS ===", stats);
-                this._toggleStatsOverlay(stats);
+                this.toggleStatsOverlay(stats);
             }
         });
 
@@ -105,41 +85,41 @@ export default class DebugMenu {
         );
         this.debugKey.on("down", () => this.toggle());
 
-        // Clean up on scene shutdown
+        //clean up on scene shutdown
         this.scene.events.once("shutdown", () => {
             this.debugKey?.off("down");
             this.debugKey = null;
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Private — component application
-    // -------------------------------------------------------------------------
+
+
+
+
 
     /**
-     * POSTs the chosen component variant to the server, highlights the button,
-     * and fires onComponentChange with the returned stats.
-     * @param {string} componentType - Key identifying the component (e.g. "hull", "sails").
-     * @param {string} variant       - Variant name to apply (e.g. "heavy", "light").
+     * POSTs chosen component variant to the server, highlights the button and runs onComponentChange with returned stats
+     * @param {string} componentType - key (e.g. "hull", "sails")
+     * @param {string} variant - variant name to apply (e.g. "LVL1", "kraken")
      */
-    async _applyComponent(componentType, variant) {
+    async applyComponent(componentType, variant) {
         try {
             const res = await fetch("/api/component", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ componentType, variant })
+                body: JSON.stringify({ componentType, variant }) 
             });
 
-            this._highlightButton(componentType, variant);
+            this.highlightButton(componentType, variant);
 
             const updatedStats = res.ok ? await res.json() : null;
 
-            // Refresh overlay if it is open
+            //refresh overlay if it is open
             if (this.statsVisible && updatedStats) {
-                this._updateStatsOverlay(updatedStats);
+                this.updateStatsOverlay(updatedStats);
             }
 
-            // Notify any external listener
+            //notify any external listener
             if (this.onComponentChange) {
                 this.onComponentChange(componentType, variant, updatedStats);
             }
@@ -149,11 +129,11 @@ export default class DebugMenu {
     }
 
     /**
-     * Marks the chosen variant button as active and clears the others in that row.
-     * @param {string} componentType - Key of the component section to update.
-     * @param {string} variant       - Variant name whose button should be marked active.
+     * Marks the chosen variant button as active and clears the others in that row
+     * @param {string} componentType - key of the component section to update
+     * @param {string} variant - variant name whose button should be marked active
      */
-    _highlightButton(componentType, variant) {
+    highlightButton(componentType, variant) {
         this.menuEl.querySelectorAll(".debug-section[data-component-key]").forEach(section => {
             if (section.dataset.componentKey === componentType) {
                 section.querySelectorAll("button").forEach(btn => {
@@ -163,31 +143,27 @@ export default class DebugMenu {
         });
     }
 
-    // -------------------------------------------------------------------------
-    // Private — stats overlay
-    // -------------------------------------------------------------------------
-
     /**
-     * Toggles the stats overlay panel. Opens and populates on first call; hides on second.
-     * @param {Object} stats - Key/value ship stat data returned from /api/stats.
+     * toggles the stats overlay panel. Opens and populates on first call; hides on second
+     * @param {Object} stats - key/value ship stat data returned from /api/stats
      */
-    _toggleStatsOverlay(stats) {
+    toggleStatsOverlay(stats) {
         if (this.statsVisible) {
             this.statsOverlay.style.display = "none";
             this.statsVisible = false;
             return;
         }
-        this._updateStatsOverlay(stats);
+        this.updateStatsOverlay(stats);
         this.statsOverlay.style.display = "block";
         this.statsVisible = true;
     }
 
     /**
-     * Derives ordered, deduplicated stat keys from types.components[*].affects.
-     * Falls back to Object.keys(stats) if types haven't loaded yet.
+     * derives ordered, deduplicated stat keys from types.components[*].affects.
+     * falls back to Object.keys(stats) if types haven't loaded yet.
      * @returns {string[]}
      */
-    _getStatKeys(stats) {
+    getStatKeys(stats) {
         const seen = new Set();
         const keys = [];
         if (this.types?.components) {
@@ -197,7 +173,7 @@ export default class DebugMenu {
                 }
             }
         }
-        // Fall back to whatever the server returned if types not loaded
+        //fall back to whatever the server returned if types not loaded
         for (const key of Object.keys(stats)) {
             if (!seen.has(key)) { seen.add(key); keys.push(key); }
         }
@@ -205,23 +181,22 @@ export default class DebugMenu {
     }
 
     /**
-     * Converts a camelCase key to "Title Case" label.
-     * e.g. "cannonDamage" → "Cannon Damage"
+     * camelCase -> "Title Case" label, e.g. "cannonDamage" -> "Cannon Damage"
      * @param {string} key
      * @returns {string}
      */
-    _camelToTitle(key) {
+    camelToTitle(key) {
         return key
             .replace(/([A-Z])/g, " $1")
             .replace(/^./, c => c.toUpperCase());
     }
 
     /**
-     * Rebuilds the stats overlay content from the provided stats object.
-     * @param {Object} stats - Key/value ship stat data to display.
+     * rebuilds the stats overlay content from the provided stats object
+     * @param {Object} stats - key/value ship stat data to display
      */
-    _updateStatsOverlay(stats) {
-        const keys = this._getStatKeys(stats);
+    updateStatsOverlay(stats) {
+        const keys = this.getStatKeys(stats);
 
         this.statsContent.innerHTML = keys
             .map(key => {
@@ -231,20 +206,20 @@ export default class DebugMenu {
                     : (raw ?? "N/A");
                 return `
                 <div class="stat-row">
-                    <span class="stat-label">${this._camelToTitle(key)}</span>
+                    <span class="stat-label">${this.camelToTitle(key)}</span>
                     <span class="stat-value">${display}</span>
                 </div>`;
             })
             .join("");
     }
 
-    async _fetchShipStats() {
+    async fetchShipStats() {
         try {
             const res = await fetch("/api/stats");
             if (!res.ok) throw new Error(res.status);
             return await res.json();
         } catch (e) {
-            console.error("[DebugMenu] Failed to fetch ship stats:", e);
+            console.error("[DebugMenu] failed to fetch ship stats:", e);
             return null;
         }
     }

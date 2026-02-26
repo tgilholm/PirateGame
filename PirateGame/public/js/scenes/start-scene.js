@@ -56,9 +56,9 @@ export class StartScene extends Phaser.Scene {
 
             if (username) // not null or empty
             {
-                // Hide the form before continuing
+                //hides the form
                 document.getElementById('input-form').style.display = 'none';
-                this.scene.start('MainScene', { username });      // Pass the username to the main scene
+                this.scene.start('MainScene', { username }); // Passes the username to the main scene
             }
         })
     }

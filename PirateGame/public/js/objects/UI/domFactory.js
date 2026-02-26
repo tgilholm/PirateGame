@@ -1,9 +1,5 @@
-/**
- * DomFactory — generic static DOM factory.
- * Provides reusable helpers for building UI elements.
- * Any UI class (DebugMenu, ShopUI, Minimap, etc.) can call these methods
- * instead of manually constructing DOM nodes.
- */
+//creates DOMs for UI components, reusable helpers for building UI elements, any UI class can call these methods
+
 export default class DomFactory {
 
     /**
@@ -23,10 +19,10 @@ export default class DomFactory {
     }
 
     /**
-     * Creates styled button element
-     * @param {string} label - Button text content
-     * @param {Function} onClick - Click event handler
-     * @param {string[]} [extraClasses] - Additional CSS classes to add
+     * creates styled button element
+     * @param {string} label - button text content
+     * @param {Function} onClick - click event handler
+     * @param {string[]} [extraClasses] - additional CSS classes to add
      * @returns {HTMLButtonElement}
      */
     static createButton(label, onClick, extraClasses = []) {
@@ -38,8 +34,8 @@ export default class DomFactory {
 
     /**
      * creates and appends minimap and marker canvas into container element, returns references to both
-     * @param {HTMLElement} containerEl - The element to populate (e.g. #minimap-container)
-     * @param {string} imgSrc - src attribute for the map image
+     * @param {HTMLElement} containerEl - the element to populate (e.g. #minimap-container)
+     * @param {string} imgSrc src attribute for the map image
      * @returns {{ img: HTMLImageElement, canvas: HTMLCanvasElement }}
      */
     static createMinimapContent(containerEl, imgSrc) {
@@ -56,7 +52,7 @@ export default class DomFactory {
     }
 
     /**
-     * Creates a shop item card
+     * creates a shop item card
      * e.g.
      *   <div class="shop-card">
      *     <span class="shop-card-name">Name</span>
@@ -64,9 +60,9 @@ export default class DomFactory {
      *     <button class="shop-card-buy">Buy</button>
      *   </div>
      *
-     * @param {string} name - Item name
-     * @param {string} description - Short item description
-     * @param {Function} onBuy - Called when the buy button is clicked
+     * @param {string} name - item name
+     * @param {string} description - short item description
+     * @param {Function} onBuy - called when the buy button is clicked
      * @returns {HTMLElement}
      */
     static createCard(name, description, onBuy) {
@@ -86,15 +82,15 @@ export default class DomFactory {
     }
 
     /**
-     * Creates a labelled section with a row of buttons
+     * creates a labelled section with a row of buttons
      * e.g.
      *   <div class="debug-section" data-component-key="">
      *     <span class="debug-label">Label</span>
      *     <div class="debug-buttons">...buttons...</div>
      *   </div>
      *
-     * @param {string} labelText
-     * @param {{ label: string, onClick: Function }[]} buttons
+     * @param {string} labelText - the text for the section label
+     * @param {{ label: string, onClick: Function }[]} buttons - array of button definitions
      * @returns {HTMLElement}
      */
     static createSection(labelText, buttons) {
@@ -114,9 +110,9 @@ export default class DomFactory {
     }
 
     /**
-     * Builds and appends the debug menu DOM to the container.
-     * @param {HTMLElement} [container=document.body]
-     * @returns {{ menu, statsSection, statsBtn, statsOverlay, statsContent }}
+     * builds and appends the debug menu DOM to the container.
+     * @param {HTMLElement} [container=document.body] - where to append the menu elements
+     * @returns {{ menu, statsSection, statsBtn, statsOverlay, statsContent }} - references to key elements for wiring and runtime control
      */
     static createDebugMenuDOM(container = document.body) {
         const menu = DomFactory.createElement("div", [], { id: "debug-menu" });

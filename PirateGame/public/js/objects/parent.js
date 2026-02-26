@@ -27,9 +27,9 @@ export default class Parent {
     /**
     * Converts local- (ship-scope) coordinates to absolute (world-scope)
     * coordinates using RotateAround
-    * @param {Number} localX The X coordinate relative to this object
-    * @param {Number} localY The Y coordinate relative to this object
-    * @returns a Vector of x and y coordinates
+    * @param {Number} localX - the X coordinate relative to this object
+    * @param {Number} localY - the Y coordinate relative to this object
+    * @returns {{x: Number, y: Number}} a Vector of x and y coordinates
     */
     toWorld(localX, localY) {
         return Phaser.Math.RotateAround(
@@ -42,9 +42,9 @@ export default class Parent {
 
     /**
      * Converts absolute coordinates to coordinates relative to this object
-     * @param {Number} worldX 
-     * @param {Number} worldY 
-     * @returns the x and y coordinates relative to this object
+     * @param {Number} worldX - the X coordinate in world space
+     * @param {Number} worldY - the Y coordinate in world space
+     * @returns {{x: Number, y: Number}} the x and y coordinates relative to this object
      */
     toLocal(worldX, worldY) {
         const angle = -this.container.rotation;

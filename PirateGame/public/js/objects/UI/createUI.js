@@ -3,10 +3,10 @@ import ShopUI from "./shopUI.js";
 import Minimap from "./minimap.js";
 import UI_CONFIG from "./UIConfig.json" with { type: "json" };
 
-//Contains only creation/init logic; runtime control belongs to the caller.
+//Contains only creation/init logic; runtime control belongs to the caller
 export default class CreateUI {
     /**
-     * @param {Phaser.Scene} scene - The active Phaser scene used to create Phaser text objects and bind keyboard input.
+     * @param {Phaser.Scene} scene - the active Phaser scene
      */
     constructor(scene) {
         this.scene = scene;

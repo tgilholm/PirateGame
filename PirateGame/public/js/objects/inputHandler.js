@@ -1,29 +1,18 @@
-/* global Phaser */
-
-/**
- * InputHandler — owns all keyboard and mouse input setup for the main scene.
- *
- * Centralises key registration, exposes typed key groups, and provides
- * helpers so the rest of the codebase never needs to touch the Phaser
- * keyboard API directly.
- *
- * Note: the debug-menu toggle key (X) is intentionally left with DebugMenu /
- * UI, since it is scoped to that subsystem and registered there.
- */
+//InputHandler — all keyboard and mouse input setup for the main scene, Centralised key registration and provides helpers
 export default class InputHandler {
 
     /**
-     * @param {Phaser.Scene} scene
+     * @param {Phaser.Scene} scene - active scene
      */
     constructor(scene) {
         this.scene = scene;
 
-        // WASD movement + in-world interaction keys
+        //WASD movement + in-world interaction keys
         this.keys = /** @type {any} */ (scene.input.keyboard.addKeys(
             "W, A, S, D, E, Q, space"
         ));
 
-        // Camera / utility keys
+        //camera / utility keys
         this.shipKeys = /** @type {any} */ (scene.input.keyboard.addKeys({
             left: Phaser.Input.Keyboard.KeyCodes.LEFT,
             down: Phaser.Input.Keyboard.KeyCodes.DOWN,
@@ -32,16 +21,12 @@ export default class InputHandler {
             zoom: Phaser.Input.Keyboard.KeyCodes.Z,
         }));
 
-        // Auto-cleanup when the owning scene shuts down
+        //cleanup when scene shuts down
         scene.events.once("shutdown", () => this.destroy());
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
     /**
-     * Returns true only on the frame the key is first pressed (not held).
+     * Returns true only on the frame the key is first pressed
      * @param {Phaser.Input.Keyboard.Key} key
      * @returns {boolean}
      */
@@ -50,8 +35,7 @@ export default class InputHandler {
     }
 
     /**
-     * Builds the movement/action payload expected by the server's
-     * player:moveInput event.
+     * Builds the movement/action expected by the server
      * @returns {{ up: boolean, left: boolean, down: boolean, right: boolean, e: boolean, q: boolean, space: boolean }}
      */
     getMovementInput() {
@@ -67,11 +51,7 @@ export default class InputHandler {
         };
     }
 
-    // -------------------------------------------------------------------------
-    // Lifecycle
-    // -------------------------------------------------------------------------
-
     destroy() {
-        // Phaser manages key-listener cleanup; nothing extra needed here
+        //phaser manages key-listener cleanup
     }
 }
