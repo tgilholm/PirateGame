@@ -52,6 +52,14 @@ export default class SocketService {
             Client-server events
         */
 
+            // TODO Create a session UUID for new users, save to client via cookies.
+            // Re-join should use the same session ID, route back to existing player.
+            // Remove players after 5 minutes if they haven't re-joined.
+
+            // Accept socket.id for the initial connection, require the session ID
+            // for all further communication afterwards
+            // Translate UUID to playerID afterwards
+
         // Handle new clients
         this.io.on('connection', (socket) => {
             console.log(`[SocketService] New player connected: ${socket.id}`);

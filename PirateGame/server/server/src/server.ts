@@ -8,11 +8,11 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
-import WorldFactory from './application/world-factory';
 import WorldManager from './application/world-manager';
 import SocketService from './application/socket-service';
 import { CONFIG } from './config';
 import entityConfig from './entity-config.json';
+import { GameMode } from './engine/world';
 
 // Create the express app & server
 const app = express();
@@ -37,10 +37,10 @@ worldManager.createWorld({
   mode: GameMode.FREE_FOR_ALL
 });
 
-worldManager.createWorld({
-  maxPlayers: 32,
-  mode: GameMode.TEAMS
-});
+// worldManager.createWorld({
+//   maxPlayers: 32,
+//   mode: GameMode.TEAMS
+// });
 
 /*
   Player is presented with the choice of free-for-all or teams- socketService
