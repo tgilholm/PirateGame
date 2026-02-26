@@ -1,3 +1,16 @@
-export default class NetworkManager {
 
+
+export default class NetworkManager {
+    constructor() {}
+
+    setupListeners() {
+
+    }
+
+    
+
+    /** */
+    emitEvent(action) {
+
+    }
 }

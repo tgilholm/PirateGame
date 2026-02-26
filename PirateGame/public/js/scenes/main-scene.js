@@ -63,8 +63,6 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
 
-        // Cameras
-
         // Initialize UI
         this.ui = new UI(this);
 
