@@ -99,3 +99,10 @@ button {
     border-top: 1px solid red;
     border-radius: 12px;
 }
+
+#chat-content{
+    background-color: antiquewhite;
+    border: 2px double;
+    height: 150px;
+    overflow-y: scroll;
+}

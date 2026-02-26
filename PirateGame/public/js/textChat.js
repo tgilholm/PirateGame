@@ -12,7 +12,7 @@ document.addEventListener("keydown", function(event){
     // send message with enter if chatbox is 'active'
     if (event.key === "Enter" && document.activeElement === chatbox){
         event.preventDefault();
-        const chatMessage = chatbox.value.trim();
+        let chatMessage = chatbox.value.trim();
         if (chatMessage.length > 0){
             testMessage.innerText = chatMessage;
             // send message to server and have that echo it then close the chat
