@@ -5,7 +5,8 @@
     "checkJs": true,
     "baseUrl": "./",
     "paths": {
-      "*": ["src/*"]
+      "*": ["src/*"],
+      "shared/*": ["./shared/*"]
     },
     "types": ["phaser"] //a lot of annoying problems listed with phaser but they are fine at runtime, this gets rid of them apparently 
   },

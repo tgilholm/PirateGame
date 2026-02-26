@@ -6,13 +6,15 @@ import Ship from "../objects/ship.js";
 import UI from "../objects/UI/createUI.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
+import { io } from "socket.io-client";
 import InputHandler from "../objects/inputHandler.js";
 //import PlayerInventory from "../objects/playerInventory.js";
 
 
+
 const ships = {}
 const players = {}
-const socket = globalThis.io();
+const socket = io();
 
 
 /**

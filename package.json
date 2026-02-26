@@ -22,6 +22,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/socket.io-client": "^1.4.36",
     "undici-types": "^7.22.0"
   }
 }
