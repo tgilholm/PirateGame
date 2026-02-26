@@ -4,7 +4,6 @@ import WorldFactory from "../application/world-factory";
 import World from "./world";
 import { WorkerEvent } from "../application/world-manager";
 import { CONFIG } from "../config";
-import { ClientEvent } from "../shared/socket-protocol";
 import { EntityConfig } from "../types";
 
 let world: World;
