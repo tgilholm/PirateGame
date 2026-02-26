@@ -1,6 +1,6 @@
 import WorldController from "../controllers/world-controller";
 import EntityFactory from "../entities/entity-factory";
-import { PlayerAction } from "../shared/socket-protocol";
+import { PlayerAction } from "../../../shared/socket-protocol";
 import EntityRegistry from "./entity-registry";
 import GameEngine from "./game-engine";
 

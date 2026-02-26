@@ -1,6 +1,6 @@
 import EntityRegistry from "../engine/entity-registry";
 import Ship from "../entities/ship";
-import { MoveData } from "../shared/socket-protocol";
+import { MoveData } from "../../../shared/socket-protocol";
 
 export default class ShipController {
     constructor(entityRegistry: EntityRegistry) {

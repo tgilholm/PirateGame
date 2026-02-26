@@ -1,7 +1,7 @@
 import EntityRegistry from "../engine/entity-registry";
 import Player from "../entities/player";
 import UpgradeHandler from "../handlers/upgrade-handler";
-import { MoveData, UpgradeData } from "../shared/socket-protocol";
+import { MoveData, UpgradeData } from "../../../shared/socket-protocol";
 
 export default class PlayerController {
 

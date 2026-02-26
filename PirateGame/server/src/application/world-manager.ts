@@ -2,7 +2,7 @@ import { Worker } from 'node:worker_threads'  // use node.js workers instead of 
 import { EntityConfig } from '../types';
 import WorldFactory from "./world-factory";
 import { EventEmitter } from 'node:stream';
-import { PlayerAction } from '../shared/socket-protocol';
+import { PlayerAction } from '../../../shared/socket-protocol';
 import { WorldConfig } from '../server';
 
 export enum ManagerEvent {

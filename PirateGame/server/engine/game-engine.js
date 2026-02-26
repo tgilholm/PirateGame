@@ -1,6 +1,6 @@
 // @ts-nocheck
 import PhysicsHandler from "../handlers/physics-handler.js"
-import { CONFIG } from "../server/src/config.js";
+import { CONFIG } from "../src/config.js";
 import EntityRegistry from "./entity-registry.js";
 import Matter from "matter-js";
 

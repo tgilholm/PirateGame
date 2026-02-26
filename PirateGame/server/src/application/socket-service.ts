@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { z } from 'zod';    // For frontline validation
-import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "../shared/socket-protocol";
+import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "../../../shared/socket-protocol";
 import WorldManager, { ManagerEvent } from "./world-manager";
 
 const MoveSchema = z.object({

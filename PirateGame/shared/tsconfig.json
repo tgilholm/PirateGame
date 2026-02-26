@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./built",
+        "module": "ESNext",
+        "target": "ESNext",
+        "declaration": true
+    },
+    "include": [
+        "./*.ts"
+    ]
+}
