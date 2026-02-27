@@ -64,11 +64,18 @@ export class MainScene extends Phaser.Scene {
     create(data) {
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
+        this.playersPanel = this.add.container(20, 20);
 
         // Cameras
 
         // Initialize UI
         this.ui = new UI(this);
+
+        //for leaderboard
+        this.lbTexts = [];
+        for (let i = 0; i < 10; i++) {
+            this.lbTexts.push(this.add.text(20, 20 + i * 18, "", { fontSize: "14px" }));
+        }
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
@@ -83,7 +90,16 @@ export class MainScene extends Phaser.Scene {
 
         this.cameraTarget = this.add.container(0, 0); // follow the player
         this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
-
+        //conn player panel
+        const bg = this.add.rectangle(0, 0, 220, 220, 0x000000, 0.55).setOrigin(0, 0);
+        const title = this.add.text(10, 8, "Players Online", { fontSize: "16px" });
+        this.playersTextLines = [];
+        for (let i = 0; i < 10; i++) {
+            const t = this.add.text(10, 36 + i * 18, "", { fontSize: "14px" });
+            this.playersTextLines.push(t);
+            this.playersPanel.add(t);
+        }
+        this.playersPanel.add([bg, title]);
         // Shop object
         this.shop = new Shop(this, 3000, 5250);
 
@@ -116,6 +132,7 @@ export class MainScene extends Phaser.Scene {
                     }
                 });
             }
+
 
             // Create all players from server data
             if (data.playerData && Array.isArray(data.playerData)) {
@@ -158,6 +175,11 @@ export class MainScene extends Phaser.Scene {
             // top is [{ playerId, username, score }, ...]
             hudScene.updateLeaderboard(top);
         });
+
+        socket.on("players:list", (players) => {
+            this.updatePlayersPanel(players);
+        });
+
 
 
         socket.on('gameState', (data) => {
@@ -215,13 +237,27 @@ export class MainScene extends Phaser.Scene {
         });
 
 
-        socket.emit('system:playerReady', { username: data.username });
+        socket.emit('system:playerReady', {username: data.username });
     }
 
 
     /**
      * Updates dynamic content such as ships, players, etc
      */
+    updatePlayersPanel(players) {
+        // Resize panel height based on list size (cap to 10 visible rows)
+        const visible = players.slice(0, 10);
+        for (let i = 0; i < this.playersTextLines.length; i++) {
+            const p = visible[i];
+            this.playersTextLines[i].setText(p ? `• ${p.username}` : "");
+        }
+    }
+    updateLeaderboard(top) {
+        for (let i = 0; i < this.lbTexts.length; i++) {
+            const e = top[i];
+            this.lbTexts[i].setText(e ? `${i + 1}. ${e.username} — ${e.score}` : `${i + 1}.`);
+        }
+    }
     update() {
         this.ui?.clear(); // Clear UI messages each frame- they will be re-added if still relevant
 

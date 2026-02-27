@@ -4,6 +4,7 @@ import NpcSystem from "../systems/npc-system.js"
 import PlayerSystem from "../systems/player-system.js"
 import ShipSystem from "../systems/ship-system.js"
 import { CONFIG } from "../config.js";
+import leaderboard from "../leaderboard.js";
 
 const systems = {
     player: PlayerSystem,
@@ -13,7 +14,8 @@ const systems = {
 
 export default class SocketHandler {
     /**
-     * 
+     *
+     * @param io
      * @param {GameEngine} gameEngine
      * @param {leaderboard} leaderboard
      */
@@ -36,6 +38,7 @@ export default class SocketHandler {
             console.log("[SocketHandler] Received new player")
 
             const player = EntityRegistry.createPlayer(socket.id, CONFIG.SPAWN.PLAYER.X, CONFIG.SPAWN.PLAYER.Y, "ship_1", "");
+
 
             
             if (!player) {
@@ -85,13 +88,14 @@ export default class SocketHandler {
         EntityRegistry.removeEntity(playerId); // Remove from the game
         this.leaderboard.removePlayer(socket.id);
         this.io.emit("leaderboard:update", this.leaderboard.top());
+        this.broadcastConnectedPlayers();
     }
 
     /**
      * 
      */
     registerHandlers(socket) {
-        // Route to the related system- this calls the "handle" method in each system class
+        // Route to the related system this calls the "handle" method in each system class
         socket.on("leaderboard:setScore", ({ score }) => {
             this.leaderboard.setScore(socket.id, score);
             this.io.emit("leaderboard:update", this.leaderboard.top());
@@ -99,6 +103,8 @@ export default class SocketHandler {
 
         socket.on("leaderboard:addScore", ({ delta }) => {
             this.leaderboard.addScore(socket.id, delta);
+            socket.emit("leaderboard:addScore", { delta: 1 });
+            socket.emit("leaderboard:setScore", { score: 8 });
             this.io.emit("leaderboard:update", this.leaderboard.top());
         });
 
@@ -158,5 +164,23 @@ export default class SocketHandler {
                 }
             }
         });
+    }
+    broadcastConnectedPlayers() {
+        // Pull from your game engine registry (player entities)
+        const players = [];
+
+        for (const entity of this.gameEngine.EntityRegistry.getPlayers().forEach()) {
+            if (entity?.type === "player") {
+                players.push({
+                    id: entity.id,
+                    username: entity.username ?? "Anonymous",
+                });
+            }
+        }
+
+        // Optional: sort alphabetically
+        players.sort((a, b) => a.username.localeCompare(b.username));
+
+        this.io.emit("players:list", players);
     }
 }
