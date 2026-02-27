@@ -1,7 +1,7 @@
-import DebugMenu from "./debugMenu.js";
-import ShopUI from "./shopUI.js";
+import DebugMenu from "./debug-menu.js";
+import ShopUI from "./shop-ui.js";
 import Minimap from "./minimap.js";
-import UI_CONFIG from "./UIConfig.json" with { type: "json" };
+import UI_CONFIG from "./ui-config.json" with { type: "json" };
 
 //Contains only creation/init logic; runtime control belongs to the caller.
 export default class CreateUI {

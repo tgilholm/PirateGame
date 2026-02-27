@@ -1,6 +1,6 @@
 import Parent from "./parent.js";
 
-export default class Player {
+export default class PlayerModel {
     constructor(scene, id) {
         this.scene = scene;
         this.id = id;
@@ -20,8 +20,6 @@ export default class Player {
         });
         this.nameText.setOrigin(0.5, 1);
         this.nameText.setDepth(100);
-
-        console.log(`Player drawn at ${this.sprite.x}, ${this.sprite.y}`);
     }
 
     /**
@@ -30,7 +28,6 @@ export default class Player {
      * @param {Parent} parentObject 
      */
     updateState(data, parentObject) {
-        console.log(`Player updateState called with x: ${data.x}, y: ${data.y}, parentId: ${data.parentId}`);
 
         // if username provided and not already set
         if (data.username && this.nameText.text !== data.username) {

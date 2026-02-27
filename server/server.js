@@ -4,7 +4,7 @@ import express from "express";
 import http from "http";
 import path from "path";
 import { CONFIG} from './config.js';
-import shipStatsRouter from './shipStats.js';
+import shipStatsRouter from './ship-stats.js';
 import { initConfig } from "./entities/calculateComponents.js";
 // @ts-ignore
 import { Server } from "socket.io"

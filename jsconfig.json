@@ -4,7 +4,8 @@
     "target": "ESNext",
     "checkJs": true,
     "noImplicitAny": false,
-    "baseUrl": "./",  // fix this
+    "ignoreDeprecations": "6.0",  // shuts up the next line
+    "baseUrl": "./",
     
     "paths": {
       "*": ["src/*"],

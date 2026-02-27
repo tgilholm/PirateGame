@@ -1,5 +1,5 @@
-import DomFactory from "./domFactory.js";
-import UI_CONFIG from "./UIConfig.json" with { type: "json" };
+import DomFactory from "./dom-factory.js";
+import UI_CONFIG from "./ui-config.json" with { type: "json" };
 
 /**
  * DebugMenu — owns the entire debug panel: DOM creation, CSS injection,

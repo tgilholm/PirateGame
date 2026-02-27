@@ -12,6 +12,7 @@
  */
 export default class InputHandler {
 
+
     /**
      * @param {Phaser.Scene} scene
      */

@@ -1,7 +1,10 @@
 import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
-import { ServerEvent } from "shared/socket-protocol";
+import { ServerEvent } from "shared/socket-protocol.js";
 import { Socket } from "socket.io-client";
 
+/**
+ * Owns socket-io logic
+ */
 export default class NetworkManager {
     /**
      * @param {Socket} socket
@@ -30,7 +33,7 @@ export default class NetworkManager {
 
     /**
      * Sends any event matching PlayerAction to the server
-     * @param {import("shared/built/socket-protocol").PlayerAction} action
+     * @param {import("shared/built/socket-protocol.js").PlayerAction} action
      */
     sendAction(action) {
         this.socket.emit(ClientEvent.ACTION, action);
@@ -38,7 +41,7 @@ export default class NetworkManager {
 
     /**
      * Sends movement inputs from the client to the server
-     * @param {import("shared/socket-protocol").MoveData} inputs 
+     * @param {import("shared/socket-protocol.js").MoveData} inputs 
      */
     sendMove(inputs) {
         this.sendAction({ type: ActionType.MOVE, data: inputs });

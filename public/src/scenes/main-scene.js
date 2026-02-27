@@ -1,14 +1,15 @@
 
 /* global Phaser, io */
 
-import Player from "../objects/player.js";
-import Ship from "../objects/ship.js";
-import UI from "../objects/UI/createUI.js";
+import PlayerModel from "../models/player-model.js";
+import ShipModel from "../models/ship-model.js";
+import UI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
 import { io } from "socket.io-client";
-import InputHandler from "../objects/inputHandler.js";
-//import PlayerInventory from "../objects/playerInventory.js";
+import InputHandler from "../objects/input-handler.js";
+import NetworkManager from "../managers/network-manager.js";
+import { ServerEvent } from "shared/socket-protocol.js";
 
 
 
@@ -35,8 +36,9 @@ export class MainScene extends Phaser.Scene {
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
-        //this.gameState = new gameState();
-        //this.playerInventory = new PlayerInventory(this);
+
+        this.network = new NetworkManager(socket);
+        this.ui = new UI(this);
     }
 
 
@@ -44,22 +46,16 @@ export class MainScene extends Phaser.Scene {
      * Loads static assets from the filesystem into memory.
      */
     preload() {
-        // Load the tilesheet
         this.load.image("tiles", "/assets/terrain-tilesheet.png");
         this.load.image('cannon', '/assets/cannon.png');
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
-
-        // Load the map
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
 
-        // Load the plank
-        this.load.image("plank", "/assets/plank.png");
-
+        // Resize canvas with window
         window.addEventListener('resize', () => {
             this.scale.resize(window.innerWidth, window.innerHeight);
         });
-
     }
 
     /**
@@ -70,8 +66,6 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
 
-        // Initialize UI
-        this.ui = new UI(this);
 
         // Generate the tilemap from the .json
         const map = this.make.tilemap({ key: "map" });
@@ -98,19 +92,14 @@ export class MainScene extends Phaser.Scene {
         this.inputHandler = new InputHandler(this);
 
 
+        // Network events
+
+
+
         // Generate the entire game once when the "handshake" is received
         socket.on('initGame', (data) => {
-            console.log('[Client] Received initGame', data);
 
-            // Create all ships from server data
-            if (data.shipData && Array.isArray(data.shipData)) {
-                data.shipData.forEach(shipData => {
-                    if (!ships[shipData.id]) {
-                        console.log(`[Client] Creating ship: ${shipData.id}`);
-                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, shipData.params);
-                    }
-                });
-            }
+
 
             // Create all players from server data
             if (data.playerData && Array.isArray(data.playerData)) {

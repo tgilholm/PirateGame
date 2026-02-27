@@ -1,4 +1,4 @@
-﻿import DomFactory from "./domFactory.js";
+﻿import DomFactory from "./dom-factory.js";
 
 /**
  * ShopUI — builds and manages the shop overlay.
