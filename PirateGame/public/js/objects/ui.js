@@ -29,6 +29,8 @@ export default class UI {
         this.minimapCanvas = document.getElementById("minimap-marker-canvas");
         this.minimapCtx = this.minimapCanvas.getContext("2d");
 
+        //HTML LeaderBoard
+
         //sets canvas resolotiom to display size
         this.minimapCanvas.width = this.minimapContainer.offsetWidth;
         this.minimapCanvas.height = this.minimapContainer.offsetHeight;

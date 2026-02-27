@@ -20,6 +20,12 @@ export class StartScene extends Phaser.Scene {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
 
+        //for leaderboard
+        this.lbTexts = [];
+        for (let i = 0; i < 10; i++) {
+            this.lbTexts.push(this.add.text(20, 20 + i * 18, "", { fontSize: "14px" }));
+        }
+
 
         // Add the animated background
         this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
@@ -63,6 +69,13 @@ export class StartScene extends Phaser.Scene {
         })
     }
 
+
+    updateLeaderboard(top) {
+        for (let i = 0; i < this.lbTexts.length; i++) {
+            const e = top[i];
+            this.lbTexts[i].setText(e ? `${i + 1}. ${e.username} — ${e.score}` : `${i + 1}.`);
+        }
+    }
 
     update() {
         // Vertically scroll the background image

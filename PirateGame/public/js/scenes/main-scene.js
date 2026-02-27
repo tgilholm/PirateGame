@@ -154,6 +154,11 @@ export class MainScene extends Phaser.Scene {
         });
 
 
+        socket.on("leaderboard:update", (top) => {
+            // top is [{ playerId, username, score }, ...]
+            hudScene.updateLeaderboard(top);
+        });
+
 
         socket.on('gameState', (data) => {
             // Update ships

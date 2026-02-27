@@ -14,12 +14,16 @@ const systems = {
 export default class SocketHandler {
     /**
      * 
-     * @param {GameEngine} gameEngine 
+     * @param {GameEngine} gameEngine
+     * @param {leaderboard} leaderboard
      */
-    constructor(io, gameEngine) {
+    constructor(io, gameEngine,leaderboard) {
         this.io = io;
         this.gameEngine = gameEngine;
+        this.leaderboard = leaderboard;
     }
+
+
 
     /**
      * 
@@ -46,6 +50,14 @@ export default class SocketHandler {
             // Store username
             player.username = payload.username;
 
+            this.leaderboard.upsertPlayer(socket.id, player.username);
+
+            // send to joined player
+            socket.emit("leaderboard:update", this.leaderboard.top());
+
+            // and broadcast to everyone (so names appear immediately)
+            this.io.emit("leaderboard:update", this.leaderboard.top());
+
             const shipData = EntityRegistry.getShipData()
             const playerData = EntityRegistry.getPlayerData();
 
@@ -71,6 +83,8 @@ export default class SocketHandler {
         }
 
         EntityRegistry.removeEntity(playerId); // Remove from the game
+        this.leaderboard.removePlayer(socket.id);
+        this.io.emit("leaderboard:update", this.leaderboard.top());
     }
 
     /**
@@ -78,7 +92,15 @@ export default class SocketHandler {
      */
     registerHandlers(socket) {
         // Route to the related system- this calls the "handle" method in each system class
+        socket.on("leaderboard:setScore", ({ score }) => {
+            this.leaderboard.setScore(socket.id, score);
+            this.io.emit("leaderboard:update", this.leaderboard.top());
+        });
 
+        socket.on("leaderboard:addScore", ({ delta }) => {
+            this.leaderboard.addScore(socket.id, delta);
+            this.io.emit("leaderboard:update", this.leaderboard.top());
+        });
 
         socket.onAny((eventName, payload) => {
             //console.log(eventName);

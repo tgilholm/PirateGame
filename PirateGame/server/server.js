@@ -12,6 +12,8 @@ import { fileURLToPath } from "url";
 import EntityRegistry from "./engine/entity-registry.js";
 import GameEngine from "./engine/game-engine.js";
 import SocketHandler from "./handlers/socket-handler.js";
+import Leaderboard from "./leaderboard.js";
+
 
 // Create the server
 const app = express();
@@ -21,6 +23,8 @@ app.use('/api', shipStatsRouter); //adds rout for ship stats
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+
+
 
 
 /*
@@ -47,7 +51,8 @@ app.get('/', (req, res) => {
     SocketHandler handles incoming and outgoing socket events from clients.
 */
 const gameEngine = new GameEngine();
-const socketHandler = new SocketHandler(io, gameEngine);
+const leaderboard = new Leaderboard({ topN: 10 });
+const socketHandler = new SocketHandler(io, gameEngine,leaderboard);
 EntityRegistry.initialise();
 
 // Initialize configuration and create ships after stats are loaded
