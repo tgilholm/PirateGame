@@ -17,12 +17,13 @@ export default class SocketHandler {
      *
      * @param io
      * @param {GameEngine} gameEngine
-     * @param {leaderboard} leaderboard
      */
-    constructor(io, gameEngine,leaderboard) {
+    constructor(io, gameEngine) {
         this.io = io;
         this.gameEngine = gameEngine;
-        this.leaderboard = leaderboard;
+        //this.leaderboard = leaderboard;
+        this.connPlayers = new Map();
+        this.nextJoinNumber = 1;
     }
 
 
@@ -39,8 +40,6 @@ export default class SocketHandler {
 
             const player = EntityRegistry.createPlayer(socket.id, CONFIG.SPAWN.PLAYER.X, CONFIG.SPAWN.PLAYER.Y, "ship_1", "");
 
-
-            
             if (!player) {
                 console.log(`[SocketHandler] Player: ${socket.id} not found`);
             }
@@ -52,15 +51,8 @@ export default class SocketHandler {
 
             // Store username
             player.username = payload.username;
-
-            this.leaderboard.upsertPlayer(socket.id, player.username);
-
-            // send to joined player
-            socket.emit("leaderboard:update", this.leaderboard.top());
-
-            // and broadcast to everyone (so names appear immediately)
-            this.io.emit("leaderboard:update", this.leaderboard.top());
-
+            this.connPlayers.set(socket.id, player.username);
+            this.broadcastPlayersList();
             const shipData = EntityRegistry.getShipData()
             const playerData = EntityRegistry.getPlayerData();
 
@@ -86,28 +78,14 @@ export default class SocketHandler {
         }
 
         EntityRegistry.removeEntity(playerId); // Remove from the game
-        this.leaderboard.removePlayer(socket.id);
-        this.io.emit("leaderboard:update", this.leaderboard.top());
-        this.broadcastConnectedPlayers();
+        this.connPlayers.delete(socket.id);
+        this.broadcastPlayersList();
     }
 
     /**
      * 
      */
     registerHandlers(socket) {
-        // Route to the related system this calls the "handle" method in each system class
-        socket.on("leaderboard:setScore", ({ score }) => {
-            this.leaderboard.setScore(socket.id, score);
-            this.io.emit("leaderboard:update", this.leaderboard.top());
-        });
-
-        socket.on("leaderboard:addScore", ({ delta }) => {
-            this.leaderboard.addScore(socket.id, delta);
-            socket.emit("leaderboard:addScore", { delta: 1 });
-            socket.emit("leaderboard:setScore", { score: 8 });
-            this.io.emit("leaderboard:update", this.leaderboard.top());
-        });
-
         socket.onAny((eventName, payload) => {
             //console.log(eventName);
             const [namespace, action] = eventName.split(':');
@@ -151,7 +129,6 @@ export default class SocketHandler {
                 //socket.emit(`${eventName}:error`, { reason: result.reason });
             } else if (outcome && outcome.result) {
 
-                
                 //emits events to client
                 if (eventName === 'player:takeControl') {
                     socket.emit('controlTaken');
@@ -165,22 +142,16 @@ export default class SocketHandler {
             }
         });
     }
-    broadcastConnectedPlayers() {
-        // Pull from your game engine registry (player entities)
-        const players = [];
 
-        for (const entity of this.gameEngine.EntityRegistry.getPlayers().forEach()) {
-            if (entity?.type === "player") {
-                players.push({
-                    id: entity.id,
-                    username: entity.username ?? "Anonymous",
-                });
-            }
-        }
+    broadcastPlayersList() {
+        const list = [...this.connPlayers.entries()].map(([id, username]) => ({
+            id,
+            username: username || "Anonymous"
+        }));
 
         // Optional: sort alphabetically
-        players.sort((a, b) => a.username.localeCompare(b.username));
+        list.sort((a, b) => a.username.localeCompare(b.username));
 
-        this.io.emit("players:list", players);
+        this.io.emit("players:list", list);
     }
 }

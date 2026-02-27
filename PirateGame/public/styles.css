@@ -273,4 +273,68 @@ button {
     pointer-events: none;
 }
 }
+/*.press-start-2p-regular {*/
+/*    font-family: "Press Start 2P", system-ui;*/
+/*    font-weight: 400;*/
+/*    font-style: normal;*/
+/*}*/
+/*.vt323-regular {*/
+/*    font-family: "VT323", monospace;*/
+/*    font-weight: 400;*/
+/*    font-style: normal;*/
+/*}*/
+/*.pirata-one-regular {*/
+/*    font-family: "Pirata One", system-ui;*/
+/*    font-weight: 400;*/
+/*    font-style: normal;*/
+/*}*/
+
+/* Active Players Panel */
+.vt323-regular {
+    font-family: "VT323", monospace;
+}
+#players-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1200;
+
+    width: 220px;
+    max-height: 220px;
+
+    background: rgba(0, 0, 0, 0.35);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: white;
+    font-family: "VT323", monospace; /* match your UI */
+    font-size: 22px;
+    pointer-events: none; /* won't block game input */
+}
+
+#players-panel .players-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.35);
+    padding-bottom: 6px;
+    text-align: center;
+}
+
+/* Use an ordered list for the numbering */
+#players-list {
+    margin: 0;
+    padding-left: 22px; /* spacing for 1. 2. 3. */
+    list-style-position: outside;
+    max-height: 170px;
+    overflow: auto; /* or auto if you want scroll */
+}
+
+#players-list li {
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /*--------------------- feel free to change now but if not i will when we start working of game visuals---------------------*/
