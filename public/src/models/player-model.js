@@ -1,12 +1,11 @@
 
 
-export default class PlayerModel extends Phaser.GameObjects.Sprite{
+export default class PlayerModel extends Phaser.GameObjects.Sprite {
     constructor(scene, id, x, y) {
         super(scene, x, y, 'player_circle');
         this.scene.add.existing(this);
 
-        this.targetX = 0;
-        this.targetY = 0;
+        this.target = { x: 0, y: 0 };
         this.isSteering = false;
 
         this.parentId = null;
@@ -20,31 +19,31 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite{
         }).setOrigin(0.5, 1).setDepth(100);
     }
 
-    update(data)
-    {
+    update(data) {
         if (data.username) this.nameText.setText(data.username);
 
         // Snap to ship if just boarded
-        if (this.parentId !== data.parentId)
-        {
+        if (this.parentId !== data.parentId) {
             this.parentId = data.parentId;
             this.x = data.x;
             this.y = data.y
         }
 
         // Interp otherwise
-        this.targetX = data.x;
-        this.targetY = data.y;
+        this.target.x = data.x;
+        this.target.y = data.y;
     }
 
-    preUpdate(time, delta)
-    {
+    preUpdate(time, delta) {
         if (super.preUpdate) super.preUpdate(time, delta);
-        const lerp = 0.2;
+
+        // How fast the client responds to updates
+        const responseFactor = 0.15;
+        const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667); // Aim for 60fps
 
         // Interpolate
-        this.x = Phaser.Math.Linear(this.x, this.targetX, lerp);
-        this.y = Phaser.Math.Linear(this.y, this.targetY, lerp);
+        this.x = Phaser.Math.Linear(this.x, this.target.x, lerp);
+        this.y = Phaser.Math.Linear(this.y, this.target.y, lerp);
 
         // Update name box position
         const matrix = this.getWorldTransformMatrix();

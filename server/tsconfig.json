@@ -1,12 +1,17 @@
 {
     "compilerOptions": {
         "rootDir": "./src",
+        "resolveJsonModule": true,
         "outDir": "./built",
+        "baseUrl": ".",
         "allowJs": true,
         "target": "es2022",
         "strict": true,
         "esModuleInterop": true,
         "module": "commonjs",
+        "paths": {
+            "@shared/*": ["../shared/*"]
+        }
     },
     "include": ["src/**/*"]
 }

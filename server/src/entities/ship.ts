@@ -20,7 +20,6 @@ export default class Ship extends Entity {
         super("ship", x, y, config.maxHealth, null);    // ships have no parents
 
         this.pilotId = null;    // Nobody piloting at startup
-        this.parent = null;
         this.dimensions = config.dimensions;
         this.physics = config.physics;
         this.inputs = {
@@ -45,6 +44,7 @@ export default class Ship extends Entity {
             y: this.y,
             vx: this.vx,
             vy: this.vy,
+            av: this.av,
             r: this.r,
             health: this.health,
             maxHealth: this.maxHealth
