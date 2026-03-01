@@ -10,7 +10,7 @@ import ShipController from "../controllers/ship-controller";
 import WorldController, { GameControllers } from "../controllers/world-controller";
 import UpgradeHandler from "../handlers/upgrade-handler";
 import EntityFactory from "../entities/entity-factory";
-import { EntityConfig } from "../types";
+import { EntityConfig } from "../../types";
 import MessageController from "../controllers/message-controller";
 
 

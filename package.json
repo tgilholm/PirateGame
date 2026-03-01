@@ -19,6 +19,7 @@
     "poly-decomp-es": "^0.4.2",
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.8.3",
+    "typescript": "^5.9.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

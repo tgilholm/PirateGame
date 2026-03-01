@@ -1,3 +1,5 @@
+/** @typedef {import("../../../shared/entity-config.json")["ship"]} ShipConfig */
+
 /**
  * The Ship class provides a moving body on which Interactables and Players can exist.
  * It can move independently and all objects "attached" to it will move with it- players'
@@ -6,9 +8,20 @@
  * 
  */
 export default class ShipModel extends Phaser.GameObjects.Container {
-    constructor(scene, x, y, dimensions) {
+
+    /**
+     * @param {Phaser.Scene} scene
+     * @param {string} id
+     * @param {number} x
+     * @param {number} y
+     * @param {ShipConfig} config
+     */
+    constructor(scene, id, x, y, config) {
         super(scene, x, y);
-        this.dimensions = dimensions;
+        this.dimensions = config.dimensions;
+        this.interactables = config.interactables;
+
+
 
         this.target = { x: 0, y: 0, r: 0 };
         this.velocity = { x: 0, y: 0 };
@@ -17,7 +30,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
 
 
         this.drawHull();
-        this.setupInteractables();
+        this.drawInteractables();
 
         scene.add.existing(this);
     }
@@ -34,7 +47,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         const offsetX = sternRadius + halfW + padding;
         const offsetY = halfH + padding;
 
-        const graphics = this.scene.make.graphics({ x: 0, y: 0, add: false });
+        const graphics = this.scene.make.graphics({ x: 0, y: 0 }, false);
         graphics.fillStyle(0x5d4037, 1);
         graphics.lineStyle(4, 0xffffff, 1);
         graphics.beginPath();
@@ -85,44 +98,39 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         this.setDepth(10);
     }
 
-    setupInteractables() {
-        // Get interactable positions from params and create sprites for them
-        const { interactables } = this.dimensions;
-        const helm = interactables.helm;
-        const cannons = interactables.cannons;
-        const ladders = interactables.ladders;
+    drawInteractables() {
+        // Get interactable positions from dimensions and create sprites for them
+        const { helm, cannons, ladders } = this.interactables;
 
+        this.add(this.scene.add.sprite(helm.x, helm.y, 'helm'));
 
-        // HELM
-        // move it back by half the middle width, plus a bit of the stern radius
-        this.helm = this.scene.add.sprite(helm.x, helm.y, 'helm');
-        this.add(this.helm);
+        // Add all cannons
+        for (let i = 0; i < cannons.length; i++) {
+            const current = cannons[i];
 
-        // CANNONS
-        // Cannons
-        const cannonPort = this.scene.add.sprite(cannons[0].x, cannons[0].y, 'cannon');
-        cannonPort.setRotation(0); // Pointing Outward
-        this.add(cannonPort);
+            // Invert for negative y values
+            const cannon = this.scene.add.sprite(current.x, current.y, 'cannon');
 
-        const cannonStarboard = this.scene.add.sprite(cannons[1].x, cannons[1].y, 'cannon');
-        cannonStarboard.setRotation(Math.PI); // Pointing Outward
-        this.add(cannonStarboard);
+            current.y < 0 ? cannon.setRotation(0) : cannon.setRotation(Math.PI);
+            this.add(cannon);
+        }
 
-        // Ladders
-        this.ladder = this.scene.add.sprite(ladders[0].x, ladders[0].y, 'ladder');
-        this.add(this.ladder);
+        for (let i = 0; i < ladders.length; i++) {
+            const current = ladders[i];
 
-        this.ladder2 = this.scene.add.sprite(ladders[1].x, ladders[1].y, 'ladder');
-        this.ladder2.setFlipY(true);
-        this.add(this.ladder2);
+            // Invert for negative y values
+            const ladder = this.scene.add.sprite(current.x, current.y, 'cannon');
+
+            current.y < 0 ? ladder.setRotation(0) : ladder.setRotation(Math.PI);
+            this.add(ladder);
+        }
     }
 
     update(data, delta) {
         this.syncFromServer(data);
 
         // Snap if position drifted
-        if (Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150)
-        {
+        if (Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
             this.x = data.x;
             this.y = data.y;
         }
@@ -146,8 +154,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         );
     }
 
-    syncFromServer(data)
-    {
+    syncFromServer(data) {
         this.target.x = data.x;
         this.target.y = data.y;
         this.target.r = data.r;

@@ -1,12 +1,14 @@
 {
     "compilerOptions": {
         "outDir": "./built",
-        "module": "nodenext",
-        "moduleResolution": "nodenext",
+        "esModuleInterop": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
         "target": "ESNext",
         "declaration": true
     },
     "include": [
-        "./*.ts"
+        "./*.ts", "./*.json"
     ]
 }

@@ -4,7 +4,7 @@ import WorldFactory from "../application/world-factory";
 import World from "./world";
 import { WorkerEvent } from "../application/world-manager";
 import { CONFIG } from "../config";
-import { EntityConfig } from "../types";
+import { EntityConfig } from "../../types";
 
 let world: World;
 let isInitialized = false;

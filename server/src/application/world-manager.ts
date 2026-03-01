@@ -1,5 +1,5 @@
 import { Worker } from 'node:worker_threads'  // use node.js workers instead of default js ones
-import { EntityConfig } from '../types';
+import { EntityConfig } from '../../types';
 import WorldFactory from "./world-factory";
 import { EventEmitter } from 'node:stream';
 import { PlayerAction } from '../../../shared/socket-protocol';

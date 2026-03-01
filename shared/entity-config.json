@@ -19,39 +19,32 @@
             "frictionAir": 0.05,
             "restitution": 0.2,
             "thrust": 0.05
-        }
-    },
-    "frigate": {
-        "maxHealth": 2500,
-        "dimensions": {
-            "height": 160,
-            "middleWidth": 200,
-            "bowLength": 100,
-            "sternRadius": 80
         },
-        "physics": {
-            "turnSpeed": 0.003,
-            "mass": 200,
-            "frictionAir": 0.05,
-            "restitution": 0.2,
-            "thrust": 0.05
-        }
-    },
-    "manowar": {
-        "maxHealth": 5000,
-        "dimensions": {
-            "height": 160,
-            "middleWidth": 200,
-            "bowLength": 100,
-            "sternRadius": 80
-        },
-        "physics": {
-            "turnSpeed": 0.003,
-            "mass": 200,
-            "frictionAir": 0.05,
-            "restitution": 0.2,
-            "thrust": 0.05
+        "interactables": {
+            "helm": {
+                "x": 100,
+                "y": 0
+            },
+            "cannons": [
+                {
+                    "x": 0,
+                    "y": -55
+                },
+                {
+                    "x": 0,
+                    "y": 55
+                }
+            ],
+            "ladders": [
+                {
+                    "x": 120,
+                    "y": -75
+                },
+                {
+                    "x": 120,
+                    "y": 75
+                }
+            ]
         }
     }
-    
 }

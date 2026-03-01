@@ -3,7 +3,7 @@ import EntityRegistry from "../engine/entity-registry";
 import TerrainMap from "../engine/terrain-map";
 import Player from "../entities/player";
 import Ship from "../entities/ship";
-import { EntityConfig } from "../types";
+import { EntityConfig } from "../../types";
 import { BaseSystem } from "./base-system";
 
 export default class MovementSystem implements BaseSystem {

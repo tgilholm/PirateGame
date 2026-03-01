@@ -1,5 +1,5 @@
 import { Bodies, Body } from "matter-js";
-import { ShipConfig } from "../types";
+import { ShipConfig } from "../../types";
 import Entity from "./entity";
 
 
