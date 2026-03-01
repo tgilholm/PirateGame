@@ -18,8 +18,36 @@ export default class GameManager {
         this.localPlayer = null;
 
         this.shipList = {};
+        this.interactables = [];
         this.playerList = {};
     }
+
+    getInteractables() {
+        this.interactables = [];
+        Object.values(this.shipList).forEach(ship => {
+            this.interactables.push(...ship.interactables);
+        })
+    }
+
+    getClosestInteractable(player) {
+        let closest = null;
+        let nearestDist = Infinity;
+
+        this.interactables.forEach(item => {
+            const dist = Phaser.Math.Distance.Between(
+                player.x, player.y,
+                item.x, item.y
+            );
+
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                closest = { item, dist };
+            }
+        });
+
+        return closest;
+    }
+
 
     init() {
         // Init game contains all ships/players, game state contains only those that changed
@@ -76,5 +104,5 @@ export default class GameManager {
             this.localPlayer = this.playerList[this.network.socket.id];
         }
     }
-    
+
 }

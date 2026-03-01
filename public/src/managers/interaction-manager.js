@@ -19,7 +19,8 @@ export default class InteractionManager {
 
         // InputManager events
         inputManager.on('interact', () => this.interact());
-        inputManager.on()
+        inputManager.on('release', () => this.release());
+        inputManager.on('fire', () => this.fire());
 
     }
 
@@ -29,14 +30,21 @@ export default class InteractionManager {
         const player = this.gameManager.localPlayer;
         if (!player) return;
 
-        const targets = this.getNearbyTargets(player);
-        const closest = targets.find(t => t.distance < 40);
+        const closest = this.gameManager.getClosestInteractable(player);
 
-        if (closest)
-        {
+        if (closest) {
             this.network.sendInteract(closest.type, closest.id);
         }
     }
 
+    fire() {
+        this.network.sendFire();
+    }
+    
+    release() {
+        const player = this.gameManager.localPlayer;
+        if (!player || !player.isSteering || !player.isUsingCannon) return;
 
+        this.network.sendRelease();
+    }
 }

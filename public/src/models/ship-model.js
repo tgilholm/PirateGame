@@ -1,5 +1,7 @@
 /** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */
 
+import Interactable from "./interactable";
+
 /**
  * The Ship class provides a moving body on which Interactables and Players can exist.
  * It can move independently and all objects "attached" to it will move with it- players'
@@ -19,8 +21,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
     constructor(scene, id, x, y, config) {
         super(scene, x, y);
         this.dimensions = config.dimensions;
-        this.interactables = config.interactables;
-
+        this.interactables = [];
 
 
         this.target = { x: 0, y: 0, r: 0 };
@@ -28,10 +29,17 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         this.pilotId = null;
         this.angularVelocity = 0;
 
+        if (config.interactables)
+        {
+            config.interactables.forEach(item => {
+                const model = new Interactable(this.scene, this, item);
+                this.interactables.push(model);
+            })
+        }
+
 
         this.drawHull();
         this.drawInteractables();
-
         scene.add.existing(this);
     }
 
@@ -100,31 +108,12 @@ export default class ShipModel extends Phaser.GameObjects.Container {
 
     drawInteractables() {
         // Get interactable positions from dimensions and create sprites for them
-        const { helm, cannons, ladders } = this.interactables;
-
-        this.add(this.scene.add.sprite(helm.x, helm.y, 'helm'));
-
-        // Add all cannons
-        for (let i = 0; i < cannons.length; i++) {
-            const current = cannons[i];
-
-            // Invert for negative y values
-            const cannon = this.scene.add.sprite(current.x, current.y, 'cannon');
-
-            current.y < 0 ? cannon.setRotation(0) : cannon.setRotation(Math.PI);
-            this.add(cannon);
-        }
-
-        for (let i = 0; i < ladders.length; i++) {
-            const current = ladders[i];
-
-            // Invert for negative y values
-            const ladder = this.scene.add.sprite(current.x, current.y, 'cannon');
-
-            current.y < 0 ? ladder.setRotation(0) : ladder.setRotation(Math.PI);
-            this.add(ladder);
-        }
+        this.interactables.forEach(i => {
+            const item = this.add(i);
+            item.y < 0 ? item.setRotation(0) : item.setRotation(Math.PI);
+        })
     }
+
 
     update(data, delta) {
         this.syncFromServer(data);
@@ -142,7 +131,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         // Extrapolate from velocity and time
         const predictedX = this.target.x + this.velocity.x * deltaTime; // where x is in however many milliseconds
         const predictedY = this.target.y + this.velocity.y * deltaTime; // Distance = speed * time
-        const predictedR = this.target.r + this.angularVelocity * deltaTime;
+        const predictedR = this.target.ar + this.angularVelocity * deltaTime;
 
         this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
         this.y = Math.round(Phaser.Math.Linear(this.y, predictedY, lerp));
