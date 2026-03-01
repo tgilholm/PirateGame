@@ -15,6 +15,8 @@ export default class GameManager {
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
 
+        this.localPlayer = null;
+
         this.shipList = {};
         this.playerList = {};
     }
@@ -68,5 +70,11 @@ export default class GameManager {
 
             player.update(playerData);
         });
+
+        // Get the current player
+        if (!this.localPlayer && this.playerList[this.network.socket.id]) {
+            this.localPlayer = this.playerList[this.network.socket.id];
+        }
     }
+    
 }

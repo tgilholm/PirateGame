@@ -136,6 +136,13 @@ export class MainScene extends Phaser.Scene {
      * Updates dynamic content such as ships, players, etc
      */
     update() {
+        const localPlayer = this.gameManager.localPlayer;
+        if (!localPlayer) return;
+
+        const inputs = this.inputHandler.getInputs();
+        this.network.sendMove(inputs);
+
+
         this.ui?.promptEl && (this.ui.promptEl.style.display = "none"); // Clear UI messages each frame- they will be re-added if still relevant
 
 
