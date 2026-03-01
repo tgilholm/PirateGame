@@ -9,12 +9,15 @@ import Model from "./model.js";
  * 
  */
 export default class ShipModel extends Model {
-    constructor(scene, x, y, params) {
+    constructor(scene, x, y, dimensions) {
         super(scene, x, y);
-        this.params = params;
+        this.dimensions = dimensions;
         this.hullSprite = null;
         this.drawHull();
         this.setupInteractables()
+
+        this.vx = 0;
+        this.vy = 0;
 
         this.velocity = { x: 0, y: 0 };
         this.angularVelocity = 0;
@@ -23,8 +26,8 @@ export default class ShipModel extends Model {
 
     //draws ship hull based on parameters in params
     drawHull() {
-        if (!this.params) return;
-        const { height, middleWidth, bowLength, sternRadius } = this.params;
+        if (!this.dimensions) return;
+        const { height, middleWidth, bowLength, sternRadius } = this.dimensions;
         const halfH = height / 2;
         const halfW = middleWidth / 2;
         const segments = 12;
@@ -68,7 +71,7 @@ export default class ShipModel extends Model {
         graphics.fillPath();
         graphics.strokePath();
 
-        const textureName = `hull_${this.params.id}`;
+        const textureName = `hull_${this.dimensions.id}`;
         graphics.generateTexture(textureName, totalW, totalH);
 
         // Create sprite and set origin to the relative center
@@ -86,7 +89,7 @@ export default class ShipModel extends Model {
 
     setupInteractables() {
         // Get interactable positions from params and create sprites for them
-        const { interactables } = this.params;
+        const { interactables } = this.dimensions;
         const helm = interactables.helm;
         const cannons = interactables.cannons;
         const ladders = interactables.ladders;

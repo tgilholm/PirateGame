@@ -52,6 +52,8 @@ export class MainScene extends Phaser.Scene {
         this.load.image('ladder', '/assets/ladder.png')
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
 
+        this.load.im
+
         // Resize canvas with window
         window.addEventListener('resize', () => {
             this.scale.resize(window.innerWidth, window.innerHeight);
@@ -63,6 +65,15 @@ export class MainScene extends Phaser.Scene {
      * as setting up user input and socket listeners.
      */
     create(data) {
+
+        // Placeholder player sprite- replace in preload() with actual
+        const circle = this.make.graphics();
+        circle.fillStyle(0xff0000, 1);
+        circle.fillCircle(15, 15, 15);
+        circle.generateTexture('player_circle', 30, 30);    
+        circle.destroy();
+
+
         this.debugGraphics = this.add.graphics();
         this.debugGraphics.setDepth(1000); // Always on top
 
