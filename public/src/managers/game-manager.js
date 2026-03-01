@@ -16,10 +16,17 @@ export default class GameManager {
         this.shipConfig = entityConfig.ship;
 
         this.localPlayer = null;
+        this.closestInteractable = null;
 
         this.shipList = {};
         this.interactables = [];
         this.playerList = {};
+
+
+        this.network.on(
+            ServerEvent.INIT_GAME || ServerEvent.GAME_STATE,
+            (data) => this.onSync(data)
+        );
     }
 
     getInteractables() {
@@ -48,11 +55,17 @@ export default class GameManager {
         return closest;
     }
 
+    update()
+    {
+        if (!this.localPlayer) return;
 
-    init() {
-        // Init game contains all ships/players, game state contains only those that changed
-        this.network.on(ServerEvent.INIT_GAME, (data) => this.onSync(data));
-        this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
+        const closest = this.getClosestInteractable(this.localPlayer);
+        if (closest && closest.dist < 50)
+        {
+            this.closestInteractable = closest;
+        } else {
+            this.closestInteractable = null;
+        }
     }
 
     onSync(data) {

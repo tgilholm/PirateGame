@@ -26,12 +26,8 @@ export default class InteractionManager {
 
 
     interact() {
-        // Find the closest interactable object
-        const player = this.gameManager.localPlayer;
-        if (!player) return;
-
-        const closest = this.gameManager.getClosestInteractable(player);
-
+        const closest = this.gameManager.closestInteractable;
+        
         if (closest) {
             this.network.sendInteract(closest.type, closest.id);
         }
@@ -40,11 +36,8 @@ export default class InteractionManager {
     fire() {
         this.network.sendFire();
     }
-    
-    release() {
-        const player = this.gameManager.localPlayer;
-        if (!player || !player.isSteering || !player.isUsingCannon) return;
 
+    release() {
         this.network.sendRelease();
     }
 }
