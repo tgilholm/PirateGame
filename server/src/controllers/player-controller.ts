@@ -18,7 +18,7 @@ export default class PlayerController {
         player.inputs.right = data.right;
     }
 
-    handleInteract(player: Player): void {
+    handleInteract(player: Player, data): void {
         // Get interactables near player
         // "select" nearest one
         // If close enough, use that item
