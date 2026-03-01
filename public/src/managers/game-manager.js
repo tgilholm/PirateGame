@@ -3,7 +3,7 @@ import NetworkManager from "./network-manager.js";
 import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
 
-export default class GameManager {
+export default class GameManager extends Phaser.Events.EventEmitter {
     /**
      * 
      * @param {NetworkManager} network 
@@ -11,6 +11,7 @@ export default class GameManager {
      * @param {import("shared/entity-config.json")} entityConfig
      */
     constructor(network, scene, entityConfig) {
+        super();
         this.network = network;
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
@@ -29,7 +30,7 @@ export default class GameManager {
         );
     }
 
-    getInteractables() {
+    refreshInteractables() {
         this.interactables = [];
         Object.values(this.shipList).forEach(ship => {
             this.interactables.push(...ship.interactables);
@@ -55,13 +56,11 @@ export default class GameManager {
         return closest;
     }
 
-    update()
-    {
+    update() {
         if (!this.localPlayer) return;
 
         const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 50)
-        {
+        if (closest && closest.dist < 50) {
             this.closestInteractable = closest;
         } else {
             this.closestInteractable = null;
@@ -80,6 +79,7 @@ export default class GameManager {
                     this.shipConfig
                 );
             }
+            this.refreshInteractables();
         });
 
         data.players?.forEach(playerData => {
@@ -112,9 +112,12 @@ export default class GameManager {
             player.update(playerData);
         });
 
-        // Get the current player
-        if (!this.localPlayer && this.playerList[this.network.socket.id]) {
-            this.localPlayer = this.playerList[this.network.socket.id];
+        if (!this.localPlayer) {
+            const myId = this.network.socket.id;
+            if (this.playerList[myId]) {
+                this.localPlayer = this.playerList[myId];
+                this.emit('localPlayerReady', this.localPlayer);
+            }
         }
     }
 

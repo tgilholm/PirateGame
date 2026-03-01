@@ -30,7 +30,6 @@ export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
 
-        this.cameraTarget = null;
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
@@ -42,6 +41,11 @@ export class MainScene extends Phaser.Scene {
         this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager)
 
         this.ui = new UI(this);
+
+        // Resize canvas with window
+        window.addEventListener('resize', () => {
+            this.scale.resize(window.innerWidth, window.innerHeight);
+        });
     }
 
 
@@ -54,29 +58,6 @@ export class MainScene extends Phaser.Scene {
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
-
-        // Resize canvas with window
-        window.addEventListener('resize', () => {
-            this.scale.resize(window.innerWidth, window.innerHeight);
-        });
-
-
-        // Generate the tilemap from the .json
-        const map = this.make.tilemap({ key: "map" });
-        const tileset = map.addTilesetImage("terrain-tilesheet", "tiles");
-
-        map.createLayer("sea", tileset, 0, 0); // Add at 0, 0
-        map.createLayer("shallows", tileset, 0, 0);
-        const islands = map.createLayer("islands", tileset, 0, 0);
-
-        //this.matter.world.convertTilemapLayer(islands); // add collision to solid objects
-
-        // Placeholder player sprite- replace in preload() with actual
-        const circle = this.make.graphics();
-        circle.fillStyle(0xff0000, 1);
-        circle.fillCircle(15, 15, 15);
-        circle.generateTexture('player_circle', 30, 30);
-        circle.destroy();
     }
 
     /**
@@ -84,24 +65,27 @@ export class MainScene extends Phaser.Scene {
      * as setting up user input and socket listeners.
      */
     create(data) {
-        this.debugGraphics = this.add.graphics();
-        this.debugGraphics.setDepth(1000); // Always on top
+        this.setupWorld();
 
 
-        this.cameraTarget = this.add.container(0, 0); // follow the player
-        this.cameras.main.startFollow(this.cameraTarget, true, 1, 1); // dont interp camera
-
-        // Shop object
-        this.shop = new Shop(this, 3000, 5250);
-
-        this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);   // don't leave the map
-
-
-        // Show the minimap and place the initial marker
-        this.ui.minimap.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+        // Placeholder player sprite- replace in preload() with actual
+        const circle = this.make.graphics();
+        circle.fillStyle(0xff0000, 1);
+        circle.fillCircle(15, 15, 15);
+        circle.generateTexture('player_circle', 30, 30);
+        circle.destroy();
 
 
-        socket.emit('system:playerReady', { username: data.username });
+        this.gameManager.once('localPlayerReady', (player) => {
+            this.cameras.main.startFollow(player, true, 0.1, 0.1);
+            this.ui.minimap.initializeMarker(
+                player.x,
+                player.y, 
+                this.map.widthInPixels, 
+                this.map.heightInPixels
+            );
+        });
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         this.network.emit(ClientEvent.READY);
     }
@@ -115,52 +99,17 @@ export class MainScene extends Phaser.Scene {
         this.uiManager.update();
         this.network.sendMove(this.inputManager.getMovementInputs());
 
-
-        const inputs = this.inputHandler.getInputs();
-        this.network.sendMove(inputs);
-
-
-        const cameraTarget = this.cameraTarget;
-        if (!players[socket.id]) return; // wait for player data to load
-
-
-
-        const player = players[socket.id];
-        const parentId = player.parentId;
-
-        // Handle camera movement for players in either relative or absolute state
-        if (parentId && ships[parentId]) {
-            // Player is on a ship – convert local to world
-            const ship = ships[parentId];
-            const shipContainer = ship.container;
-            const worldPos = Phaser.Math.RotateAround(
-                { x: player.sprite.x, y: player.sprite.y },
-                0, 0,
-                shipContainer.rotation
-            );
-            // Player is in relative space
-            cameraTarget.x = shipContainer.x + worldPos.x;
-            cameraTarget.y = shipContainer.y + worldPos.y;
-
-
-            // Check distance to the shop
-            this.shop.update(player, this.inputHandler.keys, this.ui);
-
-
-            // Player is in world space
-            cameraTarget.x = player.sprite.x;
-            cameraTarget.y = player.sprite.y;
-        }
-
-
-        // Toggle zoom when Z is pressed
-        if (this.inputHandler.justPressed(this.inputHandler.shipKeys.zoom)) {
-            const zoomValue = zoom.toggleZoom();
-            this.cameras.main.setZoom(zoomValue);
-        }
-
         // Update minimap marker with current world position
-        this.ui.minimap.updatePlayerMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+        //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
 
+    }
+
+    setupWorld() {
+        this.map = this.make.tilemap({ key: "map" });
+        const tileset = this.map.addTilesetImage("terrain-tilesheet", "tiles");
+
+        this.map.createLayer("sea", tileset, 0, 0);
+        this.map.createLayer("shallows", tileset, 0, 0);
+        this.map.createLayer("islands", tileset, 0, 0);
     }
 }
