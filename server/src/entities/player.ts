@@ -1,6 +1,5 @@
+import { PlayerConfig } from "types";
 import Entity from "./entity";
-
-type PlayerConfig = typeof import("../entity-config.json")["player"];
 
 export default class Player extends Entity {
     username: string;

@@ -6,15 +6,15 @@ import ShipModel from "../models/ship-model.js";
 import UI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
-import { io } from "socket.io-client";
+import io from "socket.io-client";
 import InputHandler from "../objects/input-handler.js";
 import NetworkManager from "../managers/network-manager.js";
 import { ServerEvent } from "shared/socket-protocol.js";
+import GameManager from "../managers/game-manager.js";
+import entityConfig from "shared/entity-config.json";
+import { ClientEvent } from "shared/built/socket-protocol.js";
 
 
-
-const ships = {}
-const players = {}
 const socket = io();
 
 
@@ -38,6 +38,7 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = null;
 
         this.network = new NetworkManager(socket);
+        this.gameManager = new GameManager(this.network, this, entityConfig);
         this.ui = new UI(this);
     }
 
@@ -51,8 +52,6 @@ export class MainScene extends Phaser.Scene {
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
         this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
-
-        this.load.im
 
         // Resize canvas with window
         window.addEventListener('resize', () => {
@@ -70,7 +69,7 @@ export class MainScene extends Phaser.Scene {
         const circle = this.make.graphics();
         circle.fillStyle(0xff0000, 1);
         circle.fillCircle(15, 15, 15);
-        circle.generateTexture('player_circle', 30, 30);    
+        circle.generateTexture('player_circle', 30, 30);
         circle.destroy();
 
 
@@ -103,87 +102,9 @@ export class MainScene extends Phaser.Scene {
         this.inputHandler = new InputHandler(this);
 
 
-        // Network events
+        // Show the minimap and place the initial marker
+        this.ui.minimap.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
 
-
-
-        // Generate the entire game once when the "handshake" is received
-        socket.on('initGame', (data) => {
-
-
-
-            // Create all players from server data
-            if (data.playerData && Array.isArray(data.playerData)) {
-                data.playerData.forEach(playerData => {
-                    if (!players[playerData.id]) {
-                        console.log(`[Client] Creating player: ${playerData.id}`);
-                        players[playerData.id] = new Player(this, playerData.id);
-                    }
-
-                    // Update player state
-                    const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
-                    players[playerData.id].updateState(playerData, shipParent);
-                });
-            }
-
-            //move camera immediately to the local players world position
-            const localPlayer = players[socket.id];
-            if (localPlayer) {
-                if (localPlayer.parentId && ships[localPlayer.parentId]) {
-                    const ship = ships[localPlayer.parentId];
-                    const worldPos = Phaser.Math.RotateAround(
-                        { x: localPlayer.sprite.x, y: localPlayer.sprite.y },
-                        0, 0,
-                        ship.container.rotation
-                    );
-                    this.cameraTarget.x = ship.container.x + worldPos.x;
-                    this.cameraTarget.y = ship.container.y + worldPos.y;
-                } else {
-                    this.cameraTarget.x = localPlayer.sprite.x;
-                    this.cameraTarget.y = localPlayer.sprite.y;
-                }
-
-                // Show the minimap and place the initial marker
-                this.ui.minimap.initializeMarker(this.cameraTarget.x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
-            }
-        });
-
-
-
-        socket.on('gameState', (data) => {
-            // Update ships
-            if (data.ships && Array.isArray(data.ships)) {
-                data.ships.forEach(shipData => {
-                    // If the ship doesn't exist yet, create it
-                    if (!ships[shipData.id]) {
-                        console.log(`[Client] New ship detected: ${shipData.id}`);
-                        // use default params if not found
-                        ships[shipData.id] = new Ship(this, shipData.x, shipData.y, shipData.params || {});
-                    }
-
-                    // Standard update logic
-                    const ship = ships[shipData.id];
-                    ship.target = {
-                        x: shipData.x,
-                        y: shipData.y,
-                        r: shipData.r
-                    };
-                    ship.velocity = { x: shipData.vx || 0, y: shipData.vy || 0 };
-                    ship.angularVelocity = shipData.av || 0;
-                });
-            }
-
-            data.players.forEach(playerData => {
-                // If the player doesn't exist in our local list, create them now
-                if (!players[playerData.id]) {
-                    console.log(`[Client] New player joined: ${playerData.id}`);
-                    players[playerData.id] = new Player(this, playerData.id);
-                }
-
-                const shipParent = playerData.parentId ? ships[playerData.parentId] : null;
-                players[playerData.id].updateState(playerData, shipParent);
-            });
-        });
 
         // Respond to server confirmation of control takeover 
         socket.on('controlTaken', () => {
@@ -206,6 +127,8 @@ export class MainScene extends Phaser.Scene {
 
 
         socket.emit('system:playerReady', { username: data.username });
+
+        this.network.emit(ClientEvent.READY);
     }
 
 

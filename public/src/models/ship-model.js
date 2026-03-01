@@ -1,4 +1,4 @@
-/** @typedef {import("../../../shared/entity-config.json")["ship"]} ShipConfig */
+/** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */
 
 /**
  * The Ship class provides a moving body on which Interactables and Players can exist.

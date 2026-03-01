@@ -8,59 +8,65 @@ export default class GameManager {
      * 
      * @param {NetworkManager} network 
      * @param {Phaser.Scene} scene 
+     * @param {import("shared/entity-config.json")} entityConfig
      */
-    constructor(network, scene) {
+    constructor(network, scene, entityConfig) {
         this.network = network;
         this.scene = scene;
+        this.shipConfig = entityConfig.ship;
 
         this.shipList = {};
         this.playerList = {};
     }
 
     init() {
-        this.network.on(ServerEvent.INIT_GAME, (data) => this.onInitGame(data));
-        this.network.on(ServerEvent.GAME_STATE, (data) => this.onGameState(data));
+        // Init game contains all ships/players, game state contains only those that changed
+        this.network.on(ServerEvent.INIT_GAME, (data) => this.onSync(data));
+        this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
     }
 
-    update() {
-
-    }
-
-
-
-    onInitGame(data) {
-        // Initial "handshake" packet from server
-
+    onSync(data) {
         data.ships?.forEach(shipData => {
             // Only create the ship if not already in the list
             if (!this.shipList[shipData.id]) {
-                this.shipList[shipData.id] = new ShipModel(this.scene, shipData.x, shipData.y, shipData.dimensions);
+                this.shipList[shipData.id] = new ShipModel(
+                    this.scene,
+                    shipData.id,
+                    shipData.x,
+                    shipData.y,
+                    this.shipConfig
+                );
             }
         });
 
         data.players?.forEach(playerData => {
+            let player = this.playerList[playerData.id]
+
             // Only create the player if not already in the list
-            if (!this.playerList[playerData.id]) {
-                this.playerList[playerData.id] = new PlayerModel(this.scene, playerData.id);
+            if (!player) {
+                this.playerList[playerData.id] = new PlayerModel(
+                    this.scene,
+                    playerData.id,
+                    playerData.x,
+                    playerData.y);
             }
-            const shipParent = playerData.parentId ? this.shipList[playerData.parentId] : null;
-            this.playerList[playerData.id].updateState(playerData, shipParent);
-        });
-        console.log('[GameManager] Initialised game with data received from server', data);
-    }
 
-    onGameState(data) {
-        // Regular "choppy" data from server
+            if (player.parentId !== playerData.parentId) {
+                const newParentId = playerData.parentId;
 
-        data.ships?.forEach(shipData => {
-            if (!this.shipList[shipData.id]) {
-                this.shipList[shipData.id] = new ShipModel(this.scene, shipData.x, shipData.y, shipData.dimensions);
+                if (newParentId && this.shipList[newParentId]) {
+                    this.shipList[newParentId].add(player);
+                } else {
+                    this.scene.add.existing(player);
+                }
+
+
+                player.x = playerData.x;
+                player.y = playerData.y;
+                player.parentId = newParentId;
             }
-            
-            const ship = this.shipList[shipData.id];
-            
+
+            player.update(playerData);
         });
     }
-
-
 }

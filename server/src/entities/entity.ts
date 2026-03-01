@@ -44,6 +44,7 @@ export default abstract class Entity {
             vy: this.vy,
             av: this.av,
             r: this.r,
+            parentId: this.parent?.id,
 
             // Transmit both maximum and current health for health bars
             health: this.health,

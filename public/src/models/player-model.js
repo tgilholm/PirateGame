@@ -7,6 +7,7 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
 
         this.target = { x: 0, y: 0 };
         this.isSteering = false;
+        this.isUsingCannon = false;
 
         this.parentId = null;
 
@@ -22,16 +23,12 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
     update(data) {
         if (data.username) this.nameText.setText(data.username);
 
-        // Snap to ship if just boarded
-        if (this.parentId !== data.parentId) {
-            this.parentId = data.parentId;
-            this.x = data.x;
-            this.y = data.y
-        }
-
         // Interp otherwise
         this.target.x = data.x;
         this.target.y = data.y;
+
+        this.isSteering = data.isSteering;
+        this.isUsingCannon = data.isUsingCannon;
     }
 
     preUpdate(time, delta) {
