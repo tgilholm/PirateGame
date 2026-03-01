@@ -1,6 +1,7 @@
 import { ServerEvent } from "shared/built/socket-protocol.js";
 import NetworkManager from "./network-manager.js";
 import ShipModel from "../models/ship-model.js";
+import PlayerModel from "../models/player-model.js";
 
 export default class GameManager {
     /**
@@ -35,9 +36,9 @@ export default class GameManager {
             }
         });
 
-        data.playerData?.forEach(playerData => {
-            if (!this.players[playerData.id]) {
-                this.players[playerData.id] = new Player(this.scene, playerData.id);
+        data.players?.forEach(player => {
+            if (!this.players[player.id]) {
+                this.players[player.id] = new PlayerModel(this.scene, player.id);
             }
             const shipParent = playerData.parentId ? this.ships[playerData.parentId] : null;
             this.players[playerData.id].updateState(playerData, shipParent);
