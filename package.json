@@ -23,6 +23,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/matter-js": "^0.20.2",
     "@types/socket.io-client": "^1.4.36",
     "undici-types": "^7.22.0"

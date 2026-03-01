@@ -62,7 +62,7 @@ const worldController = new WorldController(registry,
   }
 );
 
-const gameWorld = new GameWorld(server, registry, entityFactory, engine, worldController);
+const gameWorld = new GameWorld(registry, entityFactory, engine, worldController);
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();

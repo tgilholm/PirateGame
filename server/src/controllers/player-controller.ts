@@ -1,7 +1,7 @@
 import EntityRegistry from "../engine/entity-registry";
 import Player from "../entities/player";
 import UpgradeHandler from "../handlers/upgrade-handler";
-import { MoveData, UpgradeData } from "../../../shared/socket-protocol";
+import { InteractData, MoveData, UpgradeData } from "@shared/socket-protocol";
 
 export default class PlayerController {
 
@@ -18,7 +18,7 @@ export default class PlayerController {
         player.inputs.right = data.right;
     }
 
-    handleInteract(player: Player, data): void {
+    handleInteract(player: Player, data: InteractData): void {
         // Get interactables near player
         // "select" nearest one
         // If close enough, use that item

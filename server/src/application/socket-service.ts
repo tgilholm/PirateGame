@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 import { z } from 'zod';    // For frontline validation
-import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "shared/socket-protocol";
-import GameWorld from "./game-world";
+import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "@shared/socket-protocol";
+import GameWorld, { WorldEvent } from "./game-world";
 
 const MoveSchema = z.object({
     up: z.boolean(),
@@ -30,6 +30,11 @@ export default class SocketService {
     constructor(private io: Server, private world: GameWorld) { }
 
     public initialise() {
+
+        this.world.on(WorldEvent.GAME_STATE, (data) => {
+            this.io.emit(ServerEvent.GAME_STATE, data);
+        });
+
         // Handle new clients
         this.io.on('connection', (socket: Socket) => {
             console.log(`[SocketService] Client connected: ${socket.id}`);
