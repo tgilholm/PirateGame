@@ -11,9 +11,7 @@ export enum ServerEvent {
 }
 
 export enum ClientEvent {
-    READY = 'PLAYER_READY',
-    REQUEST_JOIN = 'REQUEST_JOIN',
-    REQUEST_SYNC = 'REQUEST_SYNC',
+    READY = 'READY',
     ACTION = 'ACTION'
 }
 
@@ -38,10 +36,16 @@ export interface UpgradeData {
     itemId: string
 }
 
+export interface InteractData {
+    targetId: string;
+    targetType: string;
+    parentId?: string | null;
+}
+
 export type PlayerAction =
     | { type: ActionType.MOVE; data: MoveData }   // Must match interface
     | { type: ActionType.UPGRADE; data: UpgradeData }
-    | { type: ActionType.INTERACT; data?: never } // Cannot provide data
+    | { type: ActionType.INTERACT; data: InteractData }
     | { type: ActionType.MESSAGE; data?: { text: string } } // the message
     | { type: ActionType.DIG; data?: never }
     | { type: ActionType.FIRE; data?: never }

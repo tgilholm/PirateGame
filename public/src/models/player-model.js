@@ -21,7 +21,9 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
     }
 
     update(data) {
-        if (data.username) this.nameText.setText(data.username);
+        if (data.username && this.nameText.text !== data.username) {
+            this.nameText.setText(data.username);
+        }
 
         // Interp otherwise
         this.target.x = data.x;
@@ -42,14 +44,20 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
         this.x = Phaser.Math.Linear(this.x, this.target.x, lerp);
         this.y = Phaser.Math.Linear(this.y, this.target.y, lerp);
 
+        this.setAlpha(this.isSteering || this.isUsingCannon ? 0.6 : 1.0);
+
         // Update name box position
         const matrix = this.getWorldTransformMatrix();
-        this.nameText.setPosition(matrix.tx, matrix.ty - 25);   // Slightly above player
+        this.nameText.setPosition(matrix.tx, matrix.ty - 25);
+
+        // Hide name if off-screen
+        const cam = this.scene.cameras.main;
+        this.nameText.setVisible(cam.worldView.contains(matrix.tx, matrix.ty));
     }
 
 
     destroy(scene) {
-        this.nameText.destroy();
+        if (this.nameText) this.nameText.destroy();
 
         super.destroy(scene);
     }

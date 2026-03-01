@@ -41,11 +41,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let closest = null;
         let nearestDist = Infinity;
 
+        const playerMatrix = player.getWorldTransformMatrix();
+        const px = playerMatrix.tx;
+        const py = playerMatrix.ty;
+
         this.interactables.forEach(item => {
-            const dist = Phaser.Math.Distance.Between(
-                player.x, player.y,
-                item.x, item.y
-            );
+            const itemMatrix = item.getWorldTransformMatrix();
+            const ix = itemMatrix.tx;
+            const iy = itemMatrix.ty;
+
+            const dist = Phaser.Math.Distance.Between(px, py, ix, iy);
 
             if (dist < nearestDist) {
                 nearestDist = dist;
@@ -78,8 +83,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     shipData.y,
                     this.shipConfig
                 );
+                this.refreshInteractables();
             }
-            this.refreshInteractables();
         });
 
         data.players?.forEach(playerData => {
@@ -91,7 +96,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     this.scene,
                     playerData.id,
                     playerData.x,
-                    playerData.y);
+                    playerData.y
+                );
             }
 
             if (player.parentId !== playerData.parentId) {
