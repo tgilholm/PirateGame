@@ -7,6 +7,7 @@ export default class InteractionHandler {
     constructor() { }
 
     handleHelmInteraction(player: Player, ship: Ship, helm: { x: number, y: number }) {
+        if (!player.parent) return;
         player.isSteering = true;
 
         if (ship.pilot) return; // Ship already has a pilot
@@ -18,6 +19,7 @@ export default class InteractionHandler {
     }
 
     handleCannonInteraction(player: Player, cannon: { x: number, y: number }) {
+        if (!player.parent) return;
         player.isUsingCannon = true;
 
         const cannonYdir = cannon.y > 0 ? -1 : 1;

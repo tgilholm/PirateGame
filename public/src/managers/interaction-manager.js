@@ -28,9 +28,9 @@ export default class InteractionManager {
     interact() {
         const target = this.gameManager.closestInteractable;
 
-        console.log(target.item, target.dist);
 
         if (target && target.item) {
+            console.log(target.item.id, target.dist);
             const closest = target.item
             this.network.sendInteract({
                 targetId: closest.id,        // e.g. "cannon_1"

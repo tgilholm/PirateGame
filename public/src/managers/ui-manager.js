@@ -16,17 +16,30 @@ export default class UIManager {
 
     update() {
         const target = this.gameManager.closestInteractable;
+        const player = this.gameManager.localPlayer;
 
+        if (!player) return;
+
+        const isInteracting = player.isSteering || player.isUsingCannon;
 
         if (target) {
-
             const item = target.item;
 
-            console.log(item.usePrompt);
-            this.showPrompt(item.usePrompt);
+            if (isInteracting) {
+                const prompt = item.releasePrompt || "Release";
+                this.showPrompt(`[Q] ${prompt}`);
+            } else {
+                this.showPrompt(`[E] ${item.usePrompt}`);
+            }
         } else {
-            this.hidePrompt();
+            if (isInteracting) {
+                this.showPrompt(`[Q] Release`);
+            } else {
+                this.hidePrompt();
+            }
         }
+
+        console.log("Target:", !!target, "Interacting:", isInteracting);
     }
 
     hidePrompt() {
@@ -36,8 +49,11 @@ export default class UIManager {
     }
 
     showPrompt(promptText) {
-        if (this.promptElement.style.display !== 'block') {
+        if (this.promptElement.textContent !== promptText) {
             this.promptElement.textContent = promptText;
+        }
+
+        if (this.promptElement.style.display !== 'block') {
             this.promptElement.style.display = 'block';
         }
     }
