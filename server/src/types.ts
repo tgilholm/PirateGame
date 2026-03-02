@@ -1,5 +1,5 @@
-export type EntityConfig = typeof import("./entity-config.json");
+import entityConfig from "../../shared/entity-config.json"
 
-export type PlayerConfig = EntityConfig["player"];
-export type ShipConfig = EntityConfig["ship"];
-
+export type EntityConfig = typeof entityConfig;
+export type PlayerConfig = typeof entityConfig["player"];
+export type ShipConfig = typeof entityConfig["ship"];

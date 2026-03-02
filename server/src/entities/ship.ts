@@ -1,28 +1,32 @@
 import { Bodies, Body } from "matter-js";
 import { ShipConfig } from "../types";
 import Entity from "./entity";
+import InteractableEntity from "./interactable-entity";
+import Player from "./player";
 
 
 
 
 export default class Ship extends Entity {
-    pilotId: string | null;
+    pilot: Player | null;
     dimensions: ShipConfig["dimensions"];
     physics: ShipConfig["physics"];
+    interactables: InteractableEntity[]
     body: Matter.Body
     inputs: any;
 
     constructor(
+        id: string,
         x: number,
         y: number,
         config: ShipConfig
     ) {
-        super("ship", x, y, config.maxHealth, null);    // ships have no parents
+        super(id, "ship", x, y, config.maxHealth, null);    // ships have no parents
 
-        this.pilotId = null;    // Nobody piloting at startup
-        this.parent = null;
+        this.pilot = null;    // Nobody piloting at startup
         this.dimensions = config.dimensions;
         this.physics = config.physics;
+        this.interactables = [];
         this.inputs = {
             up: false,
             down: false,
@@ -30,7 +34,34 @@ export default class Ship extends Entity {
             right: false
         }
 
+        let result = this.createInteractables(config.interactables);
+        if (result) {
+            this.interactables = result;
+        }
+
+
         this.body = this.createPhysicsBody(x, y);
+    }
+
+    createInteractables(interactables: ShipConfig['interactables']): InteractableEntity[] {
+        if (!interactables) return [];
+
+        let result: InteractableEntity[] = [];
+
+        for (let i = 0; i < interactables.length; i++) {
+            const uniqueId = `${this.id}_${interactables[i].id}`;
+
+            const configWithUniqueId = { ...interactables[i], id: uniqueId };
+
+            const interactable = new InteractableEntity(
+                configWithUniqueId,
+                this
+            );
+
+            result.push(interactable);
+        }
+
+        return result;
     }
 
     /**
@@ -45,6 +76,7 @@ export default class Ship extends Entity {
             y: this.y,
             vx: this.vx,
             vy: this.vy,
+            av: this.av,
             r: this.r,
             health: this.health,
             maxHealth: this.maxHealth
@@ -53,8 +85,7 @@ export default class Ship extends Entity {
         // Send everything the client needs to display the player
         return {
             ...super.serialise(),
-            pilotId: this.pilotId,  // For client side messages
-            dimensions: this.dimensions // For client side drawing
+            pilotId: this.pilot?.id,  // For client side messages
         }
     }
 
@@ -85,22 +116,26 @@ export default class Ship extends Entity {
     }
 
 
-    isInside(localX: number, localY: number, padding = 15) {
-        const halfMidWidth = (this.dimensions.middleWidth / 2) - padding;
-        const halfHeight = (this.dimensions.height / 2) - padding;
-        const paddedSternRadius = this.dimensions.sternRadius - padding;
-        const paddedBowLength = this.dimensions.bowLength - padding;
+    isInside(localX: number, localY: number, padding = 0) {
+        const { middleWidth, height, sternRadius, bowLength } = this.dimensions;
+        const halfMidWidth = middleWidth / 2;
+        const halfHeight = height / 2;
 
         if (localX < -halfMidWidth) {
             const dx = localX + halfMidWidth;
-            return (dx ** 2 + localY ** 2) <= (paddedSternRadius ** 2);
-        } else if (localX > halfMidWidth) {
-            const t = (localX - halfMidWidth) / paddedBowLength;
-            if (t > 1) return false;
-            const hullLimitY = halfHeight * (1 - (t ** 2));
-            return Math.abs(localY) <= hullLimitY;
-        } else {
-            return Math.abs(localY) <= halfHeight;
+            const currentSternRadius = sternRadius - padding;
+            return (dx ** 2 + localY ** 2) <= (currentSternRadius ** 2);
+        }
+
+        else if (localX > halfMidWidth) {
+            const t = (localX - halfMidWidth) / bowLength;
+
+            if (localX > halfMidWidth + bowLength - padding) return false;
+            const hullLimitY = halfHeight * (1 - (t * t));
+            return Math.abs(localY) <= (hullLimitY - padding);
+        }
+        else {
+            return Math.abs(localY) <= (halfHeight - padding);
         }
     }
 
@@ -159,6 +194,9 @@ export default class Ship extends Entity {
         });
 
         Body.setPosition(body, { x, y });
+        console.log('Ship body initial angle:', body.angle);
+
+        Body.setAngle(body, 0);
         return body;
     }
 }

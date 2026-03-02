@@ -8,11 +8,25 @@ import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
-import WorldManager from './application/world-manager';
 import SocketService from './application/socket-service';
 import { CONFIG } from './config';
-import entityConfig from './entity-config.json';
-import { GameMode } from './engine/world';
+import GameWorld from './application/game-world';
+import EntityRegistry from './engine/entity-registry';
+import EntityFactory from './entities/entity-factory';
+import entityConfig from '../../shared/entity-config.json';
+import GameEngine from './engine/game-engine';
+import PhysicsSystem from './systems/physics-system';
+import MovementSystem from './systems/movement-system';
+import ProjectileSystem from './systems/projectile-system';
+import MessageSystem from './systems/message-system';
+import { Engine } from 'matter-js';
+import TerrainMap from './engine/terrain-map';
+import WorldController from './controllers/world-controller';
+import PlayerController from './controllers/player-controller';
+import UpgradeHandler from './handlers/upgrade-handler';
+import ShipController from './controllers/ship-controller';
+import MessageController from './controllers/message-controller';
+import InteractionHandler from './handlers/interaction-handler';
 
 // Create the express app & server
 const app = express();
@@ -20,35 +34,44 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
 // Route files to the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../../public')));
+app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')));
 
-
-// Composition root- create all dependencies and inject
-const worldManager = new WorldManager(entityConfig);
-const socketService = new SocketService(io, worldManager);
-socketService.initialise();
 
 /*
-Start with two worlds initially- WorldManager can dynamically expand the map
-with new worlds when they fill up
+  Create the game world
 */
-worldManager.createWorld({
-  maxPlayers: 32,
-  mode: GameMode.FREE_FOR_ALL
+const registry = new EntityRegistry();
+const matterEngine = Engine.create({
+  gravity: {x: 0, y: 0}
+});
+const terrainMap = new TerrainMap('demo-map.json')
+const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
+const entityFactory = new EntityFactory(entityConfig, registry, physicsSystem);
+
+const engine = new GameEngine({
+  physicsSystem,
+  movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
+  projectileSystem: new ProjectileSystem(registry),
+  messageSystem: new MessageSystem()
 });
 
-// worldManager.createWorld({
-//   maxPlayers: 32,
-//   mode: GameMode.TEAMS
-// });
+const upgradeHandler = new UpgradeHandler(entityConfig);
+const interactionHandler = new InteractionHandler();
 
-/*
-  Player is presented with the choice of free-for-all or teams- socketService
-  accepts their choice and uses WorldManager to route to the correct world.
+const worldController = new WorldController(registry,
+  {
+    playerController: new PlayerController(registry, interactionHandler, upgradeHandler),
+    shipController: new ShipController(registry),
+    messageController: new MessageController()
+  }
+);
 
-  If the world is "full", a new one is started and the players are re-distributed
-  between the new worlds.
-*/
+const gameWorld = new GameWorld(registry, entityFactory, engine, worldController);
+const socketService = new SocketService(io, gameWorld);
+
+socketService.initialise();
+gameWorld.start();
 
 const PORT = process.env.PORT || CONFIG.PORT
 server.listen(PORT, () => {

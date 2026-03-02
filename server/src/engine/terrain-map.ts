@@ -1,10 +1,12 @@
 import fs from 'fs';
+import path from 'path';
 
 export default class TerrainMap {
     private islandTiles: Set<string> = new Set();
     public readonly tileWidth: number;
 
-    constructor(mapPath: string) {
+    constructor(mapFileName: string) {
+        const mapPath = path.join(__dirname, '..', mapFileName);
         const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
         this.tileWidth = mapData.tilewidth;
         const mapWidth: number = mapData.width;

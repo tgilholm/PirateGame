@@ -7,8 +7,19 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <link rel="stylesheet" type="text/css" href="styles.css" />
 
+    <script type="importmap">
+    {
+    "imports": {
+        "shared/built/": "/shared/",
+        "shared/": "/shared/",
+        "socket.io-client": "/socket.io/socket.io.js"
+    }
+    }
+    </script>
+
     <script src="//cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.js"></script>
-    <script src="js/scenes/index.js" type="module"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="src/scenes/index.js" type="module"></script>
 
 
 </head>
@@ -26,7 +37,7 @@
         </div>
     </form>
 
-    
+
 
     <!-- Interaction prompt -->
     <div id="interaction-prompt" style="display:none;"></div>

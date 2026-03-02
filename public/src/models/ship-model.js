@@ -1,5 +1,6 @@
-//import Helm from "./helm.js";
-import Model from "./model.js";
+/** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */
+
+import Interactable from "./interactable.js";
 
 /**
  * The Ship class provides a moving body on which Interactables and Players can exist.
@@ -8,23 +9,42 @@ import Model from "./model.js";
  * independently of the ship.
  * 
  */
-export default class ShipModel extends Model {
-    constructor(scene, x, y, dimensions) {
+export default class ShipModel extends Phaser.GameObjects.Container {
+
+    /**
+     * @param {Phaser.Scene} scene
+     * @param {string} id
+     * @param {number} x
+     * @param {number} y
+     * @param {ShipConfig} config
+     */
+    constructor(scene, id, x, y, config) {
         super(scene, x, y);
-        this.dimensions = dimensions;
+        this.dimensions = config.dimensions;
+        this.interactables = [];
+        this.id = id;
+
+
+        this.target = { x: 0, y: 0, r: 0 };
+        this.velocity = { x: 0, y: 0 };
+        this.pilotId = null;
+        this.angularVelocity = 0;
+
+        if (config.interactables) {
+            config.interactables.forEach(item => {
+                const model = new Interactable(this.scene, this, item);
+                this.interactables.push(model);
+            })
+        }
+
+
         this.hullSprite = null;
         this.drawHull();
-        this.setupInteractables()
-
-        this.vx = 0;
-        this.vy = 0;
-
-        this.velocity = { x: 0, y: 0 };
-        this.angularVelocity = 0;
-        this.lastUpdateTime = 0;
+        this.drawInteractables();
+        this.setRotation(0);
+        scene.add.existing(this);
     }
 
-    //draws ship hull based on parameters in params
     drawHull() {
         if (!this.dimensions) return;
         const { height, middleWidth, bowLength, sternRadius } = this.dimensions;
@@ -37,7 +57,7 @@ export default class ShipModel extends Model {
         const offsetX = sternRadius + halfW + padding;
         const offsetY = halfH + padding;
 
-        const graphics = this.scene.make.graphics({ x: 0, y: 0, add: false });
+        const graphics = this.scene.make.graphics({ x: 0, y: 0 }, false);
         graphics.fillStyle(0x5d4037, 1);
         graphics.lineStyle(4, 0xffffff, 1);
         graphics.beginPath();
@@ -71,125 +91,83 @@ export default class ShipModel extends Model {
         graphics.fillPath();
         graphics.strokePath();
 
-        const textureName = `hull_${this.dimensions.id}`;
-        graphics.generateTexture(textureName, totalW, totalH);
+        const textureName = 'hull';
+        if (!this.scene.textures.exists(textureName)) {
+            graphics.generateTexture(textureName, totalW, totalH);
+        }
+
 
         // Create sprite and set origin to the relative center
         if (this.hullSprite) this.hullSprite.destroy();
+
+
         this.hullSprite = this.scene.add.sprite(0, 0, textureName);
-
         this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
+        this.add(this.hullSprite);
+        this.sendToBack(this.hullSprite);
+        this.setDepth(10);
 
-        this.container.add(this.hullSprite);
-        this.container.sendToBack(this.hullSprite);
-        this.container.setDepth(10);
-
-        console.log(`Ship drawn at ${this.container.x}, ${this.container.y}`)
+        this.swayTimer = Math.random() * 1000;
     }
 
-    setupInteractables() {
-        // Get interactable positions from params and create sprites for them
-        const { interactables } = this.dimensions;
-        const helm = interactables.helm;
-        const cannons = interactables.cannons;
-        const ladders = interactables.ladders;
-
-
-        // HELM
-        // move it back by half the middle width, plus a bit of the stern radius
-        this.helm = this.scene.add.sprite(helm.x, helm.y, 'helm');
-        this.container.add(this.helm);
-
-        // CANNONS
-        // Cannon 1
-        const cannonPort = this.scene.add.sprite(cannons[0].x, cannons[0].y, 'cannon');
-        cannonPort.setRotation(0); // Pointing Outward
-        this.container.add(cannonPort);
-
-        // Cannon 2
-        const cannonStarboard = this.scene.add.sprite(cannons[1].x, cannons[1].y, 'cannon');
-        cannonStarboard.setRotation(Math.PI); // Pointing Outward
-        this.container.add(cannonStarboard);
-
-        // LADDER1
-        this.ladder = this.scene.add.sprite(ladders[0].x, ladders[0].y, 'ladder');
-        this.container.add(this.ladder);
-
-        // LADDER2
-        this.ladder2 = this.scene.add.sprite(ladders[1].x, ladders[1].y, 'ladder');
-        this.ladder2.setFlipY(true);
-        this.container.add(this.ladder2);
-
-
-        // Ensure all these objects are above the hull sprite
-        // (Since hullSprite was sentToBack, new items are naturally on top)
-
-
-        console.log(`Interactables created ${this.container}`)
+    drawInteractables() {
+        // Get interactable positions from dimensions and create sprites for them
+        this.interactables.forEach(i => {
+            const item = this.add(i);
+        });
     }
 
 
-    //extrapolation + interpolation to smooth movement client-side
-    update() {
-        if (!this.target) return;
+    update(data, delta) {
+        if (!data || typeof data.x !== 'number') return;
+        this.syncFromServer(data);
+
+        // Snap if position drifted
+        if (Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
+            this.x = data.x;
+            this.y = data.y;
+        }
+
+        this.swayTimer += delta;
+        const bobAmount = Math.sin(this.swayTimer / 1000) * 1; // 3px vertical bob
+        const rockAmount = Math.cos(this.swayTimer / 1500) * 0.02;
+
+        if (this.hullSprite) {
+            this.hullSprite.y = bobAmount;
+            this.hullSprite.rotation = rockAmount;
+        }
+
+        this.interactables.forEach(item => {
+            item.y = item.startY + bobAmount;
+        });
+
+        const deltaTime = delta / 1000;
+        const lerp = 1 - Math.pow(1 - 0.1, delta / 16.67);
 
 
-        // Get the current time
-        const now = performance.now();
-        const deltaTime = (now - this.lastUpdateTime) / 1000;   //in seconds
-        this.lastUpdateTime = now;
-
-        // Extrapolate "expected position" from velocity and time
+        // Extrapolate from velocity and time
         const predictedX = this.target.x + this.velocity.x * deltaTime; // where x is in however many milliseconds
         const predictedY = this.target.y + this.velocity.y * deltaTime; // Distance = speed * time
+        const predictedR = this.target.r + this.angularVelocity * deltaTime;
 
-        // Interpolate between the current and predicted positions instead of waiting for the server to update
-        this.container.x = Math.round(Phaser.Math.Linear(this.container.x, predictedX, 0.08));
-        this.container.y = Math.round(Phaser.Math.Linear(this.container.y, predictedY, 0.08));
+        this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
+        this.y = Math.round(Phaser.Math.Linear(this.y, predictedY, lerp));
 
-        // Predict the rotation
-        const predictedRotation = this.target.r + this.angularVelocity * deltaTime;
-        let rotDiff = predictedRotation - this.container.rotation;
-
-        // Normalize to shortest path
-        while (rotDiff > Math.PI) rotDiff -= 2 * Math.PI;
-        while (rotDiff < -Math.PI) rotDiff += 2 * Math.PI;
-
-        // Apply same interpolation as position
-        this.container.rotation += rotDiff * 0.08;
-
+        this.rotation = Phaser.Math.Angle.RotateTo(
+            this.rotation,
+            predictedR,
+            lerp
+        );
     }
 
-    /**
-* Converts local- (ship-scope) coordinates to absolute (world-scope)
-* coordinates using RotateAround
-* @param {Number} localX The X coordinate relative to this object
-* @param {Number} localY The Y coordinate relative to this object
-* @returns a Vector of x and y coordinates
-*/
-    toWorld(localX, localY) {
-        return Phaser.Math.RotateAround(
-            {
-                x: this.container.x + localX, y: this.container.y + localY
-            },
-            this.container.x, this.container.y, this.container.rotation
-        )
-    }
+    syncFromServer(data) {
+        this.target.x = data.x;
+        this.target.y = data.y;
+        this.target.r = data.r;
 
-    /**
-     * Converts absolute coordinates to coordinates relative to this object
-     * @param {Number} worldX 
-     * @param {Number} worldY 
-     * @returns the x and y coordinates relative to this object
-     */
-    toLocal(worldX, worldY) {
-        const angle = -this.container.rotation;
-        const dx = worldX - this.container.x;
-        const dy = worldY - this.container.y;
-
-        return {
-            x: dx * Math.cos(angle) - dy * Math.sin(angle),
-            y: dx * Math.sin(angle) + dy * Math.cos(angle)
-        };
+        this.velocity.x = data.vx;
+        this.velocity.y = data.vy;
+        this.angularVelocity = data.av;
+        this.pilotId = data.pilotId;
     }
 }

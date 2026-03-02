@@ -1,5 +1,4 @@
 export default abstract class Entity {
-    private static idCounter = 0;   // for unique ids
 
     public id: string;
     public type: string;
@@ -13,8 +12,8 @@ export default abstract class Entity {
     public maxHealth: number;
     public parent: Entity | null;
 
-    constructor(type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
-        this.id = `${this.constructor.name}:${++Entity.idCounter}`;  // increment before return
+    constructor(id: string, type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
+        this.id = id;
         this.type = type;
         this.x = x;
         this.y = y;
@@ -42,7 +41,9 @@ export default abstract class Entity {
             y: this.y,
             vx: this.vx,
             vy: this.vy,
+            av: this.av,
             r: this.r,
+            parentId: this.parent?.id,
 
             // Transmit both maximum and current health for health bars
             health: this.health,

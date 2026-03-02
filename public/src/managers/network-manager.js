@@ -1,14 +1,10 @@
 import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
 import { ServerEvent } from "shared/socket-protocol.js";
-import { Socket } from "socket.io-client";
 
 /**
  * Owns socket-io logic
  */
 export default class NetworkManager {
-    /**
-     * @param {Socket} socket
-     */
     constructor(socket) {
         this.socket = socket;
     }
@@ -47,11 +43,15 @@ export default class NetworkManager {
         this.sendAction({ type: ActionType.MOVE, data: inputs });
     }
 
-    /**
+/**
      * Sends an interaction event to the server
+     * @param {import("shared/socket-protocol.js").InteractData} data 
      */
-    sendInteract() {
-        this.sendAction({ type: ActionType.INTERACT });
+    sendInteract(data) {
+        this.sendAction({ 
+            type: ActionType.INTERACT, 
+            data: data
+        });
     }
 
     /**

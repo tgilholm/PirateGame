@@ -4,7 +4,7 @@
     "target": "ESNext",
     "checkJs": true,
     "noImplicitAny": false,
-    "ignoreDeprecations": "6.0",  // shuts up the next line
+    "resolveJsonModule": true,
     "baseUrl": "./",
     
     "paths": {
