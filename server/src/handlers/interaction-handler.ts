@@ -29,30 +29,33 @@ export default class InteractionHandler {
     }
 
     handleLadderInteraction(player: Player, ship: Ship, ladder: { x: number, y: number }) {
-        // Not on ship
+
         if (!player.parent) {
-            const enterYdir = ladder.y > 0 ? -1 : 1;    // which side the ladder is on
+            const enterYdir = ladder.y > 0 ? -1 : 1;
+
             player.x = ladder.x;
-            player.y = ladder.y + enterYdir * 30;   // move player inside hitbox
+            player.y = ladder.y + (enterYdir * 20);
 
             player.parent = ship;
         } else {
-            const exitYdir = ladder.y > 0 ? 1 : -1;
+            const dist = Math.sqrt(ladder.x * ladder.x + ladder.y * ladder.y);
+            const dirX = ladder.x / dist;
+            const dirY = ladder.y / dist;
 
-            const worldPos = ship.localToWorld(ladder.x, ladder.y);
+            const exitPadding = 40;
+            const shuntLocalX = ladder.x + (dirX * exitPadding);
+            const shuntLocalY = ladder.y + (dirY * exitPadding);
+            const shuntGlobal = ship.localToWorld(shuntLocalX, shuntLocalY);
 
-            player.x = worldPos.x;
-            player.y = worldPos.y + exitYdir * 50;
-
+            player.x = shuntGlobal.x;
+            player.y = shuntGlobal.y;
             player.parent = null;
         }
     }
 
     handleRelease(player: Player, ship: Ship | null) {
-        if (player.isSteering)
-        {
-            if (ship)
-            {
+        if (player.isSteering) {
+            if (ship) {
                 if (ship.pilot !== player) return;
 
                 ship.pilot = null;
@@ -60,8 +63,7 @@ export default class InteractionHandler {
             }
         }
 
-        if (player.isUsingCannon)
-        {
+        if (player.isUsingCannon) {
             player.isUsingCannon = false;
         }
     }

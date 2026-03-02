@@ -39,7 +39,6 @@ export default class PlayerController {
             Math.pow(playerWorldPos.y - interactableWorldPos?.y, 2)
         )
 
-        console.log(data.targetId, data.parentId, dist);
 
         if (dist < 50) {
             const ship = interactable.parent as Ship;

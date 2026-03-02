@@ -194,8 +194,6 @@ export default class Ship extends Entity {
         });
 
         Body.setPosition(body, { x, y });
-        console.log('Ship body initial angle:', body.angle);
-
         Body.setAngle(body, 0);
         return body;
     }
