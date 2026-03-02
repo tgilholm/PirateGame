@@ -38,6 +38,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         }
 
 
+        this.hullSprite = null;
         this.drawHull();
         this.drawInteractables();
         this.setRotation(0);
@@ -98,13 +99,15 @@ export default class ShipModel extends Phaser.GameObjects.Container {
 
         // Create sprite and set origin to the relative center
         if (this.hullSprite) this.hullSprite.destroy();
+
+
         this.hullSprite = this.scene.add.sprite(0, 0, textureName);
-
         this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
-
         this.add(this.hullSprite);
         this.sendToBack(this.hullSprite);
         this.setDepth(10);
+
+        this.swayTimer = Math.random() * 1000;
     }
 
     drawInteractables() {
@@ -116,6 +119,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
 
 
     update(data, delta) {
+        if (!data || typeof data.x !== 'number') return;
         this.syncFromServer(data);
 
         // Snap if position drifted
@@ -123,6 +127,19 @@ export default class ShipModel extends Phaser.GameObjects.Container {
             this.x = data.x;
             this.y = data.y;
         }
+
+        this.swayTimer += delta;
+        const bobAmount = Math.sin(this.swayTimer / 1000) * 1; // 3px vertical bob
+        const rockAmount = Math.cos(this.swayTimer / 1500) * 0.02;
+
+        if (this.hullSprite) {
+            this.hullSprite.y = bobAmount;
+            this.hullSprite.rotation = rockAmount;
+        }
+
+        this.interactables.forEach(item => {
+            item.y = item.startY + bobAmount;
+        });
 
         const deltaTime = delta / 1000;
         const lerp = 1 - Math.pow(1 - 0.1, delta / 16.67);

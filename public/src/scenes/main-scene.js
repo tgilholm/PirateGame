@@ -104,5 +104,10 @@ export class MainScene extends Phaser.Scene {
         this.map.createLayer("sea", tileset, 0, 0);
         this.map.createLayer("shallows", tileset, 0, 0);
         this.map.createLayer("islands", tileset, 0, 0);
+        
+        if (tileset && tileset.image) {
+            tileset.image.setFilter(Phaser.Textures.FilterMode.NEAREST);
+        }
+
     }
 }

@@ -26,6 +26,26 @@ export default class MovementSystem implements BaseSystem {
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;
         const playerConfig = this.entityConfig.player;
+        const ships = this.registry.getByType<Ship>('ship');
+
+        if (!parent) {
+            for (const ship of ships) {
+                const pushPadding = -playerConfig.radius - 2;
+                const local = ship.worldToLocal(player.x, player.y);
+
+                if (ship.isInside(local.x, local.y, pushPadding)) {
+                    const angleToPlayer = Math.atan2(local.y, local.x);
+                    const shoveDistance = 5;
+
+                    local.x += Math.cos(angleToPlayer) * shoveDistance;
+                    local.y += Math.sin(angleToPlayer) * shoveDistance;
+
+                    const correctedWorld = ship.localToWorld(local.x, local.y);
+                    player.x = correctedWorld.x;
+                    player.y = correctedWorld.y;
+                }
+            }
+        }
 
         let dx = 0;
         let dy = 0;
@@ -40,28 +60,61 @@ export default class MovementSystem implements BaseSystem {
         dx /= length;
         dy /= length;
 
-        const speed = (parent ? playerConfig.runSpeed : playerConfig.swimSpeed) * dt * 60;
+        const onLand = this.terrainMap.isOnIsland(player.x, player.y);
+        const speedMultiplier = (parent || onLand) ? playerConfig.runSpeed : playerConfig.swimSpeed;
+        const speed = speedMultiplier * dt * 60;
 
         if (parent) {
             const cos = Math.cos(-parent.r);
             const sin = Math.sin(-parent.r);
             const localDX = (dx * cos - dy * sin) * speed;
             const localDY = (dx * sin + dy * cos) * speed;
+
             const nextX = player.x + localDX;
             const nextY = player.y + localDY;
 
-            if (parent.isInside(nextX, nextY, playerConfig.radius)) {
+            const padding = playerConfig.radius;
+
+            if (parent.isInside(nextX, nextY, padding)) {
                 player.x = nextX;
                 player.y = nextY;
-            } else if (parent.isInside(nextX, player.y, playerConfig.radius)) {
+            } else if (parent.isInside(nextX, player.y, padding)) {
                 player.x = nextX;
-            } else if (parent.isInside(player.x, nextY, playerConfig.radius)) {
+            } else if (parent.isInside(player.x, nextY, padding)) {
                 player.y = nextY;
             }
         } else {
-            player.x += dx * speed;
-            player.y += dy * speed;
+            const nextWorldX = player.x + dx * speed;
+            const nextWorldY = player.y + dy * speed;
+
+            const collisionPadding = -playerConfig.radius;
+
+            const isColliding = (x: number, y: number) =>
+                this.checkShipCollisions(x, y, ships, collisionPadding);
+
+            if (!isColliding(nextWorldX, nextWorldY)) {
+                player.x = nextWorldX;
+                player.y = nextWorldY;
+            } else {
+                // Slide along the hull
+                const canMoveX = !isColliding(nextWorldX, player.y);
+                const canMoveY = !isColliding(player.x, nextWorldY);
+
+                if (canMoveX) player.x = nextWorldX;
+                else if (canMoveY) player.y = nextWorldY;
+            }
         }
+    }
+
+    /**
+     * Helper to check if a world position is inside any ship
+     */
+    private checkShipCollisions(x: number, y: number, ships: Ship[], padding: number): boolean {
+        for (const ship of ships) {
+            const local = ship.worldToLocal(x, y);
+            if (ship.isInside(local.x, local.y, padding)) return true;
+        }
+        return false;
     }
 
 

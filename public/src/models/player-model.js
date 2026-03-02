@@ -1,3 +1,4 @@
+import ShipModel from "./ship-model.js";
 
 
 export default class PlayerModel extends Phaser.GameObjects.Sprite {
@@ -38,13 +39,19 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
     preUpdate(time, delta) {
         if (super.preUpdate) super.preUpdate(time, delta);
 
-        // How fast the client responds to updates
+
         const responseFactor = 0.15;
         const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667); // Aim for 60fps
 
         // Interpolate
         this.x = Phaser.Math.Linear(this.x, this.target.x, lerp);
         this.y = Phaser.Math.Linear(this.y, this.target.y, lerp);
+
+        if (this.parentContainer instanceof ShipModel) {
+            const bob = this.parentContainer.hullSprite.y;
+            this.y += bob;
+        }
+
 
         this.setAlpha(this.isSteering || this.isUsingCannon ? 0.6 : 1.0);
 

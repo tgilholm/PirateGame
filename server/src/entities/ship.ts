@@ -116,22 +116,26 @@ export default class Ship extends Entity {
     }
 
 
-    isInside(localX: number, localY: number, padding = 15) {
-        const halfMidWidth = (this.dimensions.middleWidth / 2) - padding;
-        const halfHeight = (this.dimensions.height / 2) - padding;
-        const paddedSternRadius = this.dimensions.sternRadius - padding;
-        const paddedBowLength = this.dimensions.bowLength - padding;
+    isInside(localX: number, localY: number, padding = 0) {
+        const { middleWidth, height, sternRadius, bowLength } = this.dimensions;
+        const halfMidWidth = middleWidth / 2;
+        const halfHeight = height / 2;
 
         if (localX < -halfMidWidth) {
             const dx = localX + halfMidWidth;
-            return (dx ** 2 + localY ** 2) <= (paddedSternRadius ** 2);
-        } else if (localX > halfMidWidth) {
-            const t = (localX - halfMidWidth) / paddedBowLength;
-            if (t > 1) return false;
-            const hullLimitY = halfHeight * (1 - (t ** 2));
-            return Math.abs(localY) <= hullLimitY;
-        } else {
-            return Math.abs(localY) <= halfHeight;
+            const currentSternRadius = sternRadius - padding;
+            return (dx ** 2 + localY ** 2) <= (currentSternRadius ** 2);
+        }
+
+        else if (localX > halfMidWidth) {
+            const t = (localX - halfMidWidth) / bowLength;
+
+            if (localX > halfMidWidth + bowLength - padding) return false;
+            const hullLimitY = halfHeight * (1 - (t * t));
+            return Math.abs(localY) <= (hullLimitY - padding);
+        }
+        else {
+            return Math.abs(localY) <= (halfHeight - padding);
         }
     }
 
