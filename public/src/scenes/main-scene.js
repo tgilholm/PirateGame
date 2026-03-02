@@ -69,7 +69,7 @@ export class MainScene extends Phaser.Scene {
         this.inputManager = new InputManager(this);
         this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager);
 
-        this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0); 
+        this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
 
         // Placeholder player sprite- replace in preload() with actual
@@ -80,7 +80,7 @@ export class MainScene extends Phaser.Scene {
         circle.destroy();
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.network.emit(ClientEvent.READY, data.username);
+        this.network.emit(ClientEvent.READY, { username: data.username });
     }
 
 

@@ -12,8 +12,16 @@ export default class Interactable extends Phaser.GameObjects.Sprite {
         if (parent) {
             this.parentId = parent.id;
             this.id = `${parent.id}_${config.id}`;
-            
+
             parent.add(this);
+
+            if (this.type !== "helm") {
+                if (config.y < 0) {
+                    this.setRotation(0);
+                } else {
+                    this.setRotation(Math.PI);
+                }
+            }
         }
     }
 

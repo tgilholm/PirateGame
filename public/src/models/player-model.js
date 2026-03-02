@@ -26,6 +26,7 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
             this.nameText.setText(data.username);
         }
 
+
         // Interp otherwise
         this.target.x = data.x;
         this.target.y = data.y;

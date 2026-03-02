@@ -111,8 +111,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         // Get interactable positions from dimensions and create sprites for them
         this.interactables.forEach(i => {
             const item = this.add(i);
-            item.y < 0 ? item.setRotation(0) : item.setRotation(Math.PI);
-        })
+        });
     }
 
 

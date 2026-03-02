@@ -79,7 +79,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 
         const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 50) {
+        if (closest && closest.dist < 30) {
             this.closestInteractable = closest;
         } else {
             this.closestInteractable = null;

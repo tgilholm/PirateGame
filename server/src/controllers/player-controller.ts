@@ -41,7 +41,7 @@ export default class PlayerController {
 
         console.log(data.targetId, data.parentId, dist);
 
-        if (dist < 50) {
+        if (dist < 25) {
             const ship = interactable.parent as Ship;
             if (!ship) return;
             switch (interactable.useType) {

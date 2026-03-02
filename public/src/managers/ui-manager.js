@@ -17,8 +17,13 @@ export default class UIManager {
     update() {
         const target = this.gameManager.closestInteractable;
 
+
         if (target) {
-            this.showPrompt(target.promptText);
+
+            const item = target.item;
+
+            console.log(item.usePrompt);
+            this.showPrompt(item.usePrompt);
         } else {
             this.hidePrompt();
         }
