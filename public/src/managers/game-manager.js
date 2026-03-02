@@ -74,13 +74,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.scene.cameraTarget.y = matrix.ty;
 
         Object.values(this.shipList).forEach(ship => {
-            ship.getWorldTransformMatrix(); 
+            ship.getWorldTransformMatrix();
         });
 
 
         const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 30) {
-            this.closestInteractable = closest;
+        if (closest && closest.dist < 50) {
+            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
+                this.closestInteractable = closest;
+            }
+
         } else {
             this.closestInteractable = null;
         }

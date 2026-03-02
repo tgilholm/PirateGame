@@ -36,7 +36,7 @@
                 "usePrompt": "Use cannon",
                 "releasePrompt": "Release cannon",
                 "texture": "cannon",
-                "x": 0,
+                "x": 30,
                 "y": -55
             },
             {
@@ -45,7 +45,7 @@
                 "usePrompt": "Use cannon",
                 "releasePrompt": "Release cannon",
                 "texture": "cannon",
-                "x": 0,
+                "x": 30,
                 "y": 55
             },
             {
@@ -54,7 +54,7 @@
                 "usePrompt": "Use ladder",
                 "releasePrompt": "",
                 "texture": "ladder",
-                "x": -100,
+                "x": -80,
                 "y": 75
             },
             {
@@ -63,7 +63,7 @@
                 "usePrompt": "Use ladder",
                 "releasePrompt": "",
                 "texture": "ladder",
-                "x": -100,
+                "x": -80,
                 "y": -75
             }
         ]
