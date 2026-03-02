@@ -41,7 +41,7 @@ export default class SocketService {
             socket.on(ClientEvent.READY, (data) => {
 
                 this.world.addPlayer(socket.id, data.username);
-                socket.emit(ServerEvent.INIT_GAME, this.world.getFullState());
+                socket.emit(ServerEvent.INIT_GAME, {...this.world.getFullState(), id:socket.id});
             });
 
             socket.on(ClientEvent.ACTION, (action: PlayerAction) => {

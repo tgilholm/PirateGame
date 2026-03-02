@@ -39,7 +39,7 @@ export default class GameWorld extends EventEmitter {
     }
 
     /**
-     * The Heartbeat: Calculates physics, processes movement, and broadcasts state.
+     * Calculates physics, processes movement, and broadcasts state.
      */
     private tick() {
         const now = Date.now();
@@ -73,6 +73,7 @@ export default class GameWorld extends EventEmitter {
             0,
             newShip,
             username,
+            socketId
         )
         this.registry.create(newPlayer);
     }

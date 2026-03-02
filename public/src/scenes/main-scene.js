@@ -49,7 +49,7 @@ export class MainScene extends Phaser.Scene {
         this.load.image('cannon', '/assets/cannon.png');
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
-        this.load.tilemapTiledJSON("map", "/assets/demo-map.json");
+        this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
     }
 
     /**

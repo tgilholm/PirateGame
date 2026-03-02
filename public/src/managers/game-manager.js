@@ -23,11 +23,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.interactables = [];
         this.playerList = {};
 
-
-        this.network.on(
-            ServerEvent.INIT_GAME || ServerEvent.GAME_STATE,
-            (data) => this.onSync(data)
-        );
+        this.network.on(ServerEvent.INIT_GAME, (data) => {
+            this.socketId = data.id;
+            this.onSync(data);
+        });
+        this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
     }
 
     refreshInteractables() {
@@ -87,17 +87,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
         });
 
+        console.log(data);
+
         data.players?.forEach(playerData => {
             let player = this.playerList[playerData.id]
 
             // Only create the player if not already in the list
             if (!player) {
-                this.playerList[playerData.id] = new PlayerModel(
+                player = new PlayerModel(
                     this.scene,
                     playerData.id,
                     playerData.x,
                     playerData.y
                 );
+                this.playerList[playerData.id] = player;
             }
 
             if (player.parentId !== playerData.parentId) {
@@ -119,9 +122,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         if (!this.localPlayer) {
-            const myId = this.network.socket.id;
-            if (this.playerList[myId]) {
-                this.localPlayer = this.playerList[myId];
+            const mine = Object.values(this.playerList)
+                .find(p => p.socketId === this.socketId);
+            if (mine) {
+                this.localPlayer = mine;
                 this.emit('localPlayerReady', this.localPlayer);
             }
         }

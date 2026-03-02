@@ -19,8 +19,8 @@ export default class EntityFactory {
         this.shipConfig = entityConfig.ship;
     }
 
-    public createPlayer(x: number, y: number, parent: Entity | null, username: string): Player {
-        return new Player(x, y, parent, username, this.playerConfig);
+    public createPlayer(x: number, y: number, parent: Entity | null, username: string, socketId: string): Player {
+        return new Player(x, y, parent, username, this.playerConfig, socketId);
     }
 
     public createShip(x: number, y: number): Ship {
