@@ -4,7 +4,6 @@
 import UI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
-import io from "socket.io-client";
 import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
 import entityConfig from "shared/entity-config.json";

@@ -2,19 +2,19 @@
   "name": "poopdeck-pirates",
   "version": "1.0.0",
   "description": "A multiplayer pirate game with server-side physics",
-  "type": "module",
+  "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "start": "node server/server.js",
-    "dev": "nodemon server.js",
-    "build:shared": "tsc -p shared/tsconfig.json",
-    "build:server": "tsc -p server/tsconfig.json",
-    "build:all": "npm run build:shared && npm run build:server"
+    "clean": "shx rm -rf server/built shared/built",
+    "build:shared": "tsc -p shared/tsconfig.json && shx cp shared/*.json shared/built/",
+    "build:server": "tsc -p server/tsconfig.json && shx cp shared/*.json server/built/",
+    "build:all": "npm run clean && npm run build:shared && npm run build:server && npm run start",
+    "start": "node -r tsconfig-paths/register server/built/server.js",
+    "dev": "npm run clean && npm run build:shared && concurrently \"tsc -p shared/tsconfig.json --watch\" \"tsc -p server/tsconfig.json --watch\" \"nodemon\""
   },
   "dependencies": {
     "express": "^4.18.2",
     "matter-js": "^0.20.0",
-    "nodemon": "^3.0.1",
     "phaser": "^3.90.0",
     "poly-decomp-es": "^0.4.2",
     "socket.io": "^4.8.3",
@@ -26,6 +26,11 @@
     "@types/express": "^5.0.6",
     "@types/matter-js": "^0.20.2",
     "@types/socket.io-client": "^1.4.36",
+    "@types/ws": "^8.18.1",
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14",
+    "shx": "^0.4.0",
+    "tsconfig-paths": "^4.2.0",
     "undici-types": "^7.22.0"
   }
 }

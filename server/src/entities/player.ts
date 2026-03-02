@@ -1,4 +1,4 @@
-import { PlayerConfig } from "types";
+import { PlayerConfig } from "src/types";
 import Entity from "./entity";
 
 export default class Player extends Entity {

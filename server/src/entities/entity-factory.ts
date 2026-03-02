@@ -1,5 +1,5 @@
 
-import { EntityConfig, PlayerConfig, ShipConfig } from "../../types";
+import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";

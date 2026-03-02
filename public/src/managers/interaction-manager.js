@@ -25,11 +25,15 @@ export default class InteractionManager {
     }
 
 
-    interact() {
-        const closest = this.gameManager.closestInteractable;
+interact() {
+        const target = this.gameManager.closestInteractable;
         
-        if (closest) {
-            this.network.sendInteract(closest.type, closest.id);
+        if (target) {
+            this.network.sendInteract({
+                targetId: target.id,        // e.g. "cannon_1"
+                targetType: target.type,    // e.g. "cannon"
+                parentId: target.parentId   // e.g. "ship__123"
+            });
         }
     }
 

@@ -14,9 +14,7 @@ var ServerEvent;
 })(ServerEvent || (exports.ServerEvent = ServerEvent = {}));
 var ClientEvent;
 (function (ClientEvent) {
-    ClientEvent["READY"] = "PLAYER_READY";
-    ClientEvent["REQUEST_JOIN"] = "REQUEST_JOIN";
-    ClientEvent["REQUEST_SYNC"] = "REQUEST_SYNC";
+    ClientEvent["READY"] = "READY";
     ClientEvent["ACTION"] = "ACTION";
 })(ClientEvent || (exports.ClientEvent = ClientEvent = {}));
 var ActionType;

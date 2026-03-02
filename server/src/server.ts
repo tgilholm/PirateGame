@@ -24,7 +24,6 @@ import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
 import PlayerController from './controllers/player-controller';
 import UpgradeHandler from './handlers/upgrade-handler';
-import Ship from './entities/ship';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 
@@ -34,7 +33,8 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
 // Route files to the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../../public')));
+app.use('/shared', express.static(path.join(__dirname, '../../shared/built')));
 
 /*
   Create the game world
@@ -43,7 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const registry = new EntityRegistry();
 const entityFactory = new EntityFactory(entityConfig);
 const matterEngine = Engine.create()
-const terrainMap = new TerrainMap('../../shared/demo-map.json');
+const terrainMap = new TerrainMap('demo-map.json')
 
 const engine = new GameEngine({
   physicsSystem: new PhysicsSystem(registry, matterEngine, terrainMap),

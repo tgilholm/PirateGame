@@ -5,10 +5,12 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "target": "ESNext",
-        "declaration": true
+        "target": "es2022",
+        "declaration": true,
+        "declarationMap": true,
+        "baseUrl": "."
     },
     "include": [
-        "./*.ts", "./*.json"
+        "./**/*.ts"
     ]
 }

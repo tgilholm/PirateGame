@@ -1,7 +1,7 @@
 import EntityRegistry from "../engine/entity-registry";
 import PlayerController from "./player-controller";
 import ShipController from "./ship-controller";
-import { ActionType, PlayerAction } from "../../../shared/socket-protocol";
+import { ActionType, PlayerAction } from "@shared/socket-protocol";
 import Player from "../entities/player";
 import Ship from "../entities/ship";
 import MessageController from "./message-controller";
