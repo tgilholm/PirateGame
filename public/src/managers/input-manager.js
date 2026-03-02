@@ -17,7 +17,6 @@ export default class InputManager extends Phaser.Events.EventEmitter {
      */
     constructor(scene) {
         super();
-        this.scene = scene;
 
         this.moveKeys = scene.input.keyboard.addKeys("W,A,S,D");
 

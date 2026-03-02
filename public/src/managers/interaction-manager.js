@@ -1,6 +1,6 @@
-import GameManager from "./game-manager";
-import InputManager from "./input-manager";
-import NetworkManager from "./network-manager";
+import GameManager from "./game-manager.js";
+import InputManager from "./input-manager.js";
+import NetworkManager from "./network-manager.js";
 
 /**
  * Owns interaction logic

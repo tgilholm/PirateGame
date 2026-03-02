@@ -1,14 +1,10 @@
 import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
 import { ServerEvent } from "shared/socket-protocol.js";
-import { Socket } from "socket.io-client";
 
 /**
  * Owns socket-io logic
  */
 export default class NetworkManager {
-    /**
-     * @param {Socket} socket
-     */
     constructor(socket) {
         this.socket = socket;
     }

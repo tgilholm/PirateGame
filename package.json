@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "clean": "shx rm -rf server/built shared/built",
-    "build:shared": "tsc -p shared/tsconfig.json && shx cp shared/*.json shared/built/",
+    "build:shared": "tsc -p shared/tsconfig.json && tsc -p shared/tsconfig.browser.json && shx cp shared/*.json shared/built/ && shx cp shared/*.json shared/browser/",
     "build:server": "tsc -p server/tsconfig.json && shx cp shared/*.json server/built/",
     "build:all": "npm run clean && npm run build:shared && npm run build:server && npm run start",
     "start": "node -r tsconfig-paths/register server/built/server.js",

@@ -1,6 +1,6 @@
 /** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */
 
-import Interactable from "./interactable";
+import Interactable from "./interactable.js";
 
 /**
  * The Ship class provides a moving body on which Interactables and Players can exist.

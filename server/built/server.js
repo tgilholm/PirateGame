@@ -35,7 +35,10 @@ const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, { cors: { origin: "*" } });
 // Route files to the public folder
 app.use(express_1.default.static(path_1.default.join(__dirname, '../../public')));
-app.use('/shared', express_1.default.static(path_1.default.join(__dirname, '../../shared/built')));
+app.use('/shared', express_1.default.static(path_1.default.join(__dirname, '../../shared/browser')));
+app.get('/test-shared', (req, res) => {
+    res.sendFile(path_1.default.join(__dirname, '../../shared/browser/socket-protocol.js'));
+});
 /*
   Create the game world
 */

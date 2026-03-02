@@ -22,4 +22,6 @@ const config = {
     },
 };
 
+const entityConfig = await fetch('/shared/entity-config.json').then(r => r.json());
+window.entityConfig = entityConfig;
 const game = new Phaser.Game(config);

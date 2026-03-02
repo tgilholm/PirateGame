@@ -6,14 +6,13 @@ import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
 import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
-import entityConfig from "shared/entity-config.json";
 import { ClientEvent } from "shared/built/socket-protocol.js";
 import UIManager from "../managers/ui-manager.js";
 import InteractionManager from "../managers/interaction-manager.js";
 import InputManager from "../managers/input-manager.js";
 
 
-const socket = io();
+const socket = globalThis.io();
 
 
 /**
@@ -33,13 +32,7 @@ export class MainScene extends Phaser.Scene {
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
 
-        this.network = new NetworkManager(socket);
-        this.gameManager = new GameManager(this.network, this, entityConfig);
-        this.uiManager = new UIManager(this, this.gameManager);
-        this.inputManager = new InputManager(this);
-        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager)
 
-        this.ui = new UI(this);
 
         // Resize canvas with window
         window.addEventListener('resize', () => {
@@ -66,6 +59,16 @@ export class MainScene extends Phaser.Scene {
     create(data) {
         this.setupWorld();
 
+        const entityConfig = window.entityConfig;
+
+        this.network = new NetworkManager(socket);
+        this.gameManager = new GameManager(this.network, this, entityConfig);
+        this.uiManager = new UIManager(this, this.gameManager);
+        this.inputManager = new InputManager(this);
+        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager)
+
+        this.ui = new UI(this);
+
 
         // Placeholder player sprite- replace in preload() with actual
         const circle = this.make.graphics();
@@ -79,8 +82,8 @@ export class MainScene extends Phaser.Scene {
             this.cameras.main.startFollow(player, true, 0.1, 0.1);
             this.ui.minimap.initializeMarker(
                 player.x,
-                player.y, 
-                this.map.widthInPixels, 
+                player.y,
+                this.map.widthInPixels,
                 this.map.heightInPixels
             );
             this.gameManager.refreshInteractables();

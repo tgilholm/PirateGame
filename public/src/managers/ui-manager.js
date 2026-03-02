@@ -1,4 +1,4 @@
-import GameManager from "./game-manager";
+import GameManager from "./game-manager.js";
 
 export default class UIManager {
     /**

@@ -1,0 +1,71 @@
+{
+    "player": {
+        "maxHealth": 100,
+        "runSpeed": 5,
+        "swimSpeed": 3,
+        "radius": 15
+    },
+    "ship": {
+        "maxHealth": 1000,
+        "dimensions": {
+            "height": 160,
+            "middleWidth": 200,
+            "bowLength": 100,
+            "sternRadius": 80
+        },
+        "physics": {
+            "turnSpeed": 0.003,
+            "mass": 200,
+            "frictionAir": 0.05,
+            "restitution": 0.2,
+            "thrust": 0.05
+        },
+        "interactables": [
+            {
+                "id": "helm",
+                "type": "helm",
+                "usePrompt": "Take the helm",
+                "releasePrompt": "Release the helm",
+                "texture": "helm",
+                "x": 100,
+                "y": 0
+            },
+            {
+                "id": "cannon_1",
+                "type": "cannon",
+                "usePrompt": "Use cannon",
+                "releasePrompt": "Release cannon",
+                "texture": "cannon",
+                "x": 0,
+                "y": -55
+            },
+            {
+                "id": "cannon_2",
+                "type": "cannon",
+                "usePrompt": "Use cannon",
+                "releasePrompt": "Release cannon",
+                "texture": "cannon",
+                "x": 0,
+                "y": 55
+            },
+            {
+                "id": "ladder_1",
+                "type": "ladder",
+                "usePrompt": "Use ladder",
+                "releasePrompt": "",
+                "texture": "ladder",
+                "x": 120,
+                "y": -75
+            },
+            {
+                "id": "ladder_2",
+                "type": "ladder",
+                "usePrompt": "Use ladder",
+                "releasePrompt": "",
+                "texture": "ladder",
+                "x": 120,
+                "y": -75
+            }
+        ]
+    }
+}
