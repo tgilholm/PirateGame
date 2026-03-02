@@ -21,63 +21,59 @@ export default class MovementSystem implements BaseSystem {
     }
 
     updatePlayer(player: Player, dt: number): void {
+        if (player.isSteering || player.isUsingCannon) return;
 
-        // Only move if not bound to something
-        if (player.isSteering || player.isUsingCannon || player.isCarrying) {
-            return;
-        }
-
-        const playerConfig = this.entityConfig.player;
         const parent = player.parent as Ship || null;
-
-        // If not on land or a ship, lower movement speed
-        const onLand = !parent && this.terrainMap.isOnIsland(player.x, player.y);
-        const speed = onLand ? playerConfig.runSpeed : playerConfig.swimSpeed;
         const { up, down, left, right } = player.inputs;
+        const playerConfig = this.entityConfig.player;
 
-        // If on ship, move relative to ship
+        let dx = 0;
+        let dy = 0;
+        if (up) dy -= 1;
+        if (down) dy += 1;
+        if (left) dx -= 1;
+        if (right) dx += 1;
+        if (dx === 0 && dy === 0) return;
+
+        // Normalize diagonal movement
+        const length = Math.sqrt(dx * dx + dy * dy);
+        dx /= length;
+        dy /= length;
+
+        const speed = (parent ? playerConfig.runSpeed : playerConfig.swimSpeed) * dt * 60;
+
         if (parent) {
-            const worldPos = parent.localToWorld(player.x, player.y);
+            const cos = Math.cos(-parent.r);
+            const sin = Math.sin(-parent.r);
+            const localDX = (dx * cos - dy * sin) * speed;
+            const localDY = (dx * sin + dy * cos) * speed;
+            const nextX = player.x + localDX;
+            const nextY = player.y + localDY;
 
-            // Apply absolute movement
-            if (up) worldPos.y -= speed * dt;
-            if (down) worldPos.y += speed * dt;
-            if (left) worldPos.x -= speed * dt;
-            if (right) worldPos.x += speed * dt;
-
-            // Convert back to local
-            const newLocal = parent.worldToLocal(worldPos.x, worldPos.y);
-
-            // Check collision with parent
-            if (parent.isInside(newLocal.x, newLocal.y, playerConfig.radius)) {
-                player.x = newLocal.x;
-                player.y = newLocal.y;
-            } else {
-                // Slide along walls
-                if (parent.isInside(newLocal.x, player.y, playerConfig.radius)) {
-                    player.x = newLocal.x;
-                } else if (parent.isInside(player.x, newLocal.y, playerConfig.radius)) {
-                    player.y = newLocal.y;
-                }
+            if (parent.isInside(nextX, nextY, playerConfig.radius)) {
+                player.x = nextX;
+                player.y = nextY;
+            } else if (parent.isInside(nextX, player.y, playerConfig.radius)) {
+                player.x = nextX;
+            } else if (parent.isInside(player.x, nextY, playerConfig.radius)) {
+                player.y = nextY;
             }
-
-            // If not on ship, move relative to world
         } else {
-            if (up) player.y -= speed * dt;
-            if (down) player.y += speed * dt;
-            if (left) player.x -= speed * dt;
-            if (right) player.x += speed * dt;
+            player.x += dx * speed;
+            player.y += dy * speed;
         }
     }
 
 
     updateShip(ship: Ship, dt: number) {
-        const {up, left, right} = ship.inputs;
+        const { up, left, right } = ship.inputs;
         const body = ship.body;
-        const {turnSpeed, thrust} = ship.physics;
-        
+        const { turnSpeed, thrust } = ship.physics;
+
+
         if (left) Body.setAngularVelocity(body, -turnSpeed);
         if (right) Body.setAngularVelocity(body, turnSpeed);
+
 
         if (up) {
             const force = {

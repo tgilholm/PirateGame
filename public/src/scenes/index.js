@@ -6,6 +6,7 @@ const parent = document.getElementById('game-container');
 // Set up game 
 const config = {
     type: Phaser.AUTO,
+    pixelArt: true,
     width: window.innerWidth,
     height: window.innerHeight,
     roundPixels: false,

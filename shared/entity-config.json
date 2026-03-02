@@ -27,7 +27,7 @@
                 "usePrompt": "Take the helm",
                 "releasePrompt": "Release the helm",
                 "texture": "helm",
-                "x": 100,
+                "x": -100,
                 "y": 0
             },
             {
@@ -54,8 +54,8 @@
                 "usePrompt": "Use ladder",
                 "releasePrompt": "",
                 "texture": "ladder",
-                "x": 120,
-                "y": -75
+                "x": -100,
+                "y": 75
             },
             {
                 "id": "ladder_2",
@@ -63,7 +63,7 @@
                 "usePrompt": "Use ladder",
                 "releasePrompt": "",
                 "texture": "ladder",
-                "x": 120,
+                "x": -100,
                 "y": -75
             }
         ]

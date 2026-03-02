@@ -29,6 +29,7 @@ const player_controller_1 = __importDefault(require("./controllers/player-contro
 const upgrade_handler_1 = __importDefault(require("./handlers/upgrade-handler"));
 const ship_controller_1 = __importDefault(require("./controllers/ship-controller"));
 const message_controller_1 = __importDefault(require("./controllers/message-controller"));
+const interaction_handler_1 = __importDefault(require("./handlers/interaction-handler"));
 // Create the express app & server
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
@@ -40,18 +41,22 @@ app.use('/shared', express_1.default.static(path_1.default.join(__dirname, '../.
   Create the game world
 */
 const registry = new entity_registry_1.default();
-const entityFactory = new entity_factory_1.default(entity_config_json_1.default);
-const matterEngine = matter_js_1.Engine.create();
+const matterEngine = matter_js_1.Engine.create({
+    gravity: { x: 0, y: 0 }
+});
 const terrainMap = new terrain_map_1.default('demo-map.json');
+const physicsSystem = new physics_system_1.default(registry, matterEngine, terrainMap);
+const entityFactory = new entity_factory_1.default(entity_config_json_1.default, registry, physicsSystem);
 const engine = new game_engine_1.default({
-    physicsSystem: new physics_system_1.default(registry, matterEngine, terrainMap),
+    physicsSystem,
     movementSystem: new movement_system_1.default(registry, entity_config_json_1.default, terrainMap),
     projectileSystem: new projectile_system_1.default(registry),
     messageSystem: new message_system_1.default()
 });
 const upgradeHandler = new upgrade_handler_1.default(entity_config_json_1.default);
+const interactionHandler = new interaction_handler_1.default();
 const worldController = new world_controller_1.default(registry, {
-    playerController: new player_controller_1.default(registry, upgradeHandler),
+    playerController: new player_controller_1.default(registry, interactionHandler, upgradeHandler),
     shipController: new ship_controller_1.default(registry),
     messageController: new message_controller_1.default()
 });

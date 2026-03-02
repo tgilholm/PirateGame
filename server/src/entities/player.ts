@@ -18,14 +18,14 @@ export default class Player extends Entity {
 
 
     constructor(
+        id: string,
         x: number,
         y: number,
         parent: Entity | null,
         username: string,
         config: PlayerConfig,
-        private socketId: any
     ) {
-        super("player", x, y, config.maxHealth, parent);
+        super(id, "player", x, y, config.maxHealth, parent);
         this.username = username || "";     // default to no uname
 
         // Player-specific detail
@@ -65,7 +65,6 @@ export default class Player extends Entity {
         // Send everything the client needs to display the player
         return {
             ...super.serialise(),
-            socketId: this.socketId,
             username: this.username,
             isSteering: this.isSteering,
             isUsingCannon: this.isUsingCannon

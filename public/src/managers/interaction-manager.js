@@ -28,11 +28,12 @@ export default class InteractionManager {
 interact() {
         const target = this.gameManager.closestInteractable;
         
-        if (target) {
+        if (target && target.item) {
+            const closest = target.item
             this.network.sendInteract({
-                targetId: target.id,        // e.g. "cannon_1"
-                targetType: target.type,    // e.g. "cannon"
-                parentId: target.parentId   // e.g. "ship__123"
+                targetId: closest.id,        // e.g. "cannon_1"
+                targetType: closest.type,    // e.g. "cannon"
+                parentId: closest.parentId   // e.g. "ship__123"
             });
         }
     }

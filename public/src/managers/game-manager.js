@@ -18,13 +18,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.localPlayer = null;
         this.closestInteractable = null;
+        this.playerId = null;
 
         this.shipList = {};
         this.interactables = [];
         this.playerList = {};
 
         this.network.on(ServerEvent.INIT_GAME, (data) => {
-            this.socketId = data.id;
+            this.playerId = data.id;
             this.onSync(data);
         });
         this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
@@ -64,6 +65,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     update() {
         if (!this.localPlayer) return;
 
+        const matrix = this.localPlayer.getWorldTransformMatrix();
+
+        //@ts-ignore
+        this.scene.cameraTarget.x = matrix.tx;
+        //@ts-ignore
+        this.scene.cameraTarget.y = matrix.ty;
+
+
         const closest = this.getClosestInteractable(this.localPlayer);
         if (closest && closest.dist < 50) {
             this.closestInteractable = closest;
@@ -85,9 +94,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 );
                 this.refreshInteractables();
             }
+
+            this.shipList[shipData.id].update(shipData, this.scene.game.loop.delta);
         });
 
-        console.log(data);
 
         data.players?.forEach(playerData => {
             let player = this.playerList[playerData.id]
@@ -108,22 +118,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
                 if (newParentId && this.shipList[newParentId]) {
                     this.shipList[newParentId].add(player);
+                    player.setPosition(playerData.x, playerData.y);
                 } else {
                     this.scene.add.existing(player);
+                    player.setPosition(playerData.x, playerData.y);
                 }
-
-
-                player.x = playerData.x;
-                player.y = playerData.y;
                 player.parentId = newParentId;
             }
 
             player.update(playerData);
         });
 
-        if (!this.localPlayer) {
-            const mine = Object.values(this.playerList)
-                .find(p => p.socketId === this.socketId);
+
+        if (!this.localPlayer && this.playerId) {
+            const mine = this.playerList[this.playerId];
             if (mine) {
                 this.localPlayer = mine;
                 this.emit('localPlayerReady', this.localPlayer);

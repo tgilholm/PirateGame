@@ -3,7 +3,7 @@ export default class Interactable extends Phaser.GameObjects.Sprite {
         super(scene, config.x, config.y, config.texture);
 
         this.id = config.id;
-        this.type = config.id;
+        this.type = config.type;
         this.usePrompt = config.usePrompt || `Interact with ${config.type}`;
         this.releasePrompt = config.releasePrompt || `Release ${config.type}`;
 

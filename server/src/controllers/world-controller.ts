@@ -36,9 +36,8 @@ export default class WorldController {
                 if (player.parent && player.isSteering) {
                     const ship = player.parent as Ship;
 
-                    if (parent) {
-                        this.shipController.handleMove(ship, action.data);  // Send the move inputs to the ship
-                    }
+                    this.shipController.handleMove(ship, action.data);  // Send the move inputs to the ship
+
                 } else {
                     // Send directly to the player controller
                     this.playerController.handleMove(player, action.data);
@@ -66,7 +65,8 @@ export default class WorldController {
                 break;
 
             case ActionType.RELEASE:
-                this.playerController.handleRelease(player);
+                    const ship = player.parent as Ship;
+                this.playerController.handleRelease(player, ship);
                 break;
             case ActionType.MESSAGE:
                 this.messageController.handleMessage(player, action.data);

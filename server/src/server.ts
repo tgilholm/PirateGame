@@ -26,6 +26,7 @@ import PlayerController from './controllers/player-controller';
 import UpgradeHandler from './handlers/upgrade-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
+import InteractionHandler from './handlers/interaction-handler';
 
 // Create the express app & server
 const app = express();
@@ -40,24 +41,27 @@ app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')))
 /*
   Create the game world
 */
-
 const registry = new EntityRegistry();
-const entityFactory = new EntityFactory(entityConfig);
-const matterEngine = Engine.create()
+const matterEngine = Engine.create({
+  gravity: {x: 0, y: 0}
+});
 const terrainMap = new TerrainMap('demo-map.json')
+const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
+const entityFactory = new EntityFactory(entityConfig, registry, physicsSystem);
 
 const engine = new GameEngine({
-  physicsSystem: new PhysicsSystem(registry, matterEngine, terrainMap),
+  physicsSystem,
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem: new ProjectileSystem(registry),
   messageSystem: new MessageSystem()
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);
+const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,
   {
-    playerController: new PlayerController(registry, upgradeHandler),
+    playerController: new PlayerController(registry, interactionHandler, upgradeHandler),
     shipController: new ShipController(registry),
     messageController: new MessageController()
   }

@@ -63,17 +63,18 @@ export default class GameWorld extends EventEmitter {
         // Spawn the player on their own ship
 
         const newShip = this.entityFactory.createShip(
+            `ship_${socketId}`,
             5000,
             5000
         )
         this.registry.create(newShip);
 
         const newPlayer = this.entityFactory.createPlayer(
+            socketId,
             0,
             0,
             newShip,
             username,
-            socketId
         )
         this.registry.create(newPlayer);
     }

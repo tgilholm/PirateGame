@@ -19,8 +19,8 @@ export default class GameEngine {
     private systems: Map<string, BaseSystem> = new Map();
 
     constructor(systems: GameSystems) {
-        this.systems.set('physics', systems.physicsSystem);
         this.systems.set('movement', systems.movementSystem);
+        this.systems.set('physics', systems.physicsSystem);
         this.systems.set('projectile', systems.projectileSystem);
         this.systems.set('message', systems.messageSystem);
     }

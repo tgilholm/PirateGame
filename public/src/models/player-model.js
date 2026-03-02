@@ -4,6 +4,7 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
     constructor(scene, id, x, y) {
         super(scene, x, y, 'player_circle');
         this.scene.add.existing(this);
+        this.id = id;
 
         this.target = { x: 0, y: 0 };
         this.isSteering = false;

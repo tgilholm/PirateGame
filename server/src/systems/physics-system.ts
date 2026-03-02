@@ -36,10 +36,11 @@ export default class PhysicsSystem implements BaseSystem {
     }
 
     public update(dt: number): void {
-        Matter.Engine.update(this.engine, dt);
+        Matter.Engine.update(this.engine, dt * 1000);
 
         // Sync matter body state back to ship entities
         this.registry.getByType<Ship>('ship').forEach(ship => {
+
             ship.x = ship.body.position.x;
             ship.y = ship.body.position.y;
             ship.r = ship.body.angle;

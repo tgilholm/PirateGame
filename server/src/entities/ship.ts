@@ -1,27 +1,32 @@
 import { Bodies, Body } from "matter-js";
 import { ShipConfig } from "../types";
 import Entity from "./entity";
+import InteractableEntity from "./interactable-entity";
+import Player from "./player";
 
 
 
 
 export default class Ship extends Entity {
-    pilotId: string | null;
+    pilot: Player | null;
     dimensions: ShipConfig["dimensions"];
     physics: ShipConfig["physics"];
+    interactables: InteractableEntity[]
     body: Matter.Body
     inputs: any;
 
     constructor(
+        id: string,
         x: number,
         y: number,
         config: ShipConfig
     ) {
-        super("ship", x, y, config.maxHealth, null);    // ships have no parents
+        super(id, "ship", x, y, config.maxHealth, null);    // ships have no parents
 
-        this.pilotId = null;    // Nobody piloting at startup
+        this.pilot = null;    // Nobody piloting at startup
         this.dimensions = config.dimensions;
         this.physics = config.physics;
+        this.interactables = [];
         this.inputs = {
             up: false,
             down: false,
@@ -29,7 +34,30 @@ export default class Ship extends Entity {
             right: false
         }
 
+        let result = this.createInteractables(config.interactables);
+        if (result) {
+            this.interactables = result;
+        }
+
+
         this.body = this.createPhysicsBody(x, y);
+    }
+
+    createInteractables(interactables: ShipConfig['interactables']): InteractableEntity[] {
+        if (!interactables) return [];
+
+        let result: InteractableEntity[] = [];
+
+        for (let i = 0; i < interactables.length; i++) {
+            const interactable = new InteractableEntity(
+                interactables[i],
+                this
+            );
+
+            result.push(interactable);
+        }
+
+        return result;
     }
 
     /**
@@ -53,8 +81,7 @@ export default class Ship extends Entity {
         // Send everything the client needs to display the player
         return {
             ...super.serialise(),
-            pilotId: this.pilotId,  // For client side messages
-            dimensions: this.dimensions // For client side drawing
+            pilotId: this.pilot?.id,  // For client side messages
         }
     }
 
@@ -159,6 +186,9 @@ export default class Ship extends Entity {
         });
 
         Body.setPosition(body, { x, y });
+        console.log('Ship body initial angle:', body.angle);
+
+        Body.setAngle(body, 0);
         return body;
     }
 }

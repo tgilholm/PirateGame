@@ -22,6 +22,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         super(scene, x, y);
         this.dimensions = config.dimensions;
         this.interactables = [];
+        this.id = id;
 
 
         this.target = { x: 0, y: 0, r: 0 };
@@ -29,8 +30,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         this.pilotId = null;
         this.angularVelocity = 0;
 
-        if (config.interactables)
-        {
+        if (config.interactables) {
             config.interactables.forEach(item => {
                 const model = new Interactable(this.scene, this, item);
                 this.interactables.push(model);
@@ -40,6 +40,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
 
         this.drawHull();
         this.drawInteractables();
+        this.setRotation(0);
         scene.add.existing(this);
     }
 
@@ -131,7 +132,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         // Extrapolate from velocity and time
         const predictedX = this.target.x + this.velocity.x * deltaTime; // where x is in however many milliseconds
         const predictedY = this.target.y + this.velocity.y * deltaTime; // Distance = speed * time
-        const predictedR = this.target.ar + this.angularVelocity * deltaTime;
+        const predictedR = this.target.r + this.angularVelocity * deltaTime;
 
         this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
         this.y = Math.round(Phaser.Math.Linear(this.y, predictedY, lerp));

@@ -1,7 +1,7 @@
 
 /* global Phaser, io */
 
-import UI from "../ui/create-ui.js";
+//import UI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
 import NetworkManager from "../managers/network-manager.js";
@@ -31,6 +31,7 @@ export class MainScene extends Phaser.Scene {
         this.shipParams = null; // retrieve ship width/height etc from server
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
+        this.cameraTarget = null;
 
 
 
@@ -59,16 +60,17 @@ export class MainScene extends Phaser.Scene {
     create(data) {
         this.setupWorld();
 
-        const entityConfig = window.entityConfig;
+        //@ts-ignore
+        const entityConfig = window.entityConfig;   // cheesed
 
         this.network = new NetworkManager(socket);
         this.gameManager = new GameManager(this.network, this, entityConfig);
         this.uiManager = new UIManager(this, this.gameManager);
         this.inputManager = new InputManager(this);
-        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager)
+        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager);
 
-        this.ui = new UI(this);
-
+        this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0); 
+        this.cameras.main.startFollow(this.cameraTarget);
 
         // Placeholder player sprite- replace in preload() with actual
         const circle = this.make.graphics();
@@ -77,19 +79,7 @@ export class MainScene extends Phaser.Scene {
         circle.generateTexture('player_circle', 30, 30);
         circle.destroy();
 
-
-        this.gameManager.once('localPlayerReady', (player) => {
-            this.cameras.main.startFollow(player, true, 0.1, 0.1);
-            this.ui.minimap.initializeMarker(
-                player.x,
-                player.y,
-                this.map.widthInPixels,
-                this.map.heightInPixels
-            );
-            this.gameManager.refreshInteractables();
-        });
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-
         this.network.emit(ClientEvent.READY, data.username);
     }
 
@@ -102,9 +92,10 @@ export class MainScene extends Phaser.Scene {
         this.uiManager.update();
         this.network.sendMove(this.inputManager.getMovementInputs());
 
+        console.log(this.cameras.main);
+
         // Update minimap marker with current world position
         //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
-
     }
 
     setupWorld() {
