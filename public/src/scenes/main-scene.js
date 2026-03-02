@@ -90,7 +90,7 @@ export class MainScene extends Phaser.Scene {
     update() {
         this.gameManager.update();
         this.uiManager.update();
-        this.network.sendMove(this.inputManager.getMovementInputs());
+        this.network.sendMove(this.inputManager.getInputs(this));
 
 
         // Update minimap marker with current world position

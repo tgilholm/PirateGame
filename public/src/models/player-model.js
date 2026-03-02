@@ -2,6 +2,14 @@ import ShipModel from "./ship-model.js";
 
 
 export default class PlayerModel extends Phaser.GameObjects.Sprite {
+
+    /**
+     * 
+     * @param {Phaser.Scene} scene 
+     * @param {string} id 
+     * @param {number} x 
+     * @param {number} y 
+     */
     constructor(scene, id, x, y) {
         super(scene, x, y, 'player_circle');
         this.scene.add.existing(this);
@@ -10,6 +18,7 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
         this.target = { x: 0, y: 0 };
         this.isSteering = false;
         this.isUsingCannon = false;
+        this.aimAngle = 0;
 
         this.parentId = null;
 
@@ -20,6 +29,8 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
             backgroundColor: '#00000088',
             padding: { x: 6, y: 4 }
         }).setOrigin(0.5, 1).setDepth(100);
+
+        this.gun = scene.add.rectangle(x, )
     }
 
     update(data) {
@@ -31,6 +42,7 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
         // Interp otherwise
         this.target.x = data.x;
         this.target.y = data.y;
+        this.aimAngle = data.aimAngle;
 
         this.isSteering = data.isSteering;
         this.isUsingCannon = data.isUsingCannon;

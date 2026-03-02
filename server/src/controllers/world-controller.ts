@@ -5,6 +5,7 @@ import { ActionType, PlayerAction } from "@shared/socket-protocol";
 import Player from "../entities/player";
 import Ship from "../entities/ship";
 import MessageController from "./message-controller";
+import InteractableEntity from "src/entities/interactable-entity";
 
 export interface GameControllers {
     playerController: PlayerController,
@@ -32,17 +33,25 @@ export default class WorldController {
         switch (action.type) {
             case ActionType.MOVE:
 
-                // If player is controlling a ship, send move inputs to the ship
-                if (player.parent && player.isSteering) {
+                // If the player is controlling a cannon, send move inputs to the cannon
+                if (player.isUsingCannon) {
+                    
+                    // // Get the cannon being used by the player
+                    // const cannon = this.entityRegistry.get<InteractableEntity>()
+
+                    // this.cannonController.handleMove(cannon, action.data);
+
+                } else if (player.parent && player.isSteering) {
                     const ship = player.parent as Ship;
 
                     this.shipController.handleMove(ship, action.data);  // Send the move inputs to the ship
 
                 } else {
-                    // Send directly to the player controller
+
                     this.playerController.handleMove(player, action.data);
                 }
                 break;
+
             case ActionType.UPGRADE:
                 this.playerController.handleUpgrade(player, action.data);
                 break;
@@ -65,7 +74,7 @@ export default class WorldController {
                 break;
 
             case ActionType.RELEASE:
-                    const ship = player.parent as Ship;
+                const ship = player.parent as Ship;
                 this.playerController.handleRelease(player, ship);
                 break;
             case ActionType.MESSAGE:

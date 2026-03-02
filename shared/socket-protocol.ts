@@ -16,6 +16,7 @@ export enum ClientEvent {
 }
 
 export enum ActionType {
+    AIM = 'AIM',
     MOVE = 'MOVE',
     FIRE = 'FIRE',
     UPGRADE = 'UPGRADE',
@@ -30,6 +31,9 @@ export interface MoveData {
     down: boolean;
     left: boolean;
     right: boolean;
+
+    mouseX: number;
+    mouseY: number;
 }
 
 export interface UpgradeData {

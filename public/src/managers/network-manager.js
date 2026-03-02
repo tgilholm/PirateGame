@@ -43,13 +43,13 @@ export default class NetworkManager {
         this.sendAction({ type: ActionType.MOVE, data: inputs });
     }
 
-/**
-     * Sends an interaction event to the server
-     * @param {import("shared/socket-protocol.js").InteractData} data 
-     */
+    /**
+         * Sends an interaction event to the server
+         * @param {import("shared/socket-protocol.js").InteractData} data 
+         */
     sendInteract(data) {
-        this.sendAction({ 
-            type: ActionType.INTERACT, 
+        this.sendAction({
+            type: ActionType.INTERACT,
             data: data
         });
     }

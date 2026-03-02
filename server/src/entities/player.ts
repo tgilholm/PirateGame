@@ -11,10 +11,11 @@ export default class Player extends Entity {
         down: boolean;
         left: boolean;
         right: boolean;
-        e: boolean;
-        q: boolean;
-        space: boolean;
+
+        mouseX: number;
+        mouseY: number;
     };
+    aimAngle: number;
 
 
     constructor(
@@ -32,14 +33,19 @@ export default class Player extends Entity {
         this.isSteering = false;
         this.isUsingCannon = false;
         this.isCarrying = false;
+
+        // Where the player is aiming
+        this.aimAngle = 0;
+
+        // Input from the client
         this.inputs = {
             up: false,
             down: false,
             left: false,
             right: false,
-            e: false,
-            q: false,
-            space: false
+
+            mouseX: 0,
+            mouseY: 0
 
             // Specify any other player inputs here
         }
@@ -66,6 +72,7 @@ export default class Player extends Entity {
         return {
             ...super.serialise(),
             username: this.username,
+            aimAngle: this.aimAngle,
             isSteering: this.isSteering,
             isUsingCannon: this.isUsingCannon
         }

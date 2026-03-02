@@ -24,9 +24,13 @@ export default class MovementSystem implements BaseSystem {
         if (player.isSteering || player.isUsingCannon) return;
 
         const parent = player.parent as Ship || null;
-        const { up, down, left, right } = player.inputs;
+        const { up, down, left, right, mouseX, mouseY} = player.inputs;
         const playerConfig = this.entityConfig.player;
         const ships = this.registry.getByType<Ship>('ship');
+
+        // Calculate the angle of the player to their mouse
+        player.aimAngle = Math.atan2(mouseY - player.y, mouseX - player.x);
+
 
         if (!parent) {
             for (const ship of ships) {

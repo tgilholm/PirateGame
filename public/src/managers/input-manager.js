@@ -25,7 +25,12 @@ export default class InputManager extends Phaser.Events.EventEmitter {
         scene.input.keyboard.on('keydown-SPACE', () => this.emit('fire'));
     }
 
-    getMovementInputs() {
+    /**
+     * 
+     * @param {Phaser.Scene} scene 
+     * @returns 
+     */
+    getInputs(scene) {
         /** @type {any} */
         const keys = this.moveKeys;
         return {
@@ -33,7 +38,10 @@ export default class InputManager extends Phaser.Events.EventEmitter {
             down: keys.S.isDown,
             left: keys.A.isDown,
             right: keys.D.isDown,
+            mouseX: scene.input.mousePointer.x,
+            mouseY: scene.input.mousePointer.y,
         }
     }
+
 
 }
