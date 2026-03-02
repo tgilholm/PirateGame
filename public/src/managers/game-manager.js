@@ -63,6 +63,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     }
 
     update() {
+        this.refreshInteractables();
         if (!this.localPlayer) return;
 
         const matrix = this.localPlayer.getWorldTransformMatrix();
@@ -72,6 +73,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         //@ts-ignore
         this.scene.cameraTarget.y = matrix.ty;
 
+        Object.values(this.shipList).forEach(ship => {
+            ship.getWorldTransformMatrix(); 
+        });
+
 
         const closest = this.getClosestInteractable(this.localPlayer);
         if (closest && closest.dist < 50) {
@@ -79,6 +84,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         } else {
             this.closestInteractable = null;
         }
+
+
     }
 
     onSync(data) {
@@ -92,7 +99,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     shipData.y,
                     this.shipConfig
                 );
-                this.refreshInteractables();
             }
 
             this.shipList[shipData.id].update(shipData, this.scene.game.loop.delta);

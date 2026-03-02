@@ -25,9 +25,11 @@ export default class InteractionManager {
     }
 
 
-interact() {
+    interact() {
         const target = this.gameManager.closestInteractable;
-        
+
+        console.log(target.item, target.dist);
+
         if (target && target.item) {
             const closest = target.item
             this.network.sendInteract({

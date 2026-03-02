@@ -49,8 +49,12 @@ export default class Ship extends Entity {
         let result: InteractableEntity[] = [];
 
         for (let i = 0; i < interactables.length; i++) {
+            const uniqueId = `${this.id}_${interactables[i].id}`;
+
+            const configWithUniqueId = { ...interactables[i], id: uniqueId };
+
             const interactable = new InteractableEntity(
-                interactables[i],
+                configWithUniqueId,
                 this
             );
 

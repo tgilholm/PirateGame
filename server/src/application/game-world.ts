@@ -84,6 +84,7 @@ export default class GameWorld extends EventEmitter {
      */
     public removePlayer(socketId: string) {
         this.registry.delete(socketId);
+        this.registry.delete(`ship_${socketId}`);   // remove their ship
     }
 
     /**

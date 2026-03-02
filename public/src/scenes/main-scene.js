@@ -92,7 +92,6 @@ export class MainScene extends Phaser.Scene {
         this.uiManager.update();
         this.network.sendMove(this.inputManager.getMovementInputs());
 
-        console.log(this.cameras.main);
 
         // Update minimap marker with current world position
         //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
