@@ -1,5 +1,11 @@
 {
   "name": "poopdeck-pirates",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "lint-staged": {
+    "**/*": "node scripts/check-filenames.mjs"
+  },
   "version": "1.0.0",
   "description": "A multiplayer pirate game with server-side physics",
   "type": "commonjs",
@@ -10,7 +16,8 @@
     "build:server": "tsc -p server/tsconfig.json && shx cp shared/*.json server/built/",
     "build:all": "npm run clean && npm run build:shared && npm run build:server",
     "start": "npm run build:all && node -r tsconfig-paths/register server/built/server.js",
-    "dev": "npm run clean && npm run build:shared && npm run build:server && concurrently \"tsc -p shared/tsconfig.json --watch\" \"tsc -p server/tsconfig.json --watch\" \"nodemon --watch server/src server/built/server.js\""
+    "dev": "npm run clean && npm run build:shared && npm run build:server && concurrently \"tsc -p shared/tsconfig.json --watch\" \"tsc -p server/tsconfig.json --watch\" \"nodemon --watch server/src server/built/server.js\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -28,6 +35,8 @@
     "@types/socket.io-client": "^1.4.36",
     "@types/ws": "^8.18.1",
     "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.1",
     "nodemon": "^3.1.14",
     "shx": "^0.4.0",
     "tsconfig-paths": "^4.2.0",
