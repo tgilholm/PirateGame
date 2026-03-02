@@ -1,77 +1,30 @@
 # Poop Deck Pirates
-A top down 2d multiplayer game where you play as a pirate sailing around, finding treaure and fighting other players. Available at https://www.poopdeckpirates.com/.
+Available at https://www.poopdeckpirates.com/, or by hosting on a local machine.
 
-## Making changes to the game locally
-If making changes to the game on your local machine:
-  1. Clone the repository and open in Visual Studio Code or another editor.
-  2. Navigate to the PirateGame directory if not already inside it. Note this may look like pirategame/pirategame depending on where you cloned the repository.
-  3. Run the command ```npm install``` in the terminal to update and install node dependencies.
-  4. Launch the server with ```npm start``` and access the game at ```localhost:3000```.
-  5. Make any changes required, push to a separate branch and make a pull request.
+## Quick-Start Guide
+To run the game on your local machine:
+  1. Clone the repository and navigate to the PirateGame directory. Note this may look like `pirategame/pirategame` depending on where you cloned the repository.
+  2. Run `npm install` to update and install all dependencies in the `package.json` file.
+  3. Launch the server with `npm start` and access the game at `localhost:3000`.
 
+## Development Guide
+If making changes to the game:
+  1. Clone the repository and open in an IDE like VSCode or equivalent.
+  2. Run `npm install` to update and install all dependencies.
+  3. Execute `npm run build:all` to compile all TypeScript files. This step is necessary to convert TypeScript code to JavaScript that can run in the browser and on the server.
+  4. Make any changes required, push to a separate branch and make a pull request.
 
-## centralised config values and functions
+## NPM Scripts
+To execute these, enter `npm run` then the name of the script:
+  - `clean` - Deletes the contents of all /browser and /built directories.
+  - `build:shared` - Builds only the shared/ directory into /shared/built (for the server) and /shared/browser (for the client).
+  - `build:server` - Builds only the server/ directory into /server/built.
+  - `build:all` - Executes the two build scripts above. This may take some time- the TypeScript compiler is notoriously slow.
+  - `start` - Executes the above, then starts server/built/server.js with the @shared path alias.
+  - `dev`- Builds all directories, then automatically re-compiles and restarts the server when code is edited. This is useful for development as it saves you from manually rebuilding and restarting the server.
 
-## Server Configuration - serverConfig.json
-
-### Spawn
-`SPAWN.PLAYER.X` - Player spawn X position relative to the ship
-`SPAWN.PLAYER.Y` - Player spawn Y position relative to the ship
-`SPAWN.SHIP.X` - Ship world spawn X coordinate
-`SPAWN.SHIP.Y` - Ship world spawn Y coordinate
-
-### Ship
-`SHIP.DIMENSIONS.HEIGHT` - Length of the ship hull
-`SHIP.DIMENSIONS.MIDDLEWIDTH` - Width of the ship at its widest point
-`SHIP.DIMENSIONS.BOWLENGTH` - Length of the ship bow
-`SHIP.DIMENSIONS.STERNRADIUS` - Radius of the ship stern
-`SHIP.MAX_HEALTH` - Base maximum hull health
-`SHIP.CREW_CAPACITY` - Base maximum crew members
-`SHIP.ACCELERATION` - Base acceleration (grids/s²)
-`SHIP.MAX_SPEED` - Base maximum speed (grids/s)
-`SHIP.CANNON_DAMAGE` - Base cannon damage per hit
-`SHIP.CANNON_RANGE` - Base cannon range (grids)
-`SHIP.CANNON_COUNT` - Base number of cannons per side
-`SHIP.RAMMING_POWER` - Base damage dealt and received when ramming
-`SHIP.MINIMAP_RANGE` - Base minimap vision range (grids)
-`SHIP.VISION_RANGE` - Base camera zoom steps available
-`SHIP.STOP_POWER` - Base stopping speed when anchor is deployed (seconds)
-`SHIP.DEPLOY_TIME` - Base time to deploy anchor (seconds)
-`SHIP.RETRIEVE_TIME` - Base time to retrieve anchor (seconds)
-`SHIP.TURN_SPEED` - Base turn speed (degrees/s at full rudder)
-`SHIP.RESPONSE_TIME` - Base rudder response time (seconds)
-`SHIP.FIRE_RATE` - Base cannon reload time (seconds)
-`SHIP.ACCURACY` - Base cannon spread cone (degrees)
-`SHIP.WEIGHT` - Base ship weight
-`SHIP.FRICTION_AIR` - Air friction applied to the ship physics body
-
-### Player
-`PLAYER.MAX_HEALTH` - Player maximum health
-`PLAYER.SPEED` - Player movement speed on ship and land
-`PLAYER.SWIM_SPEED` - Player movement speed while swimming
-`PLAYER.RADIUS` - Physics collision radius of the player
-`PLAYER.PADDING` - Padding used for boundary/collision calculations
-
-### Shop
-`SHOP.X` - World X coordinate of the shop
-`SHOP.Y` - World Y coordinate of the shop
-
-## UI Configuration - UIConfig.json
-
-### Minimap
-`MINIMAP.SIZE` - Width and height of the minimap panel in pixels
-`MINIMAP.IMG_SRC` - Path to the minimap background image
-`MINIMAP.POSITION.TOP` - Distance from the top of the screen (keep in sync with `#minimap-container` in `styles.css`)
-`MINIMAP.POSITION.LEFT` - Distance from the left of the screen (keep in sync with `#minimap-container` in `styles.css`)
-`MINIMAP.MARKER.RADIUS` - Radius of the player dot on the minimap canvas, in pixels
-`MINIMAP.MARKER.FILL` - Fill colour of the player dot
-`MINIMAP.MARKER.STROKE` - Outline colour of the player dot
-`MINIMAP.MARKER.LINE_WIDTH` - Stroke width of the player dot outline
-
-### Message Text
-`MESSAGE_TEXT.FONT_SIZE` - Font size of the on-screen message text
-`MESSAGE_TEXT.COLOR` - Text colour of the on-screen message
-`MESSAGE_TEXT.BACKGROUND` - Background colour of the on-screen message
-
-### Debug Menu
-`DEBUG_MENU.TOGGLE_KEY` - Keyboard key used to open/close the debug menu (must match a key in `Phaser.Input.Keyboard.KeyCodes`)
+## Troubleshooting
+If you encounter issues:
+  - Ensure you have Node.js installed. You can download it from [nodejs.org](https://nodejs.org/).
+  - Make sure you are in the correct directory when running commands.
+  - If you see errors about missing modules, try deleting the `node_modules` directory and running `npm install` again.
