@@ -82,16 +82,17 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
-    start(username)
-    {
-        this.network.emit(ClientEvent.READY, {username: username});
+    start(username) {
+        this.network.emit(ClientEvent.READY, { username: username });
     }
 
     update() {
         this.refreshInteractables();
         if (!this.localPlayer) return;
 
-        const matrix = this.localPlayer.getWorldTransformMatrix();
+        const player = this.localPlayer;
+
+        const matrix = player.getWorldTransformMatrix();
 
         //@ts-ignore
         this.scene.cameraTarget.x = matrix.tx;
@@ -103,9 +104,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
 
-        const closest = this.getClosestInteractable(this.localPlayer);
+        const closest = this.getClosestInteractable(player);
         if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
+            if (closest.item.type === 'ladder' || player.parentId == closest.item.parentId) {
                 this.closestInteractable = closest;
             }
 
@@ -115,7 +116,18 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         const inputs = this.input.getInputs(this.scene);
         this.network.sendMove(inputs);
-        this.localPlayer.gun.setRotation(inputs.aimAngle);
+
+
+        // Draw the gun on the outer circle of the player
+        const gun = this.localPlayer.gun;
+        const parentRotation = player.parentContainer?.rotation ?? 0;
+        const radius = 15;
+
+        // Offset by the parent container's rotation
+        gun.x = Math.cos(inputs.aimAngle - parentRotation) * radius;
+        gun.y = Math.sin(inputs.aimAngle - parentRotation) * radius;
+        gun.setRotation(inputs.aimAngle - parentRotation);
+
     }
 
     onSync(data) {

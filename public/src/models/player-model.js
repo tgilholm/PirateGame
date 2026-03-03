@@ -35,7 +35,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.bodySprite = scene.add.sprite(x, y, 'player_circle');
         this.add(this.bodySprite);
 
-        this.gun = scene.add.rectangle(5, 0, 15, 5, 0x000000).setOrigin(0, 0.5);
+        this.gun = scene.add.rectangle(15, 0, 15, 5, 0x000000)
         this.add(this.gun);
     }
 
@@ -56,9 +56,11 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             this.y += bob;
         }
 
+        const isBusy = this.isSteering || this.isUsingCannon;
 
-
-        this.setAlpha(this.isSteering || this.isUsingCannon ? 0.6 : 1.0);
+        // Hide the player's gun and make them slightly transparent when interacting
+        this.gun.setVisible(isBusy ? false : true);
+        this.setAlpha(isBusy ? 0.6 : 1.0);
 
         // Update name box position
         const matrix = this.getWorldTransformMatrix();
@@ -72,7 +74,8 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         // Interp otherwise
         this.target.x = data.x;
         this.target.y = data.y;
-        this.gun.setRotation(data.aimAngle);
+
+
 
         this.isSteering = data.isSteering;
         this.isUsingCannon = data.isUsingCannon;
