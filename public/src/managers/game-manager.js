@@ -88,9 +88,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     }
 
     update() {
+        if (!this.localPlayer) return;  // dont do anything until the player has joined
+
         const delta = this.scene.game.loop.delta;
-        const inputs = this.input.getInputs(this.scene);
+        const inputs = this.input.getInputs(this.scene, this.localPlayer);
         this.network.sendMove(inputs);
+
+        
 
 
         // Tick all ships every frame
@@ -108,7 +112,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         this.refreshInteractables();
-        if (!this.localPlayer) return;
 
         const matrix = this.localPlayer.getWorldTransformMatrix();
 
