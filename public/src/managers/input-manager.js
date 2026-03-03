@@ -25,15 +25,34 @@ export default class InputManager extends Phaser.Events.EventEmitter {
         scene.input.keyboard.on('keydown-SPACE', () => this.emit('fire'));
     }
 
-    getMovementInputs() {
+    /**
+     * 
+     * @param {Phaser.Scene} scene 
+     * @returns 
+     */
+    getInputs(scene) {
         /** @type {any} */
         const keys = this.moveKeys;
+
+        // Calculate the angle of the player to the mouse pointer
+        // Player is always in the middle of the screen
+
+        const centreX = scene.scale.width / 2;
+        const centreY = scene.scale.height / 2;
+
+        const aimAngle = Math.atan2(
+            scene.input.mousePointer.y - centreY,
+            scene.input.mousePointer.x - centreX
+        );
+
         return {
             up: keys.W.isDown,
             down: keys.S.isDown,
             left: keys.A.isDown,
             right: keys.D.isDown,
+            aimAngle: aimAngle
         }
     }
+
 
 }

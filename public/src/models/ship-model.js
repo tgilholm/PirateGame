@@ -118,18 +118,13 @@ export default class ShipModel extends Phaser.GameObjects.Container {
     }
 
 
-    update(data, delta) {
-        if (!data || typeof data.x !== 'number') return;
-        this.syncFromServer(data);
 
-        // Snap if position drifted
-        if (Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
-            this.x = data.x;
-            this.y = data.y;
-        }
+    update(data, delta) {
+        if (data) this.syncFromServer(data);
+        if (!this.initialised) return;
 
         this.swayTimer += delta;
-        const bobAmount = Math.sin(this.swayTimer / 1000) * 1; // 3px vertical bob
+        const bobAmount = Math.sin(this.swayTimer / 1000) * 1;
         const rockAmount = Math.cos(this.swayTimer / 1500) * 0.02;
 
         if (this.hullSprite) {
@@ -144,10 +139,8 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         const deltaTime = delta / 1000;
         const lerp = 1 - Math.pow(1 - 0.1, delta / 16.67);
 
-
-        // Extrapolate from velocity and time
-        const predictedX = this.target.x + this.velocity.x * deltaTime; // where x is in however many milliseconds
-        const predictedY = this.target.y + this.velocity.y * deltaTime; // Distance = speed * time
+        const predictedX = this.target.x + this.velocity.x * deltaTime;
+        const predictedY = this.target.y + this.velocity.y * deltaTime;
         const predictedR = this.target.r + this.angularVelocity * deltaTime;
 
         this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
@@ -159,8 +152,16 @@ export default class ShipModel extends Phaser.GameObjects.Container {
             lerp
         );
     }
-
+    
     syncFromServer(data) {
+        // Snap if this is the first sync or position has drifted too far
+        if (!this.initialised || Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
+            this.x = data.x;
+            this.y = data.y;
+            this.rotation = data.r;
+            this.initialised = true;
+        }
+
         this.target.x = data.x;
         this.target.y = data.y;
         this.target.r = data.r;

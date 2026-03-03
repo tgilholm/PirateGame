@@ -1,29 +1,15 @@
 
 /* global Phaser, io */
 
-//import UI from "../ui/create-ui.js";
-import zoom from "../objects/zoom.js";
-import Shop from "../objects/shop.js";
 import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
-import { ClientEvent } from "shared/built/socket-protocol.js";
 import UIManager from "../managers/ui-manager.js";
-import InteractionManager from "../managers/interaction-manager.js";
 import InputManager from "../managers/input-manager.js";
 
 
 const socket = globalThis.io();
 
 
-/**
- * The "Main Class" for the game. Contains client-side image loading and
- * socket events including user input. Note that content inside these files
- * is accessible to users- avoid placing "server side" logic here.
- * 
- * For instance, players' locations can be stored locally inside the main scene,
- * but the server is the Single Source of Truth and has the final say on the
- * players' actual locations.
- */
 export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
@@ -63,11 +49,14 @@ export class MainScene extends Phaser.Scene {
         //@ts-ignore
         const entityConfig = window.entityConfig;   // cheesed
 
-        this.network = new NetworkManager(socket);
-        this.gameManager = new GameManager(this.network, this, entityConfig);
+        this.gameManager = new GameManager(
+            this, 
+            entityConfig, 
+            new NetworkManager(socket), 
+            new InputManager(this)
+        );
         this.uiManager = new UIManager(this, this.gameManager);
-        this.inputManager = new InputManager(this);
-        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager);
+
 
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
@@ -80,7 +69,9 @@ export class MainScene extends Phaser.Scene {
         circle.destroy();
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.network.emit(ClientEvent.READY, { username: data.username });
+        
+
+        this.gameManager.start(data.username);
     }
 
 
@@ -90,7 +81,6 @@ export class MainScene extends Phaser.Scene {
     update() {
         this.gameManager.update();
         this.uiManager.update();
-        this.network.sendMove(this.inputManager.getMovementInputs());
 
 
         // Update minimap marker with current world position

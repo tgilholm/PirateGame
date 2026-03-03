@@ -1,13 +1,19 @@
+
+// The socketService is dependent upon the compiled (.js) socket-protocol in shared. Run in dev if making changes
+
 import { Server, Socket } from "socket.io";
 import { z } from 'zod';    // For frontline validation
 import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "@shared/socket-protocol";
 import GameWorld, { WorldEvent } from "./game-world";
 
+
+
 const MoveSchema = z.object({
     up: z.boolean(),
     down: z.boolean(),
     left: z.boolean(),
-    right: z.boolean()
+    right: z.boolean(),
+    aimAngle: z.number()
 });
 
 const InteractSchema = z.object({
@@ -41,7 +47,7 @@ export default class SocketService {
             socket.on(ClientEvent.READY, (data) => {
 
                 this.world.addPlayer(socket.id, data.username);
-                socket.emit(ServerEvent.INIT_GAME, {...this.world.getFullState(), id:socket.id});
+                socket.emit(ServerEvent.INIT_GAME, { ...this.world.getFullState(), id: socket.id });
             });
 
             socket.on(ClientEvent.ACTION, (action: PlayerAction) => {

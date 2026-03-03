@@ -38,8 +38,6 @@ export default class UIManager {
                 this.hidePrompt();
             }
         }
-
-        console.log("Target:", !!target, "Interacting:", isInteracting);
     }
 
     hidePrompt() {

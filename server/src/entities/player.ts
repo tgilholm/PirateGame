@@ -11,10 +11,8 @@ export default class Player extends Entity {
         down: boolean;
         left: boolean;
         right: boolean;
-        e: boolean;
-        q: boolean;
-        space: boolean;
     };
+    aimAngle: number;
 
 
     constructor(
@@ -32,15 +30,17 @@ export default class Player extends Entity {
         this.isSteering = false;
         this.isUsingCannon = false;
         this.isCarrying = false;
+
+        // Where the player is aiming
+        this.aimAngle = 0;
+
+        // Input from the client
         this.inputs = {
             up: false,
             down: false,
             left: false,
-            right: false,
-            e: false,
-            q: false,
-            space: false
-
+            right: false
+        
             // Specify any other player inputs here
         }
     }

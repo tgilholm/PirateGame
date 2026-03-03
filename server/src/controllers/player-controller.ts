@@ -21,7 +21,9 @@ export default class PlayerController {
         player.inputs.down = data.down;
         player.inputs.left = data.left;
         player.inputs.right = data.right;
+        player.aimAngle = data.aimAngle;
     }
+
 
     handleInteract(player: Player, data: InteractData): void {
         const interactable = this.entityRegistry.get<InteractableEntity>(data.targetId);
@@ -61,6 +63,25 @@ export default class PlayerController {
         }
     }
 
+
+    handleRelease(player: Player, ship: Ship | null): void {
+        this.interactionHandler.handleRelease(player, ship);
+    }
+
+
+    handleDig(player: Player) {
+        throw new Error("Method not implemented.");
+    }
+    handleGunFire(player: Player) {
+        throw new Error("Method not implemented.");
+    }
+    handleCannonFire(player: Player) {
+        throw new Error("Method not implemented.");
+    }
+    handleUpgrade(player: Player, data: UpgradeData) {
+        throw new Error("Method not implemented.");
+    }
+
     private getWorldPosition(entity: Entity) {
         if (!entity.parent) {
             // If the entity has no parent, its coordinates are already in world space
@@ -77,22 +98,5 @@ export default class PlayerController {
 
         // If the parent is not a ship, return the entity's local position
         return { x: entity.x, y: entity.y };
-    }
-
-    handleRelease(player: Player, ship: Ship | null): void {
-        this.interactionHandler.handleRelease(player, ship);
-    }
-
-    handleDig(player: Player) {
-        throw new Error("Method not implemented.");
-    }
-    handleGunFire(player: Player) {
-        throw new Error("Method not implemented.");
-    }
-    handleCannonFire(player: Player) {
-        throw new Error("Method not implemented.");
-    }
-    handleUpgrade(player: Player, data: UpgradeData) {
-        throw new Error("Method not implemented.");
     }
 }
