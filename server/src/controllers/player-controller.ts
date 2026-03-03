@@ -64,8 +64,23 @@ export default class PlayerController {
     }
 
 
-    handleRelease(player: Player, ship: Ship | null): void {
-        this.interactionHandler.handleRelease(player, ship);
+    handleRelease(player: Player): void {
+        // Get the interactable currently being used by the player
+        const interactables = this.entityRegistry.getByType<InteractableEntity>('interactable');
+        let interactable = null;
+
+        for (let i = 0; i < interactables.length; i++)
+        {
+            if (interactables[i].user === player)
+            {
+                interactable = interactables[i];
+            }
+        }
+
+        // Find the parent if the interactable has one
+        const ship = interactable?.parent as Ship || null;
+
+        this.interactionHandler.handleRelease(player, ship, interactable);
     }
 
 

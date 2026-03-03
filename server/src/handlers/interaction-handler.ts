@@ -6,29 +6,31 @@ export default class InteractionHandler {
 
     constructor() { }
 
-    handleHelmInteraction(player: Player, ship: Ship, helm: { x: number, y: number }) {
-        if (!player.parent) return;
-        player.isSteering = true;
+    handleHelmInteraction(player: Player, ship: Ship, helm: InteractableEntity) {
+        // Player not on ship or ship already being piloted
+        if (!player.parent || ship.pilot || helm.user) return;
 
-        if (ship.pilot) return; // Ship already has a pilot
+        helm.user = player;
         ship.pilot = player;
+        player.isSteering = true;
 
         // Move player just behind the helm
         player.x = helm.x - 25;
         player.y = helm.y;
     }
 
-    handleCannonInteraction(player: Player, cannon: { x: number, y: number }) {
-        if (!player.parent) return;
-        player.isUsingCannon = true;
+    handleCannonInteraction(player: Player, cannon: InteractableEntity) {
+        if (!player.parent || cannon.user) return;
 
         const cannonYdir = cannon.y > 0 ? -1 : 1;
 
         player.x = cannon.x;
+        cannon.user = player;
+        player.isUsingCannon = true;
         player.y = cannon.y + cannonYdir * 25;
     }
 
-    handleLadderInteraction(player: Player, ship: Ship, ladder: { x: number, y: number }) {
+    handleLadderInteraction(player: Player, ship: Ship, ladder: InteractableEntity) {
 
         if (!player.parent) {
             const enterYdir = ladder.y > 0 ? -1 : 1;
@@ -53,18 +55,22 @@ export default class InteractionHandler {
         }
     }
 
-    handleRelease(player: Player, ship: Ship | null) {
-        if (player.isSteering) {
-            if (ship) {
-                if (ship.pilot !== player) return;
+    handleRelease(player: Player, ship: Ship | null, interactable: InteractableEntity | null) {
 
-                ship.pilot = null;
+        if (!interactable || interactable.user !== player) return; // player can only release if using
+
+        interactable.user = null;
+
+        switch (interactable.useType) {
+            case 'helm':
+                if (!ship) return;
                 player.isSteering = false;
-            }
-        }
+                ship.pilot = null;  // reset pilot
+                break;
 
-        if (player.isUsingCannon) {
-            player.isUsingCannon = false;
+            case 'cannon':
+                player.isUsingCannon = false;
+                break;
         }
     }
 

@@ -74,8 +74,7 @@ export default class WorldController {
                 break;
 
             case ActionType.RELEASE:
-                const ship = player.parent as Ship;
-                this.playerController.handleRelease(player, ship);
+                this.playerController.handleRelease(player);
                 break;
             case ActionType.MESSAGE:
                 this.messageController.handleMessage(player, action.data);

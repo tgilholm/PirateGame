@@ -1,4 +1,5 @@
 import Entity from "./entity";
+import Player from "./player";
 
 export interface InteractableConfig {
     id: string,
@@ -12,9 +13,11 @@ export interface InteractableConfig {
 
 export default class InteractableEntity extends Entity {
     useType: string;
+    user: Player | null;
 
     constructor(config: InteractableConfig, parent: Entity | null) {
         super(config.id, 'interactable', config.x, config.y, 100, parent);
         this.useType = config.type;
+        this.user = null;   // No user to start
     }
 }
