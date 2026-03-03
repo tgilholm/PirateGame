@@ -1,4 +1,7 @@
+/* global Phaser */
+
 import ShipModel from "./ship-model.js";
+
 
 
 export default class PlayerModel extends Phaser.GameObjects.Container {
@@ -22,7 +25,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.aimAngle = 0;
         this.parentId = null;
 
-        // Create the children of the player container
+        // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
             fontSize: '12px',
             fontFamily: 'Consolas',
@@ -30,7 +33,6 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             backgroundColor: '#00000088',
             padding: { x: 6, y: 4 }
         }).setOrigin(0.5, 1).setDepth(100).setPosition(0, -25);
-        this.add(this.nameText);
 
         this.bodySprite = scene.add.sprite(x, y, 'player_circle');
         this.add(this.bodySprite);
@@ -61,6 +63,9 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             const bob = this.parentContainer.hullSprite.y;
             this.y += bob; // hi bob
         }
+
+        const worldPos = this.getWorldTransformMatrix();
+        this.nameText.setPosition(worldPos.tx, worldPos.ty - 25);
 
         const isBusy = this.isSteering || this.isUsingCannon;
 

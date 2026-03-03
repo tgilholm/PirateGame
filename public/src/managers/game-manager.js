@@ -27,6 +27,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.shipList = {};
         this.interactables = [];
+
         this.playerList = {};
 
         this.network.on(ServerEvent.INIT_GAME, (data) => {
@@ -88,6 +89,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
     update() {
         const delta = this.scene.game.loop.delta;
+        const inputs = this.input.getInputs(this.scene);
+        this.network.sendMove(inputs);
+
 
         // Tick all ships every frame
         Object.values(this.shipList).forEach(ship => {
@@ -95,8 +99,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         // Tick all players every frame
-        Object.values(this.playerList).forEach(player => {
+        Object.values(this.playerList).forEach(/** @type {PlayerModel}*/player => {
             player.update(delta);
+
+            const gun = this.localPlayer.gun;
+            const parentRotation = player.parentContainer?.rotation ?? 0;
+            const radius = 15;
+            gun.x = Math.cos(inputs.aimAngle - parentRotation) * radius;
+            gun.y = Math.sin(inputs.aimAngle - parentRotation) * radius;
+            gun.setRotation(inputs.aimAngle - parentRotation);
+
         });
 
         this.refreshInteractables();
@@ -118,17 +130,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
-        const inputs = this.input.getInputs(this.scene);
-        this.network.sendMove(inputs);
 
-        const gun = this.localPlayer.gun;
-        const parentRotation = this.localPlayer.parentContainer?.rotation ?? 0;
-        const radius = 15;
-        gun.x = Math.cos(inputs.aimAngle - parentRotation) * radius;
-        gun.y = Math.sin(inputs.aimAngle - parentRotation) * radius;
-        gun.setRotation(inputs.aimAngle - parentRotation);
     }
-    
+
     onSync(data) {
         data.ships?.forEach(shipData => {
             // Only create the ship if not already in the list
