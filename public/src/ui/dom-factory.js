@@ -1,7 +1,7 @@
 /**
  * DomFactory — generic static DOM factory.
  * Provides reusable helpers for building UI elements.
- * Any UI class (DebugMenu, ShopUI, Minimap, etc.) can call these methods
+ * Any UI class (debug-menu, ShopUI, Minimap, etc.) can call these methods
  * instead of manually constructing DOM nodes.
  */
 export default class DomFactory {
@@ -118,7 +118,7 @@ export default class DomFactory {
      * @param {HTMLElement} [container=document.body]
      * @returns {{ menu, statsSection, statsBtn, statsOverlay, statsContent }}
      */
-    static createDebugMenuDOM(container = document.body) {
+    static createdebugmenuDOM(container = document.body) {
         const menu = DomFactory.createElement("div", [], { id: "debug-menu" });
         menu.style.display = "none";
 

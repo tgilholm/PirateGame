@@ -1,5 +1,5 @@
 import DomFactory from "./dom-factory.js";
-import UIConfig from "./UIConfig.json" with { type: "json" };
+import uiConfig from "./ui-config.json" with { type: "json" };
 
 //Minimap — builds and manages the minimap and minimap marker
 
@@ -18,13 +18,13 @@ export default class Minimap {
     }
 
     /**
-     * sets minimap container, and adds the image, dictated by UIConfig
+     * sets minimap container, and adds the image, dictated by ui-config
      * @param {string} [imgSrc]
      * @param {number} [size]
      */
     createMinimap(
-        imgSrc = UIConfig.MINIMAP.IMG_SRC,
-        size = UIConfig.MINIMAP.SIZE
+        imgSrc = uiConfig.MINIMAP.IMG_SRC,
+        size = uiConfig.MINIMAP.SIZE
     ) {
         this.container.style.width = size + "px";
         this.container.style.height = size + "px";
@@ -67,7 +67,7 @@ export default class Minimap {
 
     /**
      * Draws the circular marker dot at the given world position.
-     * Marker radius, fill, stroke, and line width are read from UIConfig.
+     * Marker radius, fill, stroke, and line width are read from ui-config.
      * @param {number} x - World X position.
      * @param {number} y - World Y position.
      */
@@ -77,20 +77,20 @@ export default class Minimap {
         const markerY = (y / this.mapHeight) * canvas.height;
 
         ctx.beginPath();
-        ctx.arc(markerX, markerY, UIConfig.MINIMAP.MARKER.RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = UIConfig.MINIMAP.MARKER.FILL;
+        ctx.arc(markerX, markerY, uiConfig.MINIMAP.MARKER.RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = uiConfig.MINIMAP.MARKER.FILL;
         ctx.fill();
-        ctx.strokeStyle = UIConfig.MINIMAP.MARKER.STROKE;
-        ctx.lineWidth = UIConfig.MINIMAP.MARKER.LINE_WIDTH;
+        ctx.strokeStyle = uiConfig.MINIMAP.MARKER.STROKE;
+        ctx.lineWidth = uiConfig.MINIMAP.MARKER.LINE_WIDTH;
         ctx.stroke();
     }
 
-    //gets shop coords from UIConfig and draws to canvas, call after mapWidth/mapHeight are set
+    //gets shop coords from ui-config and draws to canvas, call after mapWidth/mapHeight are set
     //mapTileWidth/mapTileHeight are the map dimensions in tiles (not pixels)
     placeShops(mapTileWidth, mapTileHeight) { //uses tiles not coords
         this.mapTileWidth = mapTileWidth;
         this.mapTileHeight = mapTileHeight;
-        this.shops = UIConfig.SHOP.SPAWNS;
+        this.shops = uiConfig.SHOP.SPAWNS;
         this.drawShops();
     }
 
@@ -98,7 +98,7 @@ export default class Minimap {
     drawShops() {
         if (!this.shops) return;
         const { canvas, ctx } = this;
-        const { SIZE, FILL, STROKE, LINE_WIDTH } = UIConfig.SHOP.MARKER;
+        const { SIZE, FILL, STROKE, LINE_WIDTH } = uiConfig.SHOP.MARKER;
         const half = SIZE / 2;
 
         for (const shop of this.shops) {

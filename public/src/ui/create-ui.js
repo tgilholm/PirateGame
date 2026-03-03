@@ -1,4 +1,4 @@
- //import DebugMenu from "./debugMenu.js";
+ //import debug-menu from "./debug-menu.js";
  import ShopUI from "./shop-ui.js";
  import Minimap from "./minimap.js";
 
@@ -15,8 +15,8 @@
          this.minimap = new Minimap(document.getElementById("minimap-container"));
 
          //debug menu — builds its own DOM, wires X key and stats button
-//         this.debugMenu = new DebugMenu(scene);
-//         this.debugMenu.init();
+//         this.debug-menu = new debug-menu(scene);
+//         this.debug-menu.init();
 
          //shop UI — builds its own DOM and appends to document.body
          this.shopUI = new ShopUI();

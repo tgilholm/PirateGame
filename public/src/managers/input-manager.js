@@ -7,7 +7,7 @@
  * helpers so the rest of the codebase never needs to touch the Phaser
  * keyboard API directly.
  *
- * Note: the debug-menu toggle key (X) is intentionally left with DebugMenu /
+ * Note: the debug-menu toggle key (X) is intentionally left with debug-menu /
  * UI, since it is scoped to that subsystem and registered there.
  */
 export default class InputManager extends Phaser.Events.EventEmitter {
