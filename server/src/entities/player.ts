@@ -11,9 +11,6 @@ export default class Player extends Entity {
         down: boolean;
         left: boolean;
         right: boolean;
-
-        mouseX: number;
-        mouseY: number;
     };
     aimAngle: number;
 
@@ -42,11 +39,8 @@ export default class Player extends Entity {
             up: false,
             down: false,
             left: false,
-            right: false,
-
-            mouseX: 0,
-            mouseY: 0
-
+            right: false
+        
             // Specify any other player inputs here
         }
     }
@@ -72,7 +66,6 @@ export default class Player extends Entity {
         return {
             ...super.serialise(),
             username: this.username,
-            aimAngle: this.aimAngle,
             isSteering: this.isSteering,
             isUsingCannon: this.isUsingCannon
         }

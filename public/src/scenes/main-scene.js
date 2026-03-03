@@ -92,6 +92,8 @@ export class MainScene extends Phaser.Scene {
         this.uiManager.update();
         this.network.sendMove(this.inputManager.getInputs(this));
 
+        this.gameManager.localPlayer.gun.setRotation()
+
 
         // Update minimap marker with current world position
         //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);

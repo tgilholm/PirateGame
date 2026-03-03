@@ -21,9 +21,7 @@ export default class PlayerController {
         player.inputs.down = data.down;
         player.inputs.left = data.left;
         player.inputs.right = data.right;
-
-        player.inputs.mouseX = data.mouseX;
-        player.inputs.mouseY = data.mouseY;
+        player.aimAngle = data.aimAngle;
     }
 
 

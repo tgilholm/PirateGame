@@ -135,7 +135,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 player.parentId = newParentId;
             }
 
-            player.update(playerData);
+            player.update(playerData, this.scene.game.loop.delta);
         });
 
 

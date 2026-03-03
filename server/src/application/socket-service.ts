@@ -13,9 +13,7 @@ const MoveSchema = z.object({
     down: z.boolean(),
     left: z.boolean(),
     right: z.boolean(),
-
-    mouseX: z.number(),
-    mouseY: z.number()
+    aimAngle: z.number()
 });
 
 const InteractSchema = z.object({

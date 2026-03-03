@@ -31,9 +31,7 @@ export interface MoveData {
     down: boolean;
     left: boolean;
     right: boolean;
-
-    mouseX: number;
-    mouseY: number;
+    aimAngle: number;
 }
 
 export interface UpgradeData {
