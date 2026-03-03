@@ -4,12 +4,16 @@ import path from 'path';
 export default class TerrainMap {
     private islandTiles: Set<string> = new Set();
     public readonly tileWidth: number;
+    public readonly mapWidth: number;
+    public readonly mapHeight: number;
 
     constructor(mapFileName: string) {
         const mapPath = path.join(__dirname, '..', mapFileName);
         const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
         this.tileWidth = mapData.tilewidth;
-        const mapWidth: number = mapData.width;
+        this.mapHeight = mapData.height;
+        this.mapWidth = mapData.width;
+
         const islands = mapData.layers.find((l: any) => l.name === 'islands');
 
         if (!islands?.data) {
@@ -27,8 +31,8 @@ export default class TerrainMap {
 
         tileArray.forEach((tileGid, index) => {
             if (tileGid !== 0) {
-                const tileX = index % mapWidth;
-                const tileY = Math.floor(index / mapWidth);
+                const tileX = index % this.mapWidth;
+                const tileY = Math.floor(index / this.mapWidth);
                 this.islandTiles.add(`${tileX},${tileY}`);
             }
         });
@@ -50,5 +54,13 @@ export default class TerrainMap {
                 worldY: tileY * this.tileWidth + this.tileWidth / 2
             };
         });
+    }
+
+    public get widthInPixels(): number {
+        return this.mapWidth * this.tileWidth;
+    }
+
+    public get heightInPixels(): number {
+        return this.mapHeight * this.tileWidth;
     }
 }

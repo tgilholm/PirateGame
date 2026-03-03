@@ -15,6 +15,19 @@ export default class PhysicsSystem implements BaseSystem {
 
 
     private initTerrain(terrainMap: TerrainMap): void {
+        const W = terrainMap.widthInPixels;
+        const H = terrainMap.heightInPixels;
+        const T = 2000; // wall thickness
+
+        const walls = [
+            Matter.Bodies.rectangle(W / 2, -T / 2, W, T, { isStatic: true, label: 'bound' }), // top
+            Matter.Bodies.rectangle(W / 2, H + T / 2, W, T, { isStatic: true, label: 'bound' }), // bottom
+            Matter.Bodies.rectangle(-T / 2, H / 2, T, H, { isStatic: true, label: 'bound' }), // left
+            Matter.Bodies.rectangle(W + T / 2, H / 2, T, H, { isStatic: true, label: 'bound' }), // right
+        ];
+
+        Matter.World.add(this.engine.world, walls);
+
         // Add a rectangle at each solid object
         terrainMap.getIslandTiles().forEach(({ worldX, worldY }) => {
             const body = Matter.Bodies.rectangle(
@@ -24,6 +37,7 @@ export default class PhysicsSystem implements BaseSystem {
             );
             Matter.World.add(this.engine.world, body);
         });
+
         console.log(`[PhysicsSystem] Added island collision bodies`);
     }
 
