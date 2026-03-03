@@ -34,11 +34,10 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             padding: { x: 6, y: 4 }
         }).setOrigin(0.5, 1).setDepth(100).setPosition(0, -25);
 
-        this.bodySprite = scene.add.sprite(x, y, 'player_circle');
+        this.bodySprite = scene.add.sprite(0, 0, 'player_circle');
         this.add(this.bodySprite);
 
-        this.gun = scene.add.rectangle(15, 0, 15, 5, 0x000000)
-        this.add(this.gun);
+        this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
     }
 
 
@@ -53,15 +52,16 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
         this.isSteering = data.isSteering;
         this.isUsingCannon = data.isUsingCannon;
+
     }
 
     setGunRotation(angle) {
-        const gun = this.gun;
-        const parentRotation = this.parentContainer?.rotation | 0;
+        const worldPos = this.getWorldTransformMatrix();
 
-        gun.x = Math.cos(angle - parentRotation) * 15;  // radius
-        gun.y = Math.sin(angle - parentRotation) * 15;
-        gun.setRotation(angle - parentRotation);
+        const gun = this.gun;
+        gun.x = worldPos.tx + Math.cos(angle) * 15;  // radius
+        gun.y = worldPos.ty + Math.sin(angle) * 15;
+        gun.setRotation(angle);
     }
 
     update(delta) {
