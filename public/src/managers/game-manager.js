@@ -172,6 +172,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     player.setPosition(playerData.x, playerData.y);
                 }
                 player.parentId = newParentId;
+
+                player.target.x = playerData.x;
+                player.target.y = playerData.y;
             }
 
             player.update(playerData, this.scene.game.loop.delta);
