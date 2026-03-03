@@ -5,6 +5,7 @@ import Player from "../entities/player";
 import Ship from "../entities/ship";
 import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
+import Entity from "src/entities/entity";
 
 export default class MovementSystem implements BaseSystem {
     constructor(private registry: EntityRegistry, private entityConfig: EntityConfig,
@@ -24,7 +25,7 @@ export default class MovementSystem implements BaseSystem {
         if (player.isSteering || player.isUsingCannon) return;
 
         const parent = player.parent as Ship || null;
-        const { up, down, left, right} = player.inputs;
+        const { up, down, left, right } = player.inputs;
         const playerConfig = this.entityConfig.player;
         const ships = this.registry.getByType<Ship>('ship');
 
@@ -104,8 +105,27 @@ export default class MovementSystem implements BaseSystem {
 
                 if (canMoveX) player.x = nextWorldX;
                 else if (canMoveY) player.y = nextWorldY;
+
             }
+
+
+            // Keep the player on the map
+            this.constrainToWorld(player, playerConfig.radius);
         }
+
+    }
+
+
+    private constrainToWorld(entity: Entity, padding: number) {
+        const minX = padding;
+        const minY = padding;
+        const maxX = this.terrainMap.widthInPixels - padding;
+        const maxY = this.terrainMap.heightInPixels - padding;
+
+        if (entity.x < minX) entity.x = minX;
+        if (entity.x > maxX) entity.x = maxX;
+        if (entity.y < minY) entity.y = minY;
+        if (entity.y > maxY) entity.y = maxY;
     }
 
     /**
