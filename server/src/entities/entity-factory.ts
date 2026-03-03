@@ -4,6 +4,7 @@ import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
+import Shop from "./shop";
 import PhysicsSystem from "src/systems/physics-system";
 
 
@@ -41,6 +42,16 @@ export default class EntityFactory {
         this.physicsSystem.addBody(ship.body);
 
         return ship;
+    }
+
+    //spawns shops
+    public createShops(): Shop[] {
+        const spawns = this.entityConfig.SHOP?.SPAWNS ?? [];
+        return spawns.map((spawn, i) => {
+            const shop = new Shop(`shop_${i}`, spawn.X, spawn.Y);
+            this.entityRegistry.create(shop);
+            return shop;
+        });
     }
 
     // public createNPC(): NPC {

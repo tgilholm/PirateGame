@@ -22,16 +22,6 @@
         "TOGGLE_KEY": "X"
     },
     "SHOP": {
-        "SPAWNS": [
-            {
-                "X": 52,
-                "Y": 82
-            },
-            {
-                "X": 127,
-                "Y": 127
-            }
-        ],
         "MARKER": {
             "SIZE": 6,
             "FILL": "#ffd700",

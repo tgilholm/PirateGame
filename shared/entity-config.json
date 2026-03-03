@@ -67,5 +67,19 @@
                 "y": -75
             }
         ]
+    },
+    "SHOP": {
+        "interactRange": 150,
+        "usePrompt": "open shop",
+        "SPAWNS": [
+            {
+                "X": 52,
+                "Y": 82
+            },
+            {
+                "X": 127,
+                "Y": 127
+            }
+        ]
     }
 }

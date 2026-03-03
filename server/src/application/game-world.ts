@@ -29,6 +29,7 @@ export default class GameWorld extends EventEmitter {
      */
     public start() {
         console.log(`[GameWorld] Starting game at ${this.tickRate} TPS`);
+        this.entityFactory.createShops();
         this.lastTime = Date.now();
         this.tickInterval = setInterval(() => this.tick(), 1000 / this.tickRate);
     }

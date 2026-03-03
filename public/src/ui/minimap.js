@@ -38,8 +38,7 @@ export default class Minimap {
     }
 
     /**
-     * Makes the minimap visible and draws the marker at the player's spawn position.
-     * Called once when the local player is ready.
+     * sets minimap to visible and draws marker at players spawn position
      * @param {number} spawnX - Initial world X position of the player.
      * @param {number} spawnY - Initial world Y position of the player.
      * @param {number} mapWidth - pixel width of the game world.
@@ -53,8 +52,7 @@ export default class Minimap {
     }
 
     /**
-     * Clears the canvas and redraws the marker at the player's current position.
-     * Called every frame.
+     * every frame, clears canvas and redraws marker at the players position
      * @param {number} playerX - Current world X position of the player.
      * @param {number} playerY - Current world Y position of the player.
      */
@@ -66,8 +64,7 @@ export default class Minimap {
     }
 
     /**
-     * Draws the circular marker dot at the given world position.
-     * Marker radius, fill, stroke, and line width are read from ui-config.
+     * draws marker, conditions from ui-config
      * @param {number} x - World X position.
      * @param {number} y - World Y position.
      */
@@ -85,12 +82,11 @@ export default class Minimap {
         ctx.stroke();
     }
 
-    //gets shop coords from ui-config and draws to canvas, call after mapWidth/mapHeight are set
-    //mapTileWidth/mapTileHeight are the map dimensions in tiles (not pixels)
-    placeShops(mapTileWidth, mapTileHeight) { //uses tiles not coords
+    //draws shop icons on minimap canvas, called after mapTileWidth/Height are set
+    placeShops(mapTileWidth, mapTileHeight, spawns) {
         this.mapTileWidth = mapTileWidth;
         this.mapTileHeight = mapTileHeight;
-        this.shops = uiConfig.SHOP.SPAWNS;
+        this.shops = spawns;
         this.drawShops();
     }
 

@@ -3,7 +3,8 @@
 
 import CreateUI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
-import Shop from "../objects/shop.js";
+import DrawShops from "../objects/drawShops.js";
+import ShopUI from "../ui/shop-ui.js";
 import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
 import { ClientEvent } from "shared/built/socket-protocol.js";
@@ -67,7 +68,8 @@ export class MainScene extends Phaser.Scene {
         this.gameManager = new GameManager(this.network, this, entityConfig);
         this.uiManager = new UIManager(this, this.gameManager);
         this.inputManager = new InputManager(this);
-        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager);
+        this.shopUI = new ShopUI();
+        this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager, this.shopUI);
 
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
@@ -81,13 +83,15 @@ export class MainScene extends Phaser.Scene {
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.ui = new CreateUI(this);
+        this.shops = new DrawShops(this, entityConfig, this.map.tileWidth);
+        this.gameManager.setShops(this.shops);
         this.gameManager.on('localPlayerReady', (player) => {
             const matrix = player.getWorldTransformMatrix();
             this.ui.minimap.placeMarker(
                 matrix.tx, matrix.ty,
                 this.map.widthInPixels, this.map.heightInPixels
             );
-            this.ui.minimap.placeShops(this.map.width, this.map.height);
+            this.ui.minimap.placeShops(this.map.width, this.map.height, entityConfig.SHOP.SPAWNS);
         });
 
         this.network.emit(ClientEvent.READY, { username: data.username });
