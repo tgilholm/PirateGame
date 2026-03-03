@@ -1,4 +1,11 @@
 {
+    "defaults": {
+        "interactable": {
+            "interactRange": 50,
+            "usePrompt": "Interact",
+            "releasePrompt": "Release"
+        }
+    },
     "player": {
         "maxHealth": 100,
         "runSpeed": 5,
@@ -26,6 +33,7 @@
                 "type": "helm",
                 "usePrompt": "Take the helm",
                 "releasePrompt": "Release the helm",
+                "interactRange": 50,
                 "texture": "helm",
                 "x": -100,
                 "y": 0
@@ -35,6 +43,7 @@
                 "type": "cannon",
                 "usePrompt": "Use cannon",
                 "releasePrompt": "Release cannon",
+                "interactRange": 50,
                 "texture": "cannon",
                 "x": 30,
                 "y": -55
@@ -44,6 +53,7 @@
                 "type": "cannon",
                 "usePrompt": "Use cannon",
                 "releasePrompt": "Release cannon",
+                "interactRange": 50,
                 "texture": "cannon",
                 "x": 30,
                 "y": 55
@@ -53,6 +63,7 @@
                 "type": "ladder",
                 "usePrompt": "Use ladder",
                 "releasePrompt": "",
+                "interactRange": 50,
                 "texture": "ladder",
                 "x": -80,
                 "y": 75
@@ -62,6 +73,7 @@
                 "type": "ladder",
                 "usePrompt": "Use ladder",
                 "releasePrompt": "",
+                "interactRange": 50,
                 "texture": "ladder",
                 "x": -80,
                 "y": -75
@@ -69,8 +81,13 @@
         ]
     },
     "SHOP": {
-        "interactRange": 150,
+        "id": "shop",
+        "type": "shop",
         "usePrompt": "open shop",
+        "releasePrompt": "close shop",
+        "radius": 40,
+        "interactRange": 100,
+        "texture": "shop",
         "SPAWNS": [
             {
                 "X": 52,

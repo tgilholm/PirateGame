@@ -22,6 +22,15 @@
         "TOGGLE_KEY": "X"
     },
     "SHOP": {
+        "RADIUS": 40,
+        "LABEL": {
+            "TEXT": "Shop",
+            "FONT_SIZE": "13px",
+            "FONT_FAMILY": "Consolas",
+            "COLOR": "#f5c542",
+            "STROKE": "#000000",
+            "STROKE_THICKNESS": 3
+        },
         "MARKER": {
             "SIZE": 6,
             "FILL": "#ffd700",

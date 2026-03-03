@@ -2,6 +2,9 @@ import { ServerEvent } from "shared/built/socket-protocol.js";
 import NetworkManager from "./network-manager.js";
 import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
+import entityConfig from 'shared/entity-config.json' with { type: 'json' };
+
+const DEFAULTS = entityConfig.defaults.interactable;
 
 export default class GameManager extends Phaser.Events.EventEmitter {
     /**
@@ -31,11 +34,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
     }
 
+    //called after DrawShops, is constructed in main-scene
+    setShops(drawShops) {
+        this._shopInteractables = drawShops.shops;
+    }
+
     refreshInteractables() {
         this.interactables = [];
         Object.values(this.shipList).forEach(ship => {
             this.interactables.push(...ship.interactables);
-        })
+        });
+        //static interactables for UIManager
+        if (this._shopInteractables) {
+            this.interactables.push(...this._shopInteractables);
+        }
     }
 
     getClosestInteractable(player) {
@@ -79,11 +91,28 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 
         const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
-                this.closestInteractable = closest;
-            }
+        if (closest) {
+            const item = closest.item;
+            const range = item.interactRange ?? DEFAULTS.interactRange;
 
+            if (closest.dist <= range) {
+                const isShop = item.type === 'shop';
+                const isLadder = item.type === 'ladder';
+                const onSameShip = this.localPlayer.parentId != null &&
+                    this.localPlayer.parentId === item.parentId;
+                if (isShop || isLadder || onSameShip) {
+                    // Players aboard a ship cannot interact with shops
+                    if (isShop && this.localPlayer.parentId) {
+                        this.closestInteractable = null;
+                    } else {
+                        this.closestInteractable = closest;
+                    }
+                } else {
+                    this.closestInteractable = null;
+                }
+            } else {
+                this.closestInteractable = null;
+            }
         } else {
             this.closestInteractable = null;
         }

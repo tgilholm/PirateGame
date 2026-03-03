@@ -7,35 +7,42 @@ import NetworkManager from "./network-manager.js";
  */
 export default class InteractionManager {
     /**
-     * 
-     * @param {NetworkManager} network 
-     * @param {GameManager} gameManager 
-     * @param {InputManager} inputManager 
+     * @param {NetworkManager} network
+     * @param {GameManager} gameManager
+     * @param {InputManager} inputManager
+     * @param {import('../ui/shop-ui.js').default} shopUI
      */
-    constructor(network, gameManager, inputManager) {
+    constructor(network, gameManager, inputManager, shopUI) {
         this.network = network;
         this.gameManager = gameManager;
         this.inputManager = inputManager;
+        this.shopUI = shopUI;
 
         // InputManager events
         inputManager.on('interact', () => this.interact());
         inputManager.on('release', () => this.release());
         inputManager.on('fire', () => this.fire());
-
     }
 
 
     interact() {
         const target = this.gameManager.closestInteractable;
 
-
         if (target && target.item) {
-            console.log(target.item.id, target.dist);
-            const closest = target.item
+            const closest = target.item;
+
+            //shop UI client-side
+            if (closest.type === 'shop') {
+                this.shopUI?.open();
+                return;
+            }
+
+            //ship interactables
+            console.log(closest.id, target.dist);
             this.network.sendInteract({
-                targetId: closest.id,        // e.g. "cannon_1"
-                targetType: closest.type,    // e.g. "cannon"
-                parentId: closest.parentId   // e.g. "ship__123"
+                targetId: closest.id,
+                targetType: closest.type,
+                parentId: closest.parentId,
             });
         }
     }

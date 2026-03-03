@@ -1,11 +1,12 @@
 
 import EntityRegistry from "src/engine/entity-registry";
-import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
+import { EntityConfig, PlayerConfig, ShipConfig, ShopConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
 import Shop from "./shop";
 import PhysicsSystem from "src/systems/physics-system";
+import TerrainMap from "src/engine/terrain-map";
 
 
 /**
@@ -16,13 +17,15 @@ export default class EntityFactory {
 
     playerConfig: PlayerConfig;
     shipConfig: ShipConfig;
-
+    shopConfig: ShopConfig;
     constructor(private entityConfig: EntityConfig,
         private entityRegistry: EntityRegistry,
-        private physicsSystem: PhysicsSystem) {
+        private physicsSystem: PhysicsSystem,
+        private terrainMap: TerrainMap) {
 
         this.playerConfig = entityConfig.player;
         this.shipConfig = entityConfig.ship;
+        this.shopConfig = entityConfig.SHOP;
     }
 
     public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
@@ -46,9 +49,9 @@ export default class EntityFactory {
 
     //spawns shops
     public createShops(): Shop[] {
-        const spawns = this.entityConfig.SHOP?.SPAWNS ?? [];
-        return spawns.map((spawn, i) => {
-            const shop = new Shop(`shop_${i}`, spawn.X, spawn.Y);
+        const shopConfig = this.entityConfig.SHOP;
+        return shopConfig.SPAWNS.map((spawn, i) => {
+            const shop = new Shop(shopConfig.id + "_" + i, spawn.X, spawn.Y, shopConfig, this.terrainMap.tileWidth);
             this.entityRegistry.create(shop);
             return shop;
         });

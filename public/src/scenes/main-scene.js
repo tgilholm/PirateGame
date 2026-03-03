@@ -3,7 +3,7 @@
 
 import CreateUI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
-import DrawShops from "../objects/drawShops.js";
+import DrawShops from "../objects/draw-shops.js";
 import ShopUI from "../ui/shop-ui.js";
 import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
@@ -83,7 +83,7 @@ export class MainScene extends Phaser.Scene {
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.ui = new CreateUI(this);
-        this.shops = new DrawShops(this, entityConfig, this.map.tileWidth);
+        this.shops = new DrawShops(this, this.map.tileWidth);
         this.gameManager.setShops(this.shops);
         this.gameManager.on('localPlayerReady', (player) => {
             const matrix = player.getWorldTransformMatrix();

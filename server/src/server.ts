@@ -47,7 +47,7 @@ const matterEngine = Engine.create({
 });
 const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
-const entityFactory = new EntityFactory(entityConfig, registry, physicsSystem);
+const entityFactory = new EntityFactory(entityConfig, registry, physicsSystem, terrainMap);
 
 const engine = new GameEngine({
   physicsSystem,
