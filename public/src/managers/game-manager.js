@@ -87,29 +87,33 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     }
 
     update() {
+        const delta = this.scene.game.loop.delta;
+
+        // Tick all ships every frame
+        Object.values(this.shipList).forEach(ship => {
+            ship.update(null, delta);
+        });
+
+        // Tick all players every frame
+        Object.values(this.playerList).forEach(player => {
+            player.update(delta);
+        });
+
         this.refreshInteractables();
         if (!this.localPlayer) return;
 
-        const player = this.localPlayer;
-
-        const matrix = player.getWorldTransformMatrix();
+        const matrix = this.localPlayer.getWorldTransformMatrix();
 
         //@ts-ignore
         this.scene.cameraTarget.x = matrix.tx;
         //@ts-ignore
         this.scene.cameraTarget.y = matrix.ty;
 
-        Object.values(this.shipList).forEach(ship => {
-            ship.getWorldTransformMatrix();
-        });
-
-
-        const closest = this.getClosestInteractable(player);
+        const closest = this.getClosestInteractable(this.localPlayer);
         if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || player.parentId == closest.item.parentId) {
+            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
                 this.closestInteractable = closest;
             }
-
         } else {
             this.closestInteractable = null;
         }
@@ -117,19 +121,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const inputs = this.input.getInputs(this.scene);
         this.network.sendMove(inputs);
 
-
-        // Draw the gun on the outer circle of the player
         const gun = this.localPlayer.gun;
-        const parentRotation = player.parentContainer?.rotation ?? 0;
+        const parentRotation = this.localPlayer.parentContainer?.rotation ?? 0;
         const radius = 15;
-
-        // Offset by the parent container's rotation
         gun.x = Math.cos(inputs.aimAngle - parentRotation) * radius;
         gun.y = Math.sin(inputs.aimAngle - parentRotation) * radius;
         gun.setRotation(inputs.aimAngle - parentRotation);
-
     }
-
+    
     onSync(data) {
         data.ships?.forEach(shipData => {
             // Only create the ship if not already in the list
@@ -143,11 +142,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 );
             }
 
-            this.shipList[shipData.id].update(shipData, this.scene.game.loop.delta);
+            /** @type {ShipModel} */
+            let ship = this.shipList[shipData.id];
+            ship.syncFromServer(shipData);
         });
 
 
         data.players?.forEach(playerData => {
+            /** @type {PlayerModel} */
             let player = this.playerList[playerData.id]
 
             // Only create the player if not already in the list
@@ -173,11 +175,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 }
                 player.parentId = newParentId;
 
+                // Snap on re-parent
                 player.target.x = playerData.x;
                 player.target.y = playerData.y;
             }
 
-            player.update(playerData, this.scene.game.loop.delta);
+            player.syncFromServer(playerData);
         });
 
 

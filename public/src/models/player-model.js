@@ -39,21 +39,27 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.add(this.gun);
     }
 
-    update(data, delta) {
+
+    syncFromServer(data) {
         if (data.username && this.nameText.text !== data.username) {
             this.nameText.setText(data.username);
         }
+        this.target.x = data.x;
+        this.target.y = data.y;
+        this.isSteering = data.isSteering;
+        this.isUsingCannon = data.isUsingCannon;
+    }
 
+    update(delta) {
         const responseFactor = 0.15;
-        const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667); // Aim for 60fps
+        const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667);
 
-        // Interpolate
         this.x = Phaser.Math.Linear(this.x, this.target.x, lerp);
         this.y = Phaser.Math.Linear(this.y, this.target.y, lerp);
 
         if (this.parentContainer instanceof ShipModel) {
             const bob = this.parentContainer.hullSprite.y;
-            this.y += bob;  // hi bob
+            this.y += bob; // hi bob
         }
 
         const isBusy = this.isSteering || this.isUsingCannon;
@@ -61,13 +67,6 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         // Hide the player's gun and make them slightly transparent when interacting
         this.gun.setVisible(isBusy ? false : true);
         this.setAlpha(isBusy ? 0.6 : 1.0);
-
-        // Interp otherwise
-        this.target.x = data.x;
-        this.target.y = data.y;
-
-        this.isSteering = data.isSteering;
-        this.isUsingCannon = data.isUsingCannon;
     }
 
 
