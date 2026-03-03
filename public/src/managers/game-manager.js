@@ -1,21 +1,26 @@
-import { ServerEvent } from "shared/built/socket-protocol.js";
+import { ClientEvent, ServerEvent } from "shared/built/socket-protocol.js";
 import NetworkManager from "./network-manager.js";
 import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
+import InputManager from "./input-manager.js";
 
 export default class GameManager extends Phaser.Events.EventEmitter {
+
     /**
      * 
-     * @param {NetworkManager} network 
      * @param {Phaser.Scene} scene 
-     * @param {import("shared/entity-config.json")} entityConfig
+     * @param {import("server/src/types.js").EntityConfig} entityConfig 
+     * @param {NetworkManager} network 
+     * @param {InputManager} input =
      */
-    constructor(network, scene, entityConfig) {
+    constructor(scene, entityConfig, network, input) {
         super();
         this.network = network;
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
+        this.input = input;
 
+        /** @type {PlayerModel} */
         this.localPlayer = null;
         this.closestInteractable = null;
         this.playerId = null;
@@ -29,6 +34,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.onSync(data);
         });
         this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
+
+        this.input.on('interact', () => {
+            const target = this.closestInteractable;
+            if (target?.item) {
+                const closest = target.item;
+                this.network.sendInteract({
+                    targetId: closest.id,
+                    targetType: closest.type,
+                    parentId: closest.parentId
+                });
+            }
+        });
+
+        this.input.on('fire', () => this.network.sendFire());
+        this.input.on('release', () => this.network.sendRelease());
     }
 
     refreshInteractables() {
@@ -62,6 +82,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
+    start(username)
+    {
+        this.network.emit(ClientEvent.READY, {username: username});
+    }
+
     update() {
         this.refreshInteractables();
         if (!this.localPlayer) return;
@@ -88,7 +113,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
-
+        const inputs = this.input.getInputs(this.scene);
+        this.network.sendMove(inputs);
+        this.localPlayer.gun.setRotation(inputs.aimAngle);
     }
 
     onSync(data) {
@@ -147,5 +174,4 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
         }
     }
-
 }

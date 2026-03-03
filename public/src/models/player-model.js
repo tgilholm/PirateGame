@@ -35,7 +35,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.bodySprite = scene.add.sprite(x, y, 'player_circle');
         this.add(this.bodySprite);
 
-        this.gun = scene.add.rectangle(0, 0, 5, 15, 0x000000).setOrigin(0, 0.5);
+        this.gun = scene.add.rectangle(5, 0, 15, 5, 0x000000).setOrigin(0, 0.5);
         this.add(this.gun);
     }
 
