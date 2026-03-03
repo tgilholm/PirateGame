@@ -12,7 +12,7 @@ If making changes to the game:
   1. Clone the repository and open in an IDE like VSCode or equivalent.
   2. Run `npm install` to update and install all dependencies.
   3. Execute `npm run build:all` to compile all TypeScript files. This step is necessary to convert TypeScript code to JavaScript that can run in the browser and on the server.
-  4. Make any changes required, push to a separate branch and make a pull request.
+  4. Make any changes required, push to a separate branch and make a pull request. Remember to get your branch up to date with main first using `git rebase`.
 
 ## NPM Scripts
 To execute these, enter `npm run` then the name of the script:
