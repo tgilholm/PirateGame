@@ -29,7 +29,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             color: '#ffffff',
             backgroundColor: '#00000088',
             padding: { x: 6, y: 4 }
-        }).setOrigin(0.5, 1).setDepth(100);
+        }).setOrigin(0.5, 1).setDepth(100).setPosition(0, -25);
         this.add(this.nameText);
 
         this.bodySprite = scene.add.sprite(x, y, 'player_circle');
@@ -53,7 +53,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
         if (this.parentContainer instanceof ShipModel) {
             const bob = this.parentContainer.hullSprite.y;
-            this.y += bob;
+            this.y += bob;  // hi bob
         }
 
         const isBusy = this.isSteering || this.isUsingCannon;
@@ -62,20 +62,9 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.gun.setVisible(isBusy ? false : true);
         this.setAlpha(isBusy ? 0.6 : 1.0);
 
-        // Update name box position
-        const matrix = this.getWorldTransformMatrix();
-        this.nameText.setPosition(matrix.tx, matrix.ty - 25);
-
-        // Hide name if off-screen
-        const cam = this.scene.cameras.main;
-        this.nameText.setVisible(cam.worldView.contains(matrix.tx, matrix.ty));
-
-
         // Interp otherwise
         this.target.x = data.x;
         this.target.y = data.y;
-
-
 
         this.isSteering = data.isSteering;
         this.isUsingCannon = data.isUsingCannon;
