@@ -1,5 +1,7 @@
 /* global Phaser */
 
+import PlayerModel from "../models/player-model.js";
+
 /**
  * InputHandler — owns all keyboard and mouse input setup for the main scene.
  *
@@ -28,21 +30,22 @@ export default class InputManager extends Phaser.Events.EventEmitter {
     /**
      * 
      * @param {Phaser.Scene} scene 
+     * @param {PlayerModel} player
      * @returns 
      */
-    getInputs(scene) {
+    getInputs(scene, player) {
         /** @type {any} */
         const keys = this.moveKeys;
+        const mouseY = scene.input.mousePointer.worldY;
+        const mouseX = scene.input.mousePointer.worldX;
 
-        // Calculate the angle of the player to the mouse pointer
-        // Player is always in the middle of the screen
+        const worldPos = player.getWorldTransformMatrix();
 
-        const centreX = scene.scale.width / 2;
-        const centreY = scene.scale.height / 2;
+        console.log(mouseY, mouseX, player.x, player.y);
 
         const aimAngle = Math.atan2(
-            scene.input.mousePointer.y - centreY,
-            scene.input.mousePointer.x - centreX
+            mouseY - worldPos.ty,
+            mouseX - worldPos.tx
         );
 
         return {

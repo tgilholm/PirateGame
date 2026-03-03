@@ -64,8 +64,8 @@ export default class GameWorld extends EventEmitter {
 
         const newShip = this.entityFactory.createShip(
             `ship_${socketId}`,
-            5000,
-            5000
+            500,
+            500
         )
         this.registry.create(newShip);
 
