@@ -21,6 +21,25 @@
     "DEBUG_MENU": {
         "TOGGLE_KEY": "X"
     },
-    "INTERACTION_PROMPT": {},
-    "SHOP": {}
+    "SHOP": {
+        "SPAWNS": [
+            {
+                "X": a,
+                "Y": 80
+            },
+            {
+                "X": 160,
+                "Y": 150
+            }
+        ],
+        "MARKER": {
+            "SIZE": 6,
+            "FILL": "#ffd700",
+            "STROKE": "#ffffff",
+            "LINE_WIDTH": 1.5
+        },
+        "ITEM_CARDS": {
+                }
+    },
+    "INTERACTION_PROMPT": {}
 }

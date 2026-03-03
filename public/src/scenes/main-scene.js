@@ -1,7 +1,7 @@
 
 /* global Phaser, io */
 
-//import UI from "../ui/create-ui.js";
+import CreateUI from "../ui/create-ui.js";
 import zoom from "../objects/zoom.js";
 import Shop from "../objects/shop.js";
 import NetworkManager from "../managers/network-manager.js";
@@ -80,7 +80,33 @@ export class MainScene extends Phaser.Scene {
         circle.destroy();
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+        this.ui = new CreateUI(this);
+        this.gameManager.on('localPlayerReady', (player) => {
+            const matrix = player.getWorldTransformMatrix();
+            this.ui.minimap.placeMarker(
+                matrix.tx, matrix.ty,
+                this.map.widthInPixels, this.map.heightInPixels
+            );
+            this.ui.minimap.placeShops(this.map.width, this.map.height);
+        });
+
         this.network.emit(ClientEvent.READY, { username: data.username });
+
+        setInterval(() => { //positional logging
+            const player = this.gameManager.localPlayer;
+            if (!player) return;
+
+            const tileSize = this.map.tileWidth;
+            const matrix = player.getWorldTransformMatrix();
+            const tileX = Math.floor(matrix.tx / tileSize);
+            const tileY = Math.floor(matrix.ty / tileSize);
+            console.log(`[Player] tile x: ${tileX}, tile y: ${tileY}`);
+
+            const ship = player.parentId ? this.gameManager.shipList[player.parentId] : null;
+            if (ship) {
+                console.log(`[Ship]   tile x: ${Math.floor(ship.x / tileSize)}, tile y: ${Math.floor(ship.y / tileSize)}`);
+            }
+        }, 1000);
     }
 
 
@@ -92,9 +118,11 @@ export class MainScene extends Phaser.Scene {
         this.uiManager.update();
         this.network.sendMove(this.inputManager.getMovementInputs());
 
-
         // Update minimap marker with current world position
-        //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+        if (this.gameManager.localPlayer) {
+            const matrix = this.gameManager.localPlayer.getWorldTransformMatrix();
+            this.ui.minimap.updateMarker(matrix.tx, matrix.ty);
+        }
     }
 
     setupWorld() {
