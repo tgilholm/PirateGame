@@ -27,34 +27,35 @@ export default class UIManager {
 
             if (isInteracting) {
                 const prompt = item.releasePrompt || "Release";
-                this.showPrompt(`[Q] ${prompt}`);
+                this.showPrompt(`[Q] ${prompt}`, target, isInteracting);
             } else {
-                this.showPrompt(`[E] ${item.usePrompt}`);
+                this.showPrompt(`[E] ${item.usePrompt}`, target, isInteracting);
             }
         } else {
             if (isInteracting) {
-                this.showPrompt(`[Q] Release`);
+                this.showPrompt(`[Q] Release`, target, isInteracting);
             } else {
-                this.hidePrompt();
+                this.hidePrompt(target, isInteracting);
             }
         }
 
-        console.log("Target:", !!target, "Interacting:", isInteracting);
     }
 
-    hidePrompt() {
+    hidePrompt(target, isInteracting) {
         if (this.promptElement.style.display !== 'none') {
             this.promptElement.style.display = 'none';
+            console.log("Prompt hidden — Target:", !!target, "Interacting:", isInteracting);
         }
     }
 
-    showPrompt(promptText) {
+    showPrompt(promptText, target, isInteracting) {
         if (this.promptElement.textContent !== promptText) {
             this.promptElement.textContent = promptText;
         }
 
         if (this.promptElement.style.display !== 'block') {
             this.promptElement.style.display = 'block';
+            console.log("Prompt shown — Target:", !!target, "Interacting:", isInteracting);
         }
     }
 }
