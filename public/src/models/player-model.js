@@ -19,7 +19,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.scene.add.existing(this);
 
         this.id = id;
-        this.target = { x: 0, y: 0 };
+        this.target = { x: 0, y: 0, aimAngle: 0 };
         this.isSteering = false;
         this.isUsingCannon = false;
         this.aimAngle = 0;
@@ -48,8 +48,20 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         }
         this.target.x = data.x;
         this.target.y = data.y;
+        this.target.aimAngle = data.aimAngle;
+
+
         this.isSteering = data.isSteering;
         this.isUsingCannon = data.isUsingCannon;
+    }
+
+    setGunRotation(angle) {
+        const gun = this.gun;
+        const parentRotation = this.parentContainer?.rotation | 0;
+
+        gun.x = Math.cos(angle - parentRotation) * 15;  // radius
+        gun.y = Math.sin(angle - parentRotation) * 15;
+        gun.setRotation(angle - parentRotation);
     }
 
     update(delta) {
@@ -58,6 +70,14 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
         this.x = Phaser.Math.Linear(this.x, this.target.x, lerp);
         this.y = Phaser.Math.Linear(this.y, this.target.y, lerp);
+
+        this.aimAngle = Phaser.Math.Angle.RotateTo(
+            this.aimAngle,
+            this.target.aimAngle,
+            lerp
+        );
+
+        this.setGunRotation(this.aimAngle);
 
         if (this.parentContainer instanceof ShipModel) {
             const bob = this.parentContainer.hullSprite.y;

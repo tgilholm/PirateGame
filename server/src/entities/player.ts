@@ -67,6 +67,7 @@ export default class Player extends Entity {
             ...super.serialise(),
             username: this.username,
             isSteering: this.isSteering,
+            aimAngle: this.aimAngle,
             isUsingCannon: this.isUsingCannon
         }
 

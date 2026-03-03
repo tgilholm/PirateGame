@@ -102,13 +102,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         Object.values(this.playerList).forEach(/** @type {PlayerModel}*/player => {
             player.update(delta);
 
-            const gun = this.localPlayer.gun;
-            const parentRotation = player.parentContainer?.rotation ?? 0;
-            const radius = 15;
-            gun.x = Math.cos(inputs.aimAngle - parentRotation) * radius;
-            gun.y = Math.sin(inputs.aimAngle - parentRotation) * radius;
-            gun.setRotation(inputs.aimAngle - parentRotation);
-
+            if (player === this.localPlayer) {
+                player.setGunRotation(inputs.aimAngle); // snap if local
+            }
         });
 
         this.refreshInteractables();
