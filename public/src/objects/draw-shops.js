@@ -2,17 +2,18 @@
 //calculated tile to pixel conversion and draws shops in correctly as directed by entities-config.json
 
 import uiConfig from '../ui/ui-config.json' with { type: 'json' };
-import entityConfig from 'shared/entity-config.json' with { type: 'json' };
 
 export default class DrawShops {
 
     /**
      * @param {Phaser.Scene} scene
-     * @param {number} tileWidth 
+     * @param {number} tileWidth
+     * @param {import("shared/entity-config.json")} entityConfig
      */
-    constructor(scene, tileWidth) {
+    constructor(scene, tileWidth, entityConfig) {
         this.scene = scene;
         this.tileWidth = tileWidth;
+        this.entityConfig = entityConfig;
 
         this.placeShops();
         this.draw();
@@ -20,8 +21,8 @@ export default class DrawShops {
 
     //uses entity-config to spawn shops in correct locations, with correct properties
     placeShops() {
-        const shopConfig    = entityConfig.SHOP;
-        const spawns        = shopConfig.SPAWNS;
+        const shopConfig    = this.entityConfig.shop;
+        const spawns        = shopConfig.spawns;
         const id            = shopConfig.id;
         const type          = shopConfig.type;
         const interactRange = shopConfig.interactRange;
@@ -40,7 +41,7 @@ export default class DrawShops {
                 type,
                 x,
                 y,
-                radius: uiConfig.SHOP.RADIUS,
+                radius: uiConfig.shop.RADIUS,
                 interactRange,
                 usePrompt,
                 releasePrompt,
@@ -70,7 +71,7 @@ export default class DrawShops {
             gfx.strokeCircle(shop.x, shop.y, shop.radius);
 
             //floating label above the shop circle
-            const label = uiConfig.SHOP.LABEL;
+            const label = uiConfig.shop.LABEL;
             this.scene.add.text(
                 shop.x,
                 shop.y - shop.radius - 6,

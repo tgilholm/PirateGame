@@ -21,7 +21,7 @@
     "DEBUG_MENU": {
         "TOGGLE_KEY": "X"
     },
-    "SHOP": {
+    "shop": {
         "RADIUS": 40,
         "LABEL": {
             "TEXT": "Shop",

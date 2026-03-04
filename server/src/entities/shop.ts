@@ -10,9 +10,9 @@ export default class Shop extends Entity {
 
     /**
      * @param id unique id, e.g. (shop_0, shop_1, ...)
-     * @param tileX tile column - (entity-config SHOP.SPAWNS[n].X)
-     * @param tileY tile row - (entity-config SHOP.SPAWNS[n].Y)
-     * @param config entity-config SHOP section
+     * @param tileX tile column - (entity-config shop.spawns[n].X)
+     * @param tileY tile row - (entity-config shop.spawns[n].Y)
+     * @param config entity-config shop section
      * @param tileWidth pixels per tile
      */
     constructor(id: string, tileX: number, tileY: number, config: ShopConfig, tileWidth: number) {

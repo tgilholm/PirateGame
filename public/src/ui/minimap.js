@@ -94,7 +94,7 @@ export default class Minimap {
     drawShops() {
         if (!this.shops) return;
         const { canvas, ctx } = this;
-        const { SIZE, FILL, STROKE, LINE_WIDTH } = uiConfig.SHOP.MARKER;
+        const { SIZE, FILL, STROKE, LINE_WIDTH } = uiConfig.shop.MARKER;
         const half = SIZE / 2;
 
         for (const shop of this.shops) {

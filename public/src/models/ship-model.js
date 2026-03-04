@@ -17,8 +17,9 @@ export default class ShipModel extends Phaser.GameObjects.Container {
      * @param {number} x
      * @param {number} y
      * @param {ShipConfig} config
+     * @param {import('./interactable.js').InteractableDefaults} [interactableDefaults]
      */
-    constructor(scene, id, x, y, config) {
+    constructor(scene, id, x, y, config, interactableDefaults = {}) {
         super(scene, x, y);
         this.dimensions = config.dimensions;
         this.interactables = [];
@@ -32,7 +33,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
 
         if (config.interactables) {
             config.interactables.forEach(item => {
-                const model = new Interactable(this.scene, this, item);
+                const model = new Interactable(this.scene, this, item, interactableDefaults);
                 this.interactables.push(model);
             })
         }

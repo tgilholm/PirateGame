@@ -34,7 +34,7 @@ export default class ShopUI {
 
         //title
         const title = DomFactory.createElement("h2", ["shop-title"]);
-        title.textContent = "SHOP";
+        title.textContent = "shop";
         this.menuEl.appendChild(title);
 
         //6-item grid

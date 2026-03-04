@@ -1,17 +1,21 @@
-import entityConfig from 'shared/entity-config.json' with { type: 'json' };
-
-const DEFAULTS = entityConfig.defaults.interactable;
+/** @typedef {{ interactRange?: number, usePrompt?: string, releasePrompt?: string }} InteractableDefaults */
 
 export default class Interactable extends Phaser.GameObjects.Sprite {
-    constructor(scene, parent, config) {
+    /**
+     * @param {Phaser.Scene} scene
+     * @param {*} parent
+     * @param {*} config
+     * @param {InteractableDefaults} defaults
+     */
+    constructor(scene, parent, config, defaults = {}) {
         super(scene, config.x, config.y, config.texture);
 
         this.id = config.id;    // default value
         this.type = config.type;
         this.startY = config.y;
-        this.usePrompt = config.usePrompt ?? DEFAULTS.usePrompt;
-        this.releasePrompt = config.releasePrompt ?? DEFAULTS.releasePrompt;
-        this.interactRange = config.interactRange ?? DEFAULTS.interactRange;
+        this.usePrompt = config.usePrompt ?? defaults.usePrompt;
+        this.releasePrompt = config.releasePrompt ?? defaults.releasePrompt;
+        this.interactRange = config.interactRange ?? defaults.interactRange;
 
         scene.add.existing(this);
 

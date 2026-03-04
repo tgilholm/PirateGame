@@ -2,10 +2,6 @@ import { ServerEvent } from "shared/built/socket-protocol.js";
 import NetworkManager from "./network-manager.js";
 import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
-import entityConfig from 'shared/entity-config.json' with { type: 'json' };
-
-const DEFAULTS = entityConfig.defaults.interactable;
-
 export default class GameManager extends Phaser.Events.EventEmitter {
     /**
      * 
@@ -18,6 +14,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.network = network;
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
+        this.interactableDefaults = entityConfig.defaults?.interactable ?? {};
 
         this.localPlayer = null;
         this.closestInteractable = null;
@@ -93,7 +90,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const closest = this.getClosestInteractable(this.localPlayer);
         if (closest) {
             const item = closest.item;
-            const range = item.interactRange ?? DEFAULTS.interactRange;
+            const range = item.interactRange ?? this.interactableDefaults.interactRange;
 
             if (closest.dist <= range) {
                 const isShop = item.type === 'shop';
@@ -129,7 +126,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     shipData.id,
                     shipData.x,
                     shipData.y,
-                    this.shipConfig
+                    this.shipConfig,
+                    this.interactableDefaults
                 );
             }
 

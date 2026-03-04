@@ -25,7 +25,7 @@ export default class EntityFactory {
 
         this.playerConfig = entityConfig.player;
         this.shipConfig = entityConfig.ship;
-        this.shopConfig = entityConfig.SHOP;
+        this.shopConfig = entityConfig.shop;
     }
 
     public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
@@ -49,8 +49,8 @@ export default class EntityFactory {
 
     //spawns shops
     public createShops(): Shop[] {
-        const shopConfig = this.entityConfig.SHOP;
-        return shopConfig.SPAWNS.map((spawn, i) => {
+        const shopConfig = this.entityConfig.shop;
+        return shopConfig.spawns.map((spawn, i) => {
             const shop = new Shop(shopConfig.id + "_" + i, spawn.X, spawn.Y, shopConfig, this.terrainMap.tileWidth);
             this.entityRegistry.create(shop);
             return shop;
