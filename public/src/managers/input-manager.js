@@ -7,8 +7,6 @@
  * helpers so the rest of the codebase never needs to touch the Phaser
  * keyboard API directly.
  *
- * Note: the debug-menu toggle key (X) is intentionally left with debug-menu /
- * UI, since it is scoped to that subsystem and registered there.
  */
 export default class InputManager extends Phaser.Events.EventEmitter {
     /**
@@ -23,6 +21,7 @@ export default class InputManager extends Phaser.Events.EventEmitter {
         scene.input.keyboard.on('keydown-E', () => this.emit('interact'));
         scene.input.keyboard.on('keydown-Q', () => this.emit('release'));
         scene.input.keyboard.on('keydown-SPACE', () => this.emit('fire'));
+        scene.input.keyboard.on('keydown-X', () => this.emit('toggleDebugMenu'));
     }
 
     getMovementInputs() {

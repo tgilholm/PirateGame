@@ -14,7 +14,7 @@
          //minimap
          this.minimap = new Minimap(document.getElementById("minimap-container"));
 
-         //debug menu — builds its own DOM, wires X key and stats button
+         //debug menu — builds its own DOM
 //         this.debug-menu = new debug-menu(scene);
 //         this.debug-menu.init();
 
