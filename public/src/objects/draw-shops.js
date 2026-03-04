@@ -41,7 +41,7 @@ export default class DrawShops {
                 type,
                 x,
                 y,
-                radius: uiConfig.shop.RADIUS,
+                radius: uiConfig.Shop.Radius,
                 interactRange,
                 usePrompt,
                 releasePrompt,
@@ -71,17 +71,17 @@ export default class DrawShops {
             gfx.strokeCircle(shop.x, shop.y, shop.radius);
 
             //floating label above the shop circle
-            const label = uiConfig.shop.LABEL;
+            const label = uiConfig.Shop.Label;
             this.scene.add.text(
                 shop.x,
                 shop.y - shop.radius - 6,
-                label.TEXT,
+                label.Text,
                 {
-                    fontSize:        label.FONT_SIZE,
-                    fontFamily:      label.FONT_FAMILY,
-                    color:           label.COLOR,
-                    stroke:          label.STROKE,
-                    strokeThickness: label.STROKE_THICKNESS,
+                    fontSize:        label.FontSize,
+                    fontFamily:      label.FontFamily,
+                    color:           label.Color,
+                    stroke:          label.Stroke,
+                    strokeThickness: label.StrokeThickness,
                 }
             ).setOrigin(0.5, 1).setDepth(6);
         });

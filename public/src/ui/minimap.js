@@ -23,8 +23,8 @@ export default class Minimap {
      * @param {number} [size]
      */
     createMinimap(
-        imgSrc = uiConfig.MINIMAP.IMG_SRC,
-        size = uiConfig.MINIMAP.SIZE
+        imgSrc = uiConfig.Minimap.ImgSrc,
+        size = uiConfig.Minimap.Size
     ) {
         this.container.style.width = size + "px";
         this.container.style.height = size + "px";
@@ -74,11 +74,11 @@ export default class Minimap {
         const markerY = (y / this.mapHeight) * canvas.height;
 
         ctx.beginPath();
-        ctx.arc(markerX, markerY, uiConfig.MINIMAP.MARKER.RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = uiConfig.MINIMAP.MARKER.FILL;
+        ctx.arc(markerX, markerY, uiConfig.Minimap.Marker.Radius, 0, Math.PI * 2);
+        ctx.fillStyle = uiConfig.Minimap.Marker.Fill;
         ctx.fill();
-        ctx.strokeStyle = uiConfig.MINIMAP.MARKER.STROKE;
-        ctx.lineWidth = uiConfig.MINIMAP.MARKER.LINE_WIDTH;
+        ctx.strokeStyle = uiConfig.Minimap.Marker.Stroke;
+        ctx.lineWidth = uiConfig.Minimap.Marker.LineWidth;
         ctx.stroke();
     }
 
@@ -94,19 +94,19 @@ export default class Minimap {
     drawShops() {
         if (!this.shops) return;
         const { canvas, ctx } = this;
-        const { SIZE, FILL, STROKE, LINE_WIDTH } = uiConfig.shop.MARKER;
-        const half = SIZE / 2;
+        const { Size, Fill, Stroke, LineWidth } = uiConfig.Shop.Marker;
+        const half = Size / 2;
 
         for (const shop of this.shops) {
             const sx = (shop.X / this.mapTileWidth) * canvas.width;
             const sy = (shop.Y / this.mapTileHeight) * canvas.height;
 
             ctx.beginPath();
-            ctx.rect(sx - half, sy - half, SIZE, SIZE);
-            ctx.fillStyle = FILL;
+            ctx.rect(sx - half, sy - half, Size, Size);
+            ctx.fillStyle = Fill;
             ctx.fill();
-            ctx.strokeStyle = STROKE;
-            ctx.lineWidth = LINE_WIDTH;
+            ctx.strokeStyle = Stroke;
+            ctx.lineWidth = LineWidth;
             ctx.stroke();
         }
     }
