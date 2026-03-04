@@ -74,7 +74,6 @@ export class MainScene extends Phaser.Scene {
         this.gameManager.start(data.username);
     }
 
-
     /**
      * Updates dynamic content such as ships, players, etc
      */
