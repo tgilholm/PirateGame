@@ -80,7 +80,7 @@
             }
         ]
     },
-    "SHOP": {
+    "shop": {
         "id": "shop",
         "type": "shop",
         "usePrompt": "open shop",
@@ -88,7 +88,7 @@
         "radius": 40,
         "interactRange": 100,
         "texture": "shop",
-        "SPAWNS": [
+        "spawns": [
             {
                 "X": 52,
                 "Y": 82
