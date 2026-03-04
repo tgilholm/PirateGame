@@ -7,11 +7,11 @@ import InputManager from "./input-manager.js";
 export default class GameManager extends Phaser.Events.EventEmitter {
 
     /**
-     * 
-     * @param {Phaser.Scene} scene 
-     * @param {import("server/src/types.js").EntityConfig} entityConfig 
-     * @param {NetworkManager} network 
-     * @param {InputManager} input =
+     * Abstracts game state from the phaser scene
+     * @param {Phaser.Scene} scene the Phaser scene to control
+     * @param {import("../../../shared/browser/entity-config.json")} entityConfig
+     * @param {NetworkManager} network abstracts io events
+     * @param {InputManager} input abstracts key inputs
      */
     constructor(scene, entityConfig, network, input) {
         super();
@@ -30,6 +30,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.playerList = {};
 
+        this.startListeners();
+    }
+
+    /**
+     *  Sets up the NetworkManager listeners to respond to updates from
+     * the server and routes input events from the InputManager
+     */
+    startListeners() {
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
             this.onSync(data);
@@ -52,6 +60,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.input.on('release', () => this.network.sendRelease());
     }
 
+    /**
+     * Helper method to add all existing interactables to the internal list
+     */
     refreshInteractables() {
         this.interactables = [];
         Object.values(this.shipList).forEach(ship => {
@@ -59,6 +70,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         })
     }
 
+    /**
+     * Helper method to find the closest interactable object to the player,
+     * using the world coordinates of both
+     * @param {PlayerModel} player 
+     * @returns {Object} the closest interactable
+     */
     getClosestInteractable(player) {
         let closest = null;
         let nearestDist = Infinity;
@@ -83,19 +100,44 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
+    /**
+     * Sends the READY event to the server, indicating the client has 
+     * fully loaded in and is ready to receive the INIT_GAME packet. This step
+     * prevents the client from missing the setup data.
+     * @param {string} username 
+     */
     start(username) {
         this.network.emit(ClientEvent.READY, { username: username });
     }
 
+    /**
+     * Refreshes all client-side objects.
+     */
     update() {
         if (!this.localPlayer) return;  // dont do anything until the player has joined
 
         const delta = this.scene.game.loop.delta;
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
+        const matrix = this.localPlayer.getWorldTransformMatrix();
+
         this.network.sendMove(inputs);
+        this.refreshInteractables();
 
-        
+        // Move the invisible camera target to the local player's current position
+        //@ts-ignore
+        this.scene.cameraTarget.x = matrix.tx;
+        //@ts-ignore
+        this.scene.cameraTarget.y = matrix.ty;
 
+        // Ladders are accessible both off and on ships
+        const closest = this.getClosestInteractable(this.localPlayer);
+        if (closest && closest.dist < 50) {
+            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
+                this.closestInteractable = closest;
+            }
+        } else {
+            this.closestInteractable = null;
+        }
 
         // Tick all ships every frame
         Object.values(this.shipList).forEach(ship => {
@@ -110,28 +152,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 player.setGunRotation(inputs.aimAngle); // snap if local
             }
         });
-
-        this.refreshInteractables();
-
-        const matrix = this.localPlayer.getWorldTransformMatrix();
-
-        //@ts-ignore
-        this.scene.cameraTarget.x = matrix.tx;
-        //@ts-ignore
-        this.scene.cameraTarget.y = matrix.ty;
-
-        const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
-                this.closestInteractable = closest;
-            }
-        } else {
-            this.closestInteractable = null;
-        }
-
-
     }
 
+
+    /**
+     * Updates the client-side model of the game from the data provided
+     * from the server
+     * @param {Object} data the data received from the server
+     */
     onSync(data) {
         data.ships?.forEach(shipData => {
             // Only create the ship if not already in the list
@@ -166,13 +194,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.playerList[playerData.id] = player;
             }
 
+            /*
+            If the player has just entered or left a ship, add/remove them to/from
+            that ship's Phaser container, and snap their position immediately instead
+            of interpolating
+            */
             if (player.parentId !== playerData.parentId) {
                 const newParentId = playerData.parentId;
 
                 if (newParentId && this.shipList[newParentId]) {
+                    // Add to the ship
                     this.shipList[newParentId].add(player);
                     player.setPosition(playerData.x, playerData.y);
                 } else {
+                    // Add back to the world
                     this.scene.add.existing(player);
                     player.setPosition(playerData.x, playerData.y);
                 }
@@ -186,7 +221,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             player.syncFromServer(playerData);
         });
 
-
+        // Finds the current player from the list of incoming ones
         if (!this.localPlayer && this.playerId) {
             const mine = this.playerList[this.playerId];
             if (mine) {
