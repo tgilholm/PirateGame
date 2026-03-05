@@ -38,6 +38,8 @@ export default class UIManager {
                 this.hidePrompt();
             }
         }
+
+        this.updatePlayersPanelDom(this.gameManager.playerList);
     }
 
     hidePrompt() {
@@ -55,13 +57,17 @@ export default class UIManager {
             this.promptElement.style.display = 'block';
         }
     }
+
+
     //updates and sorts player list
-    updatePlayersPanelDom(playerMap) {
+    updatePlayersPanelDom(playerList) {
         const panel = document.getElementById("players-panel");
         const list = document.getElementById("players-list");
+
         if (!panel || !list) return;
+
         panel.style.display = "block";
-        const players = Object.values(playerMap);
+        const players = Object.values(playerList);
         players.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
         const visible = players.slice(0, 10);
         list.innerHTML = visible

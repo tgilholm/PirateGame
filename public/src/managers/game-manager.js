@@ -219,10 +219,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
 
             player.syncFromServer(playerData);
-
-            //need for playerlist ui
-            player.username = playerData.username;
-
         });
 
         // Finds the current player from the list of incoming ones
@@ -233,7 +229,5 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.emit('localPlayerReady', this.localPlayer);
             }
         }
-        //invokes update method for playerlist in UI manager
-        this.updatePlayersPanelDom(this.playerList);
     }
 }

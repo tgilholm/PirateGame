@@ -24,6 +24,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.isUsingCannon = false;
         this.aimAngle = 0;
         this.parentId = null;
+        this.username = null;
 
         // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
@@ -42,8 +43,11 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
 
     syncFromServer(data) {
+
+
         if (data.username && this.nameText.text !== data.username) {
             this.nameText.setText(data.username);
+            this.username = data.username;
         }
         this.target.x = data.x;
         this.target.y = data.y;
