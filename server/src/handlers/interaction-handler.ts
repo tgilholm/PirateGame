@@ -1,6 +1,7 @@
 import InteractableEntity from "src/entities/interactable-entity";
 import Player from "src/entities/player";
 import Ship from "src/entities/ship";
+import Shop from "src/entities/shop";
 
 export default class InteractionHandler {
 
@@ -53,20 +54,11 @@ export default class InteractionHandler {
         }
     }
 
-    handleRelease(player: Player, ship: Ship | null) {
-        if (player.isSteering) {
-            if (ship) {
-                if (ship.pilot !== player) return;
+    handleShopInteraction(player: Player, shop: InteractableEntity) {
+        if (shop.useType !== "shop") return;
 
-                ship.pilot = null;
-                player.isSteering = false;
-            }
-        }
+            //launch shop
 
-        if (player.isUsingCannon) {
-            player.isUsingCannon = false;
-        }
+
     }
-
-
 }
