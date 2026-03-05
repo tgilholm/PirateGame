@@ -6,17 +6,29 @@ import Player from "../entities/player";
 import EntityFactory from "../entities/entity-factory";
 import Ship from "../entities/ship";
 import { EventEmitter } from "events";
+import { CONFIG } from "src/config";
 
 export enum WorldEvent {
     GAME_STATE = "GAME_STATE"
 }
 
 
+/**
+ * The GameWorld class abstracts the specifics of each game from the server. It emits
+ * events listened to by the SocketService to deliver game state to each player.
+ */
 export default class GameWorld extends EventEmitter {
-    private tickRate = 20; // 20 Ticks Per Second (50ms per tick)
+    private tickRate = CONFIG.TICK_RATE;
     private tickInterval?: NodeJS.Timeout;
     private lastTime: number = 0;
 
+    /**
+     * Creates a game world with the provided dependencies
+     * @param registry all the entities in the game
+     * @param entityFactory to create new entities
+     * @param engine to update each system on a tick
+     * @param controller to route player events to the right place
+     */
     constructor(
         private registry: EntityRegistry,
         private entityFactory: EntityFactory,
@@ -25,7 +37,7 @@ export default class GameWorld extends EventEmitter {
     ) { super(); }
 
     /**
-     * Boot up the world loop
+     * Starts the world at the specified tickrate
      */
     public start() {
         console.log(`[GameWorld] Starting game at ${this.tickRate} TPS`);
@@ -33,6 +45,9 @@ export default class GameWorld extends EventEmitter {
         this.tickInterval = setInterval(() => this.tick(), 1000 / this.tickRate);
     }
 
+    /**
+     * Stops the game
+     */
     public stop() {
         if (this.tickInterval) clearInterval(this.tickInterval);
         console.log(`[GameWorld] Game stopped`);
@@ -60,8 +75,8 @@ export default class GameWorld extends EventEmitter {
      * Called by SocketService when a player says they are READY
      */
     public addPlayer(socketId: string, username: string) {
+        
         // Spawn the player on their own ship
-
         const newShip = this.entityFactory.createShip(
             `ship_${socketId}`,
             500,

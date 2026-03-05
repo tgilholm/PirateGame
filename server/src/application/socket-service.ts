@@ -7,7 +7,7 @@ import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "@shared/sock
 import GameWorld, { WorldEvent } from "./game-world";
 
 
-
+// Defines the allows movement states
 const MoveSchema = z.object({
     up: z.boolean(),
     down: z.boolean(),
@@ -16,12 +16,14 @@ const MoveSchema = z.object({
     aimAngle: z.number()
 });
 
+// Defines the allowed interaction data
 const InteractSchema = z.object({
     targetId: z.string(),
     targetType: z.string(),
     parentId: z.string().nullable().optional()
 });
 
+// Uses zod to require data/no data for each action type
 const ActionSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal(ActionType.MOVE), data: MoveSchema }).strict(),
     z.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) }).strict(),
@@ -32,9 +34,17 @@ const ActionSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal(ActionType.RELEASE) }).strict()
 ])
 
+/**
+ * Abstracts socket-io events from the server. Exists in a pub/sub
+ * relationship with a GameWorld to dispatch actions to it and receive updates
+ * from it
+ */
 export default class SocketService {
     constructor(private io: Server, private world: GameWorld) { }
 
+    /**
+     * Starts the listeners
+     */
     public initialise() {
 
         this.world.on(WorldEvent.GAME_STATE, (data) => {
@@ -68,6 +78,5 @@ export default class SocketService {
                 this.world.removePlayer(socket.id);
             })
         });
-
     }
 }
