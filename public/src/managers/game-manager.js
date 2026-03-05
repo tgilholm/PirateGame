@@ -152,8 +152,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 player.setGunRotation(inputs.aimAngle); // snap if local
             }
         });
-    }
 
+    }
 
     /**
      * Updates the client-side model of the game from the data provided
