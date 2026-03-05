@@ -24,6 +24,9 @@ jobs:
             npm run build:all
             
             # restart/start pm2
-            pm2 restart poopdeck-server --node-args="-r tsconfig-paths/register" || \
-            pm2 start server/built/server.js --name "poopdeck-server" --node-args="-r tsconfig-paths/register"
+            pm2 restart poopdeck-server || \
+            pm2 start server/built/server.js \
+            --name "poopdeck-server" \
+            --node-args="-r tsconfig-paths/register" \
+            --cwd /home/pirategame
             pm2 save
