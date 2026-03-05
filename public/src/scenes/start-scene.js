@@ -9,6 +9,9 @@ export class StartScene extends Phaser.Scene {
     }
 
 
+    /**
+     * Preload all the assets for the game before the player presses "join".
+     */
     preload() {
         this.load.image('background', 'assets/water.png');
         this.load.image('title', 'assets/title.png');
@@ -19,11 +22,15 @@ export class StartScene extends Phaser.Scene {
         this.load.image('ladder', '/assets/ladder.png')
         this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
 
+        // Resize the game if the window changes size
         window.addEventListener('resize', () => {
             this.scale.resize(window.innerWidth, window.innerHeight);
         });
     }
 
+    /**
+     * Creates the moving background and sets up a listener on the input form
+     */
     create() {
         // width & height are given in game config
         const centerX = this.scale.width / 2;
@@ -56,7 +63,6 @@ export class StartScene extends Phaser.Scene {
         });
 
         // Get the username from the textinput
-
         let startBtn = document.getElementById('start-btn');
         startBtn.addEventListener('click', () => {
             let inputText = document.getElementById('input-text')
@@ -73,9 +79,11 @@ export class StartScene extends Phaser.Scene {
     }
 
 
+    /**
+     * Updates the scrolling background
+     */
     update() {
-        // Vertically scroll the background image
-
+        // Vertically scroll
         if (this.background) {
             this.background.tilePositionY -= 6;
         }

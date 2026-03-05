@@ -29,10 +29,9 @@ export class MainScene extends Phaser.Scene {
             this.scale.resize(window.innerWidth, window.innerHeight);
         });
     }
-    
+
     /**
-     * Executed once at runtime- set up all game objects here, such
-     * as setting up user input and socket listeners.
+     * Executed once at runtime- create all dependencies here.
      */
     create(data) {
         this.setupWorld();
@@ -48,7 +47,7 @@ export class MainScene extends Phaser.Scene {
         );
         this.uiManager = new UIManager(this, this.gameManager);
 
-
+        // Invisible sprite ignoring player on/off ship state, always follows thi
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
 
@@ -59,14 +58,13 @@ export class MainScene extends Phaser.Scene {
         circle.generateTexture('player_circle', 30, 30);
         circle.destroy();
 
+        // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        
-
         this.gameManager.start(data.username);
     }
 
     /**
-     * Updates dynamic content such as ships, players, etc
+     * The update loop of the game. Updates all dependent classes 
      */
     update() {
         this.gameManager.update();
@@ -77,6 +75,9 @@ export class MainScene extends Phaser.Scene {
         //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
     }
 
+    /**
+     * Generates the tilemap for this world from the provided tilesheet
+     */
     setupWorld() {
         this.map = this.make.tilemap({ key: "map" });
         const tileset = this.map.addTilesetImage("terrain-tilesheet", "tiles");
@@ -84,10 +85,5 @@ export class MainScene extends Phaser.Scene {
         this.map.createLayer("sea", tileset, 0, 0);
         this.map.createLayer("shallows", tileset, 0, 0);
         this.map.createLayer("islands", tileset, 0, 0);
-        
-        if (tileset && tileset.image) {
-            tileset.image.setFilter(Phaser.Textures.FilterMode.NEAREST);
-        }
-
     }
 }
