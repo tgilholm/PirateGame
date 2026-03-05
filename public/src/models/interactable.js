@@ -1,4 +1,4 @@
-import ShipModel from "./ship-model";
+import ShipModel from "./ship-model.js";
 
 /**
  * Client side interactable entity. Contains prompts for user interaction.

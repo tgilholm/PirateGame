@@ -13,7 +13,12 @@ export class StartScene extends Phaser.Scene {
         this.load.image('background', 'assets/water.png');
         this.load.image('title', 'assets/title.png');
         this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
-    
+        this.load.image("tiles", "/assets/terrain-tilesheet.png");
+        this.load.image('cannon', '/assets/cannon.png');
+        this.load.image('helm', '/assets/helm.png')
+        this.load.image('ladder', '/assets/ladder.png')
+        this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
+
         window.addEventListener('resize', () => {
             this.scale.resize(window.innerWidth, window.innerHeight);
         });

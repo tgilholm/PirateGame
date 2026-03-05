@@ -1,12 +1,13 @@
 import { StartScene } from "./start-scene.js";
 import { MainScene } from "./main-scene.js";
 
+// Replace the div with the actual game canvas
 const parent = document.getElementById('game-container');
 
 // Set up game 
 const config = {
     type: Phaser.AUTO,
-    width: window.innerWidth,
+    width: window.innerWidth,   // doesn't account for resize yet
     height: window.innerHeight,
     roundPixels: false,
     backgroundColor: '#2d80c9',
@@ -22,6 +23,8 @@ const config = {
     },
 };
 
+// Get any files from the shared directory
 const entityConfig = await fetch('/shared/entity-config.json').then(r => r.json());
+// @ts-ignore
 window.entityConfig = entityConfig;
 const game = new Phaser.Game(config);

@@ -10,6 +10,11 @@ import InputManager from "../managers/input-manager.js";
 const socket = globalThis.io();
 
 
+/**
+ * The main scene of the Phaser game. This class should act as the "orchestrator"
+ * of the client-side manager classes, by delegating responsibility into separate classes
+ * and updating them in the update() loop.
+ */
 export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
@@ -19,26 +24,12 @@ export class MainScene extends Phaser.Scene {
         this.debugGraphics = null;
         this.cameraTarget = null;
 
-
-
         // Resize canvas with window
         window.addEventListener('resize', () => {
             this.scale.resize(window.innerWidth, window.innerHeight);
         });
     }
-
-
-    /**
-     * Loads static assets from the filesystem into memory.
-     */
-    preload() {
-        this.load.image("tiles", "/assets/terrain-tilesheet.png");
-        this.load.image('cannon', '/assets/cannon.png');
-        this.load.image('helm', '/assets/helm.png')
-        this.load.image('ladder', '/assets/ladder.png')
-        this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
-    }
-
+    
     /**
      * Executed once at runtime- set up all game objects here, such
      * as setting up user input and socket listeners.

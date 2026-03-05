@@ -39,8 +39,6 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 
         const worldPos = player.getWorldTransformMatrix();  // Absolute coords
 
-        console.log(mouseY, mouseX, player.x, player.y);
-
         const aimAngle = Math.atan2(    // Angle from player to mouse
             mouseY - worldPos.ty,
             mouseX - worldPos.tx
