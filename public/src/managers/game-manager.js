@@ -4,6 +4,10 @@ import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import InputManager from "./input-manager.js";
 
+/**
+ * Client side state manager. Keeps track of players in game, handles
+ * events for the current player and updates all entities.
+ */
 export default class GameManager extends Phaser.Events.EventEmitter {
 
     /**

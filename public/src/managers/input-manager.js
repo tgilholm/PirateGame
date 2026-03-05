@@ -9,12 +9,10 @@ import PlayerModel from "../models/player-model.js";
  * helpers so the rest of the codebase never needs to touch the Phaser
  * keyboard API directly.
  *
- * Note: the debug-menu toggle key (X) is intentionally left with DebugMenu /
- * UI, since it is scoped to that subsystem and registered there.
  */
 export default class InputManager extends Phaser.Events.EventEmitter {
     /**
-     * 
+     * Builds an InputManager and starts the keyboard listeners
      * @param {Phaser.Scene} scene 
      */
     constructor(scene) {
@@ -28,10 +26,10 @@ export default class InputManager extends Phaser.Events.EventEmitter {
     }
 
     /**
-     * 
+     * Gets the current position of the mouse and keyboard inputs
      * @param {Phaser.Scene} scene 
      * @param {PlayerModel} player
-     * @returns 
+     * @returns the player inputs
      */
     getInputs(scene, player) {
         /** @type {any} */
@@ -39,11 +37,11 @@ export default class InputManager extends Phaser.Events.EventEmitter {
         const mouseY = scene.input.mousePointer.worldY;
         const mouseX = scene.input.mousePointer.worldX;
 
-        const worldPos = player.getWorldTransformMatrix();
+        const worldPos = player.getWorldTransformMatrix();  // Absolute coords
 
         console.log(mouseY, mouseX, player.x, player.y);
 
-        const aimAngle = Math.atan2(
+        const aimAngle = Math.atan2(    // Angle from player to mouse
             mouseY - worldPos.ty,
             mouseX - worldPos.tx
         );
@@ -56,6 +54,4 @@ export default class InputManager extends Phaser.Events.EventEmitter {
             aimAngle: aimAngle
         }
     }
-
-
 }
