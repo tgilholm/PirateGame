@@ -55,4 +55,17 @@ export default class UIManager {
             this.promptElement.style.display = 'block';
         }
     }
+    //updates and sorts player list
+    updatePlayersPanelDom(playerMap) {
+        const panel = document.getElementById("players-panel");
+        const list = document.getElementById("players-list");
+        if (!panel || !list) return;
+        panel.style.display = "block";
+        const players = Object.values(playerMap);
+        players.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
+        const visible = players.slice(0, 10);
+        list.innerHTML = visible
+            .map((p, i) => `<li>${i + 1}. ${p.username || "Anonymous"}</li>`)
+            .join("");
+    }
 }

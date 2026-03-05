@@ -153,25 +153,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
         });
 
-
-    }
-    updatePlayersPanelDom(playerMap) {
-        const panel = document.getElementById("players-panel");
-        const list = document.getElementById("players-list");
-        if (!panel || !list) return;
-
-        panel.style.display = "block";
-
-        const players = Object.values(playerMap);
-
-        // optional: stable ordering (by username, or id)
-        players.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
-
-        const visible = players.slice(0, 10);
-
-        list.innerHTML = visible
-            .map((p, i) => `<li>${i + 1}. ${p.username || "Anonymous"}</li>`)
-            .join("");
     }
 
     /**
@@ -238,6 +219,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
 
             player.syncFromServer(playerData);
+
+            //need for playerlist ui
             player.username = playerData.username;
 
         });
@@ -250,6 +233,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.emit('localPlayerReady', this.localPlayer);
             }
         }
+        //invokes update method for playerlist in UI manager
         this.updatePlayersPanelDom(this.playerList);
     }
 }
