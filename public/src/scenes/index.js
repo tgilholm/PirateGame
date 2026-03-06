@@ -14,6 +14,12 @@ const config = {
     parent: parent,
     scene: [StartScene, MainScene],     // Add all scenes in
 
+    render: {
+        mipmapFilter: 'NEAREST',
+        antialias: true,
+        premultipliedAlpha: false,
+    },
+
     physics: {
         default: 'matter',  // for complex physics
         matter: {

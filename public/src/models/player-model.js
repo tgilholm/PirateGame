@@ -61,25 +61,12 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
     }
 
     /**
-     * Helper method to update the rotation of the player's gun from a specified angle. Rotates
-     * about the centre of the player, while adhering to the outer edge of their sprite
-     * @param {number} angle 
-     */
-    setGunRotation(angle) {
-        const worldPos = this.getWorldTransformMatrix();
-
-        const gun = this.gun;
-        gun.x = worldPos.tx + Math.cos(angle) * 15;  // radius
-        gun.y = worldPos.ty + Math.sin(angle) * 15;
-        gun.setRotation(angle);
-    }
-
-    /**
      * Updates this player from the target data received in the syncFromServer() method. Interpolates
      * (moves smoothly) between the player's last coordinate and the target received from the server.
      * @param {number} delta 
      */
     update(delta) {
+        const worldPos = this.getWorldTransformMatrix();
         const responseFactor = 0.15;
         const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667);
 
@@ -92,7 +79,11 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             this.target.aimAngle,
             lerp
         );
-        this.setGunRotation(this.aimAngle);
+
+        const gun = this.gun;
+        gun.x = worldPos.tx + Math.cos(this.aimAngle) * 15;  // radius
+        gun.y = worldPos.ty + Math.sin(this.aimAngle) * 15;
+        gun.setRotation(this.aimAngle);
 
         // If on a ship, move up and down with it
         if (this.parentContainer instanceof ShipModel) {
@@ -101,7 +92,6 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         }
 
         // Ignore any relative coordinates/rotation for the name tag- always display upright
-        const worldPos = this.getWorldTransformMatrix();
         this.nameText.setPosition(worldPos.tx, worldPos.ty - 25);
 
         const isBusy = this.isSteering || this.isUsingCannon;

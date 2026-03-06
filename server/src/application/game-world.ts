@@ -6,7 +6,7 @@ import Player from "../entities/player";
 import EntityFactory from "../entities/entity-factory";
 import Ship from "../entities/ship";
 import { EventEmitter } from "events";
-import { CONFIG } from "src/config";
+import { CONFIG } from "../config";
 
 export enum WorldEvent {
     GAME_STATE = "GAME_STATE"
@@ -79,8 +79,8 @@ export default class GameWorld extends EventEmitter {
         // Spawn the player on their own ship
         const newShip = this.entityFactory.createShip(
             `ship_${socketId}`,
-            500,
-            500
+            2500,
+            5000
         )
         this.registry.create(newShip);
 

@@ -125,7 +125,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const matrix = this.localPlayer.getWorldTransformMatrix();
 
         this.network.sendMove(inputs);
-        this.refreshInteractables();
 
         // Move the invisible camera target to the local player's current position
         //@ts-ignore
@@ -143,21 +142,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
-        // Tick all ships every frame
-        Object.values(this.shipList).forEach(ship => {
-            ship.update(null, delta);
-        });
-
-        // Tick all players every frame
-        Object.values(this.playerList).forEach(/** @type {PlayerModel}*/player => {
+        this.shipArray.forEach(ship => ship.update(null, delta));
+        this.playerArray.forEach((player) => {
             player.update(delta);
-
-            if (player === this.localPlayer) {
-                player.setGunRotation(inputs.aimAngle); // snap if local
-            }
-        });
+        })
 
     }
+
+
 
     /**
      * Updates the client-side model of the game from the data provided
@@ -175,6 +167,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     shipData.y,
                     this.shipConfig
                 );
+                this.refreshInteractables();
             }
 
             /** @type {ShipModel} */
@@ -233,5 +226,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.emit('localPlayerReady', this.localPlayer);
             }
         }
+
+        this.shipArray = Object.values(this.shipList); // rebuild only in onSync
+        this.playerArray = Object.values(this.playerList);
     }
 }
