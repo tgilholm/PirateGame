@@ -24,6 +24,9 @@ export default class MovementSystem implements BaseSystem {
     updatePlayer(player: Player, dt: number): void {
         if (player.isSteering || player.isUsingCannon) return;
 
+        const prevX = player.x;
+        const prevY = player.y;
+
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;
         const playerConfig = this.entityConfig.player;
@@ -112,6 +115,9 @@ export default class MovementSystem implements BaseSystem {
             // Keep the player on the map
             this.constrainToWorld(player, playerConfig.radius);
         }
+
+        player.vx = (player.x - prevX) / dt;
+        player.vy = (player.y - prevY) / dt;
 
     }
 

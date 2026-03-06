@@ -21,6 +21,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
         this.id = id;
         this.target = { x: 0, y: 0, aimAngle: 0 };
+        this.velocity = { x: 0, y: 0 };
         this.isSteering = false;
         this.isUsingCannon = false;
         this.aimAngle = 0;
@@ -56,6 +57,8 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         this.target.x = data.x; // The coordinate to aim for in interpolation
         this.target.y = data.y;
         this.target.aimAngle = data.aimAngle;
+        this.velocity.x = data.vx;
+        this.velocity.y = data.vy;
         this.isSteering = data.isSteering;
         this.isUsingCannon = data.isUsingCannon;
     }
@@ -66,33 +69,36 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
      * @param {number} delta 
      */
     update(delta) {
-        const worldPos = this.getWorldTransformMatrix();
-        const responseFactor = 0.15;
+        const responseFactor = 0.05;
         const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667);
+        const deltaTime = delta / 1000;
 
-        this.x = Phaser.Math.Linear(this.x, this.target.x, lerp);   // move smoothly between the two
-        this.y = Phaser.Math.Linear(this.y, this.target.y, lerp);
+        const predictedX = this.target.x + this.velocity.x * deltaTime;
+        const predictedY = this.target.y + this.velocity.y * deltaTime;
+
+        this.x = Phaser.Math.Linear(this.x, predictedX, lerp);
+        this.y = Phaser.Math.Linear(this.y, predictedY, lerp);
 
         // For other players- local player's aim angle is taken immediately from their inputs
-        this.aimAngle = Phaser.Math.Angle.RotateTo(
-            this.aimAngle,
-            this.target.aimAngle,
-            lerp
-        );
+        const aimDiff = Phaser.Math.Angle.Wrap(this.target.aimAngle - this.aimAngle);
+        this.aimAngle += aimDiff * lerp;
 
+        // If on a ship, move up and down with it
+        if (this.parentContainer instanceof ShipModel) {
+            const bob = this.parentContainer.hullSprite.y;
+            this.bodySprite.y = bob;
+        } else {
+            this.bodySprite.y = 0;
+        }
+
+        const worldPos = this.getWorldTransformMatrix();
         const gun = this.gun;
         gun.x = worldPos.tx + Math.cos(this.aimAngle) * 15;  // radius
         gun.y = worldPos.ty + Math.sin(this.aimAngle) * 15;
         gun.setRotation(this.aimAngle);
 
-        // If on a ship, move up and down with it
-        if (this.parentContainer instanceof ShipModel) {
-            const bob = this.parentContainer.hullSprite.y;
-            this.y += bob; // hi bob
-        }
-
         // Ignore any relative coordinates/rotation for the name tag- always display upright
-        this.nameText.setPosition(worldPos.tx, worldPos.ty - 25);
+        this.nameText.setPosition(Math.round(worldPos.tx), Math.round(worldPos.ty) - 25);
 
         const isBusy = this.isSteering || this.isUsingCannon;
 

@@ -10,6 +10,7 @@ const config = {
     width: window.innerWidth,   // doesn't account for resize yet
     height: window.innerHeight,
     roundPixels: false,
+    pixelArt: false,
     backgroundColor: '#2d80c9',
     parent: parent,
     scene: [StartScene, MainScene],     // Add all scenes in

@@ -82,7 +82,6 @@ export default class GameWorld extends EventEmitter {
             2500,
             5000
         )
-        this.registry.create(newShip);
 
         const newPlayer = this.entityFactory.createPlayer(
             socketId,
@@ -91,7 +90,6 @@ export default class GameWorld extends EventEmitter {
             newShip,
             username,
         )
-        this.registry.create(newPlayer);
     }
 
     /**

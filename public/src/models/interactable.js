@@ -22,6 +22,7 @@ export default class Interactable extends Phaser.GameObjects.Sprite {
         this.releasePrompt = config.releasePrompt || `Release ${config.type}`;
 
         scene.add.existing(this);
+        this.scene.textures.get(config.texture).setFilter(Phaser.Textures.FilterMode.NEAREST);
 
         // Responds to the side of the ship this entity is on
         if (parent) {

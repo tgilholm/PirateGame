@@ -40,9 +40,9 @@ export class MainScene extends Phaser.Scene {
         const entityConfig = window.entityConfig;   // cheesed
 
         this.gameManager = new GameManager(
-            this, 
-            entityConfig, 
-            new NetworkManager(socket), 
+            this,
+            entityConfig,
+            new NetworkManager(socket),
             new InputManager(this)
         );
         this.uiManager = new UIManager(this, this.gameManager);
@@ -82,8 +82,10 @@ export class MainScene extends Phaser.Scene {
         this.map = this.make.tilemap({ key: "map" });
         const tileset = this.map.addTilesetImage("terrain-tilesheet", "tiles");
 
-        this.map.createLayer("sea", tileset, 0, 0);
-        this.map.createLayer("shallows", tileset, 0, 0);
-        this.map.createLayer("islands", tileset, 0, 0);
+        this.seaLayer = this.map.createLayer("sea", tileset, 0, 0);
+        this.shallowsLayer = this.map.createLayer("shallows", tileset, 0, 0);
+        this.islandsLayer = this.map.createLayer("islands", tileset, 0, 0);
+
+        [this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach(l => l.setCullPadding(2, 2));
     }
 }

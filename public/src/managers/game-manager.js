@@ -27,12 +27,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         /** @type {PlayerModel} */
         this.localPlayer = null;
         this.closestInteractable = null;
+        this.playerListDirty = false;
         this.playerId = null;
 
         this.shipList = {};
+        this.playerList = {};
         this.interactables = [];
 
-        this.playerList = {};
+        this.playerArray = [];
+        this.shipArray = [];
+
 
         this.startListeners();
     }
@@ -142,11 +146,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
-        this.shipArray.forEach(ship => ship.update(null, delta));
+        this.shipArray.forEach(ship => ship.update(delta));
         this.playerArray.forEach((player) => {
+            if (player === this.localPlayer) {
+                player.target.aimAngle = inputs.aimAngle; // update target first
+            }
             player.update(delta);
-        })
-
+        });
     }
 
 
@@ -189,6 +195,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     playerData.y
                 );
                 this.playerList[playerData.id] = player;
+                this.playerListDirty = true;
             }
 
             /*

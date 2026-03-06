@@ -107,6 +107,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         // Sets the origin point of this ship to the relative centre
         this.hullSprite = this.scene.add.sprite(0, 0, textureName);
         this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
+        this.scene.textures.get(textureName).setFilter(Phaser.Textures.FilterMode.NEAREST);
         this.add(this.hullSprite);
         this.sendToBack(this.hullSprite);
         this.setDepth(10);
@@ -182,15 +183,15 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         const predictedR = this.target.r + this.angularVelocity * deltaTime;
 
         // Move smoothly to the predicted position, avoiding round pixels
-        this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
-        this.y = Math.round(Phaser.Math.Linear(this.y, predictedY, lerp));
+        this.x = Phaser.Math.Linear(this.x, predictedX, lerp)
+        this.y = Phaser.Math.Linear(this.y, predictedY, lerp)
+
+        // this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
+        // this.y = Math.round(Phaser.Math.Linear(this.y, predictedY, lerp));
 
         // Also interpolate the rotation
-        this.rotation = Phaser.Math.Angle.RotateTo(
-            this.rotation,
-            predictedR,
-            lerp
-        );
+        const diff = Phaser.Math.Angle.Wrap(predictedR - this.rotation);
+        this.rotation += diff * lerp;
     }
 
 

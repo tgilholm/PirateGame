@@ -34,22 +34,21 @@ export default class InputManager extends Phaser.Events.EventEmitter {
     getInputs(scene, player) {
         /** @type {any} */
         const keys = this.moveKeys;
-        const mouseY = scene.input.mousePointer.worldY;
-        const mouseX = scene.input.mousePointer.worldX;
+        const cam = scene.cameras.main;
 
-        const worldPos = player.getWorldTransformMatrix();  // Absolute coords
+        // Manually convert screen pos to world pos using current camera state
+        const mouseWorldX = scene.input.mousePointer.x / cam.zoom + cam.scrollX;
+        const mouseWorldY = scene.input.mousePointer.y / cam.zoom + cam.scrollY;
 
-        const aimAngle = Math.atan2(    // Angle from player to mouse
-            mouseY - worldPos.ty,
-            mouseX - worldPos.tx
-        );
+        const worldPos = player.getWorldTransformMatrix();
+        const aimAngle = Math.atan2(mouseWorldY - worldPos.ty, mouseWorldX - worldPos.tx);
 
         return {
             up: keys.W.isDown,
             down: keys.S.isDown,
             left: keys.A.isDown,
             right: keys.D.isDown,
-            aimAngle: aimAngle
+            aimAngle: isFinite(aimAngle) ? aimAngle : 0
         }
     }
 }

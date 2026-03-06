@@ -46,7 +46,10 @@ export default class UIManager {
             }
         }
 
-        this.updatePlayersPanelDom(this.gameManager.playerList);
+        if (this.gameManager.playerListDirty) {
+            this.updatePlayersPanelDom(this.gameManager.playerList);
+            this.gameManager.playerListDirty = false;
+        }
     }
 
     /**
