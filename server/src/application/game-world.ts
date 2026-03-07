@@ -99,6 +99,9 @@ export default class GameWorld extends EventEmitter {
         this.registry.getByType<Ship>('ship').forEach(s => {
             this.grid.update(s.id, s.x, s.y);
         });
+        this.registry.getByType<Projectile>('projectile').forEach(p => {
+            this.grid.update(p.id, p.x, p.y);
+        });
     }
 
     /**
@@ -120,7 +123,7 @@ export default class GameWorld extends EventEmitter {
         const physics = this.engine.systems.get('physics') as PhysicsSystem;
         physics.addBody(newShip.body);
 
-        const newPlayer = this.entityFactory.createPlayer(
+        this.entityFactory.createPlayer(
             socketId,
             0,
             0,
@@ -167,6 +170,7 @@ export default class GameWorld extends EventEmitter {
         // Compute once and reuse for every client session
         const playerData = new Map<string, { full: any, delta: any }>();
         const shipData = new Map<string, { full: any, delta: any }>();
+        const projData = new Map<string, { full: any, delta: any }>();
 
 
         this.registry.getByType<Player>('player').forEach(p => {
@@ -181,10 +185,10 @@ export default class GameWorld extends EventEmitter {
                 full: s.serialise(),
             });
         });
-        this.registry.getByType<Projectile>('projectile').forEach(s => {
-            shipData.set(s.id, {
-                delta: s.serialiseDelta(),
-                full: s.serialise(),
+        this.registry.getByType<Projectile>('projectile').forEach(p => {
+            projData.set(p.id, {
+                delta: p.serialiseDelta(),
+                full: p.serialise(),
             });
         });
 
@@ -202,6 +206,8 @@ export default class GameWorld extends EventEmitter {
             const deltaPlayers: any[] = [];
             const newShips: any[] = [];
             const deltaShips: any[] = [];
+            const newProjectiles: any[] = [];
+            const deltaProjectiles: any[] = [];
             const removedIds: string[] = []; // for entities out of range
 
             // Add nearby entities to packet
@@ -224,6 +230,17 @@ export default class GameWorld extends EventEmitter {
                     } else if (sd.delta) {
                         deltaShips.push(sd.delta);
                     }
+                    return;
+                }
+                const cd = projData.get(id);
+                if (cd) {
+                    if (!session.knownEntityIds.has(id)) {
+                        newProjectiles.push(cd.full);
+                        session.knownEntityIds.add(id);
+                    } else if (cd.delta) {
+                        deltaProjectiles.push(cd.delta);
+                    }
+                    return;
                 }
             });
 
@@ -235,12 +252,19 @@ export default class GameWorld extends EventEmitter {
                 }
             });
 
-            if (!newPlayers.length && !newShips.length && !deltaPlayers.length && !deltaShips.length && !removedIds.length) {
+            if (
+                !newPlayers.length &&
+                !newShips.length &&
+                !newProjectiles.length &&
+                !deltaPlayers.length &&
+                !deltaShips.length &&
+                !deltaProjectiles.length &&
+                !removedIds.length) {
                 return null;
             }
 
             // Send the data to the client
-            return { newPlayers, newShips, deltaPlayers, deltaShips, removedIds };
+            return { newPlayers, newShips, newProjectiles, deltaProjectiles, deltaPlayers, deltaShips, removedIds };
         });
     }
 
@@ -252,6 +276,7 @@ export default class GameWorld extends EventEmitter {
         return {
             players: this.registry.getByType<Player>('player').map(p => p.serialise()),
             ships: this.registry.getByType<Ship>('ship').map(s => s.serialise()),
+            projectiles: this.registry.getByType<Projectile>('projectile').map(p => p.serialise())
         };
     }
 }

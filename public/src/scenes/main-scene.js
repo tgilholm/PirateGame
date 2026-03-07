@@ -58,6 +58,13 @@ export class MainScene extends Phaser.Scene {
         circle.generateTexture('player_circle', 30, 30);
         circle.destroy();
 
+        // Placeholder cannonball sprite
+        const proj = this.make.graphics();
+        proj.fillStyle(0x222222, 1);
+        proj.fillCircle(5, 5, 5);
+        proj.generateTexture('cannonball', 5, 5);
+        proj.destroy();
+
         // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.gameManager.start(data.username);

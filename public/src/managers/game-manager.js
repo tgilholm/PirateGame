@@ -3,6 +3,7 @@ import NetworkManager from "./network-manager.js";
 import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import InputManager from "./input-manager.js";
+import ProjectileModel from "../models/projectile-model.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -37,7 +38,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.playerList = {};
         this.playerArray = [];
 
-        thi
+        this.projectileList = {};
+        this.projectileArray = [];
 
         this.interactables = [];
 
@@ -160,17 +162,18 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         }
 
         this.shipArray.forEach(ship => ship.update(delta));
+
         this.playerArray.forEach((player) => {
             if (player === this.localPlayer) {
                 player.target.aimAngle = inputs.aimAngle; // update target first
             }
             player.update(delta);
-            
-            console.log(`Player: ${player.id}, x: ${player.x}, y:${player.y}`);
-
         });
 
-
+            console.log(this.projectileArray);
+        this.projectileArray.forEach((proj) => {
+            proj.update(delta);
+        });
     }
 
     /**
@@ -182,10 +185,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Process all ships and players as full state
         data.ships?.forEach(shipData => this.applyFullShip(shipData));
         data.players?.forEach(playerData => this.applyFullPlayer(playerData));
+        data.projectiles?.forEach(projData => this.applyFullProjectile(projData));
+
         this.resolveLocalPlayer();
 
         this.shipArray = Object.values(this.shipList);
         this.playerArray = Object.values(this.playerList);
+        this.projectileArray = Object.values(this.projectileList);
     }
 
     /**
@@ -201,6 +207,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Delta updates for known entities: only update fields present in packet
         data.deltaShips?.forEach(delta => this.applyDeltaShip(delta));
         data.deltaPlayers?.forEach(delta => this.applyDeltaPlayer(delta));
+        data.newProjectiles?.forEach(projData => this.applyFullProjectile(projData));
+        data.deltaProjectiles?.forEach(delta => {
+            const proj = this.projectileList[delta.id];
+            if (proj) proj.syncDelta(delta);
+        });
 
         // Remove out-of-range entities
         if (data.removedIds) {
@@ -214,7 +225,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 if (this.shipList[id]) {
                     this.shipList[id].destroy();
                     delete this.shipList[id];
-                    this.refreshInteractables();
+                    this.refreshInteractables();    // remove the ship's interactables
+                }
+                if (this.projectileList[id]) {
+                    this.projectileList[id].destroy();
+                    delete this.projectileList[id];
                 }
             });
         }
@@ -223,6 +238,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.shipArray = Object.values(this.shipList);
         this.playerArray = Object.values(this.playerList);
+        this.projectileArray = Object.values(this.projectileList);
     }
 
     /**
@@ -263,6 +279,19 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.handleReparent(player, playerData); // if leaving/joining a ship
         player.syncFromServer(playerData); // full update
+    }
+
+    applyFullProjectile(data) {
+        if (!this.projectileList[data.id]) {
+            this.projectileList[data.id] = new ProjectileModel(
+                this.scene,
+                data.id,
+                data.x,
+                data.y,
+                data.r
+            );
+        }
+        this.projectileList[data.id].syncFromServer(data);
     }
 
     /**
