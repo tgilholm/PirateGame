@@ -4,6 +4,12 @@ import { BaseSystem } from "./base-system";
 import TerrainMap from "../engine/terrain-map";
 import Ship from "../entities/ship";
 
+// Thresholds over which the matter body has moved enough to justify sending it
+const POS_THRESHOLD = 0.5;
+const ROT_THRESHOLD = 0.001;
+const VEL_THRESHOLD = 0.05;
+
+
 /**
  * Contains methods related to the matter physics system. Initialises
  * solid matter objects for island tiles and ships, and updates the internal
@@ -82,15 +88,34 @@ export default class PhysicsSystem implements BaseSystem {
     public update(dt: number): void {
         Matter.Engine.update(this.engine, dt * 1000);
 
-        // Sync matter body state back to ship entities
+        // Sync matter body state back to ship entities, marking dirty if changed
         this.registry.getByType<Ship>('ship').forEach(ship => {
+            const newX = ship.body.position.x;
+            const newY = ship.body.position.y;
+            const newR = ship.body.angle;
+            const newVx = ship.body.velocity.x;
+            const newVy = ship.body.velocity.y;
+            const newAv = ship.body.angularVelocity;
 
-            ship.x = ship.body.position.x;
-            ship.y = ship.body.position.y;
-            ship.r = ship.body.angle;
-            ship.vx = ship.body.velocity.x;
-            ship.vy = ship.body.velocity.y;
-            ship.av = ship.body.angularVelocity;
+            // Returns true if any of the parameters have changed above the thresholds
+            // Completely static ships will not be sent
+            const moved =
+                Math.abs(newX - ship.x) > POS_THRESHOLD ||
+                Math.abs(newY - ship.y) > POS_THRESHOLD ||
+                Math.abs(newR - ship.r) > ROT_THRESHOLD ||
+                Math.abs(newVx - ship.vx) > VEL_THRESHOLD ||
+                Math.abs(newVy - ship.vy) > VEL_THRESHOLD ||
+                Math.abs(newAv - ship.av) > VEL_THRESHOLD;
+
+            ship.x = newX;
+            ship.y = newY;
+            ship.r = newR;
+            ship.vx = newVx;
+            ship.vy = newVy;
+            ship.av = newAv;
+
+            // Ensure that this ship will be sent to the client
+            if (moved) ship.markDirty();
         });
     }
 }

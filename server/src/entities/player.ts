@@ -18,6 +18,9 @@ export default class Player extends Entity {
     };
     aimAngle: number;
 
+    private prevX: number = 0;
+    private prevY: number = 0;
+
     /**
      * Builds a player with the specified data
      * @param id the id of the player
@@ -52,7 +55,7 @@ export default class Player extends Entity {
             down: false,
             left: false,
             right: false
-        
+
             // Specify any other player inputs here
         }
     }
@@ -73,7 +76,6 @@ export default class Player extends Entity {
             health: this.health,
             maxHealth: this.maxHealth
         */
-
         // Send everything the client needs to display the player
         return {
             ...super.serialise(),

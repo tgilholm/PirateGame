@@ -45,8 +45,9 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
     /**
      * Updates the client-side state of this player object with the data received from the server.
-     * This method should be called every time new player data is received. 
-     * @param {Object} data 
+     * This method replaces all data in this object with the player data from the server, and should
+     * thus only be used when a player is being created for the first time
+     * @param {Object} data the complete data about this player
      */
     syncFromServer(data) {
         // Only updates if a username was not already set
@@ -64,9 +65,29 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
     }
 
     /**
-     * Updates this player from the target data received in the syncFromServer() method. Interpolates
-     * (moves smoothly) between the player's last coordinate and the target received from the server.
-     * @param {number} delta 
+     * Updates the client-side state of this player object by changing only the fields that have been
+     * changed by the server-side representation, and leaving everything else unchanged. This retains
+     * the "last known" values of each.
+     * @param {Object} delta the partial data from the server 
+     */
+    syncDelta(delta) {
+        if (delta.username !== undefined && this.nameText.text !== delta.username) {
+            this.nameText.setText(delta.username);
+            this.username = delta.username;
+        }
+        if (delta.x !== undefined) this.target.x = delta.x;
+        if (delta.y !== undefined) this.target.y = delta.y;
+        if (delta.aimAngle !== undefined) this.target.aimAngle = delta.aimAngle;
+        if (delta.vx !== undefined) this.velocity.x = delta.vx;
+        if (delta.vy !== undefined) this.velocity.y = delta.vy;
+        if (delta.isSteering !== undefined) this.isSteering = delta.isSteering;
+        if (delta.isUsingCannon !== undefined) this.isUsingCannon = delta.isUsingCannon;
+    }
+
+    /**
+     * Updates this player from the target data. Interpolates between the player's 
+     * last coordinate and the target received from the server.
+     * @param {number} delta the difference in time between the last update
      */
     update(delta) {
         const responseFactor = 0.075;

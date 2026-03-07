@@ -3,10 +3,15 @@
 
 import { Server, Socket } from "socket.io";
 import { z } from 'zod';    // For frontline validation
-import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "@shared/socket-protocol";
+import { ActionType, ClientEvent, MoveData, PlayerAction, ServerEvent } from "@shared/socket-protocol";
 import GameWorld, { WorldEvent } from "./game-world";
 
-function isValidMove(data: any): boolean {
+/**
+ * Carries out move validation bypassing Zod for the most frequent action- movement
+ * @param data the move data from the client
+ * @returns true if the move matches the schema, false otherwise
+ */
+function isValidMove(data: MoveData): boolean {
     return data &&
         typeof data.up === 'boolean' &&
         typeof data.down === 'boolean' &&
@@ -42,26 +47,33 @@ const ActionSchema = z.discriminatedUnion("type", [
 export default class SocketService {
     constructor(private io: Server, private world: GameWorld) { }
 
-
-
     /**
      * Starts the listeners
      */
     public initialise() {
 
-        this.world.on(WorldEvent.GAME_STATE, (data) => {
-            this.io.emit(ServerEvent.GAME_STATE, data);
+        // Send the game data pertaining to that specific player- the ships/players/object near them
+        this.world.on(WorldEvent.GAME_STATE_PER_PLAYER, (getStateForSocket: (id: string) => any) => {
+            this.io.sockets.sockets.forEach((socket) => {
+                const state = getStateForSocket(socket.id);
+                if (state) {
+                    socket.emit(ServerEvent.GAME_STATE, state);
+                }
+            });
         });
 
         // Handle new clients
         this.io.on('connection', (socket: Socket) => {
             console.log(`[SocketService] Client connected: ${socket.id}`);
+
+            // Client has fully loaded in- send them the full sync
             socket.on(ClientEvent.READY, (data) => {
 
                 this.world.addPlayer(socket.id, data.username);
                 socket.emit(ServerEvent.INIT_GAME, { ...this.world.getFullState(), id: socket.id });
             });
 
+            // Client actions
             socket.on(ClientEvent.ACTION, (action: PlayerAction) => {
 
                 // dont route movement via zod
@@ -74,7 +86,7 @@ export default class SocketService {
                 // zod validation for all other action types
                 const result = ActionSchema.safeParse(action);
                 if (!result.success) {
-                    console.warn(`[SocketService] Invalid action from ${socket.id}:`, result.error.format());
+                    console.warn(`[SocketService] Invalid action from ${socket.id}:`, z.treeifyError(result.error));
                     return;
                 }
                 this.world.handleAction(socket.id, result.data);
