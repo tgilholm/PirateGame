@@ -19,7 +19,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/pirategame
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main # reset local changes
+            git pull # just in case
+            
             npm install
             npm run build:all
             
