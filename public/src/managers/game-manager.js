@@ -47,11 +47,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      * the server and routes input events from the InputManager
      */
     startListeners() {
+        // Full state packet: replace all entity data
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
-            this.onSync(data);
+            this.onFullSync(data); // get everything
         });
-        this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
+
+        // Delta packet: full for new entities and known entities that have changed
+        this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
         this.input.on('interact', () => {
             const target = this.closestInteractable;
@@ -129,6 +132,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const matrix = this.localPlayer.getWorldTransformMatrix();
 
+        // Send packets at the server tick rate instead of spamming 60 times a second
         this.moveTimer = (this.moveTimer || 0) + delta;
         if (this.moveTimer >= 1000 / 20) {  // match server tick rate
             this.network.sendMove(inputs);
@@ -160,77 +164,136 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
     }
 
+    /**
+     * Handles the init game packet by creating all entities
+     * provided with their full data
+     * @param {Object} data the data from the server
+     */
+    onFullSync(data) {
+        // Process all ships and players as full state
+        data.ships?.forEach(shipData => this.applyFullShip(shipData));
+        data.players?.forEach(playerData => this.applyFullPlayer(playerData));
+        this.resolveLocalPlayer();
 
+        this.shipArray = Object.values(this.shipList);
+        this.playerArray = Object.values(this.playerList);
+    }
 
     /**
-     * Updates the client-side model of the game from the data provided
-     * from the server
-     * @param {Object} data the data received from the server
+    * Handles the game state packet by using the full state for entities entering
+    * the view range, and the partial state for known entities that have changed
+    * @param {Object} data the data from the server
+    */
+    onDeltaSync(data) {
+        // Full state for newly visible entities
+        data.newShips?.forEach(shipData => this.applyFullShip(shipData));
+        data.newPlayers?.forEach(playerData => this.applyFullPlayer(playerData));
+
+        // Delta updates for known entities: only update fields present in packet
+        data.deltaShips?.forEach(delta => this.applyDeltaShip(delta));
+        data.deltaPlayers?.forEach(delta => this.applyDeltaPlayer(delta));
+
+        this.resolveLocalPlayer();  // get the local player
+
+        this.shipArray = Object.values(this.shipList);
+        this.playerArray = Object.values(this.playerList);
+    }
+
+    /**
+     * Creates or fully updates a ship from a complete data object.
+     * @param {Object} shipData the data about a specific ship
+    */
+    applyFullShip(shipData) {
+        if (!this.shipList[shipData.id]) {
+            this.shipList[shipData.id] = new ShipModel(
+                this.scene,
+                shipData.id,
+                shipData.x,
+                shipData.y,
+                this.shipConfig
+            );
+            this.refreshInteractables();
+        }
+        this.shipList[shipData.id].syncFromServer(shipData);
+    }
+
+    /**
+    * Creates or fully updates a player from a complete data object.
+    * @param {Object} playerData the data about a specific player
+    */
+    applyFullPlayer(playerData) {
+        let player = this.playerList[playerData.id];
+
+        if (!player) {
+            player = new PlayerModel(
+                this.scene,
+                playerData.id,
+                playerData.x,
+                playerData.y
+            );
+            this.playerList[playerData.id] = player;
+            this.playerListDirty = true;
+        }
+
+        this.handleReparent(player, playerData); // if leaving/joining a ship
+        player.syncFromServer(playerData); // full update
+    }
+
+    /**
+     * Applies a delta (partial change) to a ship
+     * @param {Object} delta the changes from the server 
      */
-    onSync(data) {
-        data.ships?.forEach(shipData => {
-            // Only create the ship if not already in the list
-            if (!this.shipList[shipData.id]) {
-                this.shipList[shipData.id] = new ShipModel(
-                    this.scene,
-                    shipData.id,
-                    shipData.x,
-                    shipData.y,
-                    this.shipConfig
-                );
-                this.refreshInteractables();
-            }
+    applyDeltaShip(delta) {
+        const ship = this.shipList[delta.id];
+        if (!ship) return; // shouldn't happen but guard anyway
+        ship.syncDelta(delta);
+    }
 
-            /** @type {ShipModel} */
-            let ship = this.shipList[shipData.id];
-            ship.syncFromServer(shipData);
-        });
+    /**
+     * Applies a delta (partial change) to a palyer
+     * @param {Object} delta the changes from the server 
+     */
+    applyDeltaPlayer(delta) {
+        const player = this.playerList[delta.id];
+        if (!player) return;
 
+        // reparent if the id changed
+        if (delta.parentId !== undefined) {
+            this.handleReparent(player, delta);
+        }
 
-        data.players?.forEach(playerData => {
-            /** @type {PlayerModel} */
-            let player = this.playerList[playerData.id]
+        player.syncDelta(delta);
+    }
 
-            // Only create the player if not already in the list
-            if (!player) {
-                player = new PlayerModel(
-                    this.scene,
-                    playerData.id,
-                    playerData.x,
-                    playerData.y
-                );
-                this.playerList[playerData.id] = player;
-                this.playerListDirty = true;
-            }
+    /**
+     * Handle moving a player into a ship object and vice versa
+     * @param {PlayerModel} player the player for which reparenting is handled
+     * @param {Object} playerData the data from the server
+     */
+    handleReparent(player, playerData) {
+        if (player.parentId === playerData.parentId) return;
 
-            /*
-            If the player has just entered or left a ship, add/remove them to/from
-            that ship's Phaser container, and snap their position immediately instead
-            of interpolating
-            */
-            if (player.parentId !== playerData.parentId) {
-                const newParentId = playerData.parentId;
+        const newParentId = playerData.parentId;
 
-                if (newParentId && this.shipList[newParentId]) {
-                    // Add to the ship
-                    this.shipList[newParentId].add(player);
-                    player.setPosition(playerData.x, playerData.y);
-                } else {
-                    // Add back to the world
-                    this.scene.add.existing(player);
-                    player.setPosition(playerData.x, playerData.y);
-                }
-                player.parentId = newParentId;
+        if (newParentId && this.shipList[newParentId]) {
+            this.shipList[newParentId].add(player);
+            player.setPosition(playerData.x ?? player.x, playerData.y ?? player.y);
+        } else {
+            this.scene.add.existing(player);
+            player.setPosition(playerData.x ?? player.x, playerData.y ?? player.y);
+        }
 
-                // Snap on re-parent
-                player.target.x = playerData.x;
-                player.target.y = playerData.y;
-            }
+        player.parentId = newParentId;
 
-            player.syncFromServer(playerData);
-        });
+        // Snap interpolation targets on reparent
+        if (playerData.x !== undefined) player.target.x = playerData.x;
+        if (playerData.y !== undefined) player.target.y = playerData.y;
+    }
 
-        // Finds the current player from the list of incoming ones
+    /**
+    * Finds and assigns the local player when they have joined
+    */
+    resolveLocalPlayer() {
         if (!this.localPlayer && this.playerId) {
             const mine = this.playerList[this.playerId];
             if (mine) {
@@ -238,8 +301,5 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.emit('localPlayerReady', this.localPlayer);
             }
         }
-
-        this.shipArray = Object.values(this.shipList); // rebuild only in onSync
-        this.playerArray = Object.values(this.playerList);
     }
 }
