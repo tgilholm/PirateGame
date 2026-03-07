@@ -108,7 +108,16 @@ export default class GameWorld extends EventEmitter {
      */
     public removePlayer(socketId: string) {
         this.registry.delete(socketId);
-        this.registry.delete(`ship_${socketId}`);   // remove their ship
+
+        // remove the matter body
+        const physics = this.engine.systems.get('physics') as PhysicsSystem;
+        const ship = this.registry.get<Ship>(`ship_${socketId}`);
+
+        if (ship) {
+
+            physics.removeBody(ship.body);  // remove the ship's physics body
+            this.registry.delete(`ship_${socketId}`);   // remove their ship
+        }
     }
 
     /**
