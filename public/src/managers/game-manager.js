@@ -161,7 +161,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 player.target.aimAngle = inputs.aimAngle; // update target first
             }
             player.update(delta);
+            
+            console.log(`Player: ${player.id}, x: ${player.x}, y:${player.y}`);
+
         });
+
+
     }
 
     /**
@@ -192,6 +197,23 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Delta updates for known entities: only update fields present in packet
         data.deltaShips?.forEach(delta => this.applyDeltaShip(delta));
         data.deltaPlayers?.forEach(delta => this.applyDeltaPlayer(delta));
+
+        // Remove out-of-range entities
+        if (data.removedIds) {
+            data.removedIds.forEach(id => {
+                // Players
+                if (this.playerList[id]) {
+                    this.playerList[id].destroy();
+                    delete this.playerList[id];
+                }
+                // Ships
+                if (this.shipList[id]) {
+                    this.shipList[id].destroy();
+                    delete this.shipList[id];
+                    this.refreshInteractables();
+                }
+            });
+        }
 
         this.resolveLocalPlayer();  // get the local player
 

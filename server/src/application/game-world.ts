@@ -169,8 +169,8 @@ export default class GameWorld extends EventEmitter {
 
         this.registry.getByType<Player>('player').forEach(p => {
             playerData.set(p.id, {
-                delta: p.serialiseDelta(), 
-                full: p.serialise(),       
+                delta: p.serialiseDelta(),
+                full: p.serialise(),
             });
         });
         this.registry.getByType<Ship>('ship').forEach(s => {
@@ -193,7 +193,9 @@ export default class GameWorld extends EventEmitter {
             const deltaPlayers: any[] = [];
             const newShips: any[] = [];
             const deltaShips: any[] = [];
+            const removedIds: string[] = []; // for entities out of range
 
+            // Add nearby entities to packet
             nearbyIds.forEach(id => {
                 const pd = playerData.get(id);
                 if (pd) {
@@ -216,16 +218,20 @@ export default class GameWorld extends EventEmitter {
                 }
             });
 
-            // Expire entities that left range
+            // Remove out-of-range entities
             session.knownEntityIds.forEach(id => {
-                if (!nearbyIds.has(id)) session.knownEntityIds.delete(id);
+                if (!nearbyIds.has(id)) {
+                    session.knownEntityIds.delete(id);
+                    removedIds.push(id); // Tell the client to drop the out-of-range entity
+                }
             });
 
-            if (!newPlayers.length && !newShips.length && !deltaPlayers.length && !deltaShips.length) {
+            if (!newPlayers.length && !newShips.length && !deltaPlayers.length && !deltaShips.length && !removedIds.length) {
                 return null;
             }
 
-            return { newPlayers, newShips, deltaPlayers, deltaShips };
+            // Send the data to the client
+            return { newPlayers, newShips, deltaPlayers, deltaShips, removedIds };
         });
     }
 

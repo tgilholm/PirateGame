@@ -126,8 +126,6 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         // Hide the player's gun and make them slightly transparent when interacting
         this.gun.setVisible(isBusy ? false : true);
         this.setAlpha(isBusy ? 0.6 : 1.0);
-
-        console.log(`x: ${this.x}, y: ${this.y}, parent? ${this.parentId}, targetX: ${this.target.x}, targetY: ${this.target.y}, velocityX: ${this.velocity.x}, velocityY: ${this.velocity.y}`)
     }
 
 
