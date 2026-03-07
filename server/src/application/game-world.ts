@@ -36,7 +36,6 @@ export default class GameWorld extends EventEmitter {
     private tickRate = CONFIG.TICK_RATE;
     private tickInterval?: NodeJS.Timeout;
     private lastTime: number = 0;
-    private grid = new SpatialGrid(512, 1024); // 512px cells, 1024px view distance.  
     private sessions: Map<string, ClientSession> = new Map();   // state held by each client
 
     /**
@@ -45,12 +44,14 @@ export default class GameWorld extends EventEmitter {
      * @param entityFactory to create new entities
      * @param engine to update each system on a tick
      * @param controller to route player events to the right place
+     * @param grid to contain entities in a grid
      */
     constructor(
         private registry: EntityRegistry,
         private entityFactory: EntityFactory,
         private engine: GameEngine,
-        private controller: WorldController
+        private controller: WorldController,
+        private grid: SpatialGrid
     ) { super(); }
 
     /**

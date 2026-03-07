@@ -62,7 +62,7 @@ export class MainScene extends Phaser.Scene {
         const proj = this.make.graphics();
         proj.fillStyle(0x222222, 1);
         proj.fillCircle(5, 5, 5);
-        proj.generateTexture('cannonball', 5, 5);
+        proj.generateTexture('cannonball', 10, 10);
         proj.destroy();
 
         // Contain the camera in the map
