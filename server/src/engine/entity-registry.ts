@@ -65,7 +65,7 @@ export default class EntityRegistry {
     }
 
     /**
-     * 
+     * Removes an entity from the game
      * @param id the id of the Entity to remove
      * @returns true if deletion succeeded, false if not found or failed
      */
