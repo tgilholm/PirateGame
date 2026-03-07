@@ -98,7 +98,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
         gun.setRotation(this.aimAngle);
 
         // Ignore any relative coordinates/rotation for the name tag- always display upright
-        this.nameText.setPosition(Math.round(worldPos.tx), Math.round(worldPos.ty) - 25);
+        this.nameText.setPosition(worldPos.tx, worldPos.ty - 25);
 
         const isBusy = this.isSteering || this.isUsingCannon;
 

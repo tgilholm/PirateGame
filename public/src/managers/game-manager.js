@@ -23,6 +23,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
         this.input = input;
+        this.moveTimer = 0;
 
         /** @type {PlayerModel} */
         this.localPlayer = null;
@@ -128,7 +129,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const matrix = this.localPlayer.getWorldTransformMatrix();
 
-        this.network.sendMove(inputs);
+        this.moveTimer = (this.moveTimer || 0) + delta;
+        if (this.moveTimer >= 1000 / 20) {  // match server tick rate
+            this.network.sendMove(inputs);
+            this.moveTimer = 0;
+        }
 
         // Move the invisible camera target to the local player's current position
         //@ts-ignore
