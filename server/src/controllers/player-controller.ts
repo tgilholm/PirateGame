@@ -3,9 +3,10 @@ import EntityRegistry from "../engine/entity-registry";
 import Player from "../entities/player";
 import UpgradeHandler from "../handlers/upgrade-handler";
 import { InteractData, MoveData, UpgradeData } from "@shared/socket-protocol";
-import InteractableEntity from "src/entities/interactable-entity";
-import InteractionHandler from "src/handlers/interaction-handler";
-import Entity from "src/entities/entity";
+import InteractableEntity from "../entities/interactable-entity";
+import InteractionHandler from "../handlers/interaction-handler";
+import Entity from "../entities/entity";
+import Projectile from "../entities/projectile";
 
 /**
  * Handles events affecting the player
@@ -110,7 +111,21 @@ export default class PlayerController {
         throw new Error("Method not implemented.");
     }
     handleGunFire(player: Player) {
-        throw new Error("Method not implemented.");
+        // Get player world pos
+        const worldPos = this.getWorldPosition(player);
+        const projectileId = `proj_${Date.now()}_${player.id}`; // "unique" id
+
+        // Create the projectile
+        const bullet = new Projectile(
+            projectileId,
+            worldPos.x,
+            worldPos.y,
+            player.aimAngle,
+            600 // velocity
+        );
+
+        // Add to the entity registry
+        this.entityRegistry.create(bullet);
     }
     handleCannonFire(player: Player) {
         throw new Error("Method not implemented.");
