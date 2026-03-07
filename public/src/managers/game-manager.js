@@ -89,30 +89,27 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 
         const closest = this.getClosestInteractable(this.localPlayer);
+        this.closestInteractable = null;
+
         if (closest) {
             const item = closest.item;
             const range = item.interactRange ?? this.interactableDefaults.interactRange;
 
-            if (closest.dist <= range) {
-                const isShop = item.type === 'shop';
-                const isLadder = item.type === 'ladder';
-                const onSameShip = this.localPlayer.parentId != null &&
-                    this.localPlayer.parentId === item.parentId;
-                if (isShop || isLadder || onSameShip) {
-                    // Players aboard a ship cannot interact with shops
-                    if (isShop && this.localPlayer.parentId) {
-                        this.closestInteractable = null;
-                    } else {
+            if (item.parentContainer) {
+                //interactable is mounted on a ship
+                if (item.type === 'ladder') {
+                    //player vs ladder world coordinates world position
+                    const { x: lx, y: ly } = item.getWorldPosition();
+                    const pm = this.localPlayer.getWorldTransformMatrix();
+                    if (Phaser.Math.Distance.Between(pm.tx, pm.ty, lx, ly) <= range) {
                         this.closestInteractable = closest;
                     }
-                } else {
-                    this.closestInteractable = null;
+                } else if (closest.dist <= range) {
+                    this.closestInteractable = closest;
                 }
-            } else {
-                this.closestInteractable = null;
+            } else if (closest.dist <= range && !this.localPlayer.parentId) {
+                this.closestInteractable = closest;
             }
-        } else {
-            this.closestInteractable = null;
         }
 
         const isNearShop = this.closestInteractable?.item?.type === 'shop';
