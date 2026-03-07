@@ -91,7 +91,9 @@ export default class GameWorld extends EventEmitter {
      */
     private updateGrid() {
         this.registry.getByType<Player>('player').forEach(p => {
-            this.grid.update(p.id, p.x, p.y);
+            const wx = p.parent ? p.parent.x : p.x;
+            const wy = p.parent ? p.parent.y : p.y;
+            this.grid.update(p.id, wx, wy);
         });
         this.registry.getByType<Ship>('ship').forEach(s => {
             this.grid.update(s.id, s.x, s.y);
@@ -161,77 +163,70 @@ export default class GameWorld extends EventEmitter {
      * range of the client are "invisible" to it and are not sent.
      */
     private broadcastGameState() {
-        // SocketService is listening
+        // Compute once and reuse for every client session
+        const playerData = new Map<string, { full: any, delta: any }>();
+        const shipData = new Map<string, { full: any, delta: any }>();
+
+        this.registry.getByType<Player>('player').forEach(p => {
+            playerData.set(p.id, {
+                delta: p.serialiseDelta(), 
+                full: p.serialise(),       
+            });
+        });
+        this.registry.getByType<Ship>('ship').forEach(s => {
+            shipData.set(s.id, {
+                delta: s.serialiseDelta(),
+                full: s.serialise(),
+            });
+        });
+
         this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
-            const session = this.sessions.get(socketId);    // Get that player's data
+            const session = this.sessions.get(socketId);
             const player = this.registry.get<Player>(socketId);
             if (!session || !player) return null;
 
-            // Get all the entities near to that player
-            const nearbyIds = this.grid.getNearby(player.x, player.y);
+            const wx = player.parent ? player.parent.x : player.x;
+            const wy = player.parent ? player.parent.y : player.y;
+            const nearbyIds = this.grid.getNearby(wx, wy);
 
             const newPlayers: any[] = [];
             const deltaPlayers: any[] = [];
             const newShips: any[] = [];
             const deltaShips: any[] = [];
 
-            // Process players
-            this.registry.getByType<Player>('player').forEach(p => {
-                // Not in range
-                if (!nearbyIds.has(p.id)) {
-                    // Delete if not in range any more
-                    session.knownEntityIds.delete(p.id);
+            nearbyIds.forEach(id => {
+                const pd = playerData.get(id);
+                if (pd) {
+                    if (!session.knownEntityIds.has(id)) {
+                        newPlayers.push(pd.full);
+                        session.knownEntityIds.add(id);
+                    } else if (pd.delta) {
+                        deltaPlayers.push(pd.delta);
+                    }
                     return;
                 }
-
-                // In range
-                if (!session.knownEntityIds.has(p.id)) {
-                    // New to this client
-                    newPlayers.push(p.serialise());
-                    session.knownEntityIds.add(p.id);
-                } else if (p.dirty) {
-                    // Known and changed
-                    const delta = p.serialiseDelta();
-                    if (delta) deltaPlayers.push(delta);
+                const sd = shipData.get(id);
+                if (sd) {
+                    if (!session.knownEntityIds.has(id)) {
+                        newShips.push(sd.full);
+                        session.knownEntityIds.add(id);
+                    } else if (sd.delta) {
+                        deltaShips.push(sd.delta);
+                    }
                 }
             });
 
-            // Process ships
-            this.registry.getByType<Ship>('ship').forEach(s => {
-                // Not in range
-                if (!nearbyIds.has(s.id)) {
-                    session.knownEntityIds.delete(s.id); // remove from session
-                    return;
-                }
-
-                // In range
-                if (!session.knownEntityIds.has(s.id)) {
-                    newShips.push(s.serialise());   // completely new
-                    session.knownEntityIds.add(s.id);   // add to session
-                } else if (s.dirty) {
-                    const delta = s.serialiseDelta(); // known but changed
-                    if (delta) deltaShips.push(delta);
-                }
+            // Expire entities that left range
+            session.knownEntityIds.forEach(id => {
+                if (!nearbyIds.has(id)) session.knownEntityIds.delete(id);
             });
 
-            // Skip emit entirely if nothing to send
-            const hasNew = newPlayers.length > 0 || newShips.length > 0;
-            const hasDeltas = deltaPlayers.length > 0 || deltaShips.length > 0;
-            if (!hasNew && !hasDeltas) return null;
+            if (!newPlayers.length && !newShips.length && !deltaPlayers.length && !deltaShips.length) {
+                return null;
+            }
 
-            return {
-                // Full state for newly visible entities
-                newPlayers,
-                newShips,
-                // Delta updates for known entities
-                deltaPlayers,
-                deltaShips
-            };
+            return { newPlayers, newShips, deltaPlayers, deltaShips };
         });
-
-        // Clear dirty flags after all clients have been processed- prevents spam
-        this.registry.getByType<Player>('player').forEach(p => p.clearDirty());
-        this.registry.getByType<Ship>('ship').forEach(s => s.clearDirty());
     }
 
     /**

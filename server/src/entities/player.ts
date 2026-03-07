@@ -76,7 +76,6 @@ export default class Player extends Entity {
             health: this.health,
             maxHealth: this.maxHealth
         */
-
         // Send everything the client needs to display the player
         return {
             ...super.serialise(),

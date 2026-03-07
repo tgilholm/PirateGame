@@ -151,6 +151,7 @@ export default class MovementSystem implements BaseSystem {
             this.constrainToWorld(player, playerConfig.radius);
         }
 
+
         // Calculate the player's velocity from their new pos vs the old
         player.vx = (player.x - prevX) / dt;
         player.vy = (player.y - prevY) / dt;

@@ -125,11 +125,12 @@ export default class ShipModel extends Phaser.GameObjects.Container {
     }
 
     /**
-     * Updates the target state of this ship entity to the data provided from the server.
-     * @param {Object} data the data for this ship
+     * Full sync- replaces all the entity data for this ship- this should only be used when a ship
+     * is created for the first time on the server, or comes into view of this player
+     * @param {Object} data complete ship data
      */
     syncFromServer(data) {
-        // Snap if this is the first sync or position has drifted too far
+        // Snap if distance has changed a lot
         if (!this.initialised || Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
             this.x = data.x;
             this.y = data.y;
@@ -137,16 +138,31 @@ export default class ShipModel extends Phaser.GameObjects.Container {
             this.initialised = true;
         }
 
-        // Set the target position
+        // Update all targets
         this.target.x = data.x;
         this.target.y = data.y;
         this.target.r = data.r;
-
-        // Get the current velocity for extrapolation
         this.velocity.x = data.vx;
         this.velocity.y = data.vy;
         this.angularVelocity = data.av;
-        this.pilotId = data.pilotId;    // If someone is at the helm
+        this.pilotId = data.pilotId;
+    }
+
+    /**
+     * Delta sync- updates only what has changed, and leaves alone absent (undefined) data.
+     * Matter-js bodies "sleep" when close to 0 speed, and their rotation becomes undefined, which defaults
+     * to zero. This forces them to retain their actual rotation on the client
+     * @param {Object} delta partial ship data (always includes id)
+     */
+    syncDelta(delta) {
+        // Only update interpolation targets for fields that changed
+        if (delta.x !== undefined) this.target.x = delta.x;
+        if (delta.y !== undefined) this.target.y = delta.y;
+        if (delta.r !== undefined) this.target.r = delta.r;
+        if (delta.vx !== undefined) this.velocity.x = delta.vx;
+        if (delta.vy !== undefined) this.velocity.y = delta.vy;
+        if (delta.av !== undefined) this.angularVelocity = delta.av;
+        if (delta.pilotId !== undefined) this.pilotId = delta.pilotId;
     }
 
     /**

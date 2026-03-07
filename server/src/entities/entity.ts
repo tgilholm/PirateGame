@@ -75,12 +75,11 @@ export default abstract class Entity {
             vy: this.vy,
             av: this.av,
             r: this.r,
-            parentId: this.parent?.id,
+            parentId: this.parent ? this.parent.id : null,
             health: this.health,
             maxHealth: this.maxHealth // Transmit both maximum and current health for health bars
         }
 
-        this.lastSent = { ...state };    // for computing the next delta
         this.clearDirty();  // client has latest data- don't send again
         return state;
     }
@@ -92,37 +91,38 @@ export default abstract class Entity {
     * @returns a record of the changes, or null if nothing has changed.
     */
     serialiseDelta(): Record<string, any> | null {
-        const current = this.serialise(); // gets current values, updates lastSent
-        const delta: Record<string, any> = { id: this.id }; // always prepend the id
+        const current = this.serialise();
+        const delta: Record<string, any> = { id: this.id };
         let hasChanges = false;
 
-        // For each of the parameters sent on the serialise packet, check if they have changed
         for (const key of Object.keys(current)) {
-            if (key === 'id') continue; // ignore id
+            if (key === 'id') continue;
 
-            // Compare the last update to the current one
             const curr = current[key];
-            const prev = this.lastSent[key];
+            const old = this.lastSent[key];
 
             let changed: boolean;
-            if (typeof curr === 'number' && typeof prev === 'number') { 
-                const threshold = (key === 'r' || key === 'av') ? 0.001 
-                    : (key === 'x' || key === 'y') ? 0.5    // Only send if the difference is "enough"
+            if (typeof curr === 'number' && typeof old === 'number') {
+                const threshold = (key === 'r' || key === 'av') ? 0.001
+                    : (key === 'x' || key === 'y') ? 0.5
                         : (key === 'vx' || key === 'vy') ? 0.05
-                            : 0.001;    // May need to be fine-tuned
-                changed = Math.abs(curr - prev) > threshold;
+                            : 0.001;
+                changed = Math.abs(curr - old) > threshold;
             } else {
-                changed = curr !== prev;
+                changed = curr !== old;
             }
 
-            // If something changed "enough", send it
             if (changed) {
                 delta[key] = curr;
-                this.lastSent[key] = curr;
                 hasChanges = true;
             }
         }
 
-        return hasChanges ? delta : null;
+        if (hasChanges) {
+            this.lastSent = { ...current };
+            return delta;
+        }
+
+        return null;
     }
 }
