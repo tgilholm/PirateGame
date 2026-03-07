@@ -9,6 +9,7 @@ import { EventEmitter } from "events";
 import { CONFIG } from "../config";
 import PhysicsSystem from "src/systems/physics-system";
 import SpatialGrid from "./spatial-grid";
+import Projectile from "src/entities/projectile";
 
 /**
  * Communication contract between this game world and the socket service
@@ -167,6 +168,7 @@ export default class GameWorld extends EventEmitter {
         const playerData = new Map<string, { full: any, delta: any }>();
         const shipData = new Map<string, { full: any, delta: any }>();
 
+
         this.registry.getByType<Player>('player').forEach(p => {
             playerData.set(p.id, {
                 delta: p.serialiseDelta(),
@@ -179,6 +181,13 @@ export default class GameWorld extends EventEmitter {
                 full: s.serialise(),
             });
         });
+        this.registry.getByType<Projectile>('projectile').forEach(s => {
+            shipData.set(s.id, {
+                delta: s.serialiseDelta(),
+                full: s.serialise(),
+            });
+        });
+
 
         this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
             const session = this.sessions.get(socketId);

@@ -32,11 +32,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.playerId = null;
 
         this.shipList = {};
+        this.shipArray = [];
+
         this.playerList = {};
+        this.playerArray = [];
+
+        thi
+
         this.interactables = [];
 
-        this.playerArray = [];
-        this.shipArray = [];
 
 
         this.startListeners();
