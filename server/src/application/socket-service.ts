@@ -59,12 +59,15 @@ export default class SocketService {
         // Handle new clients
         this.io.on('connection', (socket: Socket) => {
             console.log(`[SocketService] Client connected: ${socket.id}`);
+
+            // Client has fully loaded in- send them the full sync
             socket.on(ClientEvent.READY, (data) => {
 
                 this.world.addPlayer(socket.id, data.username);
                 socket.emit(ServerEvent.INIT_GAME, { ...this.world.getFullState(), id: socket.id });
             });
 
+            // Client actions
             socket.on(ClientEvent.ACTION, (action: PlayerAction) => {
 
                 // dont route movement via zod
@@ -77,7 +80,7 @@ export default class SocketService {
                 // zod validation for all other action types
                 const result = ActionSchema.safeParse(action);
                 if (!result.success) {
-                    console.warn(`[SocketService] Invalid action from ${socket.id}:`, result.error.format());
+                    console.warn(`[SocketService] Invalid action from ${socket.id}:`, z.treeifyError(result.error));
                     return;
                 }
                 this.world.handleAction(socket.id, result.data);
