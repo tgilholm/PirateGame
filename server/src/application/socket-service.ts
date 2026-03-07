@@ -3,10 +3,15 @@
 
 import { Server, Socket } from "socket.io";
 import { z } from 'zod';    // For frontline validation
-import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "@shared/socket-protocol";
+import { ActionType, ClientEvent, MoveData, PlayerAction, ServerEvent } from "@shared/socket-protocol";
 import GameWorld, { WorldEvent } from "./game-world";
 
-function isValidMove(data: any): boolean {
+/**
+ * Carries out move validation bypassing Zod for the most frequent action- movement
+ * @param data the move data from the client
+ * @returns true if the move matches the schema, false otherwise
+ */
+function isValidMove(data: MoveData): boolean {
     return data &&
         typeof data.up === 'boolean' &&
         typeof data.down === 'boolean' &&
@@ -41,8 +46,6 @@ const ActionSchema = z.discriminatedUnion("type", [
  */
 export default class SocketService {
     constructor(private io: Server, private world: GameWorld) { }
-
-
 
     /**
      * Starts the listeners
