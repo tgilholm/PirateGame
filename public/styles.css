@@ -203,7 +203,7 @@ input.formElement {
     border: 1px solid #fff;
     border-radius: 4px;
     padding: 20px;
-    min-width: 300px;
+    min-width: 640px;
     max-width: 90vw;
     max-height: 90vh;
     overflow-y: auto;
@@ -219,7 +219,7 @@ input.formElement {
 
 .shop-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
     margin-bottom: 12px;
 }
@@ -256,6 +256,18 @@ input.formElement {
     font-size: 11px;
     font-family: inherit;
     cursor: pointer;
+}
+
+.shop-card-level {
+    font-size: 11px;
+    color: #f5c542;
+}
+
+.shop-card-max {
+    background: rgba(255,255,255,0.1);
+    color: #888;
+    border-color: #555;
+    cursor: default;
 }
 
 .shop-card-buy {

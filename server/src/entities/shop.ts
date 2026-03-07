@@ -5,9 +5,6 @@ import { ShopConfig } from "../types";
 //canInteract is mirrored server and client side to show/hide prompts locally, but prevent server-side tampering
 export default class Shop extends Entity {
 
-    public readonly radius: number;
-    public readonly interactRange: number;
-
     /**
      * @param id unique id, e.g. (shop_0, shop_1, ...)
      * @param tileX tile column - (entity-config shop.spawns[n].X)
@@ -33,14 +30,7 @@ export default class Shop extends Entity {
 
         const dx = this.x - player.x;
         const dy = this.y - player.y;
-        return Math.sqrt(dx * dx + dy * dy) <= this.interactRange; //pythagorean pixel distance must be < or = interactRange
+        return Math.sqrt(dx * dx + dy * dy) <= this.interactRange!; //pythagorean pixel distance must be < or = interactRange
     }
 
-    serialise() { //override, otherwise it doesnt like using radius and interactRange client side
-        return {
-            ...super.serialise(),
-            radius: this.radius,
-            interactRange: this.interactRange,
-        };
-    }
 }

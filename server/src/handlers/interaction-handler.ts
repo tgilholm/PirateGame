@@ -54,11 +54,13 @@ export default class InteractionHandler {
         }
     }
 
-    handleShopInteraction(player: Player, shop: InteractableEntity) {
-        if (shop.useType !== "shop") return;
-
-            //launch shop
-
-
+    handleRelease(player: Player, ship: Ship | null): void {
+        if (player.isSteering) {
+            player.isSteering = false;
+            if (ship) ship.pilot = null;
+        }
+        if (player.isUsingCannon) {
+            player.isUsingCannon = false;
+        }
     }
 }

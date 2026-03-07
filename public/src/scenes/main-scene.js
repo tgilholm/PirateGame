@@ -68,7 +68,7 @@ export class MainScene extends Phaser.Scene {
         this.gameManager = new GameManager(this.network, this, entityConfig);
         this.uiManager = new UIManager(this, this.gameManager);
         this.inputManager = new InputManager(this);
-        this.shopUI = new ShopUI();
+        this.shopUI = new ShopUI(this.network, this.gameManager);
         this.interactionManager = new InteractionManager(this.network, this.gameManager, this.inputManager, this.shopUI);
 
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);

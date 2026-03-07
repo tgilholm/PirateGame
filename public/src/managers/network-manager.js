@@ -75,4 +75,9 @@ export default class NetworkManager {
     sendMessage(text) {
         this.sendAction({ type: ActionType.MESSAGE, data: { text } });
     }
+
+    ///sends upgrade event to server
+    sendUpgrade(itemId) {
+        this.sendAction({ type: ActionType.UPGRADE, data: { itemId } });
+    }
 }

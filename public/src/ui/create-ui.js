@@ -1,5 +1,4 @@
  //import debug-menu from "./debug-menu.js";
- import ShopUI from "./shop-ui.js";
  import Minimap from "./minimap.js";
 
 
@@ -13,15 +12,6 @@
 
          //minimap
          this.minimap = new Minimap(document.getElementById("minimap-container"));
-
-         //debug menu — builds its own DOM
-//         this.debug-menu = new debug-menu(scene);
-//         this.debug-menu.init();
-
-         //shop UI — builds its own DOM and appends to document.body
-         this.shopUI = new ShopUI();
-
-//         //interaction prompt
-//         this.promptEl = document.getElementById("interaction-prompt");
     }
 }
+   

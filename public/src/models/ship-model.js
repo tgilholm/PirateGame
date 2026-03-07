@@ -30,6 +30,7 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         this.velocity = { x: 0, y: 0 };
         this.pilotId = null;
         this.angularVelocity = 0;
+        this.components = {};
 
         if (config.interactables) {
             config.interactables.forEach(item => {
@@ -170,5 +171,6 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         this.velocity.y = data.vy;
         this.angularVelocity = data.av;
         this.pilotId = data.pilotId;
+        if (data.components) this.components = data.components;
     }
 }

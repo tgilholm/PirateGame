@@ -14,6 +14,7 @@ export default class Ship extends Entity {
     interactables: InteractableEntity[]
     body: Matter.Body
     inputs: any;
+    components: Record<string, string>;
 
     constructor(
         id: string,
@@ -33,6 +34,17 @@ export default class Ship extends Entity {
             left: false,
             right: false
         }
+
+        this.components = { 
+            body:      'LVL1',
+            sails:     'LVL1',
+            cannons:   'LVL1',
+            head:      'LVL1',
+            crowsNest: 'LVL1',
+            anchor:    'LVL1',
+            rudder:    'LVL1',
+            crew:      'LVL1'
+        };
 
         let result = this.createInteractables(config.interactables);
         if (result) {
@@ -86,6 +98,7 @@ export default class Ship extends Entity {
         return {
             ...super.serialise(),
             pilotId: this.pilot?.id,  // For client side messages
+            components: this.components,
         }
     }
 

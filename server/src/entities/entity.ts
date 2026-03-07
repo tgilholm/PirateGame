@@ -11,6 +11,8 @@ export default abstract class Entity {
     public health: number;
     public maxHealth: number;
     public parent: Entity | null;
+    public radius: number | null;
+    public interactRange: number | null;
 
     constructor(id: string, type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
         this.id = id;
@@ -28,6 +30,9 @@ export default abstract class Entity {
         this.parent = parent;
         this.maxHealth = maxHealth;
         this.health = maxHealth;    // Start at maximum
+
+        this.radius = null;
+        this.interactRange = null;
     }
 
     /**
@@ -47,7 +52,11 @@ export default abstract class Entity {
 
             // Transmit both maximum and current health for health bars
             health: this.health,
-            maxHealth: this.maxHealth
+            maxHealth: this.maxHealth,
+
+            //optional shape/interaction data
+            ...(this.radius !== null && { radius: this.radius }),
+            ...(this.interactRange !== null && { interactRange: this.interactRange })
         }
     }
 

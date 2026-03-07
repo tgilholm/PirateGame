@@ -93,6 +93,8 @@ export default class PlayerController {
         throw new Error("Method not implemented.");
     }
     handleUpgrade(player: Player, data: UpgradeData) {
-        throw new Error("Method not implemented.");
+        const ship = this.entityRegistry.get<Ship>("ship_" + player.id);
+        if (!ship) return;
+        this.upgradeHandler.handleUpgrade(ship, data.itemId);
     }
 }

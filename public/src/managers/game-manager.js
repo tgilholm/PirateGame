@@ -175,4 +175,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         }
     }
 
+    //returns component variants for players ship. null if unavailable
+    getLocalShipComponents() {
+        if (!this.playerId) return null;
+        const ship = this.shipList["ship_" + this.playerId];
+        return ship ? ship.components : null;
+    }
+
 }
