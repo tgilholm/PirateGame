@@ -9,6 +9,7 @@ import { EventEmitter } from "events";
 import { CONFIG } from "../config";
 import PhysicsSystem from "src/systems/physics-system";
 import SpatialGrid from "./spatial-grid";
+import Projectile from "src/entities/projectile";
 
 /**
  * Communication contract between this game world and the socket service
@@ -35,7 +36,6 @@ export default class GameWorld extends EventEmitter {
     private tickRate = CONFIG.TICK_RATE;
     private tickInterval?: NodeJS.Timeout;
     private lastTime: number = 0;
-    private grid = new SpatialGrid(512, 1024); // 512px cells, 1024px view distance.  
     private sessions: Map<string, ClientSession> = new Map();   // state held by each client
 
     /**
@@ -44,12 +44,14 @@ export default class GameWorld extends EventEmitter {
      * @param entityFactory to create new entities
      * @param engine to update each system on a tick
      * @param controller to route player events to the right place
+     * @param grid to contain entities in a grid
      */
     constructor(
         private registry: EntityRegistry,
         private entityFactory: EntityFactory,
         private engine: GameEngine,
-        private controller: WorldController
+        private controller: WorldController,
+        private grid: SpatialGrid
     ) { super(); }
 
     /**
@@ -98,6 +100,9 @@ export default class GameWorld extends EventEmitter {
         this.registry.getByType<Ship>('ship').forEach(s => {
             this.grid.update(s.id, s.x, s.y);
         });
+        this.registry.getByType<Projectile>('projectile').forEach(p => {
+            this.grid.update(p.id, p.x, p.y);
+        });
     }
 
     /**
@@ -119,7 +124,7 @@ export default class GameWorld extends EventEmitter {
         const physics = this.engine.systems.get('physics') as PhysicsSystem;
         physics.addBody(newShip.body);
 
-        const newPlayer = this.entityFactory.createPlayer(
+        this.entityFactory.createPlayer(
             socketId,
             0,
             0,
@@ -166,6 +171,8 @@ export default class GameWorld extends EventEmitter {
         // Compute once and reuse for every client session
         const playerData = new Map<string, { full: any, delta: any }>();
         const shipData = new Map<string, { full: any, delta: any }>();
+        const projData = new Map<string, { full: any, delta: any }>();
+
 
         this.registry.getByType<Player>('player').forEach(p => {
             playerData.set(p.id, {
@@ -179,6 +186,13 @@ export default class GameWorld extends EventEmitter {
                 full: s.serialise(),
             });
         });
+        this.registry.getByType<Projectile>('projectile').forEach(p => {
+            projData.set(p.id, {
+                delta: p.serialiseDelta(),
+                full: p.serialise(),
+            });
+        });
+
 
         this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
             const session = this.sessions.get(socketId);
@@ -193,6 +207,8 @@ export default class GameWorld extends EventEmitter {
             const deltaPlayers: any[] = [];
             const newShips: any[] = [];
             const deltaShips: any[] = [];
+            const newProjectiles: any[] = [];
+            const deltaProjectiles: any[] = [];
             const removedIds: string[] = []; // for entities out of range
 
             // Add nearby entities to packet
@@ -215,6 +231,17 @@ export default class GameWorld extends EventEmitter {
                     } else if (sd.delta) {
                         deltaShips.push(sd.delta);
                     }
+                    return;
+                }
+                const cd = projData.get(id);
+                if (cd) {
+                    if (!session.knownEntityIds.has(id)) {
+                        newProjectiles.push(cd.full);
+                        session.knownEntityIds.add(id);
+                    } else if (cd.delta) {
+                        deltaProjectiles.push(cd.delta);
+                    }
+                    return;
                 }
             });
 
@@ -226,12 +253,19 @@ export default class GameWorld extends EventEmitter {
                 }
             });
 
-            if (!newPlayers.length && !newShips.length && !deltaPlayers.length && !deltaShips.length && !removedIds.length) {
+            if (
+                !newPlayers.length &&
+                !newShips.length &&
+                !newProjectiles.length &&
+                !deltaPlayers.length &&
+                !deltaShips.length &&
+                !deltaProjectiles.length &&
+                !removedIds.length) {
                 return null;
             }
 
             // Send the data to the client
-            return { newPlayers, newShips, deltaPlayers, deltaShips, removedIds };
+            return { newPlayers, newShips, newProjectiles, deltaProjectiles, deltaPlayers, deltaShips, removedIds };
         });
     }
 
@@ -243,6 +277,7 @@ export default class GameWorld extends EventEmitter {
         return {
             players: this.registry.getByType<Player>('player').map(p => p.serialise()),
             ships: this.registry.getByType<Ship>('ship').map(s => s.serialise()),
+            projectiles: this.registry.getByType<Projectile>('projectile').map(p => p.serialise())
         };
     }
 }

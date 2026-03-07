@@ -27,6 +27,7 @@ import UpgradeHandler from './handlers/upgrade-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
+import SpatialGrid from './application/spatial-grid';
 
 // Create the express app & server
 const app = express();
@@ -46,14 +47,17 @@ const registry = new EntityRegistry();
 const matterEngine = Engine.create({
   gravity: {x: 0, y: 0}
 });
+const spatialGrid = new SpatialGrid(512, 2048);
+
 const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
+const projectileSystem = new ProjectileSystem(registry, spatialGrid)
 const entityFactory = new EntityFactory(entityConfig, registry);
 
 const engine = new GameEngine({
   physicsSystem,
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
-  projectileSystem: new ProjectileSystem(registry),
+  projectileSystem,
   messageSystem: new MessageSystem()
 });
 
@@ -68,7 +72,7 @@ const worldController = new WorldController(registry,
   }
 );
 
-const gameWorld = new GameWorld(registry, entityFactory, engine, worldController);
+const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid);
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();

@@ -19,6 +19,7 @@ export default class InputManager extends Phaser.Events.EventEmitter {
         super();
 
         this.moveKeys = scene.input.keyboard.addKeys("W,A,S,D");
+        scene.input.mouse.onMouseDown(() => this.emit('fire'));   // mouse & space
 
         scene.input.keyboard.on('keydown-E', () => this.emit('interact'));
         scene.input.keyboard.on('keydown-Q', () => this.emit('release'));
