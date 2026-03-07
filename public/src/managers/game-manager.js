@@ -4,6 +4,10 @@ import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import InputManager from "./input-manager.js";
 
+/**
+ * Client side state manager. Keeps track of players in game, handles
+ * events for the current player and updates all entities.
+ */
 export default class GameManager extends Phaser.Events.EventEmitter {
 
     /**
@@ -19,16 +23,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
         this.input = input;
+        this.moveTimer = 0;
 
         /** @type {PlayerModel} */
         this.localPlayer = null;
         this.closestInteractable = null;
+        this.playerListDirty = false;
         this.playerId = null;
 
         this.shipList = {};
+        this.playerList = {};
         this.interactables = [];
 
-        this.playerList = {};
+        this.playerArray = [];
+        this.shipArray = [];
+
 
         this.startListeners();
     }
@@ -120,8 +129,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const matrix = this.localPlayer.getWorldTransformMatrix();
 
-        this.network.sendMove(inputs);
-        this.refreshInteractables();
+        this.moveTimer = (this.moveTimer || 0) + delta;
+        if (this.moveTimer >= 1000 / 20) {  // match server tick rate
+            this.network.sendMove(inputs);
+            this.moveTimer = 0;
+        }
 
         // Move the invisible camera target to the local player's current position
         //@ts-ignore
@@ -139,21 +151,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
-        // Tick all ships every frame
-        Object.values(this.shipList).forEach(ship => {
-            ship.update(null, delta);
-        });
-
-        // Tick all players every frame
-        Object.values(this.playerList).forEach(/** @type {PlayerModel}*/player => {
-            player.update(delta);
-
+        this.shipArray.forEach(ship => ship.update(delta));
+        this.playerArray.forEach((player) => {
             if (player === this.localPlayer) {
-                player.setGunRotation(inputs.aimAngle); // snap if local
+                player.target.aimAngle = inputs.aimAngle; // update target first
             }
+            player.update(delta);
         });
-
     }
+
+
 
     /**
      * Updates the client-side model of the game from the data provided
@@ -171,6 +178,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     shipData.y,
                     this.shipConfig
                 );
+                this.refreshInteractables();
             }
 
             /** @type {ShipModel} */
@@ -192,6 +200,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     playerData.y
                 );
                 this.playerList[playerData.id] = player;
+                this.playerListDirty = true;
             }
 
             /*
@@ -229,5 +238,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.emit('localPlayerReady', this.localPlayer);
             }
         }
+
+        this.shipArray = Object.values(this.shipList); // rebuild only in onSync
+        this.playerArray = Object.values(this.playerList);
     }
 }

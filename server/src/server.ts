@@ -39,7 +39,8 @@ app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')))
 
 
 /*
-  Create the game world
+  Create the game world. This file acts as the composition root- the start of the dependency
+  tree. All dependencies must be created and injected here.
 */
 const registry = new EntityRegistry();
 const matterEngine = Engine.create({
@@ -47,7 +48,7 @@ const matterEngine = Engine.create({
 });
 const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
-const entityFactory = new EntityFactory(entityConfig, registry, physicsSystem);
+const entityFactory = new EntityFactory(entityConfig, registry);
 
 const engine = new GameEngine({
   physicsSystem,
@@ -73,6 +74,7 @@ const socketService = new SocketService(io, gameWorld);
 socketService.initialise();
 gameWorld.start();
 
+// Starts the server on the provided port
 const PORT = process.env.PORT || CONFIG.PORT
 server.listen(PORT, () => {
   console.log(`[Server] Server launched on port: ${PORT}`);

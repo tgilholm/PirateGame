@@ -5,20 +5,31 @@ import { ActionType, PlayerAction } from "@shared/socket-protocol";
 import Player from "../entities/player";
 import Ship from "../entities/ship";
 import MessageController from "./message-controller";
-import InteractableEntity from "src/entities/interactable-entity";
 
+/**
+ * Defines the controllers that must be passed to this one
+ */
 export interface GameControllers {
     playerController: PlayerController,
     shipController: ShipController,
     messageController: MessageController
 }
 
-export default class WorldController {
 
+/**
+ * Acts as an abstraction over the more specific controllers for each domain. Routes
+ * events to their target location based on where the event originated.
+ */
+export default class WorldController {
     shipController: ShipController;
     playerController: PlayerController;
     messageController: MessageController;
 
+    /**
+     * Constructs a WorldController with the provided sub-controllers
+     * @param entityRegistry to reference the entities in the game
+     * @param controllers the controllers injected into this one
+     */
     constructor(private entityRegistry: EntityRegistry, controllers: GameControllers
     ) {
         this.shipController = controllers.shipController;
@@ -26,10 +37,16 @@ export default class WorldController {
         this.messageController = controllers.messageController;
     }
 
+    /**
+     * Handles incoming events from the player
+     * @param playerId the id of the player that the event came from
+     * @param action the action, matching the schema PlayerAction, sent by the user
+     */
     public handle(playerId: string, action: PlayerAction) {
         const player = this.entityRegistry.get<Player>(playerId);
         if (!player) return;
 
+        // Sends to the respective controller
         switch (action.type) {
             case ActionType.MOVE:
 
@@ -41,13 +58,14 @@ export default class WorldController {
 
                     // this.cannonController.handleMove(cannon, action.data);
 
+                    // If player is at the helm, move the ship
                 } else if (player.parent && player.isSteering) {
                     const ship = player.parent as Ship;
 
-                    this.shipController.handleMove(ship, action.data);  // Send the move inputs to the ship
+                    this.shipController.handleMove(ship, action.data);  
 
                 } else {
-
+                    // Otherwise move the player
                     this.playerController.handleMove(player, action.data);
                 }
                 break;
@@ -56,16 +74,18 @@ export default class WorldController {
                 this.playerController.handleUpgrade(player, action.data);
                 break;
 
+                // Checks if the player is controlling a cannon.
             case ActionType.FIRE:
                 // Again check if controlling a cannon- but not necessarily on a ship- land cannons?
                 if (player.isUsingCannon) {
-                    this.playerController.handleCannonFire(player);
+                    //this.cannonController.handleFire(player);
                 } else {
                     // If not controlling a cannon, fire the player's personal gun
                     this.playerController.handleGunFire(player);
                 }
                 break;
 
+                
             case ActionType.DIG:
                 this.playerController.handleDig(player);
                 break;

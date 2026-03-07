@@ -1,3 +1,7 @@
+
+/**
+ * Base class for all entity objects in the game. Defines variables common to all entities.
+ */
 export default abstract class Entity {
 
     public id: string;
@@ -10,8 +14,17 @@ export default abstract class Entity {
     public av: number;  // angular velocity
     public health: number;
     public maxHealth: number;
-    public parent: Entity | null;
+    public parent: Entity | null;   // all entities can "technically" have parents
 
+    /**
+     * Builds an entity with the provided data
+     * @param id the (must be unique) id of this entity
+     * @param type the type (e.g. "interactable") of this entity- this allows getByType to work properly
+     * @param x the x coordinate (relative/absolute)
+     * @param y the y coordinate (relative/absolute)
+     * @param maxHealth the starting/max health of this entity
+     * @param parent the physics parent of this entity (e.g. a Ship)
+     */
     constructor(id: string, type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
         this.id = id;
         this.type = type;
@@ -50,5 +63,4 @@ export default abstract class Entity {
             maxHealth: this.maxHealth
         }
     }
-
 }

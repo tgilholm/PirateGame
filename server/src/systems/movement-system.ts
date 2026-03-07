@@ -7,12 +7,24 @@ import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "src/entities/entity";
 
+/**
+ * Contains all movement logic for moving entities
+ */
 export default class MovementSystem implements BaseSystem {
+    /**
+     * Creates a movement system from the provided data
+     * @param registry the repository of entities from which to update moving ones
+     * @param entityConfig for taking movement parameters
+     * @param terrainMap to apply different movement speed for player
+     */
     constructor(private registry: EntityRegistry, private entityConfig: EntityConfig,
         private terrainMap: TerrainMap
-    ) {
-    }
+    ) { }
 
+    /**
+     * Updates all the moving entities
+     * @param dt the difference in time from the last update
+     */
     update(dt: number): void {
         const players = this.registry.getByType<Player>('player');
         players.forEach(player => this.updatePlayer(player, dt));
@@ -21,16 +33,28 @@ export default class MovementSystem implements BaseSystem {
         ships.forEach(ship => this.updateShip(ship, dt));
     }
 
+    /**
+     * Applies movement for a given player, accounting for on-ship conditions,
+     * different movement speed for on-land vs in-sea, collision with inner/outer
+     * ship hull and with world edge (AABB)
+     * @param player the player for which to apply movement
+     * @param dt the difference in time from the last update
+     */
     updatePlayer(player: Player, dt: number): void {
         if (player.isSteering || player.isUsingCannon) return;
+
+        const prevX = player.x; // to calculate velocity difference for client-side extrapolation
+        const prevY = player.y;
 
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;
         const playerConfig = this.entityConfig.player;
         const ships = this.registry.getByType<Ship>('ship');
 
-
+        // If the player is on a ship
         if (!parent) {
+
+            // Handle "shoving" the player away from moving ships
             for (const ship of ships) {
                 const pushPadding = -playerConfig.radius - 2;
                 const local = ship.worldToLocal(player.x, player.y);
@@ -57,15 +81,17 @@ export default class MovementSystem implements BaseSystem {
         if (right) dx += 1;
         if (dx === 0 && dy === 0) return;
 
-        // Normalize diagonal movement
+        // Normalize diagonal movement- players move the same speed in all directions
         const length = Math.sqrt(dx * dx + dy * dy);
         dx /= length;
         dy /= length;
 
+        // Different speed if on land/a ship vs in the sea 
         const onLand = this.terrainMap.isOnIsland(player.x, player.y);
         const speedMultiplier = (parent || onLand) ? playerConfig.runSpeed : playerConfig.swimSpeed;
         const speed = speedMultiplier * dt * 60;
 
+        // Contain the player inside a ship- slide them along the hull if they collide
         if (parent) {
             const cos = Math.cos(-parent.r);
             const sin = Math.sin(-parent.r);
@@ -87,14 +113,17 @@ export default class MovementSystem implements BaseSystem {
             }
 
         } else {
+            // Move in absolute scope
             const nextWorldX = player.x + dx * speed;
             const nextWorldY = player.y + dy * speed;
 
             const collisionPadding = -playerConfig.radius;
 
+            // Collide with the exterior of ships
             const isColliding = (x: number, y: number) =>
                 this.checkShipCollisions(x, y, ships, collisionPadding);
 
+            // Move freely if not colliding
             if (!isColliding(nextWorldX, nextWorldY)) {
                 player.x = nextWorldX;
                 player.y = nextWorldY;
@@ -108,28 +137,45 @@ export default class MovementSystem implements BaseSystem {
 
             }
 
-
             // Keep the player on the map
             this.constrainToWorld(player, playerConfig.radius);
         }
 
+        // Calculate the player's velocity from their new pos vs the old
+        player.vx = (player.x - prevX) / dt;
+        player.vy = (player.y - prevY) / dt;
     }
 
 
+    /**
+     * Helper method to contain a non-matter (those are handled automatically) object
+     * inside the border of the world, using an AABB bounding box
+     * @param entity the entity to contain
+     * @param padding the padding around the edge of that entity
+     */
     private constrainToWorld(entity: Entity, padding: number) {
         const minX = padding;
         const minY = padding;
         const maxX = this.terrainMap.widthInPixels - padding;
         const maxY = this.terrainMap.heightInPixels - padding;
 
+        // Bounding box collision- move the entity back inside if it leaves
         if (entity.x < minX) entity.x = minX;
         if (entity.x > maxX) entity.x = maxX;
         if (entity.y < minY) entity.y = minY;
         if (entity.y > maxY) entity.y = maxY;
     }
 
+
     /**
-     * Helper to check if a world position is inside any ship
+     * Helper method to check if an entity is currently colliding with a ship. Note that this 
+     * will only work if the coordinates of both entities are in the same scope- local & local
+     * or global & global.
+     * @param x the x coordinate of the entity
+     * @param y the y coordinate of the entity
+     * @param ships the list of ships
+     * @param padding the padding around an entity
+     * @returns true if colliding, false otherwise
      */
     private checkShipCollisions(x: number, y: number, ships: Ship[], padding: number): boolean {
         for (const ship of ships) {
@@ -140,16 +186,21 @@ export default class MovementSystem implements BaseSystem {
     }
 
 
+    /**
+     * Updates a given ship's movement by applying force/angular velocity from the provided inputs.
+     * @param ship the ship to update
+     * @param dt the difference in time from the last update
+     */
     updateShip(ship: Ship, dt: number) {
-        const { up, left, right } = ship.inputs;
+        const { up, left, right } = ship.inputs;    // ships can't move backwards
         const body = ship.body;
         const { turnSpeed, thrust } = ship.physics;
 
-
+        // Add turn speed
         if (left) Body.setAngularVelocity(body, -turnSpeed);
         if (right) Body.setAngularVelocity(body, turnSpeed);
 
-
+        // Apply force to the matter body 
         if (up) {
             const force = {
                 x: Math.cos(body.angle) * thrust,
@@ -159,5 +210,4 @@ export default class MovementSystem implements BaseSystem {
             Body.applyForce(body, body.position, force);
         }
     }
-
 }

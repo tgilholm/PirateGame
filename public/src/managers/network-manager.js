@@ -1,3 +1,5 @@
+/** global io */
+
 import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
 import { ServerEvent } from "shared/socket-protocol.js";
 

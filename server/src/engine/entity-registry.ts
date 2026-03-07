@@ -7,6 +7,7 @@ import Entity from "../entities/entity";
 export default class EntityRegistry {
     private entities: Map<string, Entity> = new Map();
     private entitiesByType: Map<string, Set<string>> = new Map();
+    private typeCache: Map<string, Entity[]> = new Map();
 
 
     /**
@@ -20,6 +21,7 @@ export default class EntityRegistry {
             this.entitiesByType.set(entity.type, new Set());
         }
         this.entitiesByType.get(entity.type)!.add(entity.id);
+        this.typeCache.delete(entity.type);
 
         console.debug(`[Registry] Added ${entity.type}:${entity.id}`);
     }
@@ -29,8 +31,7 @@ export default class EntityRegistry {
      * @param id the id of the entity to retrieve
      * @returns the entity or subtype of Entity
      */
-    public get<T extends Entity>(id: string): T | undefined 
-    {
+    public get<T extends Entity>(id: string): T | undefined {
         return this.entities.get(id) as T;  // Cast to the subtype
     }
 
@@ -42,17 +43,29 @@ export default class EntityRegistry {
         return Array.from(this.entities.values());
     }
 
+    /**
+     * Gets all the entities matching the provided type 
+     * @param type the name of the type of entity - e.g. "interactable"
+     * @returns an array of that entity
+     */
     public getByType<T extends Entity>(type: string): T[] {
+        if (this.typeCache.has(type)) {
+            return this.typeCache.get(type) as T[]; // return cached
+        }
+
         const ids = this.entitiesByType.get(type);
         if (!ids) return [];
 
-        return Array.from(ids)
+        const result = Array.from(ids)
             .map(id => this.entities.get(id) as T)
             .filter(e => e !== undefined);
+
+        this.typeCache.set(type, result); // store in cache
+        return result;
     }
 
     /**
-     * 
+     * Removes an entity from the game
      * @param id the id of the Entity to remove
      * @returns true if deletion succeeded, false if not found or failed
      */
@@ -61,6 +74,7 @@ export default class EntityRegistry {
         if (!entity) return false;  // not found
 
         this.entitiesByType.get(entity.type)?.delete(id);   // Delete from type register
+        this.typeCache.delete(entity.type); // invalidate cache
         return this.entities.delete(id);    // Delete from total register
     }
 
@@ -73,7 +87,7 @@ export default class EntityRegistry {
         this.entitiesByType.forEach((ids, type) => {
             stats[type] = ids.size;
         });
-        return {total: this.entities.size, byType: stats};
+        return { total: this.entities.size, byType: stats };
     }
 
     /**
@@ -82,5 +96,6 @@ export default class EntityRegistry {
     public clear(): void {
         this.entities.clear();
         this.entitiesByType.clear();
+        this.typeCache.clear();
     }
 }

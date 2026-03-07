@@ -5,8 +5,7 @@ import PhysicsSystem from "../systems/physics-system";
 import ProjectileSystem from "../systems/projectile-system";
 
 /**
- * Specify all the systems needed to make the game run here.This separates the game engine
-    * from its specific systems.
+ * Defines the systems that must be provided into GameEngine instances
  */
 export interface GameSystems {
     physicsSystem: PhysicsSystem,
@@ -15,21 +14,34 @@ export interface GameSystems {
     messageSystem: MessageSystem
 }
 
+/**
+ * Abstracts the systems in the game and updates all of them each tick
+ */
 export default class GameEngine {
-    private systems: Map<string, BaseSystem> = new Map();
+    public systems: Map<string, BaseSystem> = new Map();   // must derive from the abstract class
+    private systemArray: BaseSystem[];
 
+    /**
+     * Builds a GameEngine from the provided systems
+     * @param systems the game systems to add
+     */
     constructor(systems: GameSystems) {
         this.systems.set('movement', systems.movementSystem);
         this.systems.set('physics', systems.physicsSystem);
         this.systems.set('projectile', systems.projectileSystem);
         this.systems.set('message', systems.messageSystem);
+
+
+        this.systemArray = Array.from(this.systems.values());   // cache systems
     }
 
+    /**
+     * Invokes the update() event for all sub-systems
+     * @param dt the difference in time from the last tick
+     */
     public tick(dt: number) {
-        const systemArray = Array.from(this.systems.values());
-
         // Update all systems
-        systemArray.forEach((system) => {
+        this.systemArray.forEach((system) => {
             system.update(dt);
         })
     }

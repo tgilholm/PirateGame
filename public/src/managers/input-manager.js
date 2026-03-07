@@ -9,12 +9,10 @@ import PlayerModel from "../models/player-model.js";
  * helpers so the rest of the codebase never needs to touch the Phaser
  * keyboard API directly.
  *
- * Note: the debug-menu toggle key (X) is intentionally left with DebugMenu /
- * UI, since it is scoped to that subsystem and registered there.
  */
 export default class InputManager extends Phaser.Events.EventEmitter {
     /**
-     * 
+     * Builds an InputManager and starts the keyboard listeners
      * @param {Phaser.Scene} scene 
      */
     constructor(scene) {
@@ -28,34 +26,29 @@ export default class InputManager extends Phaser.Events.EventEmitter {
     }
 
     /**
-     * 
+     * Gets the current position of the mouse and keyboard inputs
      * @param {Phaser.Scene} scene 
      * @param {PlayerModel} player
-     * @returns 
+     * @returns the player inputs
      */
     getInputs(scene, player) {
         /** @type {any} */
         const keys = this.moveKeys;
-        const mouseY = scene.input.mousePointer.worldY;
-        const mouseX = scene.input.mousePointer.worldX;
+        const cam = scene.cameras.main;
+
+        // Manually convert screen pos to world pos using current camera state
+        const mouseWorldX = scene.input.mousePointer.x / cam.zoom + cam.scrollX;
+        const mouseWorldY = scene.input.mousePointer.y / cam.zoom + cam.scrollY;
 
         const worldPos = player.getWorldTransformMatrix();
-
-        console.log(mouseY, mouseX, player.x, player.y);
-
-        const aimAngle = Math.atan2(
-            mouseY - worldPos.ty,
-            mouseX - worldPos.tx
-        );
+        const aimAngle = Math.atan2(mouseWorldY - worldPos.ty, mouseWorldX - worldPos.tx);
 
         return {
             up: keys.W.isDown,
             down: keys.S.isDown,
             left: keys.A.isDown,
             right: keys.D.isDown,
-            aimAngle: aimAngle
+            aimAngle: isFinite(aimAngle) ? aimAngle : 0
         }
     }
-
-
 }

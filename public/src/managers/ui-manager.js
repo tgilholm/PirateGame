@@ -1,10 +1,14 @@
 import GameManager from "./game-manager.js";
 
+/**
+ * Owns all user interface concerns. All HTML/DOM logic should be routed
+ * through this class.
+ */
 export default class UIManager {
     /**
-     * 
-     * @param {Phaser.Scene} scene 
-     * @param {GameManager} gameManager 
+     * Constructs the UI manager for the specified Scene
+     * @param {Phaser.Scene} scene the scene to provide UI for
+     * @param {GameManager} gameManager to access the state of the game
      */
     constructor(scene, gameManager) {
         this.scene = scene;
@@ -14,6 +18,9 @@ export default class UIManager {
         this.currentInteractable = null;
     }
 
+    /**
+     * Refreshes all UI elements shown to the player with the latest data
+     */
     update() {
         const target = this.gameManager.closestInteractable;
         const player = this.gameManager.localPlayer;
@@ -39,15 +46,25 @@ export default class UIManager {
             }
         }
 
-        this.updatePlayersPanelDom(this.gameManager.playerList);
+        if (this.gameManager.playerListDirty) {
+            this.updatePlayersPanelDom(this.gameManager.playerList);
+            this.gameManager.playerListDirty = false;
+        }
     }
 
+    /**
+     * Removes the interaction prompt from the users screen if it is being shown
+     */
     hidePrompt() {
         if (this.promptElement.style.display !== 'none') {
             this.promptElement.style.display = 'none';
         }
     }
 
+    /**
+     * Shows an interaction prompt to the user
+     * @param {string} promptText the text to display
+     */
     showPrompt(promptText) {
         if (this.promptElement.textContent !== promptText) {
             this.promptElement.textContent = promptText;
@@ -59,7 +76,10 @@ export default class UIManager {
     }
 
 
-    //updates and sorts player list
+    /**
+     * Takes a list of players and refreshes the "active player" list
+     * @param {Object} playerList the list of players
+     */
     updatePlayersPanelDom(playerList) {
         const panel = document.getElementById("players-panel");
         const list = document.getElementById("players-list");

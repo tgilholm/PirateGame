@@ -6,17 +6,31 @@ import Player from "../entities/player";
 import EntityFactory from "../entities/entity-factory";
 import Ship from "../entities/ship";
 import { EventEmitter } from "events";
+import { CONFIG } from "../config";
+import PhysicsSystem from "src/systems/physics-system";
 
 export enum WorldEvent {
     GAME_STATE = "GAME_STATE"
 }
 
 
+/**
+ * The GameWorld class abstracts the specifics of each game from the server. It emits
+ * events listened to by the SocketService to deliver game state to each player.
+ */
 export default class GameWorld extends EventEmitter {
-    private tickRate = 20; // 20 Ticks Per Second (50ms per tick)
+    private tickRate = CONFIG.TICK_RATE;
     private tickInterval?: NodeJS.Timeout;
     private lastTime: number = 0;
+    private cachedState = null;
 
+    /**
+     * Creates a game world with the provided dependencies
+     * @param registry all the entities in the game
+     * @param entityFactory to create new entities
+     * @param engine to update each system on a tick
+     * @param controller to route player events to the right place
+     */
     constructor(
         private registry: EntityRegistry,
         private entityFactory: EntityFactory,
@@ -25,16 +39,19 @@ export default class GameWorld extends EventEmitter {
     ) { super(); }
 
     /**
-     * Boot up the world loop
+     * Starts the world at the specified tickrate
      */
     public start() {
         console.log(`[GameWorld] Starting game at ${this.tickRate} TPS`);
         this.lastTime = Date.now();
-        this.tickInterval = setInterval(() => this.tick(), 1000 / this.tickRate);
+        this.tickInterval = setTimeout(() => this.tick(), 1000 / this.tickRate) as any;
     }
 
+    /**
+     * Stops the game
+     */
     public stop() {
-        if (this.tickInterval) clearInterval(this.tickInterval);
+        if (this.tickInterval) clearTimeout(this.tickInterval);
         console.log(`[GameWorld] Game stopped`);
     }
 
@@ -46,9 +63,14 @@ export default class GameWorld extends EventEmitter {
         const dt = (now - this.lastTime) / 1000;
         this.lastTime = now;
         this.engine.tick(dt);
+        this.cachedState = null;
         this.broadcastGameState();
-    }
 
+        // correct delays instead of using setInterval
+        const elapsed = Date.now() - now;
+        const delay = Math.max(0, (1000 / this.tickRate) - elapsed);
+        this.tickInterval = setTimeout(() => this.tick(), delay) as any;
+    }
     /**
      * Called by SocketService when a validated action arrives
      */
@@ -60,14 +82,17 @@ export default class GameWorld extends EventEmitter {
      * Called by SocketService when a player says they are READY
      */
     public addPlayer(socketId: string, username: string) {
-        // Spawn the player on their own ship
 
+        // Spawn the player on their own ship
         const newShip = this.entityFactory.createShip(
             `ship_${socketId}`,
-            500,
-            500
+            2500,
+            5000
         )
-        this.registry.create(newShip);
+
+        // "hacky" way of adding to the physics world
+        const physics = this.engine.systems.get('physics') as PhysicsSystem;
+        physics.addBody(newShip.body);
 
         const newPlayer = this.entityFactory.createPlayer(
             socketId,
@@ -76,7 +101,6 @@ export default class GameWorld extends EventEmitter {
             newShip,
             username,
         )
-        this.registry.create(newPlayer);
     }
 
     /**
@@ -84,7 +108,16 @@ export default class GameWorld extends EventEmitter {
      */
     public removePlayer(socketId: string) {
         this.registry.delete(socketId);
-        this.registry.delete(`ship_${socketId}`);   // remove their ship
+
+        // remove the matter body
+        const physics = this.engine.systems.get('physics') as PhysicsSystem;
+        const ship = this.registry.get<Ship>(`ship_${socketId}`);
+
+        if (ship) {
+
+            physics.removeBody(ship.body);  // remove the ship's physics body
+            this.registry.delete(`ship_${socketId}`);   // remove their ship
+        }
     }
 
     /**

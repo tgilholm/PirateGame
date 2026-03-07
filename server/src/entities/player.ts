@@ -1,6 +1,10 @@
 import { PlayerConfig } from "src/types";
 import Entity from "./entity";
 
+/**
+ * The server-side representation of an individual player's state, acting as the "source of truth"
+ * for each player in the game. 
+ */
 export default class Player extends Entity {
     username: string;
     isSteering: boolean;
@@ -14,7 +18,15 @@ export default class Player extends Entity {
     };
     aimAngle: number;
 
-
+    /**
+     * Builds a player with the specified data
+     * @param id the id of the player
+     * @param x the (relative/absolute) x coordinate
+     * @param y the (relative/absolute) y coordinate
+     * @param parent the optional physics parent of this player
+     * @param username chosen by the player
+     * @param config config data read from entityConfig
+     */
     constructor(
         id: string,
         x: number,
