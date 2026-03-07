@@ -22,6 +22,9 @@ export default class InteractionManager {
         inputManager.on('interact', () => this.interact());
         inputManager.on('release', () => this.release());
         inputManager.on('fire', () => this.fire());
+
+        //close shop when player leaves interaction range
+        gameManager.on('shopClose', () => this.shopUI?.close());
     }
 
 

@@ -6,6 +6,7 @@ import { InteractData, MoveData, UpgradeData } from "@shared/socket-protocol";
 import InteractableEntity from "src/entities/interactable-entity";
 import InteractionHandler from "src/handlers/interaction-handler";
 import Entity from "src/entities/entity";
+import Shop from "src/entities/shop";
 
 export default class PlayerController {
 
@@ -93,6 +94,10 @@ export default class PlayerController {
         throw new Error("Method not implemented.");
     }
     handleUpgrade(player: Player, data: UpgradeData) {
+        const shop = this.entityRegistry.getByType<Shop>('shop')
+            .find(s => s.canInteract(player));
+        if (!shop) return;
+
         const ship = this.entityRegistry.get<Ship>("ship_" + player.id);
         if (!ship) return;
         this.upgradeHandler.handleUpgrade(ship, data.itemId);

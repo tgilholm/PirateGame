@@ -19,6 +19,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.localPlayer = null;
         this.closestInteractable = null;
         this.playerId = null;
+        this.wasNearShop = false;
 
         this.shipList = {};
         this.interactables = [];
@@ -113,6 +114,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         } else {
             this.closestInteractable = null;
         }
+
+        const isNearShop = this.closestInteractable?.item?.type === 'shop';
+        if (this.wasNearShop && !isNearShop) {
+            this.emit('shopClose');
+        }
+        this.wasNearShop = isNearShop;
 
 
     }
