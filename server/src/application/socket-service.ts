@@ -52,8 +52,14 @@ export default class SocketService {
      */
     public initialise() {
 
-        this.world.on(WorldEvent.GAME_STATE, (data) => {
-            this.io.emit(ServerEvent.GAME_STATE, data);
+        // Send the game data pertaining to that specific player- the ships/players/object near them
+        this.world.on(WorldEvent.GAME_STATE_PER_PLAYER, (getStateForSocket: (id: string) => any) => {
+            this.io.sockets.sockets.forEach((socket) => {
+                const state = getStateForSocket(socket.id);
+                if (state) {
+                    socket.emit(ServerEvent.GAME_STATE, state);
+                }
+            });
         });
 
         // Handle new clients

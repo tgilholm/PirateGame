@@ -7,6 +7,9 @@ import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "src/entities/entity";
 
+// Players that have moved beyond this threshold are marked "dirty"
+const POS_THRESHOLD = 0.5;
+
 /**
  * Contains all movement logic for moving entities
  */
@@ -43,9 +46,6 @@ export default class MovementSystem implements BaseSystem {
     updatePlayer(player: Player, dt: number): void {
         if (player.isSteering || player.isUsingCannon) return;
 
-        const prevX = player.x; // to calculate velocity difference for client-side extrapolation
-        const prevY = player.y;
-
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;
         const playerConfig = this.entityConfig.player;
@@ -79,6 +79,16 @@ export default class MovementSystem implements BaseSystem {
         if (down) dy += 1;
         if (left) dx -= 1;
         if (right) dx += 1;
+
+        // Keep track of aim angle- don't send for static players
+        const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
+        const aimChanged = Math.abs(player.aimAngle - prevAimAngle) > 0.01;
+        (player as any).prevAimAngle = player.aimAngle; // store temporarily
+
+        const prevX = player.x; // to calculate velocity difference for client-side extrapolation
+        const prevY = player.y;
+
+        // If no inputs, do nothing
         if (dx === 0 && dy === 0) return;
 
         // Normalize diagonal movement- players move the same speed in all directions
@@ -144,6 +154,14 @@ export default class MovementSystem implements BaseSystem {
         // Calculate the player's velocity from their new pos vs the old
         player.vx = (player.x - prevX) / dt;
         player.vy = (player.y - prevY) / dt;
+
+        // Mark dirty if position changed enough
+        const moved =
+            Math.abs(player.x - prevX) > POS_THRESHOLD ||
+            Math.abs(player.y - prevY) > POS_THRESHOLD ||
+            aimChanged;
+
+        if (moved) player.markDirty();
     }
 
 
