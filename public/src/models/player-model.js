@@ -69,7 +69,7 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
      * @param {number} delta 
      */
     update(delta) {
-        const responseFactor = 0.05;
+        const responseFactor = 0.075;
         const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667);
         const deltaTime = delta / 1000;
 

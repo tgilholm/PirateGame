@@ -6,15 +6,16 @@ import { z } from 'zod';    // For frontline validation
 import { ActionType, ClientEvent, PlayerAction, ServerEvent } from "@shared/socket-protocol";
 import GameWorld, { WorldEvent } from "./game-world";
 
+function isValidMove(data: any): boolean {
+    return data &&
+        typeof data.up === 'boolean' &&
+        typeof data.down === 'boolean' &&
+        typeof data.left === 'boolean' &&
+        typeof data.right === 'boolean' &&
+        typeof data.aimAngle === 'number' &&
+        isFinite(data.aimAngle);
+}
 
-// Defines the allows movement states
-const MoveSchema = z.object({
-    up: z.boolean(),
-    down: z.boolean(),
-    left: z.boolean(),
-    right: z.boolean(),
-    aimAngle: z.number()
-});
 
 // Defines the allowed interaction data
 const InteractSchema = z.object({
@@ -25,7 +26,6 @@ const InteractSchema = z.object({
 
 // Uses zod to require data/no data for each action type
 const ActionSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal(ActionType.MOVE), data: MoveSchema }).strict(),
     z.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) }).strict(),
     z.object({ type: z.literal(ActionType.INTERACT), data: InteractSchema }).strict(),
     z.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) }).strict(),
@@ -41,6 +41,8 @@ const ActionSchema = z.discriminatedUnion("type", [
  */
 export default class SocketService {
     constructor(private io: Server, private world: GameWorld) { }
+
+
 
     /**
      * Starts the listeners
@@ -61,15 +63,20 @@ export default class SocketService {
             });
 
             socket.on(ClientEvent.ACTION, (action: PlayerAction) => {
-                // Use zod to check for a valid event before dispatch
-                const result = ActionSchema.safeParse(action);
 
+                // dont route movement via zod
+                if (action?.type === ActionType.MOVE) {
+                    if (!isValidMove(action.data)) return;
+                    this.world.handleAction(socket.id, action);
+                    return;
+                }
+
+                // zod validation for all other action types
+                const result = ActionSchema.safeParse(action);
                 if (!result.success) {
                     console.warn(`[SocketService] Invalid action from ${socket.id}:`, result.error.format());
                     return;
                 }
-
-                // Send the action to the controller
                 this.world.handleAction(socket.id, result.data);
             });
 

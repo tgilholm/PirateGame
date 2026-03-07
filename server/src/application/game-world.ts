@@ -21,6 +21,7 @@ export default class GameWorld extends EventEmitter {
     private tickRate = CONFIG.TICK_RATE;
     private tickInterval?: NodeJS.Timeout;
     private lastTime: number = 0;
+    private cachedState = null;
 
     /**
      * Creates a game world with the provided dependencies
@@ -42,14 +43,14 @@ export default class GameWorld extends EventEmitter {
     public start() {
         console.log(`[GameWorld] Starting game at ${this.tickRate} TPS`);
         this.lastTime = Date.now();
-        this.tickInterval = setInterval(() => this.tick(), 1000 / this.tickRate);
+        this.tickInterval = setTimeout(() => this.tick(), 1000 / this.tickRate) as any;
     }
 
     /**
      * Stops the game
      */
     public stop() {
-        if (this.tickInterval) clearInterval(this.tickInterval);
+        if (this.tickInterval) clearTimeout(this.tickInterval);
         console.log(`[GameWorld] Game stopped`);
     }
 
@@ -61,9 +62,14 @@ export default class GameWorld extends EventEmitter {
         const dt = (now - this.lastTime) / 1000;
         this.lastTime = now;
         this.engine.tick(dt);
+        this.cachedState = null;
         this.broadcastGameState();
-    }
 
+        // correct delays instead of using setInterval
+        const elapsed = Date.now() - now;
+        const delay = Math.max(0, (1000 / this.tickRate) - elapsed);
+        this.tickInterval = setTimeout(() => this.tick(), delay) as any;
+    }
     /**
      * Called by SocketService when a validated action arrives
      */
@@ -75,7 +81,7 @@ export default class GameWorld extends EventEmitter {
      * Called by SocketService when a player says they are READY
      */
     public addPlayer(socketId: string, username: string) {
-        
+
         // Spawn the player on their own ship
         const newShip = this.entityFactory.createShip(
             `ship_${socketId}`,
