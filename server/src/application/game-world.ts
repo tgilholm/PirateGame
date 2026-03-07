@@ -7,6 +7,7 @@ import EntityFactory from "../entities/entity-factory";
 import Ship from "../entities/ship";
 import { EventEmitter } from "events";
 import { CONFIG } from "../config";
+import PhysicsSystem from "src/systems/physics-system";
 
 export enum WorldEvent {
     GAME_STATE = "GAME_STATE"
@@ -88,6 +89,10 @@ export default class GameWorld extends EventEmitter {
             2500,
             5000
         )
+
+        // "hacky" way of adding to the physics world
+        const physics = this.engine.systems.get('physics') as PhysicsSystem;
+        physics.addBody(newShip.body);
 
         const newPlayer = this.entityFactory.createPlayer(
             socketId,

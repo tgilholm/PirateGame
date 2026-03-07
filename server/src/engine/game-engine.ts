@@ -18,7 +18,7 @@ export interface GameSystems {
  * Abstracts the systems in the game and updates all of them each tick
  */
 export default class GameEngine {
-    private systems: Map<string, BaseSystem> = new Map();   // must derive from the abstract class
+    public systems: Map<string, BaseSystem> = new Map();   // must derive from the abstract class
     private systemArray: BaseSystem[];
 
     /**
