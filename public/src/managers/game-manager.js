@@ -5,6 +5,8 @@ import InputManager from "./input-manager.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
+import CannonModel from "../models/cannon-model.js";
+import ShipModel from "../models/ship-model.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -94,11 +96,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
             }
             entity.update(delta);
+        });
 
-            if (entity.entityType === 'projectile') {
-                console.log(entity.x, entity.y);
+        const now = Date.now();
+        this.models.forEach((entity, id) => {
+            if (entity.isPredicted && now - entity.spawnTime > 500) {
+                entity.destroy();
+                this.models.delete(id);
             }
-        })
+        });
+
     }
 
     /**
@@ -132,7 +139,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
             if (entityData.type === 'ship') needsInteractableRefresh = true;
-            if (entityData.isInteractable || entityData.useType !== undefined) needsInteractableRefresh = true;
+            if (entityData.isInteractable || entityData.type !== undefined) needsInteractableRefresh = true;
             if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
@@ -159,16 +166,45 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            model = this.modelFactory.create(data); // create the model if it doesn't exist
+            // Before creating, check if there's a predicted projectile nearby to replace
+            if (data.type === 'projectile') {
+                const predicted = this.findMatchingPrediction(data.x, data.y);
+                if (predicted) {
+                    // Remap the real id onto the predicted model so it syncs correctly
+                    this.models.delete(predicted.id);
+                    predicted.id = data.id;
+                    predicted.isPredicted = false;
+                    this.models.set(data.id, predicted);
+                    predicted.sync(data);
+                    return;
+                }
+            }
 
-            if (!model) return; // factory failed to create
-            this.models.set(data.id, model);  // add to map
+            model = this.modelFactory.create(data);
+            if (!model) return;
+            this.models.set(data.id, model);
         }
 
         // @ts-ignore reparent the player if they left a ship
         if (data.type === 'player') this.handleReparent(model, data);
 
         model.sync(data);
+    }
+
+    findMatchingPrediction(x, y) {
+        let closest = null;
+        let closestDist = 150; // max snap distance in pixels — tune this
+
+        this.models.forEach(model => {
+            if (!model.isPredicted) return;
+            const dist = Phaser.Math.Distance.Between(model.x, model.y, x, y);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closest = model;
+            }
+        });
+
+        return closest;
     }
 
     /**
@@ -256,8 +292,57 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         // Send the one-off events directly to the server
-        this.input.on('fire', () => this.network.sendFire());
+        this.input.on('fire', () => {
+            this.network.sendFire();
+            this.spawnPredictedProjectile();
+        });
         this.input.on('release', () => this.network.sendRelease());
+    }
+
+    spawnPredictedProjectile() {
+        const player = this.localPlayer;
+        if (!player) return;
+
+        // Compute fresh aim angle directly from mouse position
+        const cam = this.scene.cameras.main;
+        const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
+        const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
+        const playerPos = player.worldPos;
+        const freshAimAngle = Math.atan2(mouseWorldY - playerPos.y, mouseWorldX - playerPos.x);
+
+        let worldAngle, spawnX, spawnY;
+
+        if (player.isUsingCannon) {
+            const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
+            if (!cannon || cannon.reloadTimer > 0) return;
+
+            const ship = this.models.get(player.parentId);
+            worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
+
+            const pos = cannon.worldPos;
+            spawnX = pos.x + Math.cos(worldAngle) * 20;
+            spawnY = pos.y + Math.sin(worldAngle) * 20;
+        } else {
+            if (player.reloadTimer > 0) return;
+            worldAngle = freshAimAngle; // fresh, not interpolated
+            spawnX = player.gun.x;
+            spawnY = player.gun.y;
+        }
+
+
+        const speed = 600;
+        const model = this.modelFactory.createProjectile({
+            id: `predicted_${Date.now()}`,
+            x: spawnX,
+            y: spawnY,
+            r: worldAngle
+        });
+        model.velocity.x = Math.cos(worldAngle) * speed;
+        model.velocity.y = Math.sin(worldAngle) * speed;
+        model.isPredicted = true;
+        model.initialised = true; // already positioned correctly, don't snap on server confirmation
+        model.spawnTime = Date.now();
+        this.models.set(model.id, model);
     }
 
     /**

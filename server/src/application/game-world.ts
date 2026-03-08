@@ -188,6 +188,12 @@ export default class GameWorld extends EventEmitter {
             const deltaEntities: any[] = [];
             const removedIds: string[] = [];
 
+            const selfData = entityData.get(socketId);
+            if (selfData) {
+                deltaEntities.push(selfData.full);
+                session.knownEntityIds.add(socketId);
+            }
+
             // New/updated entities
             nearbyIds.forEach(id => {
                 const data = entityData.get(id);

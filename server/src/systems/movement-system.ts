@@ -50,6 +50,10 @@ export default class MovementSystem implements BaseSystem {
      * @param dt the difference in time from the last update
      */
     updatePlayer(player: Player, dt: number): void {
+        if (player.reloadTimer > 0) {
+            player.reloadTimer = Math.max(0, player.reloadTimer - dt * 1000);
+            player.markDirty();
+        }
         if (player.isSteering || player.cannon) return;
 
         const parent = player.parent as Ship || null;
@@ -239,6 +243,12 @@ export default class MovementSystem implements BaseSystem {
 
 
     updateCannon(cannon: Cannon, dt: number) {
+        // Always update reload timer
+        if (cannon.reloadTimer > 0) {
+            cannon.reloadTimer = Math.max(0, cannon.reloadTimer - dt * 1000);
+            cannon.markDirty();
+        }
+
         if (!cannon.user) return;   // only move cannons when being controlled
 
         const ship = cannon.parent as Ship | null;
@@ -256,10 +266,5 @@ export default class MovementSystem implements BaseSystem {
 
         const maxStep = MAX_CANNON_SPEED * dt;
         cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
-
-        if (cannon.reloadTimer > 0) {
-            cannon.reloadTimer = Math.max(0, cannon.reloadTimer - dt * 1000);
-            cannon.markDirty();
-        }
     }
 }

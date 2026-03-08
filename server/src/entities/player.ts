@@ -18,9 +18,8 @@ export default class Player extends Entity {
         right: boolean;
     };
     aimAngle: number;
-
-    private prevX: number = 0;
-    private prevY: number = 0;
+    reloadTime: number = 1000;
+    reloadTimer: number = 0;
 
     /**
      * Builds a player with the specified data
@@ -61,6 +60,8 @@ export default class Player extends Entity {
         }
     }
 
+    get isReloaded(): boolean {return this.reloadTimer <= 0};
+
     /**
      * Override base method appending player-specific data for network transmission
      */
@@ -83,7 +84,9 @@ export default class Player extends Entity {
             username: this.username,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
-            isUsingCannon: !!this.cannon    // convert to true/false
+            isUsingCannon: !!this.cannon,    // convert to true/false
+            reloadTimer: this.reloadTimer,
+            reloadTime: this.reloadTime
         }
 
     }

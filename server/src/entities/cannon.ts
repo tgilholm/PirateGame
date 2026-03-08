@@ -18,4 +18,13 @@ export default class Cannon extends InteractableEntity {
     }
 
     get isReloaded(): boolean {return this.reloadTimer <= 0;}
+
+    serialise() {
+        return {
+            ...super.serialise(),
+            reloadTimer: this.reloadTimer,
+            reloadTime: this.reloadTime,
+            userId: this.user?.id
+        }
+    }
 }

@@ -29,6 +29,8 @@ export default class Model extends Phaser.GameObjects.Container {
         this.#worldPos = { x: 0, y: 0 };                 // private identifier
         this.health = 0;
         this.maxHealth = 0;
+        this.isPredicted = false;
+        this.spawnTime = Date.now();
 
         this.scene.add.existing(this);
     }

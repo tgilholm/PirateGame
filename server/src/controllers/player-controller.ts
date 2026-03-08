@@ -113,6 +113,12 @@ export default class PlayerController {
         throw new Error("Method not implemented.");
     }
     handleGunFire(player: Player) {
+        // Wait until reloaded
+        if (!player || !player.isReloaded) return;
+
+        // Reset reload timer
+        player.reloadTimer = player.reloadTime;
+
         // Get player world pos
         const worldPos = this.getWorldPosition(player);
         const projectileId = `proj_${Date.now()}_${player.id}`; // "unique" id
