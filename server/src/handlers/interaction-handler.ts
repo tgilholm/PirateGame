@@ -1,5 +1,7 @@
 import Cannon from "src/entities/cannon";
+import Helm from "src/entities/helm";
 import InteractableEntity from "src/entities/interactable-entity";
+import Ladder from "src/entities/ladder";
 import Player from "src/entities/player";
 import Ship from "src/entities/ship";
 
@@ -17,7 +19,7 @@ export default class InteractionHandler {
      * @param ship the ship the interactable is on
      * @param helm the helm being interacted with
      */
-    handleHelmInteraction(player: Player, ship: Ship, helm: InteractableEntity) {
+    handleHelmInteraction(player: Player, ship: Ship, helm: Helm) {
         // Player not on ship or ship already being piloted
         if (!player.parent || ship.pilot || helm.user) return;
 
@@ -55,7 +57,7 @@ export default class InteractionHandler {
      * @param ship the ship the ladder is on
      * @param ladder the ladder being interacted with
      */
-    handleLadderInteraction(player: Player, ship: Ship, ladder: InteractableEntity) {
+    handleLadderInteraction(player: Player, ship: Ship, ladder: Ladder) {
 
         if (!player.parent) {
             const enterYdir = ladder.y > 0 ? -1 : 1;

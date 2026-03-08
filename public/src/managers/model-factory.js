@@ -32,8 +32,8 @@ export default class ModelFactory {
             case 'ship': return this.createShip(data);
             case 'player': return this.createPlayer(data);
             case 'projectile': return this.createProjectile(data);
-            case 'cannon': return this.createInteractable(data);
-            case 'helm': return this.createInteractable(data);
+            case 'cannon':  // all interactables "fall through"
+            case 'helm': 
             case 'ladder': return this.createInteractable(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);

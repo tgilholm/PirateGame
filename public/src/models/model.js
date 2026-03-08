@@ -21,6 +21,7 @@ export default class Model extends Phaser.GameObjects.Container {
         this.id = id;
         this.entityType = entityType;
         this.isStatic = isStatic;
+        this.initialised = false;
 
         this.target = { x: x, y: y, r: r };   // for interpolation
         this.velocity = { x: 0, y: 0 };       // for extrapolation
@@ -50,6 +51,14 @@ export default class Model extends Phaser.GameObjects.Container {
         if (data.r !== undefined) this.target.r = data.r;
         if (data.health !== undefined) this.health = data.health;
         if (data.maxHealth !== undefined) this.maxHealth = data.maxHealth;
+
+        // Snap on first packet
+        if (!this.initialised) {
+            this.x = this.target.x;
+            this.y = this.target.y;
+            this.rotation = this.target.r;
+            this.initialised = true;
+        }
     }
 
 

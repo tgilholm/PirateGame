@@ -235,8 +235,10 @@ export default class MovementSystem implements BaseSystem {
     }
 
 
-    updateCannon(cannon: Cannon, dt: number)
-    {
+    updateCannon(cannon: Cannon, dt: number) {
+
+        // Only move cannons when being controlled
+        if (!cannon.user) return;
         const targetAngle = cannon.targetAngle;
 
         cannon.r = targetAngle;
