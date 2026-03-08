@@ -58,8 +58,9 @@ export default class TreasureSystem implements BaseSystem {
     }
 
     private spawnInitialTreasures(): void {
+        const target = this.options.initialSpawnCount || 500;
         let spawned = 0;
-        const target = Math.min(this.options.initialSpawnCount, this.options.maxTreasures);
+
 
         for (let i = 0; i < target; i++) {
             const success = this.spawnOneTreasure();

@@ -6,9 +6,8 @@ export default class TreasureModel extends Model {
         this.goldValue = goldValue;
 
         this.sprite = scene.add.sprite(0, 0, 'treasure-chest');
+        this.sprite.setScale(2);
         this.sprite.setOrigin(0.5, 0.5);
-        this.sprite.setScale(0.75);
-
         this.add(this.sprite);
         this.setDepth(20);
     }
