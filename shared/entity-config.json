@@ -22,47 +22,27 @@
         },
         "interactables": [
             {
-                "id": "helm",
                 "type": "helm",
-                "usePrompt": "Take the helm",
-                "releasePrompt": "Release the helm",
-                "texture": "helm",
                 "x": -100,
                 "y": 0
             },
             {
-                "id": "cannon_1",
                 "type": "cannon",
-                "usePrompt": "Use cannon",
-                "releasePrompt": "Release cannon",
-                "texture": "cannon",
                 "x": 30,
                 "y": -55
             },
             {
-                "id": "cannon_2",
                 "type": "cannon",
-                "usePrompt": "Use cannon",
-                "releasePrompt": "Release cannon",
-                "texture": "cannon",
                 "x": 30,
                 "y": 55
             },
             {
-                "id": "ladder_1",
                 "type": "ladder",
-                "usePrompt": "Use ladder",
-                "releasePrompt": "",
-                "texture": "ladder",
                 "x": -80,
                 "y": 75
             },
             {
-                "id": "ladder_2",
                 "type": "ladder",
-                "usePrompt": "Use ladder",
-                "releasePrompt": "",
-                "texture": "ladder",
                 "x": -80,
                 "y": -75
             }

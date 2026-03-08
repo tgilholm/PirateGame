@@ -1,12 +1,10 @@
-/** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */
-
-import Interactable from "./interactable.js";
+import Model from "./model.js";
 
 /**
- * Client-side representation of ship data. Extends container to allow other 
- * game objects to move with, and independently of the ship.  
+ * Client-side representation of ship data. Extends model, which extends
+ * Container, allowing entities to move around with and on this ship.  
  */
-export default class ShipModel extends Phaser.GameObjects.Container {
+export default class ShipModel extends Model {
 
     /**
      * Creates a ship in the specified scene at the provided coordinates.
@@ -17,119 +15,91 @@ export default class ShipModel extends Phaser.GameObjects.Container {
      * @param {ShipConfig} config the config data specifying the ship's dimensions
      */
     constructor(scene, id, x, y, config) {
-        super(scene, x, y);
-        this.dimensions = config.dimensions; // destructure the config- we only need the hull dimensions
+        super(scene, id, x, y, 'ship', 0, false);   // not static, 0 rotation
+        this.dimensions = config.dimensions; // for the hull dimensions
         this.interactables = [];
-        this.id = id;
-
-        this.target = { x: 0, y: 0, r: 0 }; // for interpolation
-        this.velocity = { x: 0, y: 0 }; // for extrapolation
         this.pilotId = null;
         this.angularVelocity = 0;
+        this.swayTimer = Math.random() * 1000;  // For the random sine-wave "bobbing"
 
-        // Adds each of the interactables from the config to this ship
-        if (config.interactables) {
-            config.interactables.forEach(item => {
-                const model = new Interactable(this.scene, this, item);
-                this.interactables.push(model);
-            })
-        }
+        const textureKey = `hull_${this.dimensions.height}_${this.dimensions.middleWidth}`;
+        this.getHullTexture(textureKey);
 
-        this.hullSprite = null;
-        this.drawHull(this.dimensions);
-        this.drawInteractables();
-        this.setRotation(0);
-        scene.add.existing(this);
+        this.hullSprite = scene.add.sprite(0, 0, textureKey);
+
+        // Calculate the centre offset
+        const padding = 5;
+        const offsetX = this.dimensions.sternRadius + (this.dimensions.middleWidth / 2) + padding;
+        const offsetY = (this.dimensions.height / 2) + padding;
+        const totalW = this.dimensions.middleWidth + this.dimensions.bowLength + this.dimensions.sternRadius + (padding * 2);
+        const totalH = this.dimensions.height + (padding * 2);
+
+        // Add the actual sprite
+        this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
+        this.add(this.hullSprite);
+        this.sendToBack(this.hullSprite);
+
+        this.setDepth(10);
     }
 
 
     /**
-     * Creates the sprite for this ship using the dimensions provided in the config file
-     * @param {ShipConfig["dimensions"]} dimensions the dimensions of the ship
+     * Generates the hull texture from the dimensions supplied in the config
+     * if it doesn't already exist. This ensures that new ships using the same
+     * dimensions as this will re-use the existing texture.
+     * @param {string} textureKey the id of the texture in Phaser's texture cache
      */
-    drawHull(dimensions) {
-        if (!dimensions) return;
+    getHullTexture(textureKey)
+    {
+        if (this.scene.textures.exists(textureKey)) return; // already drawn once
 
-
-        const { height, middleWidth, bowLength, sternRadius } = dimensions;
+        const { height, middleWidth, bowLength, sternRadius } = this.dimensions;
         const halfH = height / 2;
-        const halfW = middleWidth / 2;  // width in pixels of the middle rectangle
-        const segments = 12;            // how much to subdivide the line by
+        const halfW = middleWidth / 2;
+        const segments = 12;
         const padding = 5;
-        const totalW = middleWidth + bowLength + sternRadius + (padding * 2);   // total length of the ship
+        const totalW = middleWidth + bowLength + sternRadius + (padding * 2);
         const totalH = height + (padding * 2);
         const offsetX = sternRadius + halfW + padding;
         const offsetY = halfH + padding;
 
-        // Draw the ship with an outline, fill with brown
         const graphics = this.scene.make.graphics({ x: 0, y: 0 }, false);
         graphics.fillStyle(0x5d4037, 1);
         graphics.lineStyle(4, 0xffffff, 1);
         graphics.beginPath();
 
-        // Stern- draws a semi-circle 
+        // Stern semicircle
         for (let i = 0; i <= segments; i++) {
             const theta = (Math.PI / 2) + (i / segments) * Math.PI;
-            const px = offsetX + (-halfW + (Math.cos(theta) * sternRadius));
-            const py = offsetY + (Math.sin(theta) * sternRadius);
-            if (i === 0) graphics.moveTo(px, py);
-            else graphics.lineTo(px, py);
+            graphics.lineTo(offsetX + (-halfW + Math.cos(theta) * sternRadius), offsetY + Math.sin(theta) * sternRadius);
         }
-
-        // Bow top- half of the quadratic curve
+        // Bow Top half quadratic
         for (let i = 0; i <= segments; i++) {
             const t = i / segments;
-            const px = offsetX + (halfW + (t * bowLength));
-            const py = offsetY + (-halfH * (1 - (t * t)));
-            graphics.lineTo(px, py);
+            graphics.lineTo(offsetX + (halfW + t * bowLength), offsetY + (-halfH * (1 - t * t)));
         }
-
-        // Bow bottom - other half of the quadratic curve
+        // Bow Bottom other half of the quadratic
         for (let i = segments; i >= 0; i--) {
             const t = i / segments;
-            const px = offsetX + (halfW + (t * bowLength));
-            const py = offsetY + (halfH * (1 - (t * t)));
-            graphics.lineTo(px, py);
+            graphics.lineTo(offsetX + (halfW + t * bowLength), offsetY + (halfH * (1 - t * t)));
         }
 
         graphics.closePath();
         graphics.fillPath();
         graphics.strokePath();
-
-        // Only generate the texture if it doesn't already exist- future ships re-use this
-        const textureName = 'hull';
-        if (!this.scene.textures.exists(textureName)) {
-            graphics.generateTexture(textureName, totalW, totalH);
-        }
-
-        if (this.hullSprite) this.hullSprite.destroy();
-
-        // Sets the origin point of this ship to the relative centre
-        this.hullSprite = this.scene.add.sprite(0, 0, textureName);
-        this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
-        this.scene.textures.get(textureName).setFilter(Phaser.Textures.FilterMode.NEAREST);
-        this.add(this.hullSprite);
-        this.sendToBack(this.hullSprite);
-        this.setDepth(10);
-
-        this.swayTimer = Math.random() * 1000;  // For the random sine-wave "bobbing"
+        graphics.generateTexture(textureKey, totalW, totalH);   // for re-use by other ships
+        graphics.destroy(); // cleanup
     }
 
-    /**
-     * Adds each of the interactable sprites to this container
-     */
-    drawInteractables() {
-        this.interactables.forEach(i => {
-            const item = this.add(i);
-        });
-    }
 
     /**
-     * Full sync- replaces all the entity data for this ship- this should only be used when a ship
-     * is created for the first time on the server, or comes into view of this player
-     * @param {Object} data complete ship data
+     * Overrides the sync method in the base class to provide this model with
+     * ship-specific data from the server.
+     * @param {Object} data the data from the server
      */
-    syncFromServer(data) {
+    sync(data) {
+        super.sync(data);
+
         // Snap if distance has changed a lot
         if (!this.initialised || Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
             this.x = data.x;
@@ -138,43 +108,30 @@ export default class ShipModel extends Phaser.GameObjects.Container {
             this.initialised = true;
         }
 
-        // Update all targets
-        this.target.x = data.x;
-        this.target.y = data.y;
-        this.target.r = data.r;
-        this.velocity.x = data.vx;
-        this.velocity.y = data.vy;
-        this.angularVelocity = data.av;
-        this.pilotId = data.pilotId;
+        if (data.av !== undefined) this.angularVelocity = data.av;
+        if (data.pilotId !== undefined) this.pilotId = data.pilotId;
     }
 
     /**
-     * Delta sync- updates only what has changed, and leaves alone absent (undefined) data.
-     * Matter-js bodies "sleep" when close to 0 speed, and their rotation becomes undefined, which defaults
-     * to zero. This forces them to retain their actual rotation on the client
-     * @param {Object} delta partial ship data (always includes id)
+     * Overrides the base interpRotation method to also extrapolate the rotation
+     * of the ship from the angular velocity before interpolating.
+     * @param {number} deltaTime the difference in time in seconds
+     * @param {number} lerp the interpolation factor
      */
-    syncDelta(delta) {
-        // Only update interpolation targets for fields that changed
-        if (delta.x !== undefined) this.target.x = delta.x;
-        if (delta.y !== undefined) this.target.y = delta.y;
-        if (delta.r !== undefined) this.target.r = delta.r;
-        if (delta.vx !== undefined) this.velocity.x = delta.vx;
-        if (delta.vy !== undefined) this.velocity.y = delta.vy;
-        if (delta.av !== undefined) this.angularVelocity = delta.av;
-        if (delta.pilotId !== undefined) this.pilotId = delta.pilotId;
+    interpRotation(deltaTime, lerp) {
+        const predictedR = this.target.r + this.angularVelocity * deltaTime;
+        const diff = Phaser.Math.Angle.Wrap(predictedR - this.rotation);
+        this.rotation += diff * lerp;
     }
 
     /**
-     * Updates the position of this ship and the entities inside it from the target
-     * data provided in syncFromServer(). Extrapolates the position from
-     * the current speed and the time since the last update to predict the movement of the ship
-     * without waiting for a server update.
-     * @param {number} delta 
+     * Overrides the postUpdate method from the base class to provide
+     * ship-specific updates.
+     * @param {number} delta the difference in time from the last update
+     * @param {number} deltaTime the delta, in seconds
+     * @param {number} lerp the lerp factor, calculated from the delta
      */
-    update(delta) {
-        if (!this.initialised) return;
-
+    postUpdate(delta, deltaTime, lerp) {
         // Move the ship up and down slightly to "bob" with the waves
         this.swayTimer += delta;
         const bobAmount = Math.sin(this.swayTimer / 1000) * 1;
@@ -188,27 +145,15 @@ export default class ShipModel extends Phaser.GameObjects.Container {
         this.interactables.forEach(item => {
             item.y = item.startY + bobAmount;
         });
-
-        // Calculate the amount to interpolate 
-        const deltaTime = delta / 1000;
-        const lerp = 1 - Math.pow(1 - 0.1, delta / 16.67);
-
-        // Use distance = speed * time to calculate the predicted destination
-        const predictedX = this.target.x + this.velocity.x * deltaTime;
-        const predictedY = this.target.y + this.velocity.y * deltaTime;
-        const predictedR = this.target.r + this.angularVelocity * deltaTime;
-
-        // Move smoothly to the predicted position, avoiding round pixels
-        this.x = Phaser.Math.Linear(this.x, predictedX, lerp)
-        this.y = Phaser.Math.Linear(this.y, predictedY, lerp)
-
-        // this.x = Math.round(Phaser.Math.Linear(this.x, predictedX, lerp));
-        // this.y = Math.round(Phaser.Math.Linear(this.y, predictedY, lerp));
-
-        // Also interpolate the rotation
-        const diff = Phaser.Math.Angle.Wrap(predictedR - this.rotation);
-        this.rotation += diff * lerp;
     }
 
-
+    /**
+     * Destroys this container and the contained interactables.
+     */
+    destroy() {
+        this.interactables.forEach((item) => {
+            item.destroy();
+        });
+        super.destroy();
+    }
 }

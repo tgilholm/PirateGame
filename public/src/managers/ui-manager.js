@@ -47,6 +47,7 @@ export default class UIManager {
         }
 
         if (this.gameManager.playerListDirty) {
+
             this.updatePlayersPanelDom(this.gameManager.playerList);
             this.gameManager.playerListDirty = false;
         }
@@ -87,7 +88,7 @@ export default class UIManager {
         if (!panel || !list) return;
 
         panel.style.display = "block";
-        const players = Object.values(playerList);
+        const players = Array.from(playerList.values());
         players.sort((a, b) => (a.username || "").localeCompare(b.username || ""));
         const visible = players.slice(0, 10);
         list.innerHTML = visible

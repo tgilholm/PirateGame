@@ -1,18 +1,6 @@
 import Entity from "./entity";
 import Player from "./player";
 
-/**
- * Defines the configuration details common to all interactables
- */
-export interface InteractableConfig {
-    id: string,
-    type: string,
-    usePrompt: string,
-    releasePrompt: string,
-    texture: string,
-    x: number,
-    y: number
-}
 
 /**
  * Base class for interactable objects. Use for simple interactables, or extend for more complex ones
@@ -26,9 +14,9 @@ export default class InteractableEntity extends Entity {
      * @param config the configuration data for this entity
      * @param parent a physics parent, if one was specified
      */
-    constructor(config: InteractableConfig, parent: Entity | null) {
-        super(config.id, 'interactable', config.x, config.y, 100, parent);
-        this.useType = config.type;
+    constructor(id: string, type: string, x: number, y: number, parent: Entity | null) {
+        super(id, 'interactable', x, y, 100, parent);
+        this.useType = type;
         this.user = null;   // No user to start
     }
 }

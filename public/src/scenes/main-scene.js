@@ -5,6 +5,7 @@ import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
 import UIManager from "../managers/ui-manager.js";
 import InputManager from "../managers/input-manager.js";
+import ModelFactory from "../managers/model-factory.js";
 
 
 const socket = globalThis.io();
@@ -36,14 +37,16 @@ export class MainScene extends Phaser.Scene {
     create(data) {
         this.setupWorld();
 
-        //@ts-ignore
-        const entityConfig = window.entityConfig;   // cheesed
+        //@ts-ignore cheesed into this window
+        const entityConfig = window.entityConfig;   
+        const modelFactory = new ModelFactory(this, entityConfig);
+
 
         this.gameManager = new GameManager(
             this,
-            entityConfig,
             new NetworkManager(socket),
-            new InputManager(this)
+            new InputManager(this),
+            modelFactory
         );
         this.uiManager = new UIManager(this, this.gameManager);
 

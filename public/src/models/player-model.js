@@ -1,11 +1,12 @@
 /* global Phaser */
 
+import Model from "./model.js";
 import ShipModel from "./ship-model.js";
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
  */
-export default class PlayerModel extends Phaser.GameObjects.Container {
+export default class PlayerModel extends Model {
 
     /**
      * Constructs a player in the specified scene with the provided id and coordinates
@@ -15,13 +16,8 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
      * @param {number} y the start y coordinate (relative/absolute)
      */
     constructor(scene, id, x, y) {
-        super(scene, x, y);
+        super(scene, id, x, y, 'player', 0, false); // players can move
 
-        this.scene.add.existing(this);
-
-        this.id = id;
-        this.target = { x: 0, y: 0, aimAngle: 0 };
-        this.velocity = { x: 0, y: 0 };
         this.isSteering = false;
         this.isUsingCannon = false;
         this.aimAngle = 0;
@@ -44,65 +40,35 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
 
 
     /**
-     * Updates the client-side state of this player object with the data received from the server.
-     * This method replaces all data in this object with the player data from the server, and should
-     * thus only be used when a player is being created for the first time
-     * @param {Object} data the complete data about this player
+     * Extend the base sync() method with generic model data, and provide player-specific data
+     * from the server here.
+     * @param {Object} data the data from the server
      */
-    syncFromServer(data) {
-        // Only updates if a username was not already set
+    sync(data) {
+        super.sync(data);   // Sync generic model data
+
         if (data.username && this.nameText.text !== data.username) {
             this.nameText.setText(data.username);
             this.username = data.username;
         }
-        this.target.x = data.x; // The coordinate to aim for in interpolation
-        this.target.y = data.y;
-        this.target.aimAngle = data.aimAngle;
-        this.velocity.x = data.vx;
-        this.velocity.y = data.vy;
-        this.isSteering = data.isSteering;
-        this.isUsingCannon = data.isUsingCannon;
+
+        if (data.isSteering !== undefined) this.isSteering = data.isSteering;
+        if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
     }
 
-    /**
-     * Updates the client-side state of this player object by changing only the fields that have been
-     * changed by the server-side representation, and leaving everything else unchanged. This retains
-     * the "last known" values of each.
-     * @param {Object} delta the partial data from the server 
-     */
-    syncDelta(delta) {
-        if (delta.username !== undefined && this.nameText.text !== delta.username) {
-            this.nameText.setText(delta.username);
-            this.username = delta.username;
-        }
-        if (delta.x !== undefined) this.target.x = delta.x;
-        if (delta.y !== undefined) this.target.y = delta.y;
-        if (delta.aimAngle !== undefined) this.target.aimAngle = delta.aimAngle;
-        if (delta.vx !== undefined) this.velocity.x = delta.vx;
-        if (delta.vy !== undefined) this.velocity.y = delta.vy;
-        if (delta.isSteering !== undefined) this.isSteering = delta.isSteering;
-        if (delta.isUsingCannon !== undefined) this.isUsingCannon = delta.isUsingCannon;
-    }
 
     /**
-     * Updates this player from the target data. Interpolates between the player's 
-     * last coordinate and the target received from the server.
-     * @param {number} delta the difference in time between the last update
+     * Override the postUpdate() class to provide functionality specific to this player,
+     * without needing to touch the base update() class
+     * @param {number} delta the difference in time from the last update
+     * @param {number} deltaTime the delta, in seconds
+     * @param {number} lerp the lerp factor, calculated from the delta
      */
-    update(delta) {
-        const responseFactor = 0.075;
-        const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667);
-        const deltaTime = delta / 1000;
+    postUpdate(delta, deltaTime, lerp) {
+        const gun = this.gun;
+        const pos = this.worldPos;
+        const isBusy = this.isSteering || this.isUsingCannon;
 
-        const predictedX = this.target.x + this.velocity.x * deltaTime;
-        const predictedY = this.target.y + this.velocity.y * deltaTime;
-
-        this.x = Phaser.Math.Linear(this.x, predictedX, lerp);
-        this.y = Phaser.Math.Linear(this.y, predictedY, lerp);
-
-        // For other players- local player's aim angle is taken immediately from their inputs
-        const aimDiff = Phaser.Math.Angle.Wrap(this.target.aimAngle - this.aimAngle);
-        this.aimAngle += aimDiff * lerp;
 
         // If on a ship, move up and down with it
         if (this.parentContainer instanceof ShipModel) {
@@ -112,22 +78,33 @@ export default class PlayerModel extends Phaser.GameObjects.Container {
             this.bodySprite.y = 0;
         }
 
-        const worldPos = this.getWorldTransformMatrix();
-        const gun = this.gun;
-        gun.x = worldPos.tx + Math.cos(this.aimAngle) * 15;  // radius
-        gun.y = worldPos.ty + Math.sin(this.aimAngle) * 15;
+        // Move the gun around the outside of the player
+        gun.setPosition(
+            pos.x + Math.cos(this.aimAngle) * 15,   // radius of player
+            pos.y + Math.sin(this.aimAngle) * 15
+        );
         gun.setRotation(this.aimAngle);
 
         // Ignore any relative coordinates/rotation for the name tag- always display upright
-        this.nameText.setPosition(worldPos.tx, worldPos.ty - 25);
-
-        const isBusy = this.isSteering || this.isUsingCannon;
+        this.nameText.setPosition(pos.x, pos.y - 25);
 
         // Hide the player's gun and make them slightly transparent when interacting
         this.gun.setVisible(isBusy ? false : true);
         this.setAlpha(isBusy ? 0.6 : 1.0);
     }
 
+
+    /**
+     * Overrides interpRotation because the player's definition of rotation applies
+     * to their gun (for now).
+     * @param {number} deltaTime the difference in time in seconds
+     * @param {number} lerp the interpolation factor 
+     */
+    interpRotation(deltaTime, lerp) {
+        // Rotate the aim angle smoothly
+        const aimDiff = Phaser.Math.Angle.Wrap(this.target.r - this.aimAngle);
+        this.aimAngle += aimDiff * lerp;
+    }
 
 
     /**
