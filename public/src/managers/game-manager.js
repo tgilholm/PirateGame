@@ -18,8 +18,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      * @param {NetworkManager} network abstracts io events
      * @param {InputManager} input abstracts key inputs
      */
+
+
     constructor(scene, entityConfig, network, input) {
         super();
+        this.projectiles = [];
         this.network = network;
         this.scene = scene;
         this.shipConfig = entityConfig.ship;
@@ -58,9 +61,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.playerId = data.id;
             this.onFullSync(data); // get everything
         });
-
-        // Delta packet: full for new entities and known entities that have changed
-        this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
+        this.network.on(ServerEvent.GAME_STATE, (data) => this.onSync(data));
 
         this.input.on('interact', () => {
             const target = this.closestInteractable;
@@ -118,6 +119,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
+    getProjectiles() {
+        return this.projectiles;
+    }
+
     /**
      * Sends the READY event to the server, indicating the client has 
      * fully loaded in and is ready to receive the INIT_GAME packet. This step
@@ -160,6 +165,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         } else {
             this.closestInteractable = null;
         }
+
+        
 
         this.shipArray.forEach(ship => ship.update(delta));
 

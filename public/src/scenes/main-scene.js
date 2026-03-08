@@ -5,6 +5,8 @@ import NetworkManager from "../managers/network-manager.js";
 import GameManager from "../managers/game-manager.js";
 import UIManager from "../managers/ui-manager.js";
 import InputManager from "../managers/input-manager.js";
+import Cannonball from "server/src/entities/cannonball.js";
+
 
 
 const socket = globalThis.io();
@@ -23,6 +25,8 @@ export class MainScene extends Phaser.Scene {
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
         this.cameraTarget = null;
+        this.projectiles = new Map();
+
 
         // Resize canvas with window
         window.addEventListener('resize', () => {
@@ -32,6 +36,20 @@ export class MainScene extends Phaser.Scene {
 
     /**
      * Executed once at runtime- create all dependencies here.
+     * Loads static assets from the filesystem into memory.
+     */
+    preload() {
+        this.load.image("tiles", "/assets/terrain-tilesheet.png");
+        this.load.image('cannon', '/assets/cannon.png');
+        this.load.image('helm', '/assets/helm.png')
+        this.load.image('ladder', '/assets/ladder.png')
+        this.load.image('cannonball', '/assets/cannonball.png');
+        this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
+    }
+
+    /**
+     * Executed once at runtime- set up all game objects here, such
+     * as setting up user input and socket listeners.
      */
     create(data) {
         this.setupWorld();
@@ -77,7 +95,21 @@ export class MainScene extends Phaser.Scene {
         this.gameManager.update();
         this.uiManager.update();
 
+        if (!this.projectilesMap) this.projectilesMap = new Map();
 
+        const projectiles = this.gameManager.getProjectiles();
+        projectiles.forEach(p => {
+            if (!this.projectiles.has(p.id)){
+                const sprite = this.add.sprite(p.x,p.y,'cannoball');
+                sprite.setOrigin(.5,.5);
+                this.projectilesMap.set(p.id,sprite);
+            }
+
+            const sprite = this.projectilesMap.get(p.id);
+            sprite.setPosition(p.x,p.y);
+            sprite.setRotation(p.rotation);
+        }
+        )
         // Update minimap marker with current world position
         //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
     }
