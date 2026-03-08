@@ -10,6 +10,8 @@ import Cannon from "src/entities/cannon";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
+const MAX_CANNON_SPEED = 20 * (Math.PI / 180); // cannons move towards mouse
+const CANNON_ARC = Math.PI / 4;     // 90 deg
 
 /**
  * Contains all movement logic for moving entities
@@ -235,12 +237,29 @@ export default class MovementSystem implements BaseSystem {
     }
 
 
+
     updateCannon(cannon: Cannon, dt: number) {
+        if (!cannon.user) return;   // only move cannons when being controlled
 
-        // Only move cannons when being controlled
-        if (!cannon.user) return;
-        const targetAngle = cannon.targetAngle;
+        const ship = cannon.parent as Ship | null;
 
-        cannon.r = targetAngle;
+
+        // Convert world-space target to local space
+        const localTarget = ship ? cannon.targetAngle - ship.r : cannon.targetAngle;
+
+        const facingAngle = cannon.y < 0 ? -Math.PI / 2 : Math.PI / 2;
+        const clampedTarget = Math.max(facingAngle - CANNON_ARC, Math.min(facingAngle + CANNON_ARC, localTarget));
+
+        let diff = clampedTarget - cannon.r;
+        while (diff > Math.PI) diff -= 2 * Math.PI;
+        while (diff < -Math.PI) diff += 2 * Math.PI;
+
+        const maxStep = MAX_CANNON_SPEED * dt;
+        cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
+
+        if (cannon.reloadTimer > 0) {
+            cannon.reloadTimer = Math.max(0, cannon.reloadTimer - dt * 1000);
+            cannon.markDirty();
+        }
     }
 }

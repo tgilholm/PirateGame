@@ -5,6 +5,7 @@ import { MoveData } from "@shared/socket-protocol";
 import Entity from "src/entities/entity";
 import Ship from "src/entities/ship";
 
+
 export default class CannonController {
 
 
@@ -16,17 +17,17 @@ export default class CannonController {
     }
 
     handleFire(cannon: Cannon): void {
-        if (!cannon) return;
-
-        const speed = 500; // you can change this if you want, just testing
-        const rotation = cannon.r; // current angle, not target
+        if (!cannon || !cannon.isReloaded) return;
+        cannon.reloadTimer = cannon.reloadTime; // reset the reload timer
+        const ship = cannon.parent as Ship | null;
 
         const cannonEndOffset = 20; // distance from the center of the cannon to the tip
-        const matrix = this.getWorldPosition(cannon);
+        const worldAngle = ship ? cannon.r + ship.r : cannon.r;
 
-        const worldPos = {
-            x: matrix.x + Math.cos(rotation) * cannonEndOffset,
-            y: matrix.y + Math.sin(rotation) * cannonEndOffset,
+        const worldPos = this.getWorldPosition(cannon);
+        const spawnPos = {
+            x: worldPos.x + Math.cos(worldAngle) * cannonEndOffset,
+            y: worldPos.y + Math.sin(worldAngle) * cannonEndOffset,
         };
 
         const id = `cannonball_${Date.now()}`;
@@ -34,11 +35,9 @@ export default class CannonController {
             id,
             worldPos.x,
             worldPos.y,
-            rotation,
-            speed
+            worldAngle,
+            500 // for now
         );
-
-        console.log(projectile.x, projectile.y)
 
         this.entityRegistry.create(projectile);
     }
