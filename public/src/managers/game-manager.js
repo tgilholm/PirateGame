@@ -8,7 +8,7 @@ import { MainScene } from "../scenes/main-scene.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
- * events for the current player and updates all entities.
+ * events for the current player and updates all models.
  */
 export default class GameManager extends Phaser.Events.EventEmitter {
 
@@ -37,7 +37,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.playerListDirty = true;
 
         /** @type {Map<string, Model>} */
-        this.entities = new Map();  // generic entity list
+        this.models = new Map();  // generic entity list
 
         this.interactables = [];
         this.closestInteractable = null;
@@ -87,8 +87,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
-        // Update all entities at once
-        this.entities.forEach((entity) => {
+        // Update all models at once
+        this.models.forEach((entity) => {
             if (entity === this.localPlayer) {
                 entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
             }
@@ -96,10 +96,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         })
     }
 
+    /**
+     * Removes and creates all models from the full server sync- this is invoked
+     * on the INIT_GAME packet and should not be used thereafter
+     * @param {Object} data the data from the server
+     */
     onFullSync(data) {
         // Reset the map to 0
-        this.entities.forEach(e => e.destroy());
-        this.entities.clear();
+        this.models.forEach(e => e.destroy());
+        this.models.clear();
         this.interactables = [];
         this.localPlayer = null;    // clear local
         this.playerListDirty = true;
@@ -111,6 +116,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.refreshInteractables();
     }
 
+    /**
+     * Updates only the models that have changed since the last game state packet from the server,
+     * or those that have come into the view distance of the player
+     * @param {Object} data the data from the server
+     */
     onDeltaSync(data) {
         let shipsChanged = false;
 
@@ -135,14 +145,19 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.resolveLocalPlayer();
     }
 
+    /**
+     * Applies a full sync to the model specified in the data from the server. Handles
+     * creating new models and re-parenting existing ones.
+     * @param {Object} data the data from the server
+     */
     applyFull(data) {
-        let model = this.entities.get(data.id);
+        let model = this.models.get(data.id);
 
         if (!model) {
-            model = this.modelFactory.create(data); // create the entity if it doesn't exist
+            model = this.modelFactory.create(data); // create the model if it doesn't exist
 
             if (!model) return; // factory failed to create
-            this.entities.set(data.id, model);  // add to map
+            this.models.set(data.id, model);  // add to map
         }
 
         // @ts-ignore reparent the player if they left a ship
@@ -151,8 +166,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         model.sync(data);
     }
 
+    /**
+     * Applies a delta sync to the model specified in the data from the server. 
+     * @param {Object} delta the data from the server
+     */
     applyDelta(delta) {
-        const model = this.entities.get(delta.id);
+        const model = this.models.get(delta.id);
         if (!model) return;
 
         if (model.entityType === 'player' && delta.parentId !== undefined) {
@@ -163,8 +182,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         model.sync(delta);
     }
 
+    /**
+     * Deletes a model from the internal map, removing any child models before themselves
+     * @param {string} id the id of the model to delete 
+     * @returns the deleted model 
+     */
     removeEntity(id) {
-        const model = this.entities.get(id);
+        const model = this.models.get(id);
         if (!model) {
             console.debug(`[GameManager] removeEntity: "${id}" not found, already removed?`);
             return undefined;
@@ -172,7 +196,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         // Remove players from ship before deleting it
         if (model.entityType === 'ship') {
-            this.entities.forEach(entity => {
+            this.models.forEach(entity => {
                 // @ts-ignore
                 if (entity.entityType === 'player' && entity.parentId === id) {
                     model.remove(entity);               // detach from container
@@ -184,7 +208,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         }
 
         model.destroy();
-        this.entities.delete(id);
+        this.models.delete(id);
         return model;
     }
 
@@ -192,7 +216,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     get playerList() {
         if (!this.#playerListCache) {
             this.#playerListCache = new Map();
-            this.entities.forEach((entity, id) => {
+            this.models.forEach((entity, id) => {
                 if (entity.entityType === 'player') this.#playerListCache.set(id, entity);
             });
         }
@@ -211,7 +235,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.onFullSync(data); // get everything
         });
 
-        // Delta packet: full for new entities and known entities that have changed
+        // Delta packet: full for new models and known models that have changed
         this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
         this.input.on('interact', () => {
@@ -236,7 +260,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      */
     refreshInteractables() {
         this.interactables = [];
-        this.entities.forEach(entity => {
+        this.models.forEach(entity => {
             if (entity.entityType === 'ship') {
                 //@ts-ignore
                 this.interactables.push(...entity.interactables);
@@ -284,7 +308,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         if (player.parentId === data.parentId) return;
         this.closestInteractable = null;    // reset closest interactable
 
-        const ship = data.parentId ? this.entities.get(data.parentId) : null;
+        const ship = data.parentId ? this.models.get(data.parentId) : null;
 
         if (ship) {
             ship.add(player);
@@ -306,7 +330,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     resolveLocalPlayer() {
         if (this.localPlayer || !this.playerId) return;
 
-        const mine = this.entities.get(this.playerId);
+        const mine = this.models.get(this.playerId);
         if (mine) {
             // @ts-ignore
             this.localPlayer = mine;
