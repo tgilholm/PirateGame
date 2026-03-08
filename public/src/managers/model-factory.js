@@ -14,10 +14,12 @@ export default class ModelFactory {
      * Creates a model factory from a scene and config 
      * @param {Phaser.Scene} scene the phaser scene
      * @param {EntityConfig} config the config for entities
+     * 
      */
-    constructor(scene, config) {
+    constructor(scene, config, modelLookup) {
         this.scene = scene;
         this.config = config;
+        this.modelLookup = modelLookup
     }
 
     /**
@@ -30,6 +32,9 @@ export default class ModelFactory {
             case 'ship': return this.createShip(data);
             case 'player': return this.createPlayer(data);
             case 'projectile': return this.createProjectile(data);
+            case 'cannon':  // all interactables "fall through"
+            case 'helm': 
+            case 'ladder': return this.createInteractable(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
@@ -43,12 +48,6 @@ export default class ModelFactory {
      */
     createShip(data) {
         const ship = new ShipModel(this.scene, data.id, data.x, data.y, this.config.ship);
-
-        this.config.ship.interactables.forEach((instance, index) => {
-            const item = this.createInteractable(ship, instance, index);
-            if (item) ship.interactables.push(item);
-        });
-
         return ship;
     }
 
@@ -71,25 +70,20 @@ export default class ModelFactory {
     }
 
     /**
-     * Creates an interactable object with an id mirrored by the server. Handles parented (on-ship)
-     * interactables, and global ones
-     * @param {ShipModel | null} parent the object to create this interactable on, if any
-     * @param {InteractableInstance} instance the instance variables for this interactable
-     * @param {number} index the index of the item to create
      */
-    createInteractable(parent, instance, index) {
-        const { type, x, y } = instance;                     // get the requested type
+    createInteractable(data) {
+        const parent = data.parentId ? this.modelLookup(data.parentId) : null;
+
         const prefix = parent ? parent.id : "map";  // parent id or map if null
-        const id = `${prefix}_${type}_${index}`;    // e.g. "map_cannon_1" or "ship_1_helm_1"
 
 
         let model;
-        switch (type) {
-            case 'cannon': model = new CannonModel(this.scene, parent, id, x, y); break;
-            case 'helm': model = new HelmModel(this.scene, parent, id, x, y); break;
-            case 'ladder': model = new LadderModel(this.scene, parent, id, x, y); break;
+        switch (data.type) {
+            case 'cannon': model = new CannonModel(this.scene, parent, data.id, data.x, data.y); break;
+            case 'helm': model = new HelmModel(this.scene, parent, data.id, data.x, data.y); break;
+            case 'ladder': model = new LadderModel(this.scene, parent, data.id, data.x, data.y); break;
             default:
-                console.warn(`Interactable ${id} is not recognised as an interactable type`);
+                console.warn(`Interactable ${data.id} is not recognised as an interactable type`);
                 return;
         }
 

@@ -6,9 +6,12 @@ import Ship from "../entities/ship";
 import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "src/entities/entity";
+import Cannon from "src/entities/cannon";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
+const MAX_CANNON_SPEED = 20 * (Math.PI / 180); // cannons move towards mouse
+const CANNON_ARC = Math.PI / 4;     // 90 deg
 
 /**
  * Contains all movement logic for moving entities
@@ -34,6 +37,9 @@ export default class MovementSystem implements BaseSystem {
 
         const ships = this.registry.getByType<Ship>('ship');
         ships.forEach(ship => this.updateShip(ship, dt));
+
+        const cannons = this.registry.getByType<Cannon>('cannon');
+        cannons.forEach(cannon => this.updateCannon(cannon, dt));
     }
 
     /**
@@ -44,7 +50,11 @@ export default class MovementSystem implements BaseSystem {
      * @param dt the difference in time from the last update
      */
     updatePlayer(player: Player, dt: number): void {
-        if (player.isSteering || player.isUsingCannon) return;
+        if (player.reloadTimer > 0) {
+            player.reloadTimer = Math.max(0, player.reloadTimer - dt * 1000);
+            player.markDirty();
+        }
+        if (player.isSteering || player.cannon) return;
 
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;
@@ -228,5 +238,33 @@ export default class MovementSystem implements BaseSystem {
 
             Body.applyForce(body, body.position, force);
         }
+    }
+
+
+
+    updateCannon(cannon: Cannon, dt: number) {
+        // Always update reload timer
+        if (cannon.reloadTimer > 0) {
+            cannon.reloadTimer = Math.max(0, cannon.reloadTimer - dt * 1000);
+            cannon.markDirty();
+        }
+
+        if (!cannon.user) return;   // only move cannons when being controlled
+
+        const ship = cannon.parent as Ship | null;
+
+
+        // Convert world-space target to local space
+        const localTarget = ship ? cannon.targetAngle - ship.r : cannon.targetAngle;
+
+        const facingAngle = cannon.y < 0 ? -Math.PI / 2 : Math.PI / 2;
+        const clampedTarget = Math.max(facingAngle - CANNON_ARC, Math.min(facingAngle + CANNON_ARC, localTarget));
+
+        let diff = clampedTarget - cannon.r;
+        while (diff > Math.PI) diff -= 2 * Math.PI;
+        while (diff < -Math.PI) diff += 2 * Math.PI;
+
+        const maxStep = MAX_CANNON_SPEED * dt;
+        cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
     }
 }

@@ -28,6 +28,7 @@ import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
+import CannonController from './controllers/cannon-controller';
 
 // Create the express app & server
 const app = express();
@@ -68,7 +69,8 @@ const worldController = new WorldController(registry,
   {
     playerController: new PlayerController(registry, interactionHandler, upgradeHandler),
     shipController: new ShipController(registry),
-    messageController: new MessageController()
+    messageController: new MessageController(),
+    cannonController: new CannonController(registry)
   }
 );
 

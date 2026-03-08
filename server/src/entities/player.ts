@@ -1,5 +1,6 @@
 import { PlayerConfig } from "src/types";
 import Entity from "./entity";
+import Cannon from "./cannon";
 
 /**
  * The server-side representation of an individual player's state, acting as the "source of truth"
@@ -8,7 +9,7 @@ import Entity from "./entity";
 export default class Player extends Entity {
     username: string;
     isSteering: boolean;
-    isUsingCannon: boolean;
+    cannon: Cannon | null;
     isCarrying: boolean;
     inputs: {
         up: boolean;
@@ -17,9 +18,8 @@ export default class Player extends Entity {
         right: boolean;
     };
     aimAngle: number;
-
-    private prevX: number = 0;
-    private prevY: number = 0;
+    reloadTime: number = 1000;
+    reloadTimer: number = 0;
 
     /**
      * Builds a player with the specified data
@@ -43,7 +43,7 @@ export default class Player extends Entity {
 
         // Player-specific detail
         this.isSteering = false;
-        this.isUsingCannon = false;
+        this.cannon = null; // not using cannon to start
         this.isCarrying = false;
 
         // Where the player is aiming
@@ -59,6 +59,8 @@ export default class Player extends Entity {
             // Specify any other player inputs here
         }
     }
+
+    get isReloaded(): boolean {return this.reloadTimer <= 0};
 
     /**
      * Override base method appending player-specific data for network transmission
@@ -82,7 +84,9 @@ export default class Player extends Entity {
             username: this.username,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
-            isUsingCannon: this.isUsingCannon
+            isUsingCannon: !!this.cannon,    // convert to true/false
+            reloadTimer: this.reloadTimer,
+            reloadTime: this.reloadTime
         }
 
     }

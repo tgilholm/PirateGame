@@ -17,11 +17,12 @@ export default class EntityRegistry {
     public create(entity: Entity): void {
         this.entities.set(entity.id, entity);
         // Update type index
-        if (!this.entitiesByType.has(entity.type)) {
-            this.entitiesByType.set(entity.type, new Set());
+        const allTypes = [entity.type, ...(entity.supertypes ?? [])];
+        for (const t of allTypes) {
+            if (!this.entitiesByType.has(t)) this.entitiesByType.set(t, new Set());
+            this.entitiesByType.get(t)!.add(entity.id);
+            this.typeCache.delete(t);
         }
-        this.entitiesByType.get(entity.type)!.add(entity.id);
-        this.typeCache.delete(entity.type);
 
         console.debug(`[Registry] Added ${entity.type}:${entity.id}`);
     }
@@ -41,32 +42,6 @@ export default class EntityRegistry {
      */
     public getAll(): Entity[] {
         return Array.from(this.entities.values());
-    }
-
-    /**
-    * Returns all entities whose type is not in the included list. This is used
-    * when broadcasting entities to the client.
-    *
-    * @param excludedTypes  One or more type strings to skip (e.g. 'interactable')
-    * @returns a flat array of every entity not matching those types
-    *
-    * @example
-    * // Send everything the client doesn't construct locally
-    * registry.getAllExcluding('interactable')
-    */
-    public getAllExcluding(...excludedTypes: string[]): Entity[] {
-        const excluded = new Set(excludedTypes);
-        const result: Entity[] = [];
-
-        this.entitiesByType.forEach((ids, type) => {
-            if (excluded.has(type)) return; // skip if excluded
-            ids.forEach(id => {
-                const entity = this.entities.get(id);
-                if (entity) result.push(entity);
-            });
-        });
-
-        return result;
     }
 
     /**
@@ -97,11 +72,15 @@ export default class EntityRegistry {
      */
     public delete(id: string): boolean {
         const entity = this.entities.get(id);
-        if (!entity) return false;  // not found
+        if (!entity) return false;
 
-        this.entitiesByType.get(entity.type)?.delete(id);   // Delete from type register
-        this.typeCache.delete(entity.type); // invalidate cache
-        return this.entities.delete(id);    // Delete from total register
+        const allTypes = [entity.type, ...(entity.supertypes ?? [])];
+        for (const t of allTypes) {
+            this.entitiesByType.get(t)?.delete(id);
+            this.typeCache.delete(t);
+        }
+
+        return this.entities.delete(id);
     }
 
     /**

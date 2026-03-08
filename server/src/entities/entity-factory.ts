@@ -5,6 +5,9 @@ import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
 import InteractableEntity from "./interactable-entity";
+import Cannon from "./cannon";
+import Ladder from "./ladder";
+import Helm from "./helm";
 
 
 export interface InteractableInstance {
@@ -70,16 +73,24 @@ export default class EntityFactory {
 
 
 
-    public createInteractable(parent: Ship, instance: InteractableInstance, index: number) {
+    public createInteractable(parent: Ship | null, instance: InteractableInstance, index: number) {
         const { type, x, y } = instance;
         const prefix = parent ? parent.id : "map";  // parent id or map if null
         const id = `${prefix}_${type}_${index}`;
 
+        let item: InteractableEntity;
+
+        switch (type) {
+            case 'cannon': item = new Cannon(id, x, y, parent); break;
+            case 'ladder': item = new Ladder(id, x, y, parent); break;
+            case 'helm': item = new Helm(id, x, y, parent); break;
+
+            default: item = new InteractableEntity(id, x, y, parent);
+        }
 
         if (parent) {
-            let item = new InteractableEntity(id, type, x, y, parent);
             parent.interactables.push(item);
-            this.entityRegistry.create(item);
         }
+        this.entityRegistry.create(item);
     }
 }

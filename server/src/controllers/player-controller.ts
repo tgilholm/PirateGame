@@ -7,6 +7,9 @@ import InteractableEntity from "../entities/interactable-entity";
 import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
 import Projectile from "../entities/projectile";
+import Cannon from "src/entities/cannon";
+import Helm from "src/entities/helm";
+import Ladder from "src/entities/ladder";
 
 /**
  * Handles events affecting the player
@@ -66,17 +69,16 @@ export default class PlayerController {
         if (dist < 50) {
             const ship = interactable.parent as Ship;
             if (!ship) return;
-            switch (interactable.useType) {
+            switch (interactable.type) {
                 case 'helm':
-                    this.interactionHandler.handleHelmInteraction(player, ship, interactable);
+                    this.interactionHandler.handleHelmInteraction(player, ship, interactable as Helm);
                     break;
 
                 case 'cannon':
-                    this.interactionHandler.handleCannonInteraction(player, interactable);
+                    this.interactionHandler.handleCannonInteraction(player, interactable as Cannon);
                     break;
                 case 'ladder':
-
-                    this.interactionHandler.handleLadderInteraction(player, ship, interactable);
+                    this.interactionHandler.handleLadderInteraction(player, ship, interactable as Ladder);
                     break;
                 default:
                     return;
@@ -111,6 +113,12 @@ export default class PlayerController {
         throw new Error("Method not implemented.");
     }
     handleGunFire(player: Player) {
+        // Wait until reloaded
+        if (!player || !player.isReloaded) return;
+
+        // Reset reload timer
+        player.reloadTimer = player.reloadTime;
+
         // Get player world pos
         const worldPos = this.getWorldPosition(player);
         const projectileId = `proj_${Date.now()}_${player.id}`; // "unique" id
@@ -127,9 +135,7 @@ export default class PlayerController {
         // Add to the entity registry
         this.entityRegistry.create(bullet);
     }
-    handleCannonFire(player: Player) {
-        throw new Error("Method not implemented.");
-    }
+
     handleUpgrade(player: Player, data: UpgradeData) {
         throw new Error("Method not implemented.");
     }

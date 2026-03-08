@@ -1,5 +1,6 @@
 /* global Phaser */
 
+import ReloadIndicator from "../ui/reload-indicator.js";
 import Model from "./model.js";
 import ShipModel from "./ship-model.js";
 
@@ -23,6 +24,9 @@ export default class PlayerModel extends Model {
         this.aimAngle = 0;
         this.parentId = null;
         this.username = null;
+        this.reloadTime = 0;
+        this.reloadTimer = 0;
+        this.reloadIndicator = new ReloadIndicator(scene, this, 22);
 
         // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
@@ -54,6 +58,9 @@ export default class PlayerModel extends Model {
 
         if (data.isSteering !== undefined) this.isSteering = data.isSteering;
         if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
+        if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
+        if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
+
     }
 
 
@@ -78,6 +85,7 @@ export default class PlayerModel extends Model {
             this.bodySprite.y = 0;
         }
 
+
         // Move the gun around the outside of the player
         gun.setPosition(
             pos.x + Math.cos(this.aimAngle) * 15,   // radius of player
@@ -91,6 +99,9 @@ export default class PlayerModel extends Model {
         // Hide the player's gun and make them slightly transparent when interacting
         this.gun.setVisible(isBusy ? false : true);
         this.setAlpha(isBusy ? 0.6 : 1.0);
+
+
+        this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
     }
 
 
@@ -113,6 +124,7 @@ export default class PlayerModel extends Model {
     destroy() {
         if (this.nameText) this.nameText.destroy();
         if (this.gun) this.gun.destroy();
+        this.reloadIndicator?.destroy();
 
         super.destroy();
     }

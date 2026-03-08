@@ -24,6 +24,8 @@ export class MainScene extends Phaser.Scene {
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
         this.cameraTarget = null;
+        this.projectiles = new Map();
+
 
         // Resize canvas with window
         window.addEventListener('resize', () => {
@@ -31,15 +33,17 @@ export class MainScene extends Phaser.Scene {
         });
     }
 
+
     /**
-     * Executed once at runtime- create all dependencies here.
+     * Executed once at runtime- set up all game objects here, such
+     * as setting up user input and socket listeners.
      */
     create(data) {
         this.setupWorld();
 
         //@ts-ignore cheesed into this window
         const entityConfig = window.entityConfig;   
-        const modelFactory = new ModelFactory(this, entityConfig);
+        const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
 
 
         this.gameManager = new GameManager(
@@ -79,7 +83,6 @@ export class MainScene extends Phaser.Scene {
     update() {
         this.gameManager.update();
         this.uiManager.update();
-
 
         // Update minimap marker with current world position
         //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
