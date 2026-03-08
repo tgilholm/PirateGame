@@ -19,4 +19,11 @@ export default class InteractableEntity extends Entity {
         this.useType = type;
         this.user = null;   // No user to start
     }
+
+    serialise() {
+        return {
+            ...super.serialise(),
+            useType: this.useType
+        }
+    }
 }

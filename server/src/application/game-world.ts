@@ -145,7 +145,7 @@ export default class GameWorld extends EventEmitter {
     private buildEntityData(): Map<string, { full: any; delta: any }> {
         const entityData = new Map<string, { full: any; delta: any }>();
 
-        this.registry.getAllExcluding('interactable').forEach(e => {
+        this.registry.getAll().forEach(e => {
 
             // Use the parent coordinates if the entity has a parent
             const wx = e.parent ? e.parent.x : e.x;
@@ -226,7 +226,7 @@ export default class GameWorld extends EventEmitter {
      */
     public getFullState() {
         return {
-            entities: this.registry.getAllExcluding('interactable').map(e => e.serialise()),
+            entities: this.registry.getAll().map(e => e.serialise()),
         };
     }
 }

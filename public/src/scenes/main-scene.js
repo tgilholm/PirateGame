@@ -43,7 +43,7 @@ export class MainScene extends Phaser.Scene {
 
         //@ts-ignore cheesed into this window
         const entityConfig = window.entityConfig;   
-        const modelFactory = new ModelFactory(this, entityConfig);
+        const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
 
 
         this.gameManager = new GameManager(

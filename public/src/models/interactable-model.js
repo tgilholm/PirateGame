@@ -36,9 +36,6 @@ export default class InteractableModel extends Model {
         {
             parent.add(this);
             this.parentId = parent.id;
-            // don't flip helms
-            this.rotation = (y < 0 || type === 'helm') ? 0 : Math.PI;
-            this.target.r = this.rotation;
         } else {
             this.parentId = null;
         }

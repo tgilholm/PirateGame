@@ -6,6 +6,7 @@ import Ship from "../entities/ship";
 import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "src/entities/entity";
+import Cannon from "src/entities/cannon";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -228,5 +229,13 @@ export default class MovementSystem implements BaseSystem {
 
             Body.applyForce(body, body.position, force);
         }
+    }
+
+
+    updateCannons(cannon: Cannon, dt: number)
+    {
+        const targetAngle = cannon.targetAngle;
+
+        cannon.r = targetAngle;
     }
 }

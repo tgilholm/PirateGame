@@ -44,32 +44,6 @@ export default class EntityRegistry {
     }
 
     /**
-    * Returns all entities whose type is not in the included list. This is used
-    * when broadcasting entities to the client.
-    *
-    * @param excludedTypes  One or more type strings to skip (e.g. 'interactable')
-    * @returns a flat array of every entity not matching those types
-    *
-    * @example
-    * // Send everything the client doesn't construct locally
-    * registry.getAllExcluding('interactable')
-    */
-    public getAllExcluding(...excludedTypes: string[]): Entity[] {
-        const excluded = new Set(excludedTypes);
-        const result: Entity[] = [];
-
-        this.entitiesByType.forEach((ids, type) => {
-            if (excluded.has(type)) return; // skip if excluded
-            ids.forEach(id => {
-                const entity = this.entities.get(id);
-                if (entity) result.push(entity);
-            });
-        });
-
-        return result;
-    }
-
-    /**
      * Gets all the entities matching the provided type 
      * @param type the name of the type of entity - e.g. "interactable"
      * @returns an array of that entity
