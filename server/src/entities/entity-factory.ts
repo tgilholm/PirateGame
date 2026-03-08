@@ -4,6 +4,7 @@ import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
+import Treasure from "./treasure";
 import InteractableEntity from "./interactable-entity";
 
 
@@ -81,5 +82,11 @@ export default class EntityFactory {
             parent.interactables.push(item);
             this.entityRegistry.create(item);
         }
+    }
+
+    public createTreasure(id: string, x: number, y: number, goldValue: number): Treasure {
+        const treasure = new Treasure(id, x, y, goldValue);
+        this.entityRegistry.create(treasure);
+        return treasure;
     }
 }

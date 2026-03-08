@@ -112,8 +112,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         // Start fresh with new entity data
         data.entities?.forEach(entityData => this.applyFull(entityData));
+        data.treasures?.forEach(entityData => this.applyFull(entityData));
         this.resolveLocalPlayer();
         this.refreshInteractables();
+
     }
 
     /**
@@ -129,10 +131,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.applyFull(entityData);
             if (entityData.type === 'ship') shipsChanged = true;
             if (entityData.type === 'player') this.playerListDirty = true; this.#playerListCache = null;
+
         });
 
         // Apply changes
         data.deltaEntities?.forEach(delta => this.applyDelta(delta));
+        data.newTreasures?.forEach(entityData => this.applyFull(entityData));
+        data.deltaTreasures?.forEach(delta => this.applyDelta(delta));
 
         // Apply removals
         data.removedIds?.forEach(id => {

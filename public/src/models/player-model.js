@@ -23,6 +23,7 @@ export default class PlayerModel extends Model {
         this.aimAngle = 0;
         this.parentId = null;
         this.username = null;
+        this.gold = 0;
 
         // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
@@ -54,6 +55,7 @@ export default class PlayerModel extends Model {
 
         if (data.isSteering !== undefined) this.isSteering = data.isSteering;
         if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
+        if (data.gold !== undefined) this.gold = data.gold;
     }
 
 

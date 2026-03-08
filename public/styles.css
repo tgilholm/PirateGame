@@ -318,3 +318,20 @@ input.formElement {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+#gold-counter {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1300;
+    min-width: 140px;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 2px solid rgba(255,255,255,0.65);
+    border-radius: 8px;
+    color: #ffd54a;
+    font-family: "VT323", monospace;
+    font-size: 28px;
+    text-align: center;
+    pointer-events: none;
+}

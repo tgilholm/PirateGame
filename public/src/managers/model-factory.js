@@ -4,6 +4,7 @@ import LadderModel from "../models/ladder-model.js";
 import PlayerModel from "../models/player-model.js";
 import ProjectileModel from "../models/projectile-model.js";
 import ShipModel from "../models/ship-model.js";
+import TreasureModel from "../models/treasure-model.js";
 
 /**
  * Client side factory class for creating models
@@ -30,6 +31,7 @@ export default class ModelFactory {
             case 'ship': return this.createShip(data);
             case 'player': return this.createPlayer(data);
             case 'projectile': return this.createProjectile(data);
+            case 'treasure': return this.createTreasure(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
@@ -68,6 +70,16 @@ export default class ModelFactory {
      */
     createProjectile(data) {
         return new ProjectileModel(this.scene, data.id, data.x, data.y, data.r ?? 0);
+    }
+
+    createTreasure(data) {
+        return new TreasureModel(
+            this.scene,
+            data.id,
+            data.x,
+            data.y,
+            data.goldValue ?? 0
+        );
     }
 
     /**

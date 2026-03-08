@@ -28,6 +28,7 @@ import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
+import TreasureSystem from './systems/treasure-system';
 
 // Create the express app & server
 const app = express();
@@ -54,11 +55,29 @@ const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid)
 const entityFactory = new EntityFactory(entityConfig, registry);
 
+//injects treasure system
+const treasureSystem = new TreasureSystem(
+    registry,
+    entityFactory,
+    terrainMap,
+    {
+        initialSpawnCount: 500,
+        maxTreasures: 500,
+        spawnIntervalMs: 5000,
+        pickupRadius: 42,
+        gridSize: 128,
+        minGold: 15,
+        maxGold: 60,
+        spawnPadding: 96,
+    }
+);
+
 const engine = new GameEngine({
   physicsSystem,
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
-  messageSystem: new MessageSystem()
+  messageSystem: new MessageSystem(),
+    treasureSystem
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);

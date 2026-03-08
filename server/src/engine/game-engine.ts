@@ -3,6 +3,7 @@ import MessageSystem from "../systems/message-system";
 import MovementSystem from "../systems/movement-system";
 import PhysicsSystem from "../systems/physics-system";
 import ProjectileSystem from "../systems/projectile-system";
+import TreasureSystem from "../systems/treasure-system";
 
 /**
  * Defines the systems that must be provided into GameEngine instances
@@ -11,7 +12,8 @@ export interface GameSystems {
     physicsSystem: PhysicsSystem,
     movementSystem: MovementSystem,
     projectileSystem: ProjectileSystem,
-    messageSystem: MessageSystem
+    messageSystem: MessageSystem,
+    treasureSystem: TreasureSystem
 }
 
 /**
@@ -30,6 +32,7 @@ export default class GameEngine {
         this.systems.set('physics', systems.physicsSystem);
         this.systems.set('projectile', systems.projectileSystem);
         this.systems.set('message', systems.messageSystem);
+        this.systems.set('treasure', systems.treasureSystem);
 
 
         this.systemArray = Array.from(this.systems.values());   // cache systems

@@ -17,6 +17,7 @@ export default class Player extends Entity {
         right: boolean;
     };
     aimAngle: number;
+    gold: number;
 
     private prevX: number = 0;
     private prevY: number = 0;
@@ -45,6 +46,9 @@ export default class Player extends Entity {
         this.isSteering = false;
         this.isUsingCannon = false;
         this.isCarrying = false;
+
+        //Gold on spaw
+        this.gold = 0;
 
         // Where the player is aiming
         this.aimAngle = 0;
@@ -82,7 +86,8 @@ export default class Player extends Entity {
             username: this.username,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
-            isUsingCannon: this.isUsingCannon
+            isUsingCannon: this.isUsingCannon,
+            gold: this.gold
         }
 
     }
