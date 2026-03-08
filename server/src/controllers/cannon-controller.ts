@@ -1,9 +1,9 @@
-import Cannon from "src/entities/cannon";
+import Cannon from "../entities/interactables/cannon";
 import EntityRegistry from "../engine/entity-registry";
-import Projectile from "../entities/projectile";
+import Projectile from "../entities/projectiles/projectile";
 import { MoveData } from "@shared/socket-protocol";
-import Entity from "src/entities/entity";
-import Ship from "src/entities/ship";
+import Entity from "../entities/entity";
+import Ship from "../entities/ship";
 
 
 export default class CannonController {

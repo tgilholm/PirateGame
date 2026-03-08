@@ -6,7 +6,6 @@ import Player from "../entities/player";
 import Ship from "../entities/ship";
 import MessageController from "./message-controller";
 import CannonController from "./cannon-controller";
-import Cannon from "src/entities/cannon";
 
 /**
  * Defines the controllers that must be passed to this one

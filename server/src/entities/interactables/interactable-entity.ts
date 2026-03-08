@@ -1,5 +1,5 @@
-import Entity from "./entity";
-import Player from "./player";
+import Entity from "../entity";
+import Player from "../player";
 
 
 /**

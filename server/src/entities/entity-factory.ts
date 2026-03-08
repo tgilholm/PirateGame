@@ -1,13 +1,13 @@
 
-import EntityRegistry from "src/engine/entity-registry";
+import EntityRegistry from "../engine/entity-registry";
 import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
-import InteractableEntity from "./interactable-entity";
-import Cannon from "./cannon";
-import Ladder from "./ladder";
-import Helm from "./helm";
+import InteractableEntity from "./interactables/interactable-entity";
+import Cannon from "./interactables/cannon";
+import Ladder from "./interactables/ladder";
+import Helm from "./interactables/helm";
 
 
 export interface InteractableInstance {

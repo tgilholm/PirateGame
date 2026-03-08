@@ -1,15 +1,15 @@
-import Ship from "src/entities/ship";
+import Ship from "../entities/ship";
 import EntityRegistry from "../engine/entity-registry";
 import Player from "../entities/player";
 import UpgradeHandler from "../handlers/upgrade-handler";
 import { InteractData, MoveData, UpgradeData } from "@shared/socket-protocol";
-import InteractableEntity from "../entities/interactable-entity";
+import InteractableEntity from "../entities/interactables/interactable-entity";
 import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
-import Projectile from "../entities/projectile";
-import Cannon from "src/entities/cannon";
-import Helm from "src/entities/helm";
-import Ladder from "src/entities/ladder";
+import Projectile from "../entities/projectiles/projectile";
+import Cannon from "../entities/interactables/cannon";
+import Helm from "../entities/interactables/helm";
+import Ladder from "../entities/interactables/ladder";
 
 /**
  * Handles events affecting the player

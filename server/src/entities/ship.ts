@@ -1,7 +1,7 @@
 import { Bodies, Body } from "matter-js";
 import { ShipConfig } from "../types";
 import Entity from "./entity";
-import InteractableEntity from "./interactable-entity";
+import InteractableEntity from "./interactables/interactable-entity";
 import Player from "./player";
 
 

@@ -1,9 +1,9 @@
-import Cannon from "src/entities/cannon";
-import Helm from "src/entities/helm";
-import InteractableEntity from "src/entities/interactable-entity";
-import Ladder from "src/entities/ladder";
-import Player from "src/entities/player";
-import Ship from "src/entities/ship";
+import Cannon from "../entities/interactables/cannon";
+import Helm from "../entities/interactables/helm";
+import InteractableEntity from "../entities/interactables/interactable-entity";
+import Ladder from "../entities/interactables/ladder";
+import Player from "../entities/player";
+import Ship from "../entities/ship";
 
 /**
  * Handler class- provides methods for each type of player interaction with interactable entities,

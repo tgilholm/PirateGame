@@ -1,7 +1,7 @@
-import Projectile from "src/entities/projectile";
+import Projectile from "../entities/projectiles/projectile";
 import EntityRegistry from "../engine/entity-registry";
 import { BaseSystem } from "./base-system";
-import SpatialGrid from "src/application/spatial-grid";
+import SpatialGrid from "../application/spatial-grid";
 
 /**
  * Updates all projectile objects each tick. Handles collisions between

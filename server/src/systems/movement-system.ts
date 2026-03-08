@@ -5,8 +5,8 @@ import Player from "../entities/player";
 import Ship from "../entities/ship";
 import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
-import Entity from "src/entities/entity";
-import Cannon from "src/entities/cannon";
+import Entity from "../entities/entity";
+import Cannon from "../entities/interactables/cannon";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;

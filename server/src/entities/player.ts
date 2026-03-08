@@ -1,6 +1,6 @@
-import { PlayerConfig } from "src/types";
+import { PlayerConfig } from "../types";
 import Entity from "./entity";
-import Cannon from "./cannon";
+import Cannon from "./interactables/cannon";
 
 /**
  * The server-side representation of an individual player's state, acting as the "source of truth"
