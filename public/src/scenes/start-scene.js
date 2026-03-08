@@ -15,7 +15,7 @@ export class StartScene extends Phaser.Scene {
     preload() {
         this.load.image('background', 'assets/water.png');
         this.load.image('title', 'assets/title.png');
-        this.load.image('cannonball','assets/cannonball.png') // yoohoooo
+        //this.load.image('cannonball','assets/cannonball.png') // yoohoooo
         this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
         this.load.image("tiles", "/assets/terrain-tilesheet.png");
         this.load.image('cannon', '/assets/cannon.png');

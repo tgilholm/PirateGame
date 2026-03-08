@@ -1,3 +1,4 @@
+import Cannon from "src/entities/cannon";
 import InteractableEntity from "src/entities/interactable-entity";
 import Player from "src/entities/player";
 import Ship from "src/entities/ship";
@@ -35,14 +36,14 @@ export default class InteractionHandler {
      * @param player the player doing the interaction
      * @param cannon the cannon being interacted with
      */
-    handleCannonInteraction(player: Player, cannon: InteractableEntity) {
+    handleCannonInteraction(player: Player, cannon: Cannon) {
         if (!player.parent || cannon.user) return;  // cannon must be free
 
         const cannonYdir = cannon.y > 0 ? -1 : 1;
 
         player.x = cannon.x;
         cannon.user = player;
-        player.isUsingCannon = true;
+        player.cannon = cannon;
         player.y = cannon.y + cannonYdir * 25;  // move the player behind the cannon
     }
 
@@ -100,7 +101,7 @@ export default class InteractionHandler {
                 break;
 
             case 'cannon':
-                player.isUsingCannon = false;
+                player.cannon = null;
                 break;
         }
     }

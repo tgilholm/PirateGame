@@ -94,6 +94,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
             }
             entity.update(delta);
+
+            if (entity.entityType === 'projectile')
+            {
+                console.log(entity.x, entity.y);
+            }
         })
     }
 

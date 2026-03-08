@@ -56,10 +56,8 @@ export default class WorldController {
             case ActionType.MOVE:
 
                 // If the player is controlling a cannon, send move inputs to the cannon
-                if (player.isUsingCannon) {
-                    const cannon = this.entityRegistry.get<Cannon>()
-
-                    // this.cannonController.handleMove(cannon, action.data);
+                if (player.cannon) {
+                    this.cannonController.handleMove(player.cannon, action.data);
 
                     // If player is at the helm, move the ship
                 } else if (player.parent && player.isSteering) {
@@ -80,8 +78,8 @@ export default class WorldController {
                 // Checks if the player is controlling a cannon.
             case ActionType.FIRE:
                 // Again check if controlling a cannon- but not necessarily on a ship- land cannons?
-                if (player.isUsingCannon) {
-                    //this.cannonController.handleFire(player);
+                if (player.cannon) {
+                    this.cannonController.handleFire(player.cannon);
                 } else {
                     // If not controlling a cannon, fire the player's personal gun
                     this.playerController.handleGunFire(player);

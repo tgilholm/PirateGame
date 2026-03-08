@@ -44,7 +44,7 @@ export default class MovementSystem implements BaseSystem {
      * @param dt the difference in time from the last update
      */
     updatePlayer(player: Player, dt: number): void {
-        if (player.isSteering || player.isUsingCannon) return;
+        if (player.isSteering || player.cannon) return;
 
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;

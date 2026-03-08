@@ -7,6 +7,7 @@ import InteractableEntity from "../entities/interactable-entity";
 import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
 import Projectile from "../entities/projectile";
+import Cannon from "src/entities/cannon";
 
 /**
  * Handles events affecting the player
@@ -72,7 +73,7 @@ export default class PlayerController {
                     break;
 
                 case 'cannon':
-                    this.interactionHandler.handleCannonInteraction(player, interactable);
+                    this.interactionHandler.handleCannonInteraction(player, interactable as Cannon);
                     break;
                 case 'ladder':
                     this.interactionHandler.handleLadderInteraction(player, ship, interactable);
@@ -126,16 +127,7 @@ export default class PlayerController {
         // Add to the entity registry
         this.entityRegistry.create(bullet);
     }
-    handleCannonFire(player: Player) {
 
-        const interactables = this.entityRegistry.getByType<InteractableEntity>('interactable');
-        const cannon = interactables.find(i=>i.useType==='cannon' && i.user === player);
-
-        if (!cannon) return;
-
-        this.cannonController.handleInput(player,cannon);
-        this.cannonController.fire(player,cannon);
-    }
     handleUpgrade(player: Player, data: UpgradeData) {
         throw new Error("Method not implemented.");
     }

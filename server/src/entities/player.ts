@@ -1,5 +1,6 @@
 import { PlayerConfig } from "src/types";
 import Entity from "./entity";
+import Cannon from "./cannon";
 
 /**
  * The server-side representation of an individual player's state, acting as the "source of truth"
@@ -8,7 +9,7 @@ import Entity from "./entity";
 export default class Player extends Entity {
     username: string;
     isSteering: boolean;
-    isUsingCannon: boolean;
+    cannon: Cannon | null;
     isCarrying: boolean;
     inputs: {
         up: boolean;
@@ -43,7 +44,7 @@ export default class Player extends Entity {
 
         // Player-specific detail
         this.isSteering = false;
-        this.isUsingCannon = false;
+        this.cannon = null; // not using cannon to start
         this.isCarrying = false;
 
         // Where the player is aiming
@@ -82,7 +83,7 @@ export default class Player extends Entity {
             username: this.username,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
-            isUsingCannon: this.isUsingCannon
+            isUsingCannon: !!this.cannon    // convert to true/false
         }
 
     }
