@@ -1,15 +1,14 @@
 import GameEngine from "../engine/game-engine";
 import EntityRegistry from "../engine/entity-registry";
 import WorldController from "../controllers/world-controller";
-import { PlayerAction, ServerEvent } from "@shared/socket-protocol";
+import { PlayerAction } from "@shared/socket-protocol";
 import Player from "../entities/player";
 import EntityFactory from "../entities/entity-factory";
 import Ship from "../entities/ship";
 import { EventEmitter } from "events";
 import { CONFIG } from "../config";
-import PhysicsSystem from "src/systems/physics-system";
+import PhysicsSystem from "../systems/physics-system";
 import SpatialGrid from "./spatial-grid";
-import Projectile from "src/entities/projectile";
 
 /**
  * Communication contract between this game world and the socket service
@@ -79,7 +78,6 @@ export default class GameWorld extends EventEmitter {
         const dt = (now - this.lastTime) / 1000;
         this.lastTime = now;
         this.engine.tick(dt);
-        this.updateGrid();  // must be after the engine tick
         this.broadcastGameState();
 
         // correct delays instead of using setInterval
@@ -88,22 +86,6 @@ export default class GameWorld extends EventEmitter {
         this.tickInterval = setTimeout(() => this.tick(), delay) as any;
     }
 
-    /**
-     * Updates the SpatialGrid with the current entity positions after updating their phyiscs
-     */
-    private updateGrid() {
-        this.registry.getByType<Player>('player').forEach(p => {
-            const wx = p.parent ? p.parent.x : p.x;
-            const wy = p.parent ? p.parent.y : p.y;
-            this.grid.update(p.id, wx, wy);
-        });
-        this.registry.getByType<Ship>('ship').forEach(s => {
-            this.grid.update(s.id, s.x, s.y);
-        });
-        this.registry.getByType<Projectile>('projectile').forEach(p => {
-            this.grid.update(p.id, p.x, p.y);
-        });
-    }
 
     /**
      * Called by SocketService when a validated action arrives
@@ -160,6 +142,27 @@ export default class GameWorld extends EventEmitter {
         this.sessions.delete(socketId);
     }
 
+    private buildEntityData(): Map<string, { full: any; delta: any }> {
+        const entityData = new Map<string, { full: any; delta: any }>();
+
+        this.registry.getAllExcluding('interactable').forEach(e => {
+
+            // Use the parent coordinates if the entity has a parent
+            const wx = e.parent ? e.parent.x : e.x;
+            const wy = e.parent ? e.parent.y : e.y;
+            this.grid.update(e.id, wx, wy); // update the spatial grid
+
+            // Set the data to be broadcast
+            entityData.set(e.id, {
+                full: e.serialise(),
+                delta: e.serialiseDelta()
+            });
+        });
+
+        return entityData;
+    }
+
+
     /**
      * Creates a "personalised" update packet for each player, containing only
      * the entities that have changed recently and are within a reasonable distance of them.
@@ -168,104 +171,52 @@ export default class GameWorld extends EventEmitter {
      * range of the client are "invisible" to it and are not sent.
      */
     private broadcastGameState() {
-        // Compute once and reuse for every client session
-        const playerData = new Map<string, { full: any, delta: any }>();
-        const shipData = new Map<string, { full: any, delta: any }>();
-        const projData = new Map<string, { full: any, delta: any }>();
-
-
-        this.registry.getByType<Player>('player').forEach(p => {
-            playerData.set(p.id, {
-                delta: p.serialiseDelta(),
-                full: p.serialise(),
-            });
-        });
-        this.registry.getByType<Ship>('ship').forEach(s => {
-            shipData.set(s.id, {
-                delta: s.serialiseDelta(),
-                full: s.serialise(),
-            });
-        });
-        this.registry.getByType<Projectile>('projectile').forEach(p => {
-            projData.set(p.id, {
-                delta: p.serialiseDelta(),
-                full: p.serialise(),
-            });
-        });
-
+        const entityData = this.buildEntityData();
 
         this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
-            const session = this.sessions.get(socketId);
+            const session = this.sessions.get(socketId);    // access that player's "known data"
             const player = this.registry.get<Player>(socketId);
-            if (!session || !player) return null;
 
+            if (!session || !player) return null;    // break early
+
+            // World coords- generalise to parent if on ship
             const wx = player.parent ? player.parent.x : player.x;
             const wy = player.parent ? player.parent.y : player.y;
-            const nearbyIds = this.grid.getNearby(wx, wy);
+            const nearbyIds = this.grid.getNearby(wx, wy);  // everything near the player
 
-            const newPlayers: any[] = [];
-            const deltaPlayers: any[] = [];
-            const newShips: any[] = [];
-            const deltaShips: any[] = [];
-            const newProjectiles: any[] = [];
-            const deltaProjectiles: any[] = [];
-            const removedIds: string[] = []; // for entities out of range
+            const newEntities: any[] = [];
+            const deltaEntities: any[] = [];
+            const removedIds: string[] = [];
 
-            // Add nearby entities to packet
+            // New/updated entities
             nearbyIds.forEach(id => {
-                const pd = playerData.get(id);
-                if (pd) {
-                    if (!session.knownEntityIds.has(id)) {
-                        newPlayers.push(pd.full);
-                        session.knownEntityIds.add(id);
-                    } else if (pd.delta) {
-                        deltaPlayers.push(pd.delta);
-                    }
-                    return;
-                }
-                const sd = shipData.get(id);
-                if (sd) {
-                    if (!session.knownEntityIds.has(id)) {
-                        newShips.push(sd.full);
-                        session.knownEntityIds.add(id);
-                    } else if (sd.delta) {
-                        deltaShips.push(sd.delta);
-                    }
-                    return;
-                }
-                const cd = projData.get(id);
-                if (cd) {
-                    if (!session.knownEntityIds.has(id)) {
-                        newProjectiles.push(cd.full);
-                        session.knownEntityIds.add(id);
-                    } else if (cd.delta) {
-                        deltaProjectiles.push(cd.delta);
-                    }
-                    return;
+                const data = entityData.get(id);
+                if (!data) return;
+
+                // If client doesn't know about it, add it
+                if (!session.knownEntityIds.has(id)) {
+                    newEntities.push(data.full);    // full sync
+                    session.knownEntityIds.add(id); // so we don't add it next time
+                } else if (data.delta) {
+                    deltaEntities.push(data.delta); // if client knows about it, and it changed
                 }
             });
 
-            // Remove out-of-range entities
+            // Out-of-range entities
             session.knownEntityIds.forEach(id => {
                 if (!nearbyIds.has(id)) {
                     session.knownEntityIds.delete(id);
-                    removedIds.push(id); // Tell the client to drop the out-of-range entity
+                    removedIds.push(id);
                 }
             });
 
-            if (
-                !newPlayers.length &&
-                !newShips.length &&
-                !newProjectiles.length &&
-                !deltaPlayers.length &&
-                !deltaShips.length &&
-                !deltaProjectiles.length &&
-                !removedIds.length) {
+            // If nothing has changed, skip it altogether
+            if (!newEntities.length && !deltaEntities.length && !removedIds.length) {
                 return null;
             }
 
-            // Send the data to the client
-            return { newPlayers, newShips, newProjectiles, deltaProjectiles, deltaPlayers, deltaShips, removedIds };
+            // Send to client via socket service
+            return { newEntities, deltaEntities, removedIds };
         });
     }
 
@@ -275,9 +226,7 @@ export default class GameWorld extends EventEmitter {
      */
     public getFullState() {
         return {
-            players: this.registry.getByType<Player>('player').map(p => p.serialise()),
-            ships: this.registry.getByType<Ship>('ship').map(s => s.serialise()),
-            projectiles: this.registry.getByType<Projectile>('projectile').map(p => p.serialise())
+            entities: this.registry.getAllExcluding('interactable').map(e => e.serialise),
         };
     }
 }

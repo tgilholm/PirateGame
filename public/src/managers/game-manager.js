@@ -4,6 +4,8 @@ import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import InputManager from "./input-manager.js";
 import ProjectileModel from "../models/projectile-model.js";
+import ModelFactory from "./model-factory.js";
+import Model from "../models/model.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -14,36 +16,29 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     /**
      * Abstracts game state from the phaser scene
      * @param {Phaser.Scene} scene the Phaser scene to control
-     * @param {import("../../../shared/browser/entity-config.json")} entityConfig
      * @param {NetworkManager} network abstracts io events
      * @param {InputManager} input abstracts key inputs
+     * @param {ModelFactory} modelFactory to create client-side models
      */
-    constructor(scene, entityConfig, network, input) {
+    constructor(scene, network, input, modelFactory) {
         super();
         this.network = network;
         this.scene = scene;
-        this.shipConfig = entityConfig.ship;
         this.input = input;
+        this.modelFactory = modelFactory;
+
         this.moveTimer = 0;
 
         /** @type {PlayerModel} */
         this.localPlayer = null;
         this.closestInteractable = null;
-        this.playerListDirty = false;
         this.playerId = null;
 
-        this.shipList = {};
-        this.shipArray = [];
-
-        this.playerList = {};
-        this.playerArray = [];
-
-        this.projectileList = {};
-        this.projectileArray = [];
+        /** @type {Map<string, Model>} */
+        this.entities = new Map();  // generic entity list
 
         this.interactables = [];
-
-
+        
 
         this.startListeners();
     }
