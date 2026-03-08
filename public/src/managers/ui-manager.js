@@ -16,6 +16,8 @@ export default class UIManager {
 
         this.promptElement = document.getElementById('interaction-prompt');
         this.currentInteractable = null;
+        this.goldElement = document.getElementById('gold-counter');
+        this.lastGold = null;
     }
 
     /**
@@ -45,6 +47,7 @@ export default class UIManager {
                 this.hidePrompt();
             }
         }
+        this.updateGoldCounter(player.gold ?? 0);
 
         if (this.gameManager.playerListDirty) {
 
@@ -94,5 +97,12 @@ export default class UIManager {
         list.innerHTML = visible
             .map((p, i) => `<li>${i + 1}. ${p.username || "Anonymous"}</li>`)
             .join("");
+    }
+
+    updateGoldCounter(amount) {
+        if (!this.goldElement) return;
+        if (this.lastGold === amount) return;
+        this.goldElement.textContent = `Gold: ${amount}`;
+        this.lastGold = amount;
     }
 }
