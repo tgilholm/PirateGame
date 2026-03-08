@@ -1,11 +1,10 @@
 import { ClientEvent, ServerEvent } from "shared/built/socket-protocol.js";
 import NetworkManager from "./network-manager.js";
-import ShipModel from "../models/ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import InputManager from "./input-manager.js";
-import ProjectileModel from "../models/projectile-model.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
+import { MainScene } from "../scenes/main-scene.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -13,9 +12,11 @@ import Model from "../models/model.js";
  */
 export default class GameManager extends Phaser.Events.EventEmitter {
 
+    #playerListCache;
+
     /**
      * Abstracts game state from the phaser scene
-     * @param {Phaser.Scene} scene the Phaser scene to control
+     * @param {MainScene} scene the main scene 
      * @param {NetworkManager} network abstracts io events
      * @param {InputManager} input abstracts key inputs
      * @param {ModelFactory} modelFactory to create client-side models
@@ -26,22 +27,178 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.scene = scene;
         this.input = input;
         this.modelFactory = modelFactory;
+        this.#playerListCache = null;
 
         this.moveTimer = 0;
 
         /** @type {PlayerModel} */
         this.localPlayer = null;
-        this.closestInteractable = null;
         this.playerId = null;
+        this.playerListDirty = true;
 
         /** @type {Map<string, Model>} */
         this.entities = new Map();  // generic entity list
 
         this.interactables = [];
-        
+        this.closestInteractable = null;
+
 
         this.startListeners();
     }
+
+    /**
+     * Sends the READY event to the server, indicating the client has 
+     * fully loaded in and is ready to receive the INIT_GAME packet. This step
+     * prevents the client from missing the setup data.
+     * @param {string} username 
+     */
+    start(username) {
+        this.network.emit(ClientEvent.READY, { username: username });
+    }
+
+    /**
+    * Refreshes all client-side objects.
+    */
+    update() {
+        if (!this.localPlayer) return;  // dont do anything until the player has joined
+
+        const delta = this.scene.game.loop.delta;
+        const inputs = this.input.getInputs(this.scene, this.localPlayer);
+        const pos = this.localPlayer.worldPos;
+
+        // Send packets at the server tick rate instead of spamming 60 times a second
+        this.moveTimer = (this.moveTimer) + delta;
+        if (this.moveTimer >= 1000 / 20) {  // match server tick rate
+            this.network.sendMove(inputs);
+            this.moveTimer = 0;
+        }
+
+        // Move the invisible camera target to the local player's current position
+        this.scene.cameraTarget.x = pos.x;
+        this.scene.cameraTarget.y = pos.y;
+
+        // Ladders are accessible both off and on ships
+        const closest = this.getClosestInteractable(this.localPlayer);
+        if (closest && closest.dist < 50) {
+            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) { // handles both === null
+                this.closestInteractable = closest;
+            }
+        } else {
+            this.closestInteractable = null;
+        }
+
+        // Update all entities at once
+        this.entities.forEach((entity) => {
+            if (entity === this.localPlayer) {
+                entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
+            }
+            entity.update(delta);
+        })
+    }
+
+    onFullSync(data) {
+        // Reset the map to 0
+        this.entities.forEach(e => e.destroy());
+        this.entities.clear();
+        this.interactables = [];
+        this.localPlayer = null;    // clear local
+        this.playerListDirty = true;
+        this.#playerListCache = null; // invalidate cache
+
+        // Start fresh with new entity data
+        data.entities?.forEach(entityData => this.applyFull(entityData));
+        this.resolveLocalPlayer();
+        this.refreshInteractables();
+    }
+
+    onDeltaSync(data) {
+        let shipsChanged = false;
+
+        // Keep track of changes to ships to regenerate interactables
+        data.newEntities?.forEach(entityData => {
+            this.applyFull(entityData);
+            if (entityData.type === 'ship') shipsChanged = true;
+            if (entityData.type === 'player') this.playerListDirty = true; this.#playerListCache = null;
+        });
+
+        // Apply changes
+        data.deltaEntities?.forEach(delta => this.applyDelta(delta));
+
+        // Apply removals
+        data.removedIds?.forEach(id => {
+            const removedType = this.removeEntity(id)?.entityType;
+            if (removedType === 'player') this.playerListDirty = true; this.#playerListCache = null;
+            if (removedType === 'ship') shipsChanged = true;
+        });
+
+        if (shipsChanged) this.refreshInteractables(); // regenerate the list
+        this.resolveLocalPlayer();
+    }
+
+    applyFull(data) {
+        let model = this.entities.get(data.id);
+
+        if (!model) {
+            model = this.modelFactory.create(data); // create the entity if it doesn't exist
+
+            if (!model) return; // factory failed to create
+            this.entities.set(data.id, model);  // add to map
+        }
+
+        // @ts-ignore reparent the player if they left a ship
+        if (data.type === 'player') this.handleReparent(model, data);
+
+        model.sync(data);
+    }
+
+    applyDelta(delta) {
+        const model = this.entities.get(delta.id);
+        if (!model) return;
+
+        if (model.entityType === 'player' && delta.parentId !== undefined) {
+            // @ts-ignore
+            this.handleReparent(model, delta);
+        }
+
+        model.sync(delta);
+    }
+
+    removeEntity(id) {
+        const model = this.entities.get(id);
+        if (!model) {
+            console.debug(`[GameManager] removeEntity: "${id}" not found, already removed?`);
+            return undefined;
+        }
+
+        // Remove players from ship before deleting it
+        if (model.entityType === 'ship') {
+            this.entities.forEach(entity => {
+                // @ts-ignore
+                if (entity.entityType === 'player' && entity.parentId === id) {
+                    model.remove(entity);               // detach from container
+                    this.scene.add.existing(entity);    // re-anchor to scene root
+                    // @ts-ignore
+                    entity.parentId = null;
+                }
+            });
+        }
+
+        model.destroy();
+        this.entities.delete(id);
+        return model;
+    }
+
+    /** @returns {Map<string, import("../models/player-model.js").default>} */
+    get playerList() {
+        if (!this.#playerListCache) {
+            this.#playerListCache = new Map();
+            this.entities.forEach((entity, id) => {
+                if (entity.entityType === 'player') this.#playerListCache.set(id, entity);
+            });
+        }
+        return this.#playerListCache;
+    }
+
 
     /**
      *  Sets up the NetworkManager listeners to respond to updates from
@@ -69,6 +226,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
         });
 
+        // Send the one-off events directly to the server
         this.input.on('fire', () => this.network.sendFire());
         this.input.on('release', () => this.network.sendRelease());
     }
@@ -78,9 +236,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      */
     refreshInteractables() {
         this.interactables = [];
-        Object.values(this.shipList).forEach(ship => {
-            this.interactables.push(...ship.interactables);
-        })
+        this.entities.forEach(entity => {
+            if (entity.entityType === 'ship') {
+                //@ts-ignore
+                this.interactables.push(...entity.interactables);
+            }
+        });
     }
 
     /**
@@ -113,243 +274,43 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
-    /**
-     * Sends the READY event to the server, indicating the client has 
-     * fully loaded in and is ready to receive the INIT_GAME packet. This step
-     * prevents the client from missing the setup data.
-     * @param {string} username 
-     */
-    start(username) {
-        this.network.emit(ClientEvent.READY, { username: username });
-    }
-
-    /**
-     * Refreshes all client-side objects.
-     */
-    update() {
-        if (!this.localPlayer) return;  // dont do anything until the player has joined
-
-        const delta = this.scene.game.loop.delta;
-        const inputs = this.input.getInputs(this.scene, this.localPlayer);
-        const matrix = this.localPlayer.getWorldTransformMatrix();
-
-        // Send packets at the server tick rate instead of spamming 60 times a second
-        this.moveTimer = (this.moveTimer || 0) + delta;
-        if (this.moveTimer >= 1000 / 20) {  // match server tick rate
-            this.network.sendMove(inputs);
-            this.moveTimer = 0;
-        }
-
-        // Move the invisible camera target to the local player's current position
-        //@ts-ignore
-        this.scene.cameraTarget.x = matrix.tx;
-        //@ts-ignore
-        this.scene.cameraTarget.y = matrix.ty;
-
-        // Ladders are accessible both off and on ships
-        const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) {
-                this.closestInteractable = closest;
-            }
-        } else {
-            this.closestInteractable = null;
-        }
-
-        this.shipArray.forEach(ship => ship.update(delta));
-
-        this.playerArray.forEach((player) => {
-            if (player === this.localPlayer) {
-                player.target.aimAngle = inputs.aimAngle; // update target first
-            }
-            player.update(delta);
-        });
-
-            console.log(this.projectileArray);
-        this.projectileArray.forEach((proj) => {
-            proj.update(delta);
-        });
-    }
-
-    /**
-     * Handles the init game packet by creating all entities
-     * provided with their full data
-     * @param {Object} data the data from the server
-     */
-    onFullSync(data) {
-        // Process all ships and players as full state
-        data.ships?.forEach(shipData => this.applyFullShip(shipData));
-        data.players?.forEach(playerData => this.applyFullPlayer(playerData));
-        data.projectiles?.forEach(projData => this.applyFullProjectile(projData));
-
-        this.resolveLocalPlayer();
-
-        this.shipArray = Object.values(this.shipList);
-        this.playerArray = Object.values(this.playerList);
-        this.projectileArray = Object.values(this.projectileList);
-    }
-
-    /**
-    * Handles the game state packet by using the full state for entities entering
-    * the view range, and the partial state for known entities that have changed
-    * @param {Object} data the data from the server
-    */
-    onDeltaSync(data) {
-        // Full state for newly visible entities
-        data.newShips?.forEach(shipData => this.applyFullShip(shipData));
-        data.newPlayers?.forEach(playerData => this.applyFullPlayer(playerData));
-
-        // Delta updates for known entities: only update fields present in packet
-        data.deltaShips?.forEach(delta => this.applyDeltaShip(delta));
-        data.deltaPlayers?.forEach(delta => this.applyDeltaPlayer(delta));
-        data.newProjectiles?.forEach(projData => this.applyFullProjectile(projData));
-        data.deltaProjectiles?.forEach(delta => {
-            const proj = this.projectileList[delta.id];
-            if (proj) proj.syncDelta(delta);
-        });
-
-        // Remove out-of-range entities
-        if (data.removedIds) {
-            data.removedIds.forEach(id => {
-                // Players
-                if (this.playerList[id]) {
-                    this.playerList[id].destroy();
-                    delete this.playerList[id];
-                }
-                // Ships
-                if (this.shipList[id]) {
-                    this.shipList[id].destroy();
-                    delete this.shipList[id];
-                    this.refreshInteractables();    // remove the ship's interactables
-                }
-                if (this.projectileList[id]) {
-                    this.projectileList[id].destroy();
-                    delete this.projectileList[id];
-                }
-            });
-        }
-
-        this.resolveLocalPlayer();  // get the local player
-
-        this.shipArray = Object.values(this.shipList);
-        this.playerArray = Object.values(this.playerList);
-        this.projectileArray = Object.values(this.projectileList);
-    }
-
-    /**
-     * Creates or fully updates a ship from a complete data object.
-     * @param {Object} shipData the data about a specific ship
-    */
-    applyFullShip(shipData) {
-        if (!this.shipList[shipData.id]) {
-            this.shipList[shipData.id] = new ShipModel(
-                this.scene,
-                shipData.id,
-                shipData.x,
-                shipData.y,
-                this.shipConfig
-            );
-            this.refreshInteractables();
-        }
-        this.shipList[shipData.id].syncFromServer(shipData);
-    }
-
-    /**
-    * Creates or fully updates a player from a complete data object.
-    * @param {Object} playerData the data about a specific player
-    */
-    applyFullPlayer(playerData) {
-        let player = this.playerList[playerData.id];
-
-        if (!player) {
-            player = new PlayerModel(
-                this.scene,
-                playerData.id,
-                playerData.x,
-                playerData.y
-            );
-            this.playerList[playerData.id] = player;
-            this.playerListDirty = true;
-        }
-
-        this.handleReparent(player, playerData); // if leaving/joining a ship
-        player.syncFromServer(playerData); // full update
-    }
-
-    applyFullProjectile(data) {
-        if (!this.projectileList[data.id]) {
-            this.projectileList[data.id] = new ProjectileModel(
-                this.scene,
-                data.id,
-                data.x,
-                data.y,
-                data.r
-            );
-        }
-        this.projectileList[data.id].syncFromServer(data);
-    }
-
-    /**
-     * Applies a delta (partial change) to a ship
-     * @param {Object} delta the changes from the server 
-     */
-    applyDeltaShip(delta) {
-        const ship = this.shipList[delta.id];
-        if (!ship) return; // shouldn't happen but guard anyway
-        ship.syncDelta(delta);
-    }
-
-    /**
-     * Applies a delta (partial change) to a palyer
-     * @param {Object} delta the changes from the server 
-     */
-    applyDeltaPlayer(delta) {
-        const player = this.playerList[delta.id];
-        if (!player) return;
-
-        // reparent if the id changed
-        if (delta.parentId !== undefined) {
-            this.handleReparent(player, delta);
-        }
-
-        player.syncDelta(delta);
-    }
 
     /**
      * Handle moving a player into a ship object and vice versa
      * @param {PlayerModel} player the player for which reparenting is handled
-     * @param {Object} playerData the data from the server
+     * @param {Object} data the data from the server
      */
-    handleReparent(player, playerData) {
-        if (player.parentId === playerData.parentId) return;
+    handleReparent(player, data) {
+        if (player.parentId === data.parentId) return;
+        this.closestInteractable = null;    // reset closest interactable
 
-        const newParentId = playerData.parentId;
+        const ship = data.parentId ? this.entities.get(data.parentId) : null;
 
-        if (newParentId && this.shipList[newParentId]) {
-            this.shipList[newParentId].add(player);
-            player.setPosition(playerData.x ?? player.x, playerData.y ?? player.y);
+        if (ship) {
+            ship.add(player);
         } else {
             this.scene.add.existing(player);
-            player.setPosition(playerData.x ?? player.x, playerData.y ?? player.y);
         }
 
-        player.parentId = newParentId;
+        player.setPosition(data.x ?? player.x, data.y ?? player.y);
+        player.parentId = data.parentId ?? null;
 
-        // Snap interpolation targets on reparent
-        if (playerData.x !== undefined) player.target.x = playerData.x;
-        if (playerData.y !== undefined) player.target.y = playerData.y;
+        // Snap interpolation targets so movement feels instant on reparent
+        if (data.x !== undefined) player.target.x = data.x;
+        if (data.y !== undefined) player.target.y = data.y;
     }
 
     /**
     * Finds and assigns the local player when they have joined
     */
     resolveLocalPlayer() {
-        if (!this.localPlayer && this.playerId) {
-            const mine = this.playerList[this.playerId];
-            if (mine) {
-                this.localPlayer = mine;
-                this.emit('localPlayerReady', this.localPlayer);
-            }
+        if (this.localPlayer || !this.playerId) return;
+
+        const mine = this.entities.get(this.playerId);
+        if (mine) {
+            // @ts-ignore
+            this.localPlayer = mine;
+            this.emit('localPlayerReady', this.localPlayer);
         }
     }
 }

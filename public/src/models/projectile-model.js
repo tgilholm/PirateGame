@@ -1,4 +1,4 @@
-import Model from "./model";
+import Model from "./model.js";
 
 /**
  * Client-side projectile representation.
@@ -13,7 +13,7 @@ export default class ProjectileModel extends Model {
      * @param {number} r 
      */
     constructor(scene, id, x, y, r) {
-        super(scene, id, x, y, r, false);
+        super(scene, id, x, y, 'projectile', r, false);
 
         this.sprite = scene.add.sprite(0, 0, 'cannonball');
         this.add(this.sprite);

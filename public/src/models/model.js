@@ -15,9 +15,10 @@ export default class Model extends Phaser.GameObjects.Container {
      * @param {number} y the y coordinate of this model
      * @param {boolean} isStatic whether this model can move
      */
-    constructor(scene, id, x, y, r = 0, isStatic = false) {
+    constructor(scene, id, x, y, entityType = 'entity', r = 0, isStatic = false) {
         super(scene, x, y);
         this.id = id;
+        this.entityType = entityType;
         this.isStatic = isStatic;
 
         this.target = { x: x, y: y, r: r };   // for interpolation

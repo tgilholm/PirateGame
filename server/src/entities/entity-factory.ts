@@ -4,7 +4,14 @@ import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
+import InteractableEntity from "./interactable-entity";
 
+
+export interface InteractableInstance {
+    type: string;
+    x: number;
+    y: number;
+}
 
 /**
  * Aggregates entity creation, applying domain-specific default values from
@@ -54,10 +61,25 @@ export default class EntityFactory {
         const ship = new Ship(id, x, y, this.shipConfig);
         this.entityRegistry.create(ship);
 
-        ship.interactables.forEach(interactable => {    // Add all interactable objects to the ship
-            this.entityRegistry.create(interactable);
-        })
+        this.shipConfig.interactables.forEach((item, index) => {
+            this.createInteractable(ship, item, index);
+        });
 
         return ship;
+    }
+
+
+
+    public createInteractable(parent: Ship, instance: InteractableInstance, index: number) {
+        const { type, x, y } = instance;
+        const prefix = parent ? parent.id : "map";  // parent id or map if null
+        const id = `${prefix}_${type}_${index}`;
+
+
+        if (parent) {
+            let item = new InteractableEntity(id, type, x, y, parent);
+            parent.interactables.push(item);
+            this.entityRegistry.create(item);
+        }
     }
 }

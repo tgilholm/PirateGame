@@ -226,7 +226,7 @@ export default class GameWorld extends EventEmitter {
      */
     public getFullState() {
         return {
-            entities: this.registry.getAllExcluding('interactable').map(e => e.serialise),
+            entities: this.registry.getAllExcluding('interactable').map(e => e.serialise()),
         };
     }
 }

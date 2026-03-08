@@ -45,42 +45,10 @@ export default class Ship extends Entity {
             right: false
         }
 
-        // Allow for ships with no interactables 
-        let result = this.createInteractables(config.interactables);
-        if (result) {
-            this.interactables = result;
-        }
-
         // For adding to the matter-js world
         this.body = this.createPhysicsBody(x, y);
     }
 
-    /**
-     * Creates the interactable objects specified by the entityConfig injected into this file.
-     * Each interactable is given an id based on the ship's id- i.e. "ship_1:ladder_1"
-     * @param interactables the object containing the ship's interactables
-     * @returns a list of interactable entities
-     */
-    createInteractables(interactables: ShipConfig['interactables']): InteractableEntity[] {
-        if (!interactables) return [];
-
-        let result: InteractableEntity[] = [];
-
-        for (let i = 0; i < interactables.length; i++) {
-            const uniqueId = `${this.id}_${interactables[i].id}`;
-
-            const configWithUniqueId = { ...interactables[i], id: uniqueId };
-
-            const interactable = new InteractableEntity(
-                configWithUniqueId,
-                this
-            );
-
-            result.push(interactable);
-        }
-
-        return result;
-    }
 
     /**
      * Overrides base method appending ship-specific data for network transmission

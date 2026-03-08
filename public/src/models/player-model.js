@@ -16,7 +16,7 @@ export default class PlayerModel extends Model {
      * @param {number} y the start y coordinate (relative/absolute)
      */
     constructor(scene, id, x, y) {
-        super(scene, id, x, y, 0, false); // players can move
+        super(scene, id, x, y, 'player', 0, false); // players can move
 
         this.isSteering = false;
         this.isUsingCannon = false;
@@ -97,9 +97,10 @@ export default class PlayerModel extends Model {
     /**
      * Overrides interpRotation because the player's definition of rotation applies
      * to their gun (for now).
+     * @param {number} deltaTime the difference in time in seconds
      * @param {number} lerp the interpolation factor 
      */
-    interpRotation(lerp) {
+    interpRotation(deltaTime, lerp) {
         // Rotate the aim angle smoothly
         const aimDiff = Phaser.Math.Angle.Wrap(this.target.r - this.aimAngle);
         this.aimAngle += aimDiff * lerp;

@@ -15,7 +15,7 @@ export default class ShipModel extends Model {
      * @param {ShipConfig} config the config data specifying the ship's dimensions
      */
     constructor(scene, id, x, y, config) {
-        super(scene, id, x, y, 0, false);   // not static, 0 rotation
+        super(scene, id, x, y, 'ship', 0, false);   // not static, 0 rotation
         this.dimensions = config.dimensions; // for the hull dimensions
         this.interactables = [];
         this.pilotId = null;

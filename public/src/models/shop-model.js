@@ -1,4 +1,4 @@
-import InteractableModel from "./interactable-model";
+import InteractableModel from "./interactable-model.js";
 
 export default class ShopModel extends InteractableModel {
     constructor(scene, parent, id, x, y) {
