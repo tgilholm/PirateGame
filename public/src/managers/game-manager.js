@@ -23,6 +23,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      */
     constructor(scene, network, input, modelFactory) {
         super();
+        this.projectiles = [];
         this.network = network;
         this.scene = scene;
         this.input = input;

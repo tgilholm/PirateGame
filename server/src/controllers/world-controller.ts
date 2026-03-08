@@ -5,6 +5,8 @@ import { ActionType, PlayerAction } from "@shared/socket-protocol";
 import Player from "../entities/player";
 import Ship from "../entities/ship";
 import MessageController from "./message-controller";
+import CannonController from "./cannon-controller";
+import Cannon from "src/entities/cannon";
 
 /**
  * Defines the controllers that must be passed to this one
@@ -12,7 +14,8 @@ import MessageController from "./message-controller";
 export interface GameControllers {
     playerController: PlayerController,
     shipController: ShipController,
-    messageController: MessageController
+    messageController: MessageController,
+    cannonController: CannonController
 }
 
 
@@ -24,6 +27,7 @@ export default class WorldController {
     shipController: ShipController;
     playerController: PlayerController;
     messageController: MessageController;
+    cannonController: CannonController;
 
     /**
      * Constructs a WorldController with the provided sub-controllers
@@ -35,6 +39,7 @@ export default class WorldController {
         this.shipController = controllers.shipController;
         this.playerController = controllers.playerController;
         this.messageController = controllers.messageController;
+        this.cannonController = controllers.cannonController;
     }
 
     /**
@@ -52,9 +57,7 @@ export default class WorldController {
 
                 // If the player is controlling a cannon, send move inputs to the cannon
                 if (player.isUsingCannon) {
-                    
-                    // // Get the cannon being used by the player
-                    // const cannon = this.entityRegistry.get<InteractableEntity>()
+                    const cannon = this.entityRegistry.get<Cannon>()
 
                     // this.cannonController.handleMove(cannon, action.data);
 

@@ -75,7 +75,6 @@ export default class PlayerController {
                     this.interactionHandler.handleCannonInteraction(player, interactable);
                     break;
                 case 'ladder':
-
                     this.interactionHandler.handleLadderInteraction(player, ship, interactable);
                     break;
                 default:
@@ -128,7 +127,14 @@ export default class PlayerController {
         this.entityRegistry.create(bullet);
     }
     handleCannonFire(player: Player) {
-        throw new Error("Method not implemented.");
+
+        const interactables = this.entityRegistry.getByType<InteractableEntity>('interactable');
+        const cannon = interactables.find(i=>i.useType==='cannon' && i.user === player);
+
+        if (!cannon) return;
+
+        this.cannonController.handleInput(player,cannon);
+        this.cannonController.fire(player,cannon);
     }
     handleUpgrade(player: Player, data: UpgradeData) {
         throw new Error("Method not implemented.");
