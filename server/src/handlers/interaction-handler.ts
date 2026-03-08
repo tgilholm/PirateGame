@@ -93,7 +93,7 @@ export default class InteractionHandler {
 
         interactable.user = null;
 
-        switch (interactable.useType) {
+        switch (interactable.type) {
             case 'helm':
                 if (!ship) return;
                 player.isSteering = false;

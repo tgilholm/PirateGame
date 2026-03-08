@@ -7,11 +7,10 @@ export default class Cannon extends InteractableEntity
 
     constructor(id: string, x: number, y: number, parent: Entity | null)
     {
-        super(id, 'cannon', x, y, parent);
+        super(id, x, y, parent, 'cannon');
 
         this.targetAngle = 0;
 
-        console.log(y);
         if (parent)
         {
             this.r = (y < 0) ? 0 : Math.PI;

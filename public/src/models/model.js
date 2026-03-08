@@ -17,6 +17,7 @@ export default class Model extends Phaser.GameObjects.Container {
      */
     constructor(scene, id, x, y, entityType = 'entity', r = 0, isStatic = false) {
         super(scene, x, y);
+        this.isInteractable = false;
         this.id = id;
         this.entityType = entityType;
         this.isStatic = isStatic;

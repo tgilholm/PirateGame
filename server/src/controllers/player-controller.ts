@@ -8,6 +8,8 @@ import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
 import Projectile from "../entities/projectile";
 import Cannon from "src/entities/cannon";
+import Helm from "src/entities/helm";
+import Ladder from "src/entities/ladder";
 
 /**
  * Handles events affecting the player
@@ -67,16 +69,16 @@ export default class PlayerController {
         if (dist < 50) {
             const ship = interactable.parent as Ship;
             if (!ship) return;
-            switch (interactable.useType) {
+            switch (interactable.type) {
                 case 'helm':
-                    this.interactionHandler.handleHelmInteraction(player, ship, interactable);
+                    this.interactionHandler.handleHelmInteraction(player, ship, interactable as Helm);
                     break;
 
                 case 'cannon':
                     this.interactionHandler.handleCannonInteraction(player, interactable as Cannon);
                     break;
                 case 'ladder':
-                    this.interactionHandler.handleLadderInteraction(player, ship, interactable);
+                    this.interactionHandler.handleLadderInteraction(player, ship, interactable as Ladder);
                     break;
                 default:
                     return;

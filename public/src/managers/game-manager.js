@@ -95,8 +95,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
             entity.update(delta);
 
-            if (entity.entityType === 'projectile')
-            {
+            if (entity.entityType === 'projectile') {
                 console.log(entity.x, entity.y);
             }
         })
@@ -128,26 +127,26 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      * @param {Object} data the data from the server
      */
     onDeltaSync(data) {
-        let shipsChanged = false;
+        let needsInteractableRefresh = false;
 
-        // Keep track of changes to ships to regenerate interactables
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
-            if (entityData.type === 'ship') shipsChanged = true;
-            if (entityData.type === 'player') this.playerListDirty = true; this.#playerListCache = null;
+            if (entityData.type === 'ship') needsInteractableRefresh = true;
+            if (entityData.isInteractable || entityData.useType !== undefined) needsInteractableRefresh = true;
+            if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
-        // Apply changes
         data.deltaEntities?.forEach(delta => this.applyDelta(delta));
 
-        // Apply removals
         data.removedIds?.forEach(id => {
-            const removedType = this.removeEntity(id)?.entityType;
-            if (removedType === 'player') this.playerListDirty = true; this.#playerListCache = null;
-            if (removedType === 'ship') shipsChanged = true;
+            const removed = this.removeEntity(id);
+            const removedType = removed?.entityType;
+            if (removedType === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
+            if (removedType === 'ship') needsInteractableRefresh = true;
+            if (removed?.isInteractable) needsInteractableRefresh = true;
         });
 
-        if (shipsChanged) this.refreshInteractables(); // regenerate the list
+        if (needsInteractableRefresh) this.refreshInteractables();
         this.resolveLocalPlayer();
     }
 
@@ -267,10 +266,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     refreshInteractables() {
         this.interactables = [];
         this.models.forEach(entity => {
-            if (entity.entityType === 'ship') {
-                //@ts-ignore
-                this.interactables.push(...entity.interactables);
-            }
+            if (entity.isInteractable) this.interactables.push(entity);
         });
     }
 

@@ -32,9 +32,11 @@ export default class ModelFactory {
             case 'ship': return this.createShip(data);
             case 'player': return this.createPlayer(data);
             case 'projectile': return this.createProjectile(data);
-            case 'interactable': return this.createInteractable(data);
+            case 'cannon': return this.createInteractable(data);
+            case 'helm': return this.createInteractable(data);
+            case 'ladder': return this.createInteractable(data);
             default:
-                console.warn(`[ModelFactory] Unknown entity type: "${data.type}". Data received: ${data}`);
+                console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
         }
     }
@@ -76,7 +78,7 @@ export default class ModelFactory {
 
 
         let model;
-        switch (data.useType) {
+        switch (data.type) {
             case 'cannon': model = new CannonModel(this.scene, parent, data.id, data.x, data.y); break;
             case 'helm': model = new HelmModel(this.scene, parent, data.id, data.x, data.y); break;
             case 'ladder': model = new LadderModel(this.scene, parent, data.id, data.x, data.y); break;

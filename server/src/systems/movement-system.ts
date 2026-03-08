@@ -35,6 +35,9 @@ export default class MovementSystem implements BaseSystem {
 
         const ships = this.registry.getByType<Ship>('ship');
         ships.forEach(ship => this.updateShip(ship, dt));
+
+        const cannons = this.registry.getByType<Cannon>('cannon');
+        cannons.forEach(cannon => this.updateCannon(cannon, dt));
     }
 
     /**
@@ -232,7 +235,7 @@ export default class MovementSystem implements BaseSystem {
     }
 
 
-    updateCannons(cannon: Cannon, dt: number)
+    updateCannon(cannon: Cannon, dt: number)
     {
         const targetAngle = cannon.targetAngle;
 

@@ -21,19 +21,19 @@ export default class InteractableModel extends Model {
      * @param {string} releasePrompt 
      */
     constructor(scene, parent, id, type, x, y, texture = '', usePrompt = '', releasePrompt = '') {
-        super(scene, id, x, y, 'interactable', 0, true);    // is static
+        super(scene, id, x, y, type, 0, true);    // is static
+        this.isInteractable = true;
         this.type = type;
         this.usePrompt = usePrompt || `Use ${this.type}`;
         this.releasePrompt = releasePrompt || "";
         this.textureKey = texture || 'interactable'; // default
-        
+
 
         this.startY = y;
         this.sprite = scene.add.sprite(0, 0, this.textureKey);
         this.add(this.sprite);
 
-        if (parent)
-        {
+        if (parent) {
             parent.add(this);
             this.parentId = parent.id;
         } else {
