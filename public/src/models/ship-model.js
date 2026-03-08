@@ -1,6 +1,3 @@
-/** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */
-
-import Interactable from "./interactable.js";
 import Model from "./model.js";
 
 /**
@@ -41,16 +38,6 @@ export default class ShipModel extends Model {
         this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
         this.add(this.hullSprite);
         this.sendToBack(this.hullSprite);
-
-
-        // Create interactable models and add to this object
-        if (config.interactables) {
-            config.interactables.forEach(item => {
-                const interactable = new Interactable(this.scene, this, item);
-                this.add(interactable);
-                this.interactables.push(interactable);
-            });
-        }
 
         this.setDepth(10);
     }

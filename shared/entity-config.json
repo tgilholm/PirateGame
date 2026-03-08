@@ -47,22 +47,5 @@
                 "y": -75
             }
         ]
-    },
-    "interactables": {
-        "helm": {
-            "texture": "helm",
-            "usePrompt": "Take the helm",
-            "releasePrompt": "Release the helm"
-        },
-        "cannon": {
-            "texture": "cannon",
-            "usePrompt": "Use cannon",
-            "releasePrompt": "Release cannon"
-        },
-        "ladder": {
-            "texture": "ladder",
-            "usePrompt": "Use ladder",
-            "releasePrompt": ""
-        }
     }
 }
