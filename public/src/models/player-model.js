@@ -18,7 +18,6 @@ export default class PlayerModel extends Model {
     constructor(scene, id, x, y) {
         super(scene, id, x, y, 0, false); // players can move
 
-        this.target = { x: 0, y: 0, r: 0 }; // r represents the target aim angle
         this.isSteering = false;
         this.isUsingCannon = false;
         this.aimAngle = 0;

@@ -1,10 +1,11 @@
+import Model from "./model.js";
 import ShipModel from "./ship-model.js";
 
 /**
  * Client side interactable entity. Contains prompts for user interaction.
  * Can be added to ships by adding to their containers.
  */
-export default class Interactable extends Phaser.GameObjects.Sprite {
+export default class InteractableModel extends Model {
 
     /**
      * Builds an interactable object in the specified scene with an optional parent
