@@ -64,9 +64,8 @@ export default class Model extends Phaser.GameObjects.Container {
         // Don't move static objects
         if (!this.isStatic) {
             this.interpPosition(deltaTime, lerp);
-            this.interpRotation(lerp);
+            this.interpRotation(deltaTime, lerp);
         }
-
 
         // PostUpdate is executed regardless of this model's static state
         this.postUpdate(delta, deltaTime, lerp);
@@ -106,9 +105,10 @@ export default class Model extends Phaser.GameObjects.Container {
      * Smoothly move the rotation of this model to the target rotation.
      * This method is separated from the main update() loop so that subclasses
      * may provide additional functionality.
-     * @param {number} lerp 
+     * @param {number} deltaTime the difference in time in seconds
+     * @param {number} lerp the interpolation factor
      */
-    interpRotation(lerp) {
+    interpRotation(deltaTime, lerp) {
         const rDiff = Phaser.Math.Angle.Wrap(this.target.r - this.rotation);
         this.rotation += rDiff * lerp;
     }
