@@ -26,7 +26,7 @@ export default class TreasureModel extends Model {
 
         if (this.state === "buried") {
             this.sprite.setTexture("x-mark");
-            this.sprite.setDisplaySize(64, 64);
+            this.sprite.setDisplaySize(48, 48);
         } else {
             this.sprite.setTexture("treasure-chest");
             this.sprite.setDisplaySize(80, 80);

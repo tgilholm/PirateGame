@@ -2,7 +2,7 @@ import Ship from "src/entities/ship";
 import EntityRegistry from "../engine/entity-registry";
 import Player from "../entities/player";
 import UpgradeHandler from "../handlers/upgrade-handler";
-import { InteractData, MoveData, UpgradeData } from "@shared/socket-protocol";
+import { InteractData, MoveData, UpgradeData,DigData } from "@shared/socket-protocol";
 import InteractableEntity from "../entities/interactable-entity";
 import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
@@ -109,8 +109,15 @@ export default class PlayerController {
     }
 
 
-    handleDig(player: Player) {
-        this.treasureSystem.digAtPlayer(player);
+    handleDig(player: Player, data: DigData): void {
+        if (data.mode === "start") {
+            this.treasureSystem.beginDig(player);
+            return;
+        }
+
+        if (data.mode === "hit") {
+            this.treasureSystem.submitDigHit(player, data.sliderPosition ?? -1);
+        }
     }
     handleGunFire(player: Player) {
         // Get player world pos

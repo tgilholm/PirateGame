@@ -91,9 +91,12 @@
             goldValue: number,
             state: TreasureState = "buried",
             digProgress: number = 0,
-            carrierId: string | null = null
+            carrierId: string | null = null,
+            digSpeed: number,
+            successZoneStart: number,
+            successZoneSize: number
         ): Treasure {
-            const treasure = new Treasure(id, x, y, goldValue, state, digProgress, carrierId);
+            const treasure = new Treasure(id, x, y, goldValue, state, digProgress, carrierId,digSpeed,successZoneStart,successZoneSize);
             this.entityRegistry.create(treasure);
             return treasure;
         }

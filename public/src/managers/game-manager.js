@@ -5,6 +5,8 @@ import InputManager from "./input-manager.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
+import DigMinigame from "../ui/dig-minigame.js";
+import { ServerEvent } from "shared/socket-protocol.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -28,6 +30,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.input = input;
         this.modelFactory = modelFactory;
         this.#playerListCache = null;
+        this.digMinigame = new DigMinigame();
 
         this.moveTimer = 0;
 
@@ -71,6 +74,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         if (this.moveTimer >= 1000 / 20) {  // match server tick rate
             this.network.sendMove(inputs);
             this.moveTimer = 0;
+            this.digMinigame.update(dt);
         }
 
         // Move the invisible camera target to the local player's current position
@@ -257,7 +261,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         this.input.on('dig', () => {
-            this.network.sendDig();
+            if (this.digMinigame.active) {
+                this.network.sendDigHit(this.digMinigame.getSliderPosition());
+            } else {
+                this.network.sendDigStart();
+            }
+        });
+
+        this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
+            this.digMinigame.start(payload);
+        });
+
+        this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
+            this.digMinigame.stop();
+            console.log(success ? "Dig success" : "Dig failed");
         });
 
         // Send the one-off events directly to the server

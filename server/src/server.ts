@@ -29,11 +29,13 @@ import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import TreasureSystem from './systems/treasure-system';
+import { ServerEvent } from "@shared/socket-protocol";
 
 // Create the express app & server
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+
 
 // Route files to the public folder
 app.use(express.static(path.join(__dirname, '../../public')));
@@ -95,6 +97,18 @@ const worldController = new WorldController(registry,
 
 const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid);
 const socketService = new SocketService(io, gameWorld);
+
+treasureSystem.bindUiEvents(
+    (playerId, payload) => {
+        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_START, payload);
+    },
+    (playerId, payload) => {
+        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_RESULT, payload);
+    }
+);
+
+socketService.initialise();
+gameWorld.start();
 
 socketService.initialise();
 gameWorld.start();

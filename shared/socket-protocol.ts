@@ -7,7 +7,9 @@ export enum ServerEvent {
     GAME_STATE = 'GAME_STATE',
     INIT_GAME = 'INIT_GAME',
     KICKED = 'KICKED',
-    JOIN_FAILED = 'JOIN_FAILED'
+    JOIN_FAILED = 'JOIN_FAILED',
+    DIG_MINIGAME_START = 'DIG_MINIGAME_START',
+    DIG_MINIGAME_RESULT = 'DIG_MINIGAME_RESULT'
 }
 
 export enum ClientEvent {
@@ -23,7 +25,7 @@ export enum ActionType {
     MESSAGE = 'MESSAGE',
     INTERACT = 'INTERACT',
     DIG = 'DIG',
-    RELEASE = 'RELEASE'
+    RELEASE = 'RELEASE',
 }
 
 export interface MoveData {
@@ -43,15 +45,21 @@ export interface InteractData {
     targetType: string;
     parentId?: string | null;
 }
+export interface DigData {
+    mode: "start" | "hit";
+    sliderPosition?: number; // 0..1, only used for mode === "hit"
+}
 
 export type PlayerAction =
     | { type: ActionType.MOVE; data: MoveData }   // Must match interface
     | { type: ActionType.UPGRADE; data: UpgradeData }
     | { type: ActionType.INTERACT; data: InteractData }
     | { type: ActionType.MESSAGE; data?: { text: string } } // the message
-    | { type: ActionType.DIG; data?: never }
+    | { type: ActionType.DIG; data: DigData }
     | { type: ActionType.FIRE; data?: never }
     | { type: ActionType.RELEASE; data?: never}
+
+
 
 
 export interface Action {

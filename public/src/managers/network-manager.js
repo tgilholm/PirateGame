@@ -78,7 +78,20 @@ export default class NetworkManager {
         this.sendAction({ type: ActionType.MESSAGE, data: { text } });
     }
 
-    sendDig() {
-        this.sendAction({ type: ActionType.DIG });
+    sendDigStart() {
+        this.sendAction({
+            type: ActionType.DIG,
+            data: { mode: "start" }
+        });
+    }
+
+    sendDigHit(sliderPosition) {
+        this.sendAction({
+            type: ActionType.DIG,
+            data: {
+                mode: "hit",
+                sliderPosition
+            }
+        });
     }
 }
