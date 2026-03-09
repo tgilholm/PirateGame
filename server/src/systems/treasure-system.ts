@@ -8,6 +8,21 @@ import { BaseSystem } from "./base-system";
 
 type WorldPoint = { x: number; y: number };
 
+type DigUiPayload = {
+    treasureId: string;
+    digSpeed: number;
+    successZoneStart: number;
+    successZoneSize: number;
+    durationMs: number;
+};
+
+type DigSession = {
+    playerId: string;
+    treasureId: string;
+    startedAt: number;
+    durationMs: number;
+};
+
 export interface TreasureSystemOptions {
     spawnIntervalMs: number;
     maxTreasures: number;
@@ -38,6 +53,9 @@ export default class TreasureSystem implements BaseSystem {
     private readonly options: TreasureSystemOptions;
     private timeSinceSpawnMs = 0;
     private nextTreasureId = 1;
+    private activeDigSessions = new Map<string, DigSession>();
+    private onDigMinigameStart?: (playerId: string, payload: DigUiPayload) => void;
+    private onDigMinigameResult?: (playerId: string, payload: { success: boolean }) => void;
 
     constructor(
         private registry: EntityRegistry,
@@ -62,8 +80,17 @@ export default class TreasureSystem implements BaseSystem {
         this.resolveDeposits();
     }
 
-    public digAtPlayer(player: Player): boolean {
+    public bindUiEvents(
+        onStart: (playerId: string, payload: DigUiPayload) => void,
+        onResult: (playerId: string, payload: { success: boolean }) => void
+    ) {
+        this.onDigMinigameStart = onStart;
+        this.onDigMinigameResult = onResult;
+    }
+
+    public beginDig(player: Player): boolean {
         if (player.isCarrying) return false;
+        if (this.activeDigSessions.has(player.id)) return false;
 
         const playerPos = this.getWorldPosition(player);
         const treasures = this.registry.getByType<Treasure>("treasure");
@@ -86,15 +113,76 @@ export default class TreasureSystem implements BaseSystem {
 
         if (!nearest) return false;
 
-        nearest.digProgress += 1;
+        const durationMs = 2500;
 
-        if (nearest.digProgress >= 3) {
-            nearest.digProgress = 3;
-            nearest.state = "dugup";
-        }
+        this.activeDigSessions.set(player.id, {
+            playerId: player.id,
+            treasureId: nearest.id,
+            startedAt: Date.now(),
+            durationMs
+        });
+
+        const minGold = this.options.minGold;
+        const maxGold = this.options.maxGold;
+        const normalized = (nearest.goldValue - minGold) / Math.max(1, maxGold - minGold);
+
+        const digSpeed = 0.8 + normalized * 2.0;
+        const successZoneSize = 0.24 - normalized * 0.10;
+        const successZoneStart = Math.random() * (1 - successZoneSize);
+
+        this.onDigMinigameStart?.(player.id, {
+            treasureId: nearest.id,
+            digSpeed,
+            successZoneStart,
+            successZoneSize,
+            durationMs
+        });
+
+        // stash on entity for validation
+        (nearest as any).digSpeed = digSpeed;
+        (nearest as any).successZoneStart = successZoneStart;
+        (nearest as any).successZoneSize = successZoneSize;
 
         nearest.markDirty();
         return true;
+    }
+
+    public submitDigHit(player: Player, sliderPosition: number): boolean {
+        const session = this.activeDigSessions.get(player.id);
+        if (!session) return false;
+
+        this.activeDigSessions.delete(player.id);
+
+        const treasure = this.registry.get<Treasure>(session.treasureId);
+        if (!treasure || treasure.state !== "buried") {
+            this.onDigMinigameResult?.(player.id, { success: false });
+            return false;
+        }
+
+        const playerPos = this.getWorldPosition(player);
+        const dx = playerPos.x - treasure.x;
+        const dy = playerPos.y - treasure.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq > this.options.digRadius * this.options.digRadius) {
+            this.onDigMinigameResult?.(player.id, { success: false });
+            return false;
+        }
+
+        const zoneStart = (treasure as any).successZoneStart ?? 0.4;
+        const zoneSize = (treasure as any).successZoneSize ?? 0.2;
+        const zoneEnd = zoneStart + zoneSize;
+
+        const success = sliderPosition >= zoneStart && sliderPosition <= zoneEnd;
+
+        if (success) {
+            treasure.state = "dugup";
+            treasure.digProgress = 3;
+            treasure.markDirty();
+        }
+
+        this.onDigMinigameResult?.(player.id, { success });
+        return success;
     }
 
     private spawnInitialTreasures(): void {
@@ -129,7 +217,31 @@ export default class TreasureSystem implements BaseSystem {
         const goldValue = this.randomInt(this.options.minGold, this.options.maxGold);
         const id = `treasure_${this.nextTreasureId++}`;
 
-        this.entityFactory.createTreasure(id, point.x, point.y, goldValue, "buried", 0, null);
+        const normalized = (goldValue - this.options.minGold) / Math.max(1, (this.options.maxGold - this.options.minGold));
+
+        const digSpeed = 0.8 + normalized * 2.2;        // higher gold = faster
+        const successZoneSize = 0.22 - normalized * 0.10; // higher gold = smaller zone
+        const successZoneStart = Math.random() * (1 - successZoneSize);
+
+        this.entityFactory.createTreasure(
+            id,
+            point.x,
+            point.y,
+            goldValue,
+            "buried",
+            0,
+            null,
+            digSpeed,
+            successZoneStart,
+            successZoneSize
+        );
+        type DigSession = {
+            playerId: string;
+            treasureId: string;
+            startedAt: number;
+            durationMs: number;
+        };
+
         return true;
     }
 
@@ -222,6 +334,7 @@ export default class TreasureSystem implements BaseSystem {
         return null;
     }
 
+
     private randomGridPoint(): WorldPoint {
         const { gridSize } = this.options;
         const cols = Math.floor(this.terrainMap.widthInPixels / gridSize);
@@ -261,6 +374,7 @@ export default class TreasureSystem implements BaseSystem {
         return false;
     }
 
+
     private isTooCloseToTreasure(point: WorldPoint): boolean {
         const treasures = this.registry.getByType<Treasure>("treasure");
         const minDistance = this.options.gridSize * 0.25;
@@ -275,6 +389,7 @@ export default class TreasureSystem implements BaseSystem {
 
         return false;
     }
+
 
     private getWorldPosition(player: Player): WorldPoint {
         if (!player.parent) {
