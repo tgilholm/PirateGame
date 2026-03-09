@@ -166,11 +166,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            // Before creating, check if there's a predicted projectile nearby to replace
-            if (data.type === 'projectile') {
+            if (data.type === 'bullet' || data.type === 'cannonball') { 
                 const predicted = this.findMatchingPrediction(data.x, data.y);
                 if (predicted) {
-                    // Remap the real id onto the predicted model so it syncs correctly
                     this.models.delete(predicted.id);
                     predicted.id = data.id;
                     predicted.isPredicted = false;

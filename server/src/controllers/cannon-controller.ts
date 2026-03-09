@@ -4,6 +4,7 @@ import Projectile from "../entities/projectiles/projectile";
 import { MoveData } from "@shared/socket-protocol";
 import Entity from "../entities/entity";
 import Ship from "../entities/ship";
+import Cannonball from "../entities/projectiles/cannonball";
 
 
 export default class CannonController {
@@ -31,15 +32,10 @@ export default class CannonController {
         };
 
         const id = `cannonball_${Date.now()}`;
-        const projectile = new Projectile(
-            id,
-            worldPos.x,
-            worldPos.y,
-            worldAngle,
-            500 // for now
-        );
+        const ball = new Cannonball(`cannonball_${Date.now()}`, spawnPos.x, spawnPos.y, worldAngle);
+        ball.firedBy = ship?.id ?? cannon.id; // avoid hitting own ship
 
-        this.entityRegistry.create(projectile);
+        this.entityRegistry.create(ball);
     }
 
     /**
