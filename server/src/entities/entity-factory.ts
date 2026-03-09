@@ -1,92 +1,100 @@
 
-import EntityRegistry from "src/engine/entity-registry";
-import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
-import Entity from "./entity";
-import Player from "./player";
-import Ship from "./ship";
-import Treasure from "./treasure";
-import InteractableEntity from "./interactable-entity";
+    import EntityRegistry from "src/engine/entity-registry";
+    import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
+    import Entity from "./entity";
+    import Player from "./player";
+    import Ship from "./ship";
+    import Treasure, { TreasureState } from "./treasure";
+    import InteractableEntity from "./interactable-entity";
 
 
-export interface InteractableInstance {
-    type: string;
-    x: number;
-    y: number;
-}
-
-/**
- * Aggregates entity creation, applying domain-specific default values from
- * the entity-config.json. 
- */
-export default class EntityFactory {
-
-    playerConfig: PlayerConfig;
-    shipConfig: ShipConfig;
-
-    /**
-     * Builds an entity factory
-     * @param entityConfig the default data for new entities
-     * @param entityRegistry the repository of entities to add to
-     */
-    constructor(private entityConfig: EntityConfig,
-        private entityRegistry: EntityRegistry,) {
-
-        this.playerConfig = entityConfig.player;
-        this.shipConfig = entityConfig.ship;    // destructure
+    export interface InteractableInstance {
+        type: string;
+        x: number;
+        y: number;
     }
 
     /**
-     * Creates a player with the specified data, injects the default player config and adds to the entity registry
-     * @param id the id of the player
-     * @param x the starting x of the player (relative if parent != null)
-     * @param y the starting y of the player (relative if parent != null)
-     * @param parent an optional physics parent entity
-     * @param username the username chosen by the player
-     * @returns the player
+     * Aggregates entity creation, applying domain-specific default values from
+     * the entity-config.json.
      */
-    public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
-        const player = new Player(id, x, y, parent, username, this.playerConfig);
-        this.entityRegistry.create(player);
-        return player;
-    }
+    export default class EntityFactory {
 
-    /**
-     * Creates a ship with the specified data, injects the default ship config and adds to the entity registry. Note
-     * that this does not add a matter-js physics body to the world yet.
-     * @param id the id of the ship
-     * @param x the absolute x coordinate of the ship
-     * @param y the absolute y coordinate of the ship
-     * @returns the ship
-     */
-    public createShip(id: string, x: number, y: number): Ship {
-        const ship = new Ship(id, x, y, this.shipConfig);
-        this.entityRegistry.create(ship);
+        playerConfig: PlayerConfig;
+        shipConfig: ShipConfig;
 
-        this.shipConfig.interactables.forEach((item, index) => {
-            this.createInteractable(ship, item, index);
-        });
+        /**
+         * Builds an entity factory
+         * @param entityConfig the default data for new entities
+         * @param entityRegistry the repository of entities to add to
+         */
+        constructor(private entityConfig: EntityConfig,
+            private entityRegistry: EntityRegistry,) {
 
-        return ship;
-    }
+            this.playerConfig = entityConfig.player;
+            this.shipConfig = entityConfig.ship;    // destructure
+        }
+
+        /**
+         * Creates a player with the specified data, injects the default player config and adds to the entity registry
+         * @param id the id of the player
+         * @param x the starting x of the player (relative if parent != null)
+         * @param y the starting y of the player (relative if parent != null)
+         * @param parent an optional physics parent entity
+         * @param username the username chosen by the player
+         * @returns the player
+         */
+        public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
+            const player = new Player(id, x, y, parent, username, this.playerConfig);
+            this.entityRegistry.create(player);
+            return player;
+        }
+
+        /**
+         * Creates a ship with the specified data, injects the default ship config and adds to the entity registry. Note
+         * that this does not add a matter-js physics body to the world yet.
+         * @param id the id of the ship
+         * @param x the absolute x coordinate of the ship
+         * @param y the absolute y coordinate of the ship
+         * @returns the ship
+         */
+        public createShip(id: string, x: number, y: number): Ship {
+            const ship = new Ship(id, x, y, this.shipConfig);
+            this.entityRegistry.create(ship);
+
+            this.shipConfig.interactables.forEach((item, index) => {
+                this.createInteractable(ship, item, index);
+            });
+
+            return ship;
+        }
 
 
 
-    public createInteractable(parent: Ship, instance: InteractableInstance, index: number) {
-        const { type, x, y } = instance;
-        const prefix = parent ? parent.id : "map";  // parent id or map if null
-        const id = `${prefix}_${type}_${index}`;
+        public createInteractable(parent: Ship, instance: InteractableInstance, index: number) {
+            const { type, x, y } = instance;
+            const prefix = parent ? parent.id : "map";  // parent id or map if null
+            const id = `${prefix}_${type}_${index}`;
 
 
-        if (parent) {
-            let item = new InteractableEntity(id, type, x, y, parent);
-            parent.interactables.push(item);
-            this.entityRegistry.create(item);
+            if (parent) {
+                let item = new InteractableEntity(id, type, x, y, parent);
+                parent.interactables.push(item);
+                this.entityRegistry.create(item);
+            }
+        }
+
+        public createTreasure(
+            id: string,
+            x: number,
+            y: number,
+            goldValue: number,
+            state: TreasureState = "buried",
+            digProgress: number = 0,
+            carrierId: string | null = null
+        ): Treasure {
+            const treasure = new Treasure(id, x, y, goldValue, state, digProgress, carrierId);
+            this.entityRegistry.create(treasure);
+            return treasure;
         }
     }
-
-    public createTreasure(id: string, x: number, y: number, goldValue: number): Treasure {
-        const treasure = new Treasure(id, x, y, goldValue);
-        this.entityRegistry.create(treasure);
-        return treasure;
-    }
-}

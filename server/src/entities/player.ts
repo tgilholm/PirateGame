@@ -10,6 +10,7 @@ export default class Player extends Entity {
     isSteering: boolean;
     isUsingCannon: boolean;
     isCarrying: boolean;
+    carryingTreasureId: string | null;
     inputs: {
         up: boolean;
         down: boolean;
@@ -46,6 +47,7 @@ export default class Player extends Entity {
         this.isSteering = false;
         this.isUsingCannon = false;
         this.isCarrying = false;
+        this.carryingTreasureId = null;
 
         //Gold on spaw
         this.gold = 0;
@@ -87,6 +89,7 @@ export default class Player extends Entity {
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
             isUsingCannon: this.isUsingCannon,
+            carryingTreasureId: this.carryingTreasureId,
             gold: this.gold
         }
 

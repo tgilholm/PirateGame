@@ -61,10 +61,12 @@ const treasureSystem = new TreasureSystem(
     entityFactory,
     terrainMap,
     {
-        initialSpawnCount: 500,
-        maxTreasures: 500,
+        initialSpawnCount: 25,
+        maxTreasures: 50,
         spawnIntervalMs: 5000,
         pickupRadius: 42,
+        digRadius: 55,
+        depositRadius: 90,
         gridSize: 128,
         minGold: 15,
         maxGold: 60,
@@ -85,7 +87,7 @@ const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,
   {
-    playerController: new PlayerController(registry, interactionHandler, upgradeHandler),
+    playerController: new PlayerController(registry, interactionHandler, upgradeHandler,treasureSystem),
     shipController: new ShipController(registry),
     messageController: new MessageController()
   }

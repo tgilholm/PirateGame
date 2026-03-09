@@ -22,6 +22,8 @@ export class StartScene extends Phaser.Scene {
         this.load.image('ladder', '/assets/ladder.png')
         this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
         this.load.image('treasure-chest', '/assets/chest.png');
+        this.load.image('x-mark', '/assets/redcross.png');
+        this.load.image('shovel', '/assets/shovel.png');
 
         // Resize the game if the window changes size
         window.addEventListener('resize', () => {

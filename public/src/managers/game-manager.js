@@ -238,6 +238,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
             this.onFullSync(data); // get everything
+
         });
 
         // Delta packet: full for new models and known models that have changed
@@ -253,6 +254,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     parentId: closest.parentId
                 });
             }
+        });
+
+        this.input.on('dig', () => {
+            this.network.sendDig();
         });
 
         // Send the one-off events directly to the server

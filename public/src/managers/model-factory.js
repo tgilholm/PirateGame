@@ -78,7 +78,8 @@ export default class ModelFactory {
             data.id,
             data.x,
             data.y,
-            data.goldValue ?? 0
+            data.state ?? "buried",
+            data.digProgress ?? 0
         );
     }
 

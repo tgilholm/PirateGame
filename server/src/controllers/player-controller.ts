@@ -7,6 +7,7 @@ import InteractableEntity from "../entities/interactable-entity";
 import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
 import Projectile from "../entities/projectile";
+import TreasureSystem from "../systems/treasure-system";
 
 /**
  * Handles events affecting the player
@@ -21,7 +22,8 @@ export default class PlayerController {
      */
     constructor(private entityRegistry: EntityRegistry,
         private interactionHandler: InteractionHandler,
-        private upgradeHandler: UpgradeHandler
+        private upgradeHandler: UpgradeHandler,
+        private treasureSystem: TreasureSystem
     ) {
     }
 
@@ -108,7 +110,7 @@ export default class PlayerController {
 
 
     handleDig(player: Player) {
-        throw new Error("Method not implemented.");
+        this.treasureSystem.digAtPlayer(player);
     }
     handleGunFire(player: Player) {
         // Get player world pos
