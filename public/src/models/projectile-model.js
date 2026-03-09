@@ -19,4 +19,10 @@ export default class ProjectileModel extends Model {
         this.add(this.sprite);
         this.setDepth(90);
     }
+
+    postUpdate(delta, deltaTime, lerp) {
+        // Disable interp for projectiles
+        this.x += this.velocity.x * deltaTime;
+        this.y += this.velocity.y * deltaTime;
+    }
 }

@@ -46,7 +46,7 @@ app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')))
 */
 const registry = new EntityRegistry();
 const matterEngine = Engine.create({
-  gravity: {x: 0, y: 0}
+  gravity: { x: 0, y: 0 }
 });
 const spatialGrid = new SpatialGrid(512, 2048);
 
@@ -77,6 +77,10 @@ const worldController = new WorldController(registry,
 const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid);
 const socketService = new SocketService(io, gameWorld);
 
+projectileSystem.destroyEntity = (id) => {
+  registry.delete(id);
+  spatialGrid.remove(id);
+};
 socketService.initialise();
 gameWorld.start();
 

@@ -80,6 +80,7 @@ export default class EntityRegistry {
             this.typeCache.delete(t);
         }
 
+        console.log(`[Registry] Deleted ${id}`);
         return this.entities.delete(id);
     }
 

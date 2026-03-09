@@ -100,7 +100,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         const now = Date.now();
         this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 500) {
+            if (entity.isPredicted && now - entity.spawnTime > 150) {
                 entity.destroy();
                 this.models.delete(id);
             }
@@ -136,6 +136,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     onDeltaSync(data) {
         let needsInteractableRefresh = false;
 
+        // Kill old predicted projectiles
+        const now = Date.now();
+        this.models.forEach((entity, id) => {
+            if (entity.isPredicted && now - entity.spawnTime > 300) {
+                entity.destroy();
+                this.models.delete(id);
+            }
+        });
+
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
             if (entityData.type === 'ship') needsInteractableRefresh = true;
@@ -166,7 +175,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            if (data.type === 'bullet' || data.type === 'cannonball') { 
+            if (data.type === 'bullet' || data.type === 'cannonball') {
                 const predicted = this.findMatchingPrediction(data.x, data.y);
                 if (predicted) {
                     this.models.delete(predicted.id);
@@ -322,7 +331,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             spawnY = pos.y + Math.sin(worldAngle) * 20;
         } else {
             if (player.reloadTimer > 0) return;
-            worldAngle = freshAimAngle; // fresh, not interpolated
+            worldAngle = freshAimAngle;
             spawnX = player.gun.x;
             spawnY = player.gun.y;
         }
@@ -333,12 +342,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             id: `predicted_${Date.now()}`,
             x: spawnX,
             y: spawnY,
-            r: worldAngle
+            r: worldAngle,
+            type: player.isUsingCannon ? 'cannonball' : 'bullet' 
         });
         model.velocity.x = Math.cos(worldAngle) * speed;
         model.velocity.y = Math.sin(worldAngle) * speed;
         model.isPredicted = true;
-        model.initialised = true; // already positioned correctly, don't snap on server confirmation
+        model.initialised = true;
         model.spawnTime = Date.now();
         this.models.set(model.id, model);
     }
