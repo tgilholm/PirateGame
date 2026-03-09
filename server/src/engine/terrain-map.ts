@@ -10,8 +10,10 @@ import path from 'path';
 export default class TerrainMap {
     private islandTiles: Set<string> = new Set();
     public readonly tileWidth: number;
+    public readonly tileHeight: number;
     public readonly mapWidth: number;
     public readonly mapHeight: number;
+
 
     /**
      * Reads in the tilemap file, breaks it down into its constituent layers, and fills out
@@ -23,6 +25,7 @@ export default class TerrainMap {
         const mapPath = path.join(__dirname, '..', mapFileName);
         const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
         this.tileWidth = mapData.tilewidth;
+        this.tileHeight = mapData.tileHeight;
         this.mapHeight = mapData.height;
         this.mapWidth = mapData.width;
 

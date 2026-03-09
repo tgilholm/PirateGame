@@ -77,4 +77,8 @@ export default class NetworkManager {
     sendMessage(text) {
         this.sendAction({ type: ActionType.MESSAGE, data: { text } });
     }
+
+    sendDig() {
+        this.sendAction({ type: ActionType.DIG });
+    }
 }
