@@ -24,6 +24,7 @@ import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
 import PlayerController from './controllers/player-controller';
 import UpgradeHandler from './handlers/upgrade-handler';
+import GoldHandler from './handlers/gold-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
@@ -36,6 +37,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 // Route files to the public folder
 app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')));
+app.use('/jsons', express.static(path.join(__dirname, '../jsons')));
 
 
 /*
@@ -56,7 +58,7 @@ const engine = new GameEngine({
   messageSystem: new MessageSystem()
 });
 
-const upgradeHandler = new UpgradeHandler(entityConfig);
+const upgradeHandler = new UpgradeHandler(new GoldHandler());
 const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,

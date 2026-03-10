@@ -94,12 +94,23 @@ export default class PlayerController {
         throw new Error("Method not implemented.");
     }
     handleUpgrade(player: Player, data: UpgradeData) {
-        const shop = this.entityRegistry.getByType<Shop>('shop')
-            .find(s => s.canInteract(player));
-        if (!shop) return;
+        console.log("[Upgrade] called player=" + player.id + " item=" + data.itemId);
+        const shops = this.entityRegistry.getByType<Shop>('shop');
+        const shop = shops.find(s => s.canInteract(player));
+        if (!shop) {
+            const details = shops.map(s => {
+                const dx = s.x - player.x;
+                const dy = s.y - player.y;
+                const dist = Math.round(Math.sqrt(dx * dx + dy * dy));
+                return "s.id" + "(dist=" + dist + ",range=" + s.interactRange + ",onFoot=" + !player.parent + ")";
+            }).join(' | ');
+            console.log("[Upgrade] REJECTED player=" + player.id + " parent=" + (player.parent?.id ?? "null") + " pos=(" + Math.round(player.x) + "," + Math.round(player.y) + ") shops: " + details);
+            return;
+        }
+        console.log("[Upgrade] player=" + player.id + " shop=" + shop.id + " item=" + data.itemId);
 
         const ship = this.entityRegistry.get<Ship>("ship_" + player.id);
         if (!ship) return;
-        this.upgradeHandler.handleUpgrade(ship, data.itemId);
+        this.upgradeHandler.handleUpgrade(ship, data.itemId, player);
     }
 }

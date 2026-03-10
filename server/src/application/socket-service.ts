@@ -49,8 +49,12 @@ export default class SocketService {
                 const result = ActionSchema.safeParse(action);
 
                 if (!result.success) {
-                    console.warn(`[SocketService] Invalid action from ${socket.id}:`, result.error.format());
+                    console.warn(`[SocketService] Invalid action from ${socket.id}:`, JSON.stringify(action), result.error.format());
                     return;
+                }
+
+                if ((result.data as any).type === 'UPGRADE') {
+                    console.log(`[SocketService] UPGRADE action received from ${socket.id}:`, JSON.stringify(result.data));
                 }
 
                 // Send the action to the controller

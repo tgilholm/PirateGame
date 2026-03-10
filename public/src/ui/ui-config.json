@@ -6,9 +6,15 @@
             "Top": "20px",
             "Left": "20px"
         },
-        "Marker": {
+        "PlayerMarker": {
             "Radius": 5,
             "Fill": "#ff0000",
+            "Stroke": "#ffffff",
+            "LineWidth": 1.5
+        },
+        "ShopMarker": {
+            "Size": 6,
+            "Fill": "#ffd700",
             "Stroke": "#ffffff",
             "LineWidth": 1.5
         }
@@ -31,13 +37,15 @@
             "Stroke": "#000000",
             "StrokeThickness": 3
         },
-        "Marker": {
-            "Size": 6,
-            "Fill": "#ffd700",
-            "Stroke": "#ffffff",
-            "LineWidth": 1.5
-        },
         "ItemCards": {}
     },
-    "InteractionPrompt": {}
+    "InteractionPrompt": {},
+    "goldCounter": {
+        "Position": {
+            "Top": "1.25rem",
+            "Right": "1.25rem",
+            "Bottom": null,
+            "Left": null
+        }
+    }
 }

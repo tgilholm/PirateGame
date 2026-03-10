@@ -3,6 +3,7 @@ import Entity from "./entity";
 
 export default class Player extends Entity {
     username: string;
+    gold: number;
     isSteering: boolean;
     isUsingCannon: boolean;
     isCarrying: boolean;
@@ -27,6 +28,7 @@ export default class Player extends Entity {
     ) {
         super(id, "player", x, y, config.maxHealth, parent);
         this.username = username || "";     // default to no uname
+        this.gold = config.startingGold;
 
         // Player-specific detail
         this.isSteering = false;
@@ -66,6 +68,7 @@ export default class Player extends Entity {
         return {
             ...super.serialise(),
             username: this.username,
+            gold: this.gold,
             isSteering: this.isSteering,
             isUsingCannon: this.isUsingCannon
         }

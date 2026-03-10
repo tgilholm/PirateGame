@@ -8,7 +8,8 @@ import Ship from "../entities/ship";
 import { EventEmitter } from "events";
 
 export enum WorldEvent {
-    GAME_STATE = "GAME_STATE"
+    GAME_STATE = "GAME_STATE",
+    LOCAL_SHIP_UPDATED = "LOCAL_SHIP_UPDATED"
 }
 
 

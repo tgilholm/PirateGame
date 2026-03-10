@@ -83,7 +83,9 @@ export class MainScene extends Phaser.Scene {
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.ui = new CreateUI(this);
+        this.uiManager.setUI(this.ui);
         this.shops = new DrawShops(this, this.map.tileWidth, entityConfig);
+        this.shopUI.goldCounter = this.ui.goldCounter; 
         this.gameManager.setShops(this.shops);
         this.gameManager.on('localPlayerReady', (player) => {
             const matrix = player.getWorldTransformMatrix();
@@ -92,6 +94,7 @@ export class MainScene extends Phaser.Scene {
                 this.map.widthInPixels, this.map.heightInPixels
             );
             this.ui.minimap.placeShops(this.map.width, this.map.height, entityConfig.shop.spawns);
+            this.ui.goldCounter.show();
         });
 
         this.network.emit(ClientEvent.READY, { username: data.username });
@@ -120,13 +123,8 @@ export class MainScene extends Phaser.Scene {
     update() {
         this.gameManager.update();
         this.uiManager.update();
+        this.uiManager.updateHud();
         this.network.sendMove(this.inputManager.getMovementInputs());
-
-        // Update minimap marker with current world position
-        if (this.gameManager.localPlayer) {
-            const matrix = this.gameManager.localPlayer.getWorldTransformMatrix();
-            this.ui.minimap.updateMarker(matrix.tx, matrix.ty);
-        }
     }
 
     setupWorld() {

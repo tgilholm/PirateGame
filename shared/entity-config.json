@@ -9,8 +9,9 @@
     "player": {
         "maxHealth": 100,
         "runSpeed": 5,
-        "swimSpeed": 4,
-        "radius": 15
+        "swimSpeed": 10,
+        "radius": 15,
+        "startingGold": 100000
     },
     "ship": {
         "maxHealth": 1000,

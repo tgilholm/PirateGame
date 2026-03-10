@@ -10,6 +10,7 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
         this.target = { x: 0, y: 0 };
         this.isSteering = false;
         this.isUsingCannon = false;
+        this.gold = 0;
 
         this.parentId = null;
 
@@ -26,6 +27,8 @@ export default class PlayerModel extends Phaser.GameObjects.Sprite {
         if (data.username && this.nameText.text !== data.username) {
             this.nameText.setText(data.username);
         }
+
+        this.gold = data.gold;
 
 
         // Interp otherwise

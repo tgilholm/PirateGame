@@ -9,9 +9,15 @@ export default class UIManager {
     constructor(scene, gameManager) {
         this.scene = scene;
         this.gameManager = gameManager;
+        this.ui = null;
 
         this.promptElement = document.getElementById('interaction-prompt');
         this.currentInteractable = null;
+    }
+
+    /** @param {import('../ui/create-ui.js').default} ui */
+    setUI(ui) {
+        this.ui = ui;
     }
 
     update() {
@@ -57,5 +63,12 @@ export default class UIManager {
             this.promptElement.style.display = 'block';
             console.log("Prompt shown — Target:", !!target, "Interacting:", isInteracting);
         }
+    }
+
+    updateHud() {
+        if (!this.ui || !this.gameManager.localPlayer) return;
+        const matrix = this.gameManager.localPlayer.getWorldTransformMatrix();
+        this.ui.minimap.updateMarker(matrix.tx, matrix.ty);
+        this.ui.goldCounter.update(this.gameManager.localPlayer);
     }
 }

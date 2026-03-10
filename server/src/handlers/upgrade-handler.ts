@@ -1,33 +1,43 @@
 import Ship from '../entities/ship';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const typesData = require('../../entities/types.json');
+import Player from '../entities/player';
+import GoldHandler from './gold-handler';
+import componentsData from '../../jsons/components.json';
 
-const LEVEL_PROGRESSION = ['LVL1', 'LVL2', 'LVL3'];
+const level_progression = ['LVL1', 'LVL2', 'LVL3'];
 
 export default class UpgradeHandler {
-    constructor(private readonly upgradeConfig: any) {}
+    constructor(
+        private readonly goldHandler: GoldHandler,
+    ) {}
 
     /**
-     * Advances a ship's component one step up the level progression (LVL1→LVL2→LVL3).
-     * Returns true if the upgrade was applied, false if the component is already at max
-     * or the key is unrecognised.
+     * levels up ship component
+     * checks if component is already max lvl or if player has enough gold
      */
-    handleUpgrade(ship: Ship, componentKey: string): boolean {
-        const components = typesData.components as Record<string, { variants: Record<string, unknown> }>;
+    handleUpgrade(ship: Ship, componentKey: string, player: Player): boolean {
+        console.log("[UpgradeHandler] Attempting upgrade: player=" + player.id + " ship=" + ship.id + " component=" + componentKey);
+        const components = componentsData.components as Record<string, { variants: Record<string, { cost: number }> }>;
 
         if (!components[componentKey]) return false;
 
-        const current = ship.components[componentKey] ?? 'LVL1';
-        const currentIndex = LEVEL_PROGRESSION.indexOf(current);
+        const current = ship.components[componentKey];
+        const currentIndex = level_progression.indexOf(current);
 
-        // Already at max or unrecognised variant
-        if (currentIndex < 0 || currentIndex >= LEVEL_PROGRESSION.length - 1) return false;
+        //already at max or unknown
+        if (currentIndex < 0 || currentIndex >= level_progression.length - 1) return false;
 
-        const nextLevel = LEVEL_PROGRESSION[currentIndex + 1];
-        if (!components[componentKey].variants[nextLevel]) return false;
+        const nextLevel = level_progression[currentIndex + 1];
+        const nextVariant = components[componentKey].variants[nextLevel];
+        if (!nextVariant) return false;
 
+        //gold check (costs defined in components.json)
+        const cost = nextVariant.cost;
+        if (!this.goldHandler.trySpendGold(player, cost)) {
+            console.log("[UpgradeHandler] cannot afford " + componentKey + " : " + nextLevel + " (cost: " + cost + ", gold: " + player.gold + ")");
+            return false;
+        }
         ship.components[componentKey] = nextLevel;
-        console.log(`[UpgradeHandler] ${ship.id} ${componentKey}: ${current} → ${nextLevel}`);
+        console.log("[UpgradeHandler] " + ship.id + " " + componentKey + ": " + current + " : " + nextLevel);
         return true;
     }
 }

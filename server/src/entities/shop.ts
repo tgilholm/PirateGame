@@ -2,6 +2,7 @@ import Entity from "./entity";
 import Player from "./player";
 import { ShopConfig } from "../types";
 
+
 //canInteract is mirrored server and client side to show/hide prompts locally, but prevent server-side tampering
 export default class Shop extends Entity {
 
@@ -24,13 +25,11 @@ export default class Shop extends Entity {
         this.interactRange = config.interactRange;
     }
 
-    //returns if player is can interact with shop, server-side mirrors client-side interation checks
     canInteract(player: Player): boolean {
-        if (player.parent) return false; //must be on foot
-
+        if (player.parent) return false;
         const dx = this.x - player.x;
         const dy = this.y - player.y;
-        return Math.sqrt(dx * dx + dy * dy) <= this.interactRange!; //pythagorean pixel distance must be < or = interactRange
+        return Math.sqrt(dx * dx + dy * dy) <= (this.interactRange ?? 0);
     }
-
 }
+

@@ -136,6 +136,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             }
 
             this.shipList[shipData.id].update(shipData, this.scene.game.loop.delta);
+
+            //notifies listener when players ship data arrives from the server
+            if (this.playerId && shipData.id === 'ship_' + this.playerId) {
+                this.emit('localShipUpdated');
+            }
         });
 
 

@@ -74,11 +74,11 @@ export default class Minimap {
         const markerY = (y / this.mapHeight) * canvas.height;
 
         ctx.beginPath();
-        ctx.arc(markerX, markerY, uiConfig.Minimap.Marker.Radius, 0, Math.PI * 2);
-        ctx.fillStyle = uiConfig.Minimap.Marker.Fill;
+        ctx.arc(markerX, markerY, uiConfig.Minimap.PlayerMarker.Radius, 0, Math.PI * 2);
+        ctx.fillStyle = uiConfig.Minimap.PlayerMarker.Fill;
         ctx.fill();
-        ctx.strokeStyle = uiConfig.Minimap.Marker.Stroke;
-        ctx.lineWidth = uiConfig.Minimap.Marker.LineWidth;
+        ctx.strokeStyle = uiConfig.Minimap.PlayerMarker.Stroke;
+        ctx.lineWidth = uiConfig.Minimap.PlayerMarker.LineWidth;
         ctx.stroke();
     }
 
@@ -94,7 +94,7 @@ export default class Minimap {
     drawShops() {
         if (!this.shops) return;
         const { canvas, ctx } = this;
-        const { Size, Fill, Stroke, LineWidth } = uiConfig.Shop.Marker;
+        const { Size, Fill, Stroke, LineWidth } = uiConfig.Minimap.ShopMarker;
         const half = Size / 2;
 
         for (const shop of this.shops) {
