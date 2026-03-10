@@ -7,6 +7,7 @@ import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
 import CannonModel from "../models/cannon-model.js";
 import ShipModel from "../models/ship-model.js";
+import DigMinigame from "../ui/dig-minigame.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -31,7 +32,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.input = input;
         this.modelFactory = modelFactory;
         this.#playerListCache = null;
-
+        this.digMinigame = new DigMinigame();
         this.moveTimer = 0;
 
         /** @type {PlayerModel} */
@@ -275,6 +276,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.playerId = data.id;
             this.onFullSync(data); // get everything
 
+            this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
+                console.log("[Client] DIG_MINIGAME_START received", payload);
+                this.digMinigame.start(payload);
+            });
+
+            this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
+                console.log("[Client] DIG_MINIGAME_RESULT received", success);
+                this.digMinigame.stop();
+            });
+
         });
 
         // Delta packet: full for new models and known models that have changed
@@ -293,7 +304,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         this.input.on('dig', () => {
-            this.network.sendDig();
+            console.log("[Client] X pressed");
+
+            if (this.digMinigame?.active) {
+                const pos = this.digMinigame.getSliderPosition();
+                console.log("[Client] sending dig hit", pos);
+                this.network.sendDigHit(pos);
+            } else {
+                console.log("[Client] sending dig start");
+                this.network.sendDigStart();
+            }
         });
 
         // Send the one-off events directly to the server

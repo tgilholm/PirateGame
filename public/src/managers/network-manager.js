@@ -1,7 +1,7 @@
 /** global io */
+/** global io */
 
-import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
-import { ServerEvent } from "shared/socket-protocol.js";
+import { ActionType, ClientEvent, ServerEvent } from "shared/built/socket-protocol.js";
 
 /**
  * Owns socket-io logic
@@ -34,6 +34,7 @@ export default class NetworkManager {
      * @param {import("shared/built/socket-protocol.js").PlayerAction} action
      */
     sendAction(action) {
+        console.log("[Network] sending action", action);
         this.socket.emit(ClientEvent.ACTION, action);
     }
 
@@ -79,19 +80,26 @@ export default class NetworkManager {
     }
 
     sendDigStart() {
-        this.sendAction({
-            type: ActionType.DIG,
+        /** @type {import("shared/built/socket-protocol.js").PlayerAction} */
+        const action = {
+            type: "DIG",
             data: { mode: "start" }
-        });
+        };
+
+        this.sendAction(action);
     }
 
     sendDigHit(sliderPosition) {
-        this.sendAction({
-            type: ActionType.DIG,
+        /** @type {import("shared/built/socket-protocol.js").PlayerAction} */
+        const action = {
+            type: "DIG",
             data: {
                 mode: "hit",
                 sliderPosition
             }
-        });
+        };
+
+        this.sendAction(action);
     }
+
 }

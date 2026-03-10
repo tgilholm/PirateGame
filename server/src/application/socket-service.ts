@@ -43,12 +43,33 @@ const DigSchema = z.object({
 
 // Uses zod to require data/no data for each action type
 const ActionSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) }).strict(),
-    z.object({ type: z.literal(ActionType.INTERACT), data: InteractSchema }).strict(),
-    z.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) }).strict(),
-    
-    z.object({ type: z.literal(ActionType.FIRE) }).strict(),
-    z.object({ type: z.literal(ActionType.RELEASE) }).strict()
+    z.object({
+        type: z.literal(ActionType.UPGRADE),
+        data: z.object({ itemId: z.string() })
+    }).strict(),
+
+    z.object({
+        type: z.literal(ActionType.INTERACT),
+        data: InteractSchema
+    }).strict(),
+
+    z.object({
+        type: z.literal(ActionType.MESSAGE),
+        data: z.object({ text: z.string() })
+    }).strict(),
+
+    z.object({
+        type: z.literal(ActionType.DIG),
+        data: DigSchema
+    }).strict(),
+
+    z.object({
+        type: z.literal(ActionType.FIRE)
+    }).strict(),
+
+    z.object({
+        type: z.literal(ActionType.RELEASE)
+    }).strict()
 ])
 
 /**

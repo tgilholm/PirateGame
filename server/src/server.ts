@@ -29,6 +29,7 @@ import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
+import { ServerEvent } from "@shared/socket-protocol";
 import TreasureSystem from "./systems/treasure-system";
 
 // Create the express app & server
@@ -81,6 +82,16 @@ const gameWorld = new GameWorld(registry, entityFactory, engine, worldController
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();
+
+treasureSystem.bindUiEvents(
+    (playerId, payload) => {
+        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_START, payload);
+    },
+    (playerId, payload) => {
+        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_RESULT, payload);
+    }
+);
+
 gameWorld.start();
 
 // Starts the server on the provided port
