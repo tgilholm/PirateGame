@@ -10,7 +10,9 @@ export default class Player extends Entity {
     username: string;
     isSteering: boolean;
     cannon: Cannon | null;
-    isCarrying: boolean;
+    isCarrying: boolean= false;
+    public carryingTreasureId: string | null = null;
+    public gold: number = 0;
     inputs: {
         up: boolean;
         down: boolean;
@@ -86,7 +88,10 @@ export default class Player extends Entity {
             aimAngle: this.aimAngle,
             isUsingCannon: !!this.cannon,    // convert to true/false
             reloadTimer: this.reloadTimer,
-            reloadTime: this.reloadTime
+            reloadTime: this.reloadTime,
+            isCarrying: this.isCarrying,
+            carryingTreasureId: this.carryingTreasureId,
+            gold: this.gold
         }
 
     }

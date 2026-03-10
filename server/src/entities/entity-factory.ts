@@ -8,6 +8,7 @@ import InteractableEntity from "./interactables/interactable-entity";
 import Cannon from "./interactables/cannon";
 import Ladder from "./interactables/ladder";
 import Helm from "./interactables/helm";
+import Treasure, { TreasureState } from "./treasure";
 
 
 export interface InteractableInstance {
@@ -69,6 +70,34 @@ export default class EntityFactory {
         });
 
         return ship;
+    }
+
+    public createTreasure(
+        id: string,
+        x: number,
+        y: number,
+        goldValue: number,
+        state: TreasureState = "buried",
+        digProgress: number = 0,
+        carrierId: string | null = null,
+        digSpeed: number = 1,
+        successZoneStart: number = 0.4,
+        successZoneSize: number = 0.2
+    ): Treasure {
+        const treasure = new Treasure(
+            id,
+            x,
+            y,
+            goldValue,
+            state,
+            digProgress,
+            carrierId,
+            digSpeed,
+            successZoneStart,
+            successZoneSize
+        );
+        this.entityRegistry.create(treasure);
+        return treasure;
     }
 
 

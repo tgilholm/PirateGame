@@ -29,6 +29,7 @@ import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
+import TreasureSystem from "./systems/treasure-system";
 
 // Create the express app & server
 const app = express();
@@ -54,12 +55,14 @@ const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid)
 const entityFactory = new EntityFactory(entityConfig, registry);
+const treasureSystem = new TreasureSystem(registry, entityFactory, terrainMap);
 
 const engine = new GameEngine({
   physicsSystem,
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
-  messageSystem: new MessageSystem()
+  messageSystem: new MessageSystem(),
+    treasureSystem
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);
@@ -67,7 +70,7 @@ const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,
   {
-    playerController: new PlayerController(registry, interactionHandler, upgradeHandler),
+    playerController: new PlayerController(registry, interactionHandler, upgradeHandler,treasureSystem),
     shipController: new ShipController(registry),
     messageController: new MessageController(),
     cannonController: new CannonController(registry)

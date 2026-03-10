@@ -9,9 +9,11 @@ export default class TreasureModel extends Model {
         this.digProgress = digProgress;
         this.carrierId = null;
 
-        this.sprite = scene.add.sprite(0, 0, "treasure-x");
+        // correct texture key
+        this.sprite = scene.add.sprite(0, 0, "x-mark");
+
         this.sprite.setOrigin(0.5, 0.5);
-        this.sprite.setDisplaySize(64, 64);
+        this.sprite.setDisplaySize(48, 48);
 
         this.add(this.sprite);
         this.setDepth(20);

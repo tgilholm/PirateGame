@@ -2,7 +2,7 @@ import Ship from "../entities/ship";
 import EntityRegistry from "../engine/entity-registry";
 import Player from "../entities/player";
 import UpgradeHandler from "../handlers/upgrade-handler";
-import { InteractData, MoveData, UpgradeData } from "@shared/socket-protocol";
+import { InteractData, MoveData, UpgradeData,DigData } from "@shared/socket-protocol";
 import InteractableEntity from "../entities/interactables/interactable-entity";
 import InteractionHandler from "../handlers/interaction-handler";
 import Entity from "../entities/entity";
@@ -10,6 +10,7 @@ import Projectile from "../entities/projectiles/projectile";
 import Cannon from "../entities/interactables/cannon";
 import Helm from "../entities/interactables/helm";
 import Ladder from "../entities/interactables/ladder";
+import TreasureSystem from "../systems/treasure-system";
 
 /**
  * Handles events affecting the player
@@ -24,7 +25,8 @@ export default class PlayerController {
      */
     constructor(private entityRegistry: EntityRegistry,
         private interactionHandler: InteractionHandler,
-        private upgradeHandler: UpgradeHandler
+        private upgradeHandler: UpgradeHandler,
+                private treasureSystem: TreasureSystem
     ) {
     }
 
@@ -109,8 +111,12 @@ export default class PlayerController {
     }
 
 
-    handleDig(player: Player) {
-        throw new Error("Method not implemented.");
+    handleDig(player: Player, data: DigData) {
+        if (data.mode === "start") {
+            this.treasureSystem.beginDig(player);
+        } else if (data.mode === "hit") {
+            this.treasureSystem.submitDigHit(player, data.sliderPosition ?? -1);
+        }
     }
     handleGunFire(player: Player) {
         // Wait until reloaded

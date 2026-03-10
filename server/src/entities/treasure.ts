@@ -22,8 +22,7 @@ export default class Treasure extends Entity {
         carrierId: string | null = null,
         digSpeed: number = 1,
         successZoneStart: number = 0.4,
-        successZoneSize: number = 0.18
-
+        successZoneSize: number = 0.2
     ) {
         super(id, "treasure", x, y, 1, null);
         this.goldValue = goldValue;
