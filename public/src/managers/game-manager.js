@@ -322,8 +322,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
             if (!cannon || cannon.reloadTimer > 0) return;
 
-            console.log(cannon.userId);
-
             const ship = this.models.get(player.parentId);
             worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
 
@@ -346,8 +344,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             r: worldAngle,
             type: player.isUsingCannon ? 'cannonball' : 'bullet'
         });
+
         model.velocity.x = Math.cos(worldAngle) * speed;
         model.velocity.y = Math.sin(worldAngle) * speed;
+
+        if (player.isUsingCannon) {
+            const ship = this.models.get(player.parentId);
+            model.velocity.x += ship?.velocity.x ?? 0;
+            model.velocity.y += ship?.velocity.y ?? 0;
+        }
+
         model.isPredicted = true;
         model.initialised = true;
         model.spawnTime = Date.now();

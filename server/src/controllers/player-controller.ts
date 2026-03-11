@@ -122,9 +122,10 @@ export default class PlayerController {
 
         // Get player world pos
         const worldPos = this.getWorldPosition(player);
-        const projectileId = `proj_${Date.now()}_${player.id}`; // "unique" id
 
         const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
+        bullet.vx += player.vx;
+        bullet.vy += player.vy;
         bullet.firedBy = player;
 
         // Add to the entity registry

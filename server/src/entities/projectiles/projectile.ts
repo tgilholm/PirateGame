@@ -15,6 +15,8 @@ export default class Projectile extends Entity {
 
         this.ttl = 2000;    // default
         this.r = r;
+
+
         this.vx = Math.cos(r) * speed;
         this.vy = Math.sin(r) * speed;    // calculate velocity from speed scalar
     }
