@@ -13,7 +13,7 @@ export default class ProjectileModel extends Model {
      * @param {number} r 
      */
     constructor(scene, id, x, y, r, type) {
-        super(scene, id, x, y, 'projectile', r, false);
+        super(scene, id, x, y, 'projectile', r, true);
         const texture = type === 'cannonball' ? 'cannonball' : 'bullet';
         this.sprite = scene.add.sprite(0, 0, texture);
         this.add(this.sprite);

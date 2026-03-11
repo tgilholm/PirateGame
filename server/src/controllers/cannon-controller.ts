@@ -33,7 +33,7 @@ export default class CannonController {
 
         const id = `cannonball_${Date.now()}`;
         const ball = new Cannonball(`cannonball_${Date.now()}`, spawnPos.x, spawnPos.y, worldAngle);
-        ball.firedBy = ship?.id ?? cannon.id; // avoid hitting own ship
+        ball.firedBy = cannon; // avoid hitting own ship
 
         this.entityRegistry.create(ball);
     }

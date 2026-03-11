@@ -77,10 +77,6 @@ const worldController = new WorldController(registry,
 const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid);
 const socketService = new SocketService(io, gameWorld);
 
-projectileSystem.destroyEntity = (id) => {
-  registry.delete(id);
-  spatialGrid.remove(id);
-};
 socketService.initialise();
 gameWorld.start();
 

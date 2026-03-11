@@ -7,7 +7,7 @@ export default class Projectile extends Entity {
     public ttl: number;
     public damage: number = 0;
     public radius: number = 4;  // small by default
-    public firedBy: string | null = null; // entity id, to avoid self-hits
+    public firedBy: Entity | null = null;
 
     constructor(id: string, type: string, x: number, y: number, r: number, speed: number) {
         super(id, type, x, y, 1, null); // no parent, 1 health for insta-destroy

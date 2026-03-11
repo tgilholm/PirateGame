@@ -26,6 +26,7 @@ export default class InteractionHandler {
         helm.user = player;
         ship.pilot = player;
         player.isSteering = true;
+        
 
         // Move player just behind the helm
         player.x = helm.x - 25;

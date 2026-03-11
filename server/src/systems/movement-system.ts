@@ -54,6 +54,15 @@ export default class MovementSystem implements BaseSystem {
             player.reloadTimer = Math.max(0, player.reloadTimer - dt * 1000);
             player.markDirty();
         }
+
+        // Keep track of aim angle- don't send for static players
+        const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
+        if (Math.abs(player.aimAngle - prevAimAngle) > 0.01)
+        {
+            player.markDirty();
+        }
+        (player as any).prevAimAngle = player.aimAngle; // store temporarily
+
         if (player.isSteering || player.cannon) return;
 
         const parent = player.parent as Ship || null;
@@ -90,10 +99,7 @@ export default class MovementSystem implements BaseSystem {
         if (left) dx -= 1;
         if (right) dx += 1;
 
-        // Keep track of aim angle- don't send for static players
-        const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
-        const aimChanged = Math.abs(player.aimAngle - prevAimAngle) > 0.01;
-        (player as any).prevAimAngle = player.aimAngle; // store temporarily
+
 
         const prevX = player.x; // to calculate velocity difference for client-side extrapolation
         const prevY = player.y;
@@ -169,8 +175,7 @@ export default class MovementSystem implements BaseSystem {
         // Mark dirty if position changed enough
         const moved =
             Math.abs(player.x - prevX) > POS_THRESHOLD ||
-            Math.abs(player.y - prevY) > POS_THRESHOLD ||
-            aimChanged;
+            Math.abs(player.y - prevY) > POS_THRESHOLD
 
         if (moved) player.markDirty();
     }
