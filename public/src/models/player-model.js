@@ -62,6 +62,7 @@ export default class PlayerModel extends Model {
         if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
         if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
         if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
+        if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
 
     }
 

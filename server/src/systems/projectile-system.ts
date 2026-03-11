@@ -29,12 +29,11 @@ export default class ProjectileSystem implements BaseSystem {
 
         projectiles.forEach(projectile => {
             this.moveProjectile(projectile, dt);
-            this.collidePlayer(projectile, players);
-            this.collideShip(projectile, ships);
+            if (projectile.ttl <= 0) return;
+            this.collidePlayer(projectile);
+            if (projectile.ttl <= 0) return;
+            this.collideShip(projectile);
         });
-
-        players.forEach
-
     }
 
 
@@ -50,52 +49,54 @@ export default class ProjectileSystem implements BaseSystem {
         }
     }
 
-    collidePlayer(proj: Projectile, players: Player[]) {
+    collidePlayer(proj: Projectile) {
+        const nearby = this.grid.getNearby(proj.x, proj.y);
         let hit = false;
 
-        // All projectiles can hit players
-        for (const player of players) {
-            if (player === proj.firedBy) continue; // no self-hits
-            const worldPos = player.parent
-                ? (player.parent as Ship).localToWorld(player.x, player.y)
-                : { x: player.x, y: player.y };
+        nearby.forEach(id => {
+            const entity = this.entityRegistry.get(id);
+
+            if (entity?.type !== 'player' || proj.firedBy === entity) return;
+            const worldPos = entity.parent
+                ? (entity.parent as Ship).localToWorld(entity.x, entity.y)
+                : { x: entity.x, y: entity.y };
 
             const dist = Math.hypot(proj.x - worldPos.x, proj.y - worldPos.y);
             if (dist < proj.radius + 15) { // 15 = player radius
-                player.health -= proj.damage;
-                player.markDirty();
+                entity.health -= proj.damage;
+                entity.markDirty();
                 hit = true;
-                break;
-            }
-        }
-
-        if (hit) {
-            this.destroyEntity(proj);
-        }
-    }
-
-    collideShip(proj: Projectile, ships: Ship[]) {
-        let hit = false;
-
-        // Only cannonballs hit ships
-        if (proj.type === 'cannonball') {
-            for (const ship of ships) {
-                // Prevent self-hits
-                if (proj.firedBy?.parent === ship) return;
-
-                const local = ship.worldToLocal(proj.x, proj.y);
-                if (ship.isInside(local.x, local.y, -proj.radius)) {
-                    ship.health -= proj.damage;
-                    ship.markDirty();
-                    hit = true;
-                    break;
-                }
             }
 
             if (hit) {
                 this.destroyEntity(proj);
             }
-        }
+        });
+    }
+
+    collideShip(proj: Projectile) {
+        let hit = false;
+
+        if (proj.type !== 'cannonball') return; // bullets don't damage ships
+        const nearby = this.grid.getNearby(proj.x, proj.y);
+
+        nearby.forEach(id => {
+            const entity = this.entityRegistry.get(id);
+
+            if (entity?.type !== 'ship' || proj.firedBy?.parent === entity) return;
+            const ship = entity as Ship;
+
+            const local = ship.worldToLocal(proj.x, proj.y);
+            if (ship.isInside(local.x, local.y, -proj.radius)) {
+                ship.health -= proj.damage;
+                ship.markDirty();
+                hit = true;
+            }
+
+            if (hit) {
+                this.destroyEntity(proj);
+            }
+        });
     }
 
     /**

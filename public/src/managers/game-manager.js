@@ -5,8 +5,6 @@ import InputManager from "./input-manager.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
-import CannonModel from "../models/cannon-model.js";
-import ShipModel from "../models/ship-model.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -148,7 +146,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
             if (entityData.type === 'ship') needsInteractableRefresh = true;
-            if (entityData.isInteractable || entityData.type !== undefined) needsInteractableRefresh = true;
+            if (['cannon', 'helm', 'ladder'].includes(entityData.type)) needsInteractableRefresh = true;
             if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
@@ -310,7 +308,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const player = this.localPlayer;
         if (!player) return;
 
-        // Compute fresh aim angle directly from mouse position
+
+
         const cam = this.scene.cameras.main;
         const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
         const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
@@ -322,6 +321,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         if (player.isUsingCannon) {
             const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
             if (!cannon || cannon.reloadTimer > 0) return;
+
+            console.log(cannon.userId);
 
             const ship = this.models.get(player.parentId);
             worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
@@ -343,7 +344,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             x: spawnX,
             y: spawnY,
             r: worldAngle,
-            type: player.isUsingCannon ? 'cannonball' : 'bullet' 
+            type: player.isUsingCannon ? 'cannonball' : 'bullet'
         });
         model.velocity.x = Math.cos(worldAngle) * speed;
         model.velocity.y = Math.sin(worldAngle) * speed;
