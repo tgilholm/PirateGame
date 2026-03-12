@@ -1,3 +1,4 @@
+import NPCSystem from "src/systems/npc-system";
 import { BaseSystem } from "../systems/base-system";
 import MessageSystem from "../systems/message-system";
 import MovementSystem from "../systems/movement-system";
@@ -11,7 +12,8 @@ export interface GameSystems {
     physicsSystem: PhysicsSystem,
     movementSystem: MovementSystem,
     projectileSystem: ProjectileSystem,
-    messageSystem: MessageSystem
+    messageSystem: MessageSystem,
+    npcSystem: NPCSystem
 }
 
 /**
@@ -30,6 +32,7 @@ export default class GameEngine {
         this.systems.set('physics', systems.physicsSystem);
         this.systems.set('projectile', systems.projectileSystem);
         this.systems.set('message', systems.messageSystem);
+        this.systems.set('npc', systems.npcSystem);
 
 
         this.systemArray = Array.from(this.systems.values());   // cache systems

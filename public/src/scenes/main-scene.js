@@ -78,6 +78,13 @@ export class MainScene extends Phaser.Scene {
         proj.generateTexture('bullet', 8, 8);
         proj.destroy();
 
+        // Placeholder NPC sprite
+        const square = this.make.graphics();
+        square.fillStyle(0x0000dd);
+        square.fillRect(0, 0, 30, 30);
+        square.generateTexture('npc_sprite', 30, 30);
+        square.destroy();
+
         // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.gameManager.start(data.username);

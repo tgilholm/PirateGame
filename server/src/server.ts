@@ -29,6 +29,7 @@ import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
+import NPCSystem from './systems/npc-system';
 
 // Create the express app & server
 const app = express();
@@ -59,7 +60,8 @@ const engine = new GameEngine({
   physicsSystem,
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
-  messageSystem: new MessageSystem()
+  messageSystem: new MessageSystem(),
+  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid)
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);
