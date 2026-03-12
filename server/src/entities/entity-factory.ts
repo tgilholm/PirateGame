@@ -1,6 +1,6 @@
 
 import EntityRegistry from "../engine/entity-registry";
-import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
+import { EntityConfig, NPCShipConfig, PlayerConfig, ShipConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
@@ -9,6 +9,7 @@ import Cannon from "./interactables/cannon";
 import Ladder from "./interactables/ladder";
 import Helm from "./interactables/helm";
 import NPC from "./npc";
+import NPCShip from "./npc-ship";
 
 
 export interface InteractableInstance {
@@ -25,17 +26,19 @@ export default class EntityFactory {
 
     playerConfig: PlayerConfig;
     shipConfig: ShipConfig;
+    npcShipConfig: NPCShipConfig;
 
     /**
      * Builds an entity factory
      * @param entityConfig the default data for new entities
      * @param entityRegistry the repository of entities to add to
      */
-    constructor(private entityConfig: EntityConfig,
+    constructor(entityConfig: EntityConfig,
         private entityRegistry: EntityRegistry,) {
 
         this.playerConfig = entityConfig.player;
         this.shipConfig = entityConfig.ship;    // destructure
+        this.npcShipConfig = entityConfig.npcShip;
     }
 
     /**
@@ -99,5 +102,12 @@ export default class EntityFactory {
         const npc = new NPC(id, "npc", x, y);
         this.entityRegistry.create(npc);
         return npc;
+    }
+
+    public createNPCShip(id: string, x: number, y: number): NPCShip
+    {
+        const npcShip = new NPCShip(id, x, y, this.npcShipConfig);
+        this.entityRegistry.create(npcShip);
+        return npcShip;
     }
 }
