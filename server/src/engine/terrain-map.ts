@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { buildPathSpline } from './curve-calc'; // for catmull-rom
+
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods
@@ -7,9 +9,9 @@ import path from 'path';
  * solid objects and provide a world border. If making changes to the tilemap, make sure
  * to account for any "new" tiles here.
  */
-
 export default class TerrainMap {
     private mapLayers: Map<string, Set<string>> = new Map();
+    private pathNodes: Array<number> = [];
     public readonly tileWidth: number;
     public readonly mapWidth: number;
     public readonly mapHeight: number;
@@ -27,11 +29,22 @@ export default class TerrainMap {
         this.mapHeight = mapData.height;
         this.mapWidth = mapData.width;
 
+
         // Add all the layers you need here
         this.mapLayers.set('islands', this.getTilesetFromLayer(mapData, 'islands') || new Set());
         this.mapLayers.set('npc-spawns', this.getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', this.getTilesetFromLayer(mapData, 'player-spawns') || new Set());
         this.mapLayers.set('npc-ship-path', this.getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
+
+        this.getPathNodes();
+    }
+
+
+    getPathNodes() {
+        // Get from tilemap
+        const tiles = this.getTileset('npc-ship-path');   // get in array form
+        const nodes = tiles.map((tile) => ({x: tile.worldX, y : tile.worldY}));
+        const splinePath = buildPathSpline(nodes, 0.5, 25, true);
     }
 
 
@@ -78,13 +91,15 @@ export default class TerrainMap {
         const tileY = Math.floor(worldY / this.tileWidth);
 
         const islandTiles = this.mapLayers.get('islands');
-        if (!islandTiles){
+        if (!islandTiles) {
             console.warn(`[TerrainMap] isOnIsland check failed`);
-         return false;
+            return false;
         }
-        
+
         return islandTiles.has(`${tileX},${tileY}`);
     }
+
+
 
 
     public getTileset(layerName: string) {

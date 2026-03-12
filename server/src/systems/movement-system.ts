@@ -7,7 +7,7 @@ import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "../entities/entity";
 import Cannon from "../entities/interactables/cannon";
-import NPC from "src/entities/npc";
+import NPC from "src/entities/npcs/npc";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;

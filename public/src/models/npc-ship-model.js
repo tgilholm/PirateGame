@@ -1,4 +1,4 @@
-import NPCModel from "./npc-model";
+import NPCModel from "./npc-model.js";
 
 
 export default class NPCShipModel extends NPCModel {

@@ -8,8 +8,8 @@ import InteractableEntity from "./interactables/interactable-entity";
 import Cannon from "./interactables/cannon";
 import Ladder from "./interactables/ladder";
 import Helm from "./interactables/helm";
-import NPC from "./npc";
-import NPCShip from "./npc-ship";
+import NPC from "./npcs/npc";
+import NPCShip from "./npcs/npc-ship";
 
 
 export interface InteractableInstance {

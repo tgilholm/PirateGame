@@ -1,4 +1,4 @@
-import Entity from "./entity";
+import Entity from "../entity";
 
 
 export default class NPC extends Entity {
@@ -10,7 +10,6 @@ export default class NPC extends Entity {
 
     constructor(id: string, type:string = 'npc',  x: number, y: number, detectionRadius: number = 250) {
         super(id, type, x , y , 75, null);
-        this.supertypes = ['npc'];
 
         this.detectionRadius = detectionRadius;
     }

@@ -1,10 +1,11 @@
-import TerrainMap from "src/engine/terrain-map";
+import TerrainMap from "../engine/terrain-map";
 import { BaseSystem } from "./base-system";
-import EntityRegistry from "src/engine/entity-registry";
-import NPC from "src/entities/npc";
-import EntityFactory from "src/entities/entity-factory";
-import SpatialGrid from "src/application/spatial-grid";
-import Entity from "src/entities/entity";
+import EntityRegistry from "../engine/entity-registry";
+import NPC from "../entities/npcs/npc";
+import EntityFactory from "../entities/entity-factory";
+import SpatialGrid from "../application/spatial-grid";
+import Entity from "../entities/entity";
+import NPCShip from "../entities/npcs/npc-ship";
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -26,6 +27,10 @@ export default class NPCSystem implements BaseSystem {
     update(dt: number): void {
         // Get all npcs
         const npcs = this.entityRegistry.getByType<NPC>('npc');
+        const ships = npcs.filter((ship) => ship instanceof NPCShip);
+
+        ships.forEach(ship => this.updateNPCShip(ship, dt));
+        
 
         // Create more if needed
         this.generateNPCs(npcs);
@@ -37,6 +42,12 @@ export default class NPCSystem implements BaseSystem {
             this.getTarget(npc, nearby);
             this.removeDead(npc);   // if npc died, remove it
         }
+    }
+
+
+    updateNPCShip(ship: NPCShip, dt: number)
+    {
+        
     }
 
 
