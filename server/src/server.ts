@@ -76,7 +76,7 @@ const worldController = new WorldController(registry,
   }
 );
 
-const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid);
+const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid, terrainMap);
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();

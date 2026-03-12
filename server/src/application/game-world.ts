@@ -9,6 +9,8 @@ import { EventEmitter } from "events";
 import { CONFIG } from "../config";
 import PhysicsSystem from "../systems/physics-system";
 import SpatialGrid from "./spatial-grid";
+import TerrainMap from "src/engine/terrain-map";
+import Entity from "src/entities/entity";
 
 /**
  * Communication contract between this game world and the socket service
@@ -50,7 +52,8 @@ export default class GameWorld extends EventEmitter {
         private entityFactory: EntityFactory,
         private engine: GameEngine,
         private controller: WorldController,
-        private grid: SpatialGrid
+        private grid: SpatialGrid,
+        private terrain: TerrainMap
     ) { super(); }
 
     /**
@@ -100,7 +103,8 @@ export default class GameWorld extends EventEmitter {
     public addPlayer(socketId: string, username: string) {
 
         // Spawn the player on their own ship
-        const newShip = this.entityFactory.createShip(`ship_${socketId}`, 2500, 5000);
+        const { worldX, worldY } = this.getSpawnPoint()
+        const newShip = this.entityFactory.createShip(`ship_${socketId}`, worldX, worldY);
 
         // "hacky" way of adding to the physics world
         const physics = this.engine.systems.get('physics') as PhysicsSystem;
@@ -119,6 +123,39 @@ export default class GameWorld extends EventEmitter {
             socketId,
             knownEntityIds: new Set()   // empty set to start
         });
+    }
+
+    getSpawnPoint() {
+        const spawnPoints = this.terrain.getTileset('player-spawns');
+
+        let dist = 1000;
+        let spawnPoint = { worldX: 0, worldY: 0 };
+        while (dist > 500) {
+            spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+
+            // Get distance to players & ships
+            const ships = this.registry.getByType<Ship>('ship');
+            const players = this.registry.getByType<Player>('player');
+
+            // Calculate the minimum distance
+            const distances: number[] = [];
+            ships.forEach(ship => distances.push(Math.hypot(ship.x - spawnPoint.worldX, ship.y - spawnPoint.worldY)));
+            players.forEach(player => {
+                // Get world coordinates
+                const worldPos = this.getWorldPosition(player);
+                distances.push(Math.hypot(worldPos.x - spawnPoint.worldX, worldPos.y - spawnPoint.worldY));
+
+            });
+
+            // If all the distances are far enough away, spawn the player
+
+            console.log(dist, spawnPoint);
+            
+
+            distances.sort();
+            dist = distances[0];
+        }
+        return spawnPoint;
     }
 
     /**
@@ -236,5 +273,23 @@ export default class GameWorld extends EventEmitter {
         return {
             entities: this.registry.getAll().map(e => e.serialise()),
         };
+    }
+
+    private getWorldPosition(entity: Entity) {
+        if (!entity.parent) {
+            // If the entity has no parent, its coordinates are already in world space
+            return { x: entity.x, y: entity.y };
+        }
+
+        const parent = this.registry.get<Ship>(entity.parent.id);
+
+        // If the parent is a ship, use its localToWorld method
+        if (parent) {
+            const ship = parent as Ship;
+            return ship.localToWorld(entity.x, entity.y);
+        }
+
+        // If the parent is not a ship, return the entity's local position
+        return { x: entity.x, y: entity.y };
     }
 }

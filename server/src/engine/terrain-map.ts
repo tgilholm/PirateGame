@@ -37,7 +37,7 @@ export default class TerrainMap {
 
     private getTilesetFromLayer(mapData: any, layerName: string): Set<string> {
         // Find the layer in the map
-        const layer = mapData.find((l: any) => l.name === layerName);
+        const layer = mapData.layers.find((l: any) => l.name === layerName);
         let tileset: Set<string> = new Set();
 
         if (!layer?.data) {
@@ -92,7 +92,7 @@ export default class TerrainMap {
 
         if (!layer) {
             console.warn(`[TerrainMap] '${layerName}' is not a recognised layer in the tilemap!`);
-            return;
+            return [];
         }
 
         return Array.from(layer).map(key => {
