@@ -2,6 +2,7 @@ import CannonModel from "../models/cannon-model.js";
 import HelmModel from "../models/helm-model.js";
 import LadderModel from "../models/ladder-model.js";
 import NPCModel from "../models/npc-model.js";
+import NPCShipModel from "../models/npc-ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import ProjectileModel from "../models/projectile-model.js";
 import ShipModel from "../models/ship-model.js";
@@ -38,10 +39,17 @@ export default class ModelFactory {
             case 'helm':
             case 'ladder': return this.createInteractable(data);
             case 'npc': return this.createNPC(data);
+            case 'npc-ship': return this.createNPCShip(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
         }
+    }
+
+
+    createNPCShip(data) {
+        const npcShip = new NPCShipModel(this.scene, data.id, data.x, data.y, this.config.npcShip);
+        return npcShip;
     }
 
     /**

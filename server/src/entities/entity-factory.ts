@@ -62,7 +62,7 @@ export default class EntityFactory {
      * @returns the ship
      */
     public createShip(id: string, x: number, y: number): Ship {
-        const ship = new Ship(id, x, y, this.shipConfig);
+        const ship = new Ship(id, "ship", x, y, this.shipConfig);
         this.entityRegistry.create(ship);
 
         this.shipConfig.interactables.forEach((item, index) => {
@@ -96,7 +96,7 @@ export default class EntityFactory {
     }
 
     public createNPC(id: string, x: number, y: number): NPC {
-        const npc = new NPC(id, x, y);
+        const npc = new NPC(id, "npc", x, y);
         this.entityRegistry.create(npc);
         return npc;
     }
