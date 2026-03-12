@@ -9,6 +9,7 @@ import path from 'path';
  */
 export default class TerrainMap {
     private islandTiles: Set<string> = new Set();
+    private spawnTiles: Set<string> = new Set();
     public readonly tileWidth: number;
     public readonly mapWidth: number;
     public readonly mapHeight: number;
@@ -28,10 +29,15 @@ export default class TerrainMap {
 
         // Find the solid island layer
         const islands = mapData.layers.find((l: any) => l.name === 'islands');
+        const spawns = mapData.layers.find((l: any) => l.name === 'spawns');
 
         if (!islands?.data) {
             console.warn('[TerrainMap] No island layer found in tilemap');
             return;
+        }
+
+        if (!spawns?.data) {
+            console.warn('[TerrainMap] No spawns layer found in tilemap');
         }
 
         // Read all the island tiles
@@ -53,6 +59,27 @@ export default class TerrainMap {
         });
 
         console.log(`[TerrainMap] Loaded ${this.islandTiles.size} island tiles`);
+
+        // Load all of the spawns
+        let spawnArray: Uint32Array | number[];
+        if (typeof spawns.data === 'string') {
+            const buffer = Buffer.from(spawns.data, 'base64');
+            spawnArray = new Uint32Array(buffer.buffer, buffer.byteOffset, buffer.length / 4);
+        } else {
+            spawnArray = spawns.data;
+        }
+
+        spawnArray.forEach((tileGid, index) => {
+            if (tileGid !== 0) {
+                const tileX = index % this.mapWidth;
+                const tileY = Math.floor(index / this.mapWidth);
+                this.spawnTiles.add(`${tileX},${tileY}`);
+
+            }
+        });
+    
+
+        console.log(`[TerrainMap] Loaded ${this.spawnTiles.size} spawn tiles`);
     }
 
     /**
@@ -78,6 +105,20 @@ export default class TerrainMap {
                 worldX: tileX * this.tileWidth + this.tileWidth / 2,
                 worldY: tileY * this.tileWidth + this.tileWidth / 2
             };
+        });
+    }
+
+    /**
+     * Converts the spawn tiles list to an array of worldX and worldY coords
+     * @returns 
+     */
+    public getSpawnTiles(): { worldX: number, worldY: number}[] {
+        return Array.from(this.spawnTiles).map(key => {
+            const [tileX, tileY] = key.split(',').map(Number);
+            return {
+                worldX: tileX * this.tileWidth + this.tileWidth / 2,
+                worldY: tileY * this.tileWidth + this.tileWidth / 2
+            }
         });
     }
 
