@@ -63,25 +63,24 @@ export default abstract class Entity {
         this.dirty = false;
     }
 
+    protected toState(): Record<string, any> {
+        return {
+            id: this.id, type: this.type,
+            x: this.x, y: this.y,
+            vx: this.vx, vy: this.vy,
+            r: this.r, av: this.av,
+            parentId: this.parent?.id ?? null,
+            health: this.health, maxHealth: this.maxHealth
+        };
+    }
+
     /**
      * Full serialisation- used when entities first enter the view range of a client
      */
     serialise(): any {
-        const state = {
-            id: this.id,
-            type: this.type,
-            x: this.x,
-            y: this.y,
-            vx: this.vx,
-            vy: this.vy,
-            av: this.av,
-            r: this.r,
-            parentId: this.parent ? this.parent.id : null,
-            health: this.health,
-            maxHealth: this.maxHealth // Transmit both maximum and current health for health bars
-        }
-
-        this.clearDirty();  // client has latest data- don't send again
+        const state = this.toState();
+        this.clearDirty();
+        this.lastSent = { ...state };
         return state;
     }
 
@@ -92,16 +91,21 @@ export default abstract class Entity {
     * @returns a record of the changes, or null if nothing has changed.
     */
     serialiseDelta(): Record<string, any> | null {
-        const current = this.serialise();
+        if (this.dirty) {
+            const state = this.toState();
+            this.clearDirty();
+            this.lastSent = { ...state };
+            return state; // full state as delta — no double call
+        }
+
+        const current = this.toState();
         const delta: Record<string, any> = { id: this.id };
         let hasChanges = false;
 
         for (const key of Object.keys(current)) {
             if (key === 'id') continue;
-
             const curr = current[key];
             const old = this.lastSent[key];
-
             let changed: boolean;
             if (typeof curr === 'number' && typeof old === 'number') {
                 const threshold = (key === 'r' || key === 'av') ? 0.001
@@ -112,18 +116,13 @@ export default abstract class Entity {
             } else {
                 changed = curr !== old;
             }
-
-            if (changed) {
-                delta[key] = curr;
-                hasChanges = true;
-            }
+            if (changed) { delta[key] = curr; hasChanges = true; }
         }
 
         if (hasChanges) {
-            this.lastSent = { ...current };
+            this.lastSent = { ...this.lastSent, ...delta };
             return delta;
         }
-
         return null;
     }
 }

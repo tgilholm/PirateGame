@@ -7,8 +7,9 @@ import path from 'path';
  * solid objects and provide a world border. If making changes to the tilemap, make sure
  * to account for any "new" tiles here.
  */
+
 export default class TerrainMap {
-    private islandTiles: Set<string> = new Set();
+    private mapLayers: Map<string, Set<string>> = new Map();
     public readonly tileWidth: number;
     public readonly tileHeight: number;
     public readonly mapWidth: number;
@@ -29,33 +30,44 @@ export default class TerrainMap {
         this.mapHeight = mapData.height;
         this.mapWidth = mapData.width;
 
-        // Find the solid island layer
-        const islands = mapData.layers.find((l: any) => l.name === 'islands');
+        // Add all the layers you need here
+        this.mapLayers.set('islands', this.getTilesetFromLayer(mapData, 'islands') || new Set());
+        this.mapLayers.set('npc-spawns', this.getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
+        this.mapLayers.set('player-spawns', this.getTilesetFromLayer(mapData, 'player-spawns') || new Set());
 
-        if (!islands?.data) {
-            console.warn('[TerrainMap] No island layer found in tilemap');
-            return;
+    }
+
+
+    private getTilesetFromLayer(mapData: any, layerName: string): Set<string> {
+        // Find the layer in the map
+        const layer = mapData.layers.find((l: any) => l.name === layerName);
+        let tileset: Set<string> = new Set();
+
+        if (!layer?.data) {
+            console.warn(`[TerrainMap] No tilemap layer found with name: ${layerName}`);
         }
 
-        // Read all the island tiles
+        // Read into a buffer
         let tileArray: Uint32Array | number[];
-        if (typeof islands.data === 'string') {
-            const buffer = Buffer.from(islands.data, 'base64');
+        if (typeof layer.data === 'string') {
+            const buffer = Buffer.from(layer.data, 'base64');
             tileArray = new Uint32Array(buffer.buffer, buffer.byteOffset, buffer.length / 4);
         } else {
-            tileArray = islands.data;
+            tileArray = layer.data;
         }
 
-        // For each tile in tile array, create an island tile with the width and height
+        // Create the tileset from the buffer
         tileArray.forEach((tileGid, index) => {
             if (tileGid !== 0) {
                 const tileX = index % this.mapWidth;
                 const tileY = Math.floor(index / this.mapWidth);
-                this.islandTiles.add(`${tileX},${tileY}`);
+                tileset.add(`${tileX}, ${tileY}`);
             }
         });
 
-        console.log(`[TerrainMap] Loaded ${this.islandTiles.size} island tiles`);
+        // Output the loaded tileset
+        console.log(`[TerrainMap] Loaded ${tileset.size} tiles from layer: ${layerName}`);
+        return tileset;
     }
 
     /**
@@ -67,15 +79,26 @@ export default class TerrainMap {
     public isOnIsland(worldX: number, worldY: number): boolean {
         const tileX = Math.floor(worldX / this.tileWidth);
         const tileY = Math.floor(worldY / this.tileWidth);
-        return this.islandTiles.has(`${tileX},${tileY}`);
+
+        const islandTiles = this.mapLayers.get('islands');
+        if (!islandTiles){
+            console.warn(`[TerrainMap] isOnIsland check failed`);
+         return false;
+        }
+        
+        return islandTiles.has(`${tileX},${tileY}`);
     }
 
-    /**
-     * Converts the island tiles list to an array of worldX and worldY coords
-     * @returns 
-     */
-    public getIslandTiles(): { worldX: number, worldY: number }[] {
-        return Array.from(this.islandTiles).map(key => {
+
+    public getTileset(layerName: string) {
+        const layer = this.mapLayers.get(layerName);
+
+        if (!layer) {
+            console.warn(`[TerrainMap] '${layerName}' is not a recognised layer in the tilemap!`);
+            return [];
+        }
+
+        return Array.from(layer).map(key => {
             const [tileX, tileY] = key.split(',').map(Number);
             return {
                 worldX: tileX * this.tileWidth + this.tileWidth / 2,

@@ -11,6 +11,7 @@ import Cannon from "../entities/interactables/cannon";
 import Helm from "../entities/interactables/helm";
 import Ladder from "../entities/interactables/ladder";
 import TreasureSystem from "../systems/treasure-system";
+import Bullet from "../entities/projectiles/bullet";
 
 /**
  * Handles events affecting the player
@@ -127,16 +128,11 @@ export default class PlayerController {
 
         // Get player world pos
         const worldPos = this.getWorldPosition(player);
-        const projectileId = `proj_${Date.now()}_${player.id}`; // "unique" id
 
-        // Create the projectile
-        const bullet = new Projectile(
-            projectileId,
-            worldPos.x,
-            worldPos.y,
-            player.aimAngle,
-            600 // velocity
-        );
+        const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
+        bullet.vx += player.vx;
+        bullet.vy += player.vy;
+        bullet.firedBy = player;
 
         // Add to the entity registry
         this.entityRegistry.create(bullet);

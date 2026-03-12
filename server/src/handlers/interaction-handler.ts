@@ -30,6 +30,11 @@ export default class InteractionHandler {
         // Move player just behind the helm
         player.x = helm.x - 25;
         player.y = helm.y;
+
+
+        player.markDirty();
+        ship.markDirty();
+        helm.markDirty();
     }
 
     /**
@@ -47,6 +52,9 @@ export default class InteractionHandler {
         cannon.user = player;
         player.cannon = cannon;
         player.y = cannon.y + cannonYdir * 25;  // move the player behind the cannon
+
+        player.markDirty();
+        cannon.markDirty();
     }
 
     /**
@@ -80,6 +88,9 @@ export default class InteractionHandler {
             player.y = shuntGlobal.y;
             player.parent = null;
         }
+
+        player.markDirty();
+        ship.markDirty();
     }
 
     /**
@@ -106,5 +117,9 @@ export default class InteractionHandler {
                 player.cannon = null;
                 break;
         }
+
+        player.markDirty();
+        ship?.markDirty();
+        interactable.markDirty();
     }
 }
