@@ -4,6 +4,7 @@ import EntityRegistry from "src/engine/entity-registry";
 import NPC from "src/entities/npc";
 import EntityFactory from "src/entities/entity-factory";
 import SpatialGrid from "src/application/spatial-grid";
+import Entity from "src/entities/entity";
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -32,15 +33,25 @@ export default class NPCSystem implements BaseSystem {
         // Check their proximity to a player
         for (let i = 0; i < npcs.length; i++) {
             const npc = npcs[i];
-            this.getTarget(npc);
+            const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
+            this.getTarget(npc, nearby);
+            this.removeDead(npc);   // if npc died, remove it
         }
     }
 
 
-    getTarget(npc: NPC) {
-        const nearbyEntities = this.spatialGrid.getNearby(npc.x, npc.y);
+    removeDead(npc: NPC)
+    {
+        if (npc.health <= 0)
+        {
+            this.spatialGrid.remove(npc.id);
+            this.entityRegistry.delete(npc.id);
+        }
+    }
 
-        nearbyEntities.forEach(id => {
+    getTarget(npc: NPC, nearby: Set<string>) {
+
+        nearby.forEach(id => {
             const entity = this.entityRegistry.get(id);
 
             // Only chase players
@@ -50,7 +61,14 @@ export default class NPCSystem implements BaseSystem {
             const dist = Math.hypot(npc.x - entity.x, npc.y - entity.y);
             if (dist < npc.detectionRadius) npc.target = entity
             else npc.target = null;
+
+            if (npc.target && dist < 20) this.attackTarget(npc, npc.target); 
         });
+    }
+
+    attackTarget(npc: NPC, target: Entity)
+    {
+        target.health -= npc.attackDamage;
     }
 
 

@@ -28,11 +28,13 @@ export default class ProjectileSystem implements BaseSystem {
         const ships = this.entityRegistry.getByType<Ship>('ship');
 
         projectiles.forEach(projectile => {
+            const nearby = this.grid.getNearby(projectile.x, projectile.y);
+
             this.moveProjectile(projectile, dt);
             if (projectile.ttl <= 0) return;
-            this.collidePlayer(projectile);
+            this.collidePlayerAndNPC(projectile, nearby);
             if (projectile.ttl <= 0) return;
-            this.collideShip(projectile);
+            this.collideShip(projectile, nearby);
         });
     }
 
@@ -49,20 +51,21 @@ export default class ProjectileSystem implements BaseSystem {
         }
     }
 
-    collidePlayer(proj: Projectile) {
-        const nearby = this.grid.getNearby(proj.x, proj.y);
+    collidePlayerAndNPC(proj: Projectile, nearby: Set<string>) {
+
         let hit = false;
 
         nearby.forEach(id => {
             const entity = this.entityRegistry.get(id);
+            if (!entity || proj.firedBy === entity) return;
+            if (!(entity.type === 'player' || entity.type === 'npc')) return;
 
-            if (entity?.type !== 'player' || proj.firedBy === entity) return;
             const worldPos = entity.parent
                 ? (entity.parent as Ship).localToWorld(entity.x, entity.y)
                 : { x: entity.x, y: entity.y };
 
             const dist = Math.hypot(proj.x - worldPos.x, proj.y - worldPos.y);
-            if (dist < proj.radius + 15) { // 15 = player radius
+            if (dist < proj.radius + 25) { // 15 = player radius
                 entity.health -= proj.damage;
                 entity.markDirty();
                 hit = true;
@@ -74,11 +77,10 @@ export default class ProjectileSystem implements BaseSystem {
         });
     }
 
-    collideShip(proj: Projectile) {
+    collideShip(proj: Projectile, nearby: Set<string>) {
         let hit = false;
 
         if (proj.type !== 'cannonball') return; // bullets don't damage ships
-        const nearby = this.grid.getNearby(proj.x, proj.y);
 
         nearby.forEach(id => {
             const entity = this.entityRegistry.get(id);
