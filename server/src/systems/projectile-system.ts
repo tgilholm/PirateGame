@@ -2,6 +2,9 @@ import Projectile from "../entities/projectiles/projectile";
 import EntityRegistry from "../engine/entity-registry";
 import { BaseSystem } from "./base-system";
 import SpatialGrid from "../application/spatial-grid";
+import Player from "src/entities/player";
+import Ship from "src/entities/ship";
+import Entity from "src/entities/entity";
 
 /**
  * Updates all projectile objects each tick. Handles collisions between
@@ -9,8 +12,10 @@ import SpatialGrid from "../application/spatial-grid";
  * damage to the struck object
  */
 export default class ProjectileSystem implements BaseSystem {
+
+
     constructor(private entityRegistry: EntityRegistry,
-        private grid: SpatialGrid
+        private grid: SpatialGrid,
     ) { }
 
     /**
@@ -18,21 +23,90 @@ export default class ProjectileSystem implements BaseSystem {
      * @param dt the difference in time from the last update
      */
     update(dt: number): void {
-        // Get all projectiles
-        const projectiles = this.entityRegistry.getByType<Projectile>("projectile");
+        const projectiles = this.entityRegistry.getByType<Projectile>('projectile');
+        const players = this.entityRegistry.getByType<Player>('player');
+        const ships = this.entityRegistry.getByType<Ship>('ship');
 
-        for (const proj of projectiles) {
-            // Move the projectile
-            proj.x += proj.vx * dt;
-            proj.y += proj.vy * dt;
+        projectiles.forEach(projectile => {
+            const nearby = this.grid.getNearby(projectile.x, projectile.y);
 
-            proj.ttl -= dt * 1000;  // reduce lifespan
-
-            if (proj.ttl <= 0) {
-                this.entityRegistry.delete(proj.id);
-                this.grid.remove(proj.id);
-            }
-        }
-
+            this.moveProjectile(projectile, dt);
+            if (projectile.ttl <= 0) return;
+            this.collidePlayerAndNPC(projectile, nearby);
+            if (projectile.ttl <= 0) return;
+            this.collideShip(projectile, nearby);
+        });
     }
+
+
+    moveProjectile(proj: Projectile, dt: number) {
+
+        proj.x += proj.vx * dt;
+        proj.y += proj.vy * dt;
+        proj.ttl -= dt * 1000;
+
+        // Delete expired projectiles
+        if (proj.ttl <= 0) {
+            this.destroyEntity(proj);
+        }
+    }
+
+    collidePlayerAndNPC(proj: Projectile, nearby: Set<string>) {
+
+        let hit = false;
+
+        nearby.forEach(id => {
+            const entity = this.entityRegistry.get(id);
+            if (!entity || proj.firedBy === entity) return;
+            if (!(entity.type === 'player' || entity.type === 'npc')) return;
+
+            const worldPos = entity.parent
+                ? (entity.parent as Ship).localToWorld(entity.x, entity.y)
+                : { x: entity.x, y: entity.y };
+
+            const dist = Math.hypot(proj.x - worldPos.x, proj.y - worldPos.y);
+            if (dist < proj.radius + 25) { // 15 = player radius
+                entity.health -= proj.damage;
+                entity.markDirty();
+                hit = true;
+            }
+
+            if (hit) {
+                this.destroyEntity(proj);
+            }
+        });
+    }
+
+    collideShip(proj: Projectile, nearby: Set<string>) {
+        let hit = false;
+
+        if (proj.type !== 'cannonball') return; // bullets don't damage ships
+
+        nearby.forEach(id => {
+            const entity = this.entityRegistry.get(id);
+
+            if (entity?.type !== 'ship' || proj.firedBy?.parent === entity) return;
+            const ship = entity as Ship;
+
+            const local = ship.worldToLocal(proj.x, proj.y);
+            if (ship.isInside(local.x, local.y, -proj.radius)) {
+                ship.health -= proj.damage;
+                ship.markDirty();
+                hit = true;
+            }
+
+            if (hit) {
+                this.destroyEntity(proj);
+            }
+        });
+    }
+
+    /**
+     * Removes a projectile
+     * @param id the id to delete
+     */
+    public destroyEntity(entity: Entity) {
+        this.entityRegistry.delete(entity.id);
+        this.grid.remove(entity.id);
+    };
 }

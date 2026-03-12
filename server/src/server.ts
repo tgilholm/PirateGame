@@ -31,6 +31,7 @@ import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import { ServerEvent } from "@shared/socket-protocol";
 import TreasureSystem from "./systems/treasure-system";
+import NPCSystem from './systems/npc-system';
 
 // Create the express app & server
 const app = express();
@@ -48,7 +49,7 @@ app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')))
 */
 const registry = new EntityRegistry();
 const matterEngine = Engine.create({
-  gravity: {x: 0, y: 0}
+  gravity: { x: 0, y: 0 }
 });
 const spatialGrid = new SpatialGrid(512, 2048);
 
@@ -63,7 +64,8 @@ const engine = new GameEngine({
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
   messageSystem: new MessageSystem(),
-    treasureSystem
+    treasureSystem,
+  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid)
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);
@@ -78,7 +80,7 @@ const worldController = new WorldController(registry,
   }
 );
 
-const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid);
+const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid, terrainMap);
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();

@@ -67,7 +67,7 @@ export default class Player extends Entity {
     /**
      * Override base method appending player-specific data for network transmission
      */
-    serialise(): any {
+    toState(): any {
         /*
             ... - spread operator. Prepends all base entity data:
             id: this.id,
@@ -82,7 +82,7 @@ export default class Player extends Entity {
         */
         // Send everything the client needs to display the player
         return {
-            ...super.serialise(),
+            ...super.toState(),
             username: this.username,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,

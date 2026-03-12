@@ -9,6 +9,7 @@ import Cannon from "./interactables/cannon";
 import Ladder from "./interactables/ladder";
 import Helm from "./interactables/helm";
 import Treasure, { TreasureState } from "./treasure";
+import NPC from "./npc";
 
 
 export interface InteractableInstance {
@@ -121,5 +122,11 @@ export default class EntityFactory {
             parent.interactables.push(item);
         }
         this.entityRegistry.create(item);
+    }
+
+    public createNPC(id: string, x: number, y: number): NPC {
+        const npc = new NPC(id, x, y);
+        this.entityRegistry.create(npc);
+        return npc;
     }
 }

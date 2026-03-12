@@ -42,7 +42,7 @@ export class MainScene extends Phaser.Scene {
         this.setupWorld();
 
         //@ts-ignore cheesed into this window
-        const entityConfig = window.entityConfig;   
+        const entityConfig = window.entityConfig;
         const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
 
 
@@ -66,11 +66,24 @@ export class MainScene extends Phaser.Scene {
         circle.destroy();
 
         // Placeholder cannonball sprite
+        const ball = this.make.graphics();
+        ball.fillStyle(0x222222, 1);
+        ball.fillCircle(8, 8, 8);
+        ball.generateTexture('cannonball', 16, 16);
+        ball.destroy();
+
         const proj = this.make.graphics();
         proj.fillStyle(0x222222, 1);
-        proj.fillCircle(5, 5, 5);
-        proj.generateTexture('cannonball', 10, 10);
+        proj.fillCircle(4, 4, 4);
+        proj.generateTexture('bullet', 8, 8);
         proj.destroy();
+
+        // Placeholder NPC sprite
+        const square = this.make.graphics();
+        square.fillStyle(0x0000dd);
+        square.fillRect(0, 0, 30, 30);
+        square.generateTexture('npc_sprite', 30, 30);
+        square.destroy();
 
         // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
