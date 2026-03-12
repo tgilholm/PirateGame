@@ -67,6 +67,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         if (!this.localPlayer) return;  // dont do anything until the player has joined
 
         const delta = this.scene.game.loop.delta;
+        if (this.digMinigame) {
+            this.digMinigame.update(delta / 1000);
+        }
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const pos = this.localPlayer.worldPos;
 
@@ -304,14 +307,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         this.input.on('dig', () => {
-            console.log("[Client] X pressed");
-
             if (this.digMinigame?.active) {
-                const pos = this.digMinigame.getSliderPosition();
-                console.log("[Client] sending dig hit", pos);
-                this.network.sendDigHit(pos);
+                this.network.sendDigHit(this.digMinigame.getSliderPosition());
             } else {
-                console.log("[Client] sending dig start");
                 this.network.sendDigStart();
             }
         });

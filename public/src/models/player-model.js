@@ -27,6 +27,7 @@ export default class PlayerModel extends Model {
         this.reloadTime = 0;
         this.reloadTimer = 0;
         this.reloadIndicator = new ReloadIndicator(scene, this, 22);
+        this.gold = 0;
 
         // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
@@ -60,6 +61,9 @@ export default class PlayerModel extends Model {
         if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
         if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
         if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
+        if (data.gold !== undefined) this.gold = data.gold;
+        if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
+        if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
 
     }
 

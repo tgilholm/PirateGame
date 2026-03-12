@@ -21,10 +21,10 @@ export default class DigMinigame {
         this.direction = 1;
         this.elapsedMs = 0;
 
-        this.speed = config.digSpeed;
-        this.successZoneStart = config.successZoneStart;
-        this.successZoneSize = config.successZoneSize;
-        this.durationMs = config.durationMs;
+        this.speed = config.digSpeed ?? 1.2;
+        this.successZoneStart = config.successZoneStart ?? 0.4;
+        this.successZoneSize = config.successZoneSize ?? 0.18;
+        this.durationMs = config.durationMs ?? 2500;
 
         this.root.style.display = "block";
         this.zone.style.left = `${this.successZoneStart * 100}%`;
@@ -34,19 +34,18 @@ export default class DigMinigame {
         this.render();
     }
 
-    stop(message = "") {
+    stop() {
         this.active = false;
         this.root.style.display = "none";
-        if (message) {
-            this.label.textContent = message;
-        }
     }
 
     update(dt) {
         if (!this.active) return;
 
         this.elapsedMs += dt * 1000;
-        this.position += this.direction * this.speed * dt * 0.7;
+
+        // bounce left/right across the bar
+        this.position += this.direction * this.speed * dt * 0.65;
 
         if (this.position >= 1) {
             this.position = 1;

@@ -29,11 +29,12 @@ export default class UIManager {
 
         if (!player) return;
 
+        this.updateGoldCounter(player.gold ?? 0);
+
         const isInteracting = player.isSteering || player.isUsingCannon;
 
         if (target) {
             const item = target.item;
-
             if (isInteracting) {
                 const prompt = item.releasePrompt || "Release";
                 this.showPrompt(`[Q] ${prompt}`);
@@ -47,10 +48,8 @@ export default class UIManager {
                 this.hidePrompt();
             }
         }
-        this.updateGoldCounter(player.gold ?? 0);
 
         if (this.gameManager.playerListDirty) {
-
             this.updatePlayersPanelDom(this.gameManager.playerList);
             this.gameManager.playerListDirty = false;
         }
@@ -102,6 +101,7 @@ export default class UIManager {
     updateGoldCounter(amount) {
         if (!this.goldElement) return;
         if (this.lastGold === amount) return;
+
         this.goldElement.textContent = `Gold: ${amount}`;
         this.lastGold = amount;
     }

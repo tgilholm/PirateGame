@@ -1,6 +1,6 @@
 import Entity from "./entity";
 
-export type TreasureState = "buried" | "dugup" | "carried";
+export type TreasureState = "buried" | "opening" | "carried"| "dugup"|"hole";
 
 export default class Treasure extends Entity {
     public goldValue: number;
@@ -11,6 +11,9 @@ export default class Treasure extends Entity {
     public digSpeed: number;
     public successZoneStart: number;
     public successZoneSize: number;
+    public carriedByPendingPlayerId: string | null;
+    public openedAt: number | null;
+    public holeExpiresAt: number | null;
 
     constructor(
         id: string,
@@ -33,6 +36,9 @@ export default class Treasure extends Entity {
         this.digSpeed = digSpeed;
         this.successZoneStart = successZoneStart;
         this.successZoneSize = successZoneSize;
+        this.openedAt = null;
+        this.holeExpiresAt = null;
+        this.carriedByPendingPlayerId = null;
     }
 
     override serialise() {
@@ -45,6 +51,8 @@ export default class Treasure extends Entity {
             digSpeed: this.digSpeed,
             successZoneStart: this.successZoneStart,
             successZoneSize: this.successZoneSize,
+            openedAt: this.openedAt,
+            holeExpiresAt: this.holeExpiresAt,
         };
     }
 }

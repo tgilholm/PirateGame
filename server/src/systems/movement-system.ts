@@ -13,6 +13,7 @@ const POS_THRESHOLD = 0.5;
 const MAX_CANNON_SPEED = 20 * (Math.PI / 180); // cannons move towards mouse
 const CANNON_ARC = Math.PI / 4;     // 90 deg
 
+
 /**
  * Contains all movement logic for moving entities
  */
@@ -25,6 +26,7 @@ export default class MovementSystem implements BaseSystem {
      */
     constructor(private registry: EntityRegistry, private entityConfig: EntityConfig,
         private terrainMap: TerrainMap
+
     ) { }
 
     /**

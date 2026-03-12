@@ -75,9 +75,11 @@ export default class TreasureSystem implements BaseSystem {
             this.trySpawnTreasure();
         }
 
+        this.resolveOpeningTreasures();
         this.updateCarriedTreasures();
-        this.resolvePickups();
         this.resolveDeposits();
+        this.resolvePickups()
+        this.resolveExpiredHoles();
     }
 
     public bindUiEvents(
@@ -97,6 +99,8 @@ export default class TreasureSystem implements BaseSystem {
 
         let nearest: Treasure | null = null;
         let nearestDistSq = this.options.digRadius * this.options.digRadius;
+
+
 
         for (const treasure of treasures) {
             if (treasure.state !== "buried") continue;
@@ -124,10 +128,12 @@ export default class TreasureSystem implements BaseSystem {
 
         const minGold = this.options.minGold;
         const maxGold = this.options.maxGold;
-        const normalized = (nearest.goldValue - minGold) / Math.max(1, maxGold - minGold);
+        const normalized =
+            (nearest.goldValue - this.options.minGold) /
+            Math.max(1, this.options.maxGold - this.options.minGold);
 
-        const digSpeed = 0.8 + normalized * 2.0;
-        const successZoneSize = 0.24 - normalized * 0.10;
+        const digSpeed = 0.9 + normalized * 2.2;   // richer treasure = faster slider
+        const successZoneSize = 0.24 - normalized * 0.10; // richer treasure = smaller zone
         const successZoneStart = Math.random() * (1 - successZoneSize);
 
         this.onDigMinigameStart?.(player.id, {
@@ -176,9 +182,13 @@ export default class TreasureSystem implements BaseSystem {
         const success = sliderPosition >= zoneStart && sliderPosition <= zoneEnd;
 
         if (success) {
-            treasure.state = "dugup";
-            treasure.digProgress = 3;
+            treasure.state = "opening";
+            treasure.openedAt = Date.now();
+            treasure.carriedByPendingPlayerId = player.id;
             treasure.markDirty();
+
+            this.onDigMinigameResult?.(player.id, { success: true });
+            return true;
         }
 
         this.onDigMinigameResult?.(player.id, { success });
@@ -235,14 +245,46 @@ export default class TreasureSystem implements BaseSystem {
             successZoneStart,
             successZoneSize
         );
-        type DigSession = {
-            playerId: string;
-            treasureId: string;
-            startedAt: number;
-            durationMs: number;
-        };
 
         return true;
+    }
+
+    private resolveOpeningTreasures(): void {
+        const treasures = this.registry.getByType<Treasure>("treasure");
+
+        for (const treasure of treasures) {
+            if (treasure.state !== "opening") continue;
+            if (!treasure.openedAt) continue;
+
+            if (Date.now() - treasure.openedAt < 1200) continue;
+
+            const player = treasure.carriedByPendingPlayerId
+                ? this.registry.get<Player>(treasure.carriedByPendingPlayerId)
+                : null;
+
+            if (!player) {
+                treasure.state = "dugup";
+                treasure.openedAt = null;
+                treasure.markDirty();
+                continue;
+            }
+
+            if (player.isCarrying) {
+                treasure.state = "dugup";
+                treasure.openedAt = null;
+                treasure.markDirty();
+                continue;
+            }
+
+            treasure.state = "carried";
+            treasure.holeExpiresAt = Date.now() + 5 * 60 * 1000;
+            treasure.carrierId = player.id;
+            treasure.markDirty();
+
+            player.isCarrying = true;
+            player.carryingTreasureId = treasure.id;
+            player.markDirty();
+        }
     }
 
     private resolvePickups(): void {
@@ -263,6 +305,7 @@ export default class TreasureSystem implements BaseSystem {
                 if (distSq <= this.options.pickupRadius * this.options.pickupRadius) {
                     treasure.state = "carried";
                     treasure.carrierId = player.id;
+
                     treasure.markDirty();
 
                     player.isCarrying = true;
@@ -303,6 +346,8 @@ export default class TreasureSystem implements BaseSystem {
             if (!(player.parent instanceof Ship)) continue;
 
             const treasure = this.registry.get<Treasure>(player.carryingTreasureId);
+
+            // Always clear broken carry state
             if (!treasure) {
                 player.isCarrying = false;
                 player.carryingTreasureId = null;
@@ -310,12 +355,25 @@ export default class TreasureSystem implements BaseSystem {
                 continue;
             }
 
+            // Only deposit if the treasure is actually being carried
+            if (treasure.state !== "carried") {
+                player.isCarrying = false;
+                player.carryingTreasureId = null;
+                player.markDirty();
+                continue;
+            }
+
+            // Deposit ONCE
             player.gold += treasure.goldValue;
             player.isCarrying = false;
             player.carryingTreasureId = null;
             player.markDirty();
 
-            this.registry.delete(treasure.id);
+            treasure.state = "hole";
+            treasure.carrierId = null;
+            treasure.carriedByPendingPlayerId = null;
+            treasure.holeExpiresAt = Date.now() + 5 * 60 * 1000;
+            treasure.markDirty();
         }
     }
 
@@ -388,6 +446,20 @@ export default class TreasureSystem implements BaseSystem {
         }
 
         return false;
+    }
+
+    private resolveExpiredHoles(): void {
+        const treasures = this.registry.getByType<Treasure>("treasure");
+        const now = Date.now();
+
+        for (const treasure of treasures) {
+            if (treasure.state !== "carried") continue;
+            if (!treasure.holeExpiresAt) continue;
+
+            if (now >= treasure.holeExpiresAt) {
+                this.registry.delete(treasure.id);
+            }
+        }
     }
 
 
