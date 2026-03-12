@@ -36,6 +36,7 @@ export default class ModelFactory {
             case 'cannon':  // all interactables "fall through"
             case 'helm':
             case 'ladder': return this.createInteractable(data);
+            case 'npc' return this.createNPC(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
@@ -93,5 +94,10 @@ export default class ModelFactory {
         }
 
         return model;
+    }
+
+    createNPC(data)
+    {
+        
     }
 }

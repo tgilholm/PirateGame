@@ -2,5 +2,7 @@ import Entity from "./entity";
 
 
 export default class NPC extends Entity {
-    // todo    
+    constructor(id: string, x: number, y: number) {
+        super(id, 'npc', x , y , 75, null);
+    }
 }
