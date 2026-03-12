@@ -13,7 +13,7 @@ import Entity from "src/entities/entity";
  */
 export default class NPCSystem implements BaseSystem {
 
-    npcLimit: number = 16;
+    npcLimit: number = 12;
 
     constructor(private terrainMap: TerrainMap,
         private entityFactory: EntityFactory,
@@ -85,7 +85,7 @@ export default class NPCSystem implements BaseSystem {
 
     getSpawnPoint() {
         // Choose a spawn point for the npc
-        const spawnPoints = this.terrainMap.getSpawnTiles();
+        const spawnPoints = this.terrainMap.getTileset('npc-spawns');
 
         // Choose randomly from the list
         return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
