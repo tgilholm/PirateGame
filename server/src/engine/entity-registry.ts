@@ -8,7 +8,6 @@ export default class EntityRegistry {
     private entities: Map<string, Entity> = new Map();
     private entitiesByType: Map<string, Set<string>> = new Map();
     private typeCache: Map<string, Entity[]> = new Map();
-    private allCache: Entity[] | null = null;
 
 
     /**
@@ -25,7 +24,7 @@ export default class EntityRegistry {
             this.typeCache.delete(t);
         }
 
-        this.allCache = null;
+        console.debug(`[Registry] Added ${entity.type}:${entity.id}`);
     }
 
     /**
@@ -42,9 +41,7 @@ export default class EntityRegistry {
      * @returns an array of entities
      */
     public getAll(): Entity[] {
-        if (this.allCache) return this.allCache;
-        this.allCache = Array.from(this.entities.values());
-        return this.allCache;
+        return Array.from(this.entities.values());
     }
 
     /**
@@ -80,14 +77,9 @@ export default class EntityRegistry {
         const allTypes = [entity.type, ...(entity.supertypes ?? [])];
         for (const t of allTypes) {
             this.entitiesByType.get(t)?.delete(id);
-            // Update cache array in place instead of invalidating it
-            const cached = this.typeCache.get(t);
-            if (cached) {
-                const idx = cached.indexOf(entity);
-                if (idx !== -1) cached.splice(idx, 1);
-            }
+            this.typeCache.delete(t);
         }
-        this.allCache = null;
+
         return this.entities.delete(id);
     }
 

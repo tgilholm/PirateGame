@@ -64,7 +64,7 @@ export default class TreasureModel extends Model {
     playChestReveal() {
         this.sprite.setVisible(true);
         this.holeSprite.setVisible(false);
-        this.sprite.setTexture("chest-open");
+        this.sprite.setTexture("chest_open");
         this.sprite.setDisplaySize(80, 80);
 
         if (this.sprite.anims) {

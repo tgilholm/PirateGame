@@ -1,4 +1,3 @@
-import HealthBar from "../ui/health-bar.js";
 import Model from "./model.js";
 
 /**
@@ -41,9 +40,6 @@ export default class ShipModel extends Model {
         this.sendToBack(this.hullSprite);
 
         this.setDepth(10);
-
-
-        this.healthBar = new HealthBar(scene, 100);
     }
 
 
@@ -53,7 +49,8 @@ export default class ShipModel extends Model {
      * dimensions as this will re-use the existing texture.
      * @param {string} textureKey the id of the texture in Phaser's texture cache
      */
-    getHullTexture(textureKey) {
+    getHullTexture(textureKey)
+    {
         if (this.scene.textures.exists(textureKey)) return; // already drawn once
 
         const { height, middleWidth, bowLength, sternRadius } = this.dimensions;
@@ -148,10 +145,6 @@ export default class ShipModel extends Model {
         this.interactables.forEach(item => {
             item.y = item.startY + bobAmount;
         });
-
-
-        const pos = this.worldPos;
-        this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
     }
 
     /**
@@ -161,8 +154,6 @@ export default class ShipModel extends Model {
         this.interactables.forEach((item) => {
             item.destroy();
         });
-
-        this.healthBar?.destroy();
         super.destroy();
     }
 }

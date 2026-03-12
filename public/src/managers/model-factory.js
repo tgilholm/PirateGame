@@ -1,7 +1,6 @@
 import CannonModel from "../models/cannon-model.js";
 import HelmModel from "../models/helm-model.js";
 import LadderModel from "../models/ladder-model.js";
-import NPCModel from "../models/npc-model.js";
 import PlayerModel from "../models/player-model.js";
 import ProjectileModel from "../models/projectile-model.js";
 import ShipModel from "../models/ship-model.js";
@@ -32,14 +31,11 @@ export default class ModelFactory {
         switch (data.type) {
             case 'ship': return this.createShip(data);
             case 'player': return this.createPlayer(data);
+            case 'projectile': return this.createProjectile(data);
             case 'treasure':return this.createTreasure(data);
-            case 'projectile':
-            case 'bullet':
-            case 'cannonball': return this.createProjectile(data);
             case 'cannon':  // all interactables "fall through"
-            case 'helm':
+            case 'helm': 
             case 'ladder': return this.createInteractable(data);
-            case 'npc': return this.createNPC(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
@@ -71,7 +67,7 @@ export default class ModelFactory {
      * @returns the projectile
      */
     createProjectile(data) {
-        return new ProjectileModel(this.scene, data.id, data.x, data.y, data.r ?? 0, data.type);
+        return new ProjectileModel(this.scene, data.id, data.x, data.y, data.r ?? 0);
     }
 
     createTreasure(data) {
@@ -108,10 +104,5 @@ export default class ModelFactory {
         }
 
         return model;
-    }
-
-    createNPC(data)
-    {
-        return new NPCModel(this.scene, data.id, data.x, data.y);
     }
 }

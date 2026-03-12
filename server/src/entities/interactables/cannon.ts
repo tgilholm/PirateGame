@@ -19,12 +19,12 @@ export default class Cannon extends InteractableEntity {
 
     get isReloaded(): boolean {return this.reloadTimer <= 0;}
 
-    toState() {
+    serialise() {
         return {
-            ...super.toState(),
+            ...super.serialise(),
             reloadTimer: this.reloadTimer,
             reloadTime: this.reloadTime,
-            userId: this.user?.id ?? null   // send null if no user - json drops undefined
+            userId: this.user?.id
         }
     }
 }

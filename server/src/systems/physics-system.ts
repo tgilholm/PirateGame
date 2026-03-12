@@ -53,7 +53,7 @@ export default class PhysicsSystem implements BaseSystem {
         Matter.World.add(this.engine.world, walls);
 
         // Add a rectangle at each solid object
-        terrainMap.getTileset('islands').forEach(({ worldX, worldY }) => {
+        terrainMap.getIslandTiles().forEach(({ worldX, worldY }) => {
             const body = Matter.Bodies.rectangle(
                 worldX, worldY,
                 terrainMap.tileWidth, terrainMap.tileWidth,

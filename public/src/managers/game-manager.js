@@ -104,7 +104,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         const now = Date.now();
         this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 150) {
+            if (entity.isPredicted && now - entity.spawnTime > 500) {
                 entity.destroy();
                 this.models.delete(id);
             }
@@ -140,19 +140,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     onDeltaSync(data) {
         let needsInteractableRefresh = false;
 
-        // Kill old predicted projectiles
-        const now = Date.now();
-        this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 300) {
-                entity.destroy();
-                this.models.delete(id);
-            }
-        });
-
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
             if (entityData.type === 'ship') needsInteractableRefresh = true;
-            if (['cannon', 'helm', 'ladder'].includes(entityData.type)) needsInteractableRefresh = true;
+            if (entityData.isInteractable || entityData.type !== undefined) needsInteractableRefresh = true;
             if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
@@ -179,9 +170,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            if (data.type === 'bullet' || data.type === 'cannonball') {
+            // Before creating, check if there's a predicted projectile nearby to replace
+            if (data.type === 'projectile') {
                 const predicted = this.findMatchingPrediction(data.x, data.y);
                 if (predicted) {
+                    // Remap the real id onto the predicted model so it syncs correctly
                     this.models.delete(predicted.id);
                     predicted.id = data.id;
                     predicted.isPredicted = false;
@@ -333,8 +326,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const player = this.localPlayer;
         if (!player) return;
 
-
-
+        // Compute fresh aim angle directly from mouse position
         const cam = this.scene.cameras.main;
         const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
         const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
@@ -355,7 +347,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             spawnY = pos.y + Math.sin(worldAngle) * 20;
         } else {
             if (player.reloadTimer > 0) return;
-            worldAngle = freshAimAngle;
+            worldAngle = freshAimAngle; // fresh, not interpolated
             spawnX = player.gun.x;
             spawnY = player.gun.y;
         }
@@ -366,21 +358,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             id: `predicted_${Date.now()}`,
             x: spawnX,
             y: spawnY,
-            r: worldAngle,
-            type: player.isUsingCannon ? 'cannonball' : 'bullet'
+            r: worldAngle
         });
-
         model.velocity.x = Math.cos(worldAngle) * speed;
         model.velocity.y = Math.sin(worldAngle) * speed;
-
-        if (player.isUsingCannon) {
-            const ship = this.models.get(player.parentId);
-            model.velocity.x += ship?.velocity.x ?? 0;
-            model.velocity.y += ship?.velocity.y ?? 0;
-        }
-
         model.isPredicted = true;
-        model.initialised = true;
+        model.initialised = true; // already positioned correctly, don't snap on server confirmation
         model.spawnTime = Date.now();
         this.models.set(model.id, model);
     }

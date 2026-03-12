@@ -53,7 +53,7 @@ export default class Ship extends Entity {
     /**
      * Overrides base method appending ship-specific data for network transmission
      */
-    toState(): any {
+    serialise(): any {
         /*
             ... - spread operator. Prepends all base entity data:
             id: this.id
@@ -70,8 +70,8 @@ export default class Ship extends Entity {
 
         // Send everything the client needs to display the player
         return {
-            ...super.toState(),
-                pilotId: this.pilot?.id,  // For client side messages
+            ...super.serialise(),
+            pilotId: this.pilot?.id,  // For client side messages
         }
     }
 

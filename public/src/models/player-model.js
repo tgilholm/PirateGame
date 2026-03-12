@@ -1,6 +1,5 @@
 /* global Phaser */
 
-import HealthBar from "../ui/health-bar.js";
 import ReloadIndicator from "../ui/reload-indicator.js";
 import Model from "./model.js";
 import ShipModel from "./ship-model.js";
@@ -29,7 +28,6 @@ export default class PlayerModel extends Model {
         this.reloadTimer = 0;
         this.reloadIndicator = new ReloadIndicator(scene, this, 22);
         this.gold = 0;
-        this.healthBar = new HealthBar(scene, 40, 20);
 
         // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
@@ -63,7 +61,6 @@ export default class PlayerModel extends Model {
         if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
         if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
         if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
-        if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
         if (data.gold !== undefined) this.gold = data.gold;
         if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
         if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
@@ -93,10 +90,6 @@ export default class PlayerModel extends Model {
         }
 
 
-        if (this.health <= 0) {
-            console.log("you ded");
-        }
-
         // Move the gun around the outside of the player
         gun.setPosition(
             pos.x + Math.cos(this.aimAngle) * 15,   // radius of player
@@ -113,7 +106,6 @@ export default class PlayerModel extends Model {
 
 
         this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
-        this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
     }
 
 
@@ -136,7 +128,6 @@ export default class PlayerModel extends Model {
     destroy() {
         if (this.nameText) this.nameText.destroy();
         if (this.gun) this.gun.destroy();
-        this.healthBar?.destroy();
         this.reloadIndicator?.destroy();
 
         super.destroy();

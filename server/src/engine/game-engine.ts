@@ -1,4 +1,3 @@
-import NPCSystem from "src/systems/npc-system";
 import { BaseSystem } from "../systems/base-system";
 import MessageSystem from "../systems/message-system";
 import MovementSystem from "../systems/movement-system";
@@ -14,8 +13,7 @@ export interface GameSystems {
     movementSystem: MovementSystem,
     projectileSystem: ProjectileSystem,
     messageSystem: MessageSystem,
-    treasureSystem: TreasureSystem,
-    npcSystem: NPCSystem
+    treasureSystem: TreasureSystem
 }
 
 /**
@@ -35,7 +33,6 @@ export default class GameEngine {
         this.systems.set('projectile', systems.projectileSystem);
         this.systems.set('message', systems.messageSystem);
         this.systems.set('treasure', systems.treasureSystem);
-        this.systems.set('npc', systems.npcSystem);
 
 
         this.systemArray = Array.from(this.systems.values());   // cache systems

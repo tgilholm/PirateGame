@@ -7,7 +7,6 @@ import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "../entities/entity";
 import Cannon from "../entities/interactables/cannon";
-import NPC from "src/entities/npc";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -36,15 +35,13 @@ export default class MovementSystem implements BaseSystem {
      */
     update(dt: number): void {
         const players = this.registry.getByType<Player>('player');
-        const cannons = this.registry.getByType<Cannon>('cannon');
+        players.forEach(player => this.updatePlayer(player, dt));
+
         const ships = this.registry.getByType<Ship>('ship');
-        const npcs = this.registry.getByType<NPC>('npc');
-
         ships.forEach(ship => this.updateShip(ship, dt));
-        players.forEach(player => this.updatePlayer(player, dt, ships));
-        cannons.forEach(cannon => this.updateCannon(cannon, dt));
-        npcs.forEach(npc => this.updateNPC(npc, dt));
 
+        const cannons = this.registry.getByType<Cannon>('cannon');
+        cannons.forEach(cannon => this.updateCannon(cannon, dt));
     }
 
     /**
@@ -54,24 +51,17 @@ export default class MovementSystem implements BaseSystem {
      * @param player the player for which to apply movement
      * @param dt the difference in time from the last update
      */
-    updatePlayer(player: Player, dt: number, ships: Ship[]): void {
+    updatePlayer(player: Player, dt: number): void {
         if (player.reloadTimer > 0) {
             player.reloadTimer = Math.max(0, player.reloadTimer - dt * 1000);
             player.markDirty();
         }
-
-        // Keep track of aim angle- don't send for static players
-        const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
-        if (Math.abs(player.aimAngle - prevAimAngle) > 0.01) {
-            player.markDirty();
-        }
-        (player as any).prevAimAngle = player.aimAngle; // store temporarily
-
         if (player.isSteering || player.cannon) return;
 
         const parent = player.parent as Ship || null;
         const { up, down, left, right } = player.inputs;
         const playerConfig = this.entityConfig.player;
+        const ships = this.registry.getByType<Ship>('ship');
 
         // If the player is on a ship
         if (!parent) {
@@ -102,7 +92,10 @@ export default class MovementSystem implements BaseSystem {
         if (left) dx -= 1;
         if (right) dx += 1;
 
-
+        // Keep track of aim angle- don't send for static players
+        const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
+        const aimChanged = Math.abs(player.aimAngle - prevAimAngle) > 0.01;
+        (player as any).prevAimAngle = player.aimAngle; // store temporarily
 
         const prevX = player.x; // to calculate velocity difference for client-side extrapolation
         const prevY = player.y;
@@ -178,7 +171,8 @@ export default class MovementSystem implements BaseSystem {
         // Mark dirty if position changed enough
         const moved =
             Math.abs(player.x - prevX) > POS_THRESHOLD ||
-            Math.abs(player.y - prevY) > POS_THRESHOLD
+            Math.abs(player.y - prevY) > POS_THRESHOLD ||
+            aimChanged;
 
         if (moved) player.markDirty();
     }
@@ -251,18 +245,19 @@ export default class MovementSystem implements BaseSystem {
 
 
     updateCannon(cannon: Cannon, dt: number) {
+        // Always update reload timer
         if (cannon.reloadTimer > 0) {
             cannon.reloadTimer = Math.max(0, cannon.reloadTimer - dt * 1000);
             cannon.markDirty();
         }
 
-        if (!cannon.user) return;
+        if (!cannon.user) return;   // only move cannons when being controlled
 
         const ship = cannon.parent as Ship | null;
 
-        let localTarget = ship ? cannon.targetAngle - ship.r : cannon.targetAngle;
-        while (localTarget > Math.PI) localTarget -= 2 * Math.PI;
-        while (localTarget < -Math.PI) localTarget += 2 * Math.PI;
+
+        // Convert world-space target to local space
+        const localTarget = ship ? cannon.targetAngle - ship.r : cannon.targetAngle;
 
         const facingAngle = cannon.y < 0 ? -Math.PI / 2 : Math.PI / 2;
         const clampedTarget = Math.max(facingAngle - CANNON_ARC, Math.min(facingAngle + CANNON_ARC, localTarget));
@@ -273,24 +268,5 @@ export default class MovementSystem implements BaseSystem {
 
         const maxStep = MAX_CANNON_SPEED * dt;
         cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
-    }
-
-
-    updateNPC(npc: NPC, dt: number)
-    {
-        // If there is a target, continually move towards it
-        if (!npc.target) return; // <-- Remove when npcs can move independently
-
-        
-        // Get angle to target
-        const target = npc.target;
-        const angle = Math.atan2(npc.y - target.y, npc.x - target.x);
-
-        const dx = npc.speed * Math.cos(angle);
-        const dy = npc.speed * Math.sin(angle);
-
-        // Move towards target
-        npc.x -= dx;
-        npc.y -= dy;
     }
 }

@@ -19,19 +19,7 @@ export default class InputManager extends Phaser.Events.EventEmitter {
         super();
 
         this.moveKeys = scene.input.keyboard.addKeys("W,A,S,D");
-        
-        //Original Function---------------------------------------------------------
-        //scene.input.mouse.onMouseDown(() => this.emit('fire'));   // mouse & space
-        //--------------------------------------------------------------------------
-
-        //From what I gathered in the documentation for Phaser, it looks like onMouseDown()
-        //only listens for mouse events in the browser, rather than Phaser's input system 
-        //The Phaser documentation references that input.on('pointerdown') will listen for
-        //that event anywhere on the canvas, so I figured would try and tie that in, and
-        //it appears to work in all of the instances I tested 
-        //New Implementation--------------------------------------------------------
-        scene.input.on('pointerdown', () => this.emit('fire'));
-        //--------------------------------------------------------------------------
+        scene.input.mouse.onMouseDown(() => this.emit('fire'));   // mouse & space
 
         scene.input.keyboard.on('keydown-E', () => this.emit('interact'));
         scene.input.keyboard.on('keydown-Q', () => this.emit('release'));

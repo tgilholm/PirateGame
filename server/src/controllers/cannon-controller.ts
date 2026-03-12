@@ -4,7 +4,6 @@ import Projectile from "../entities/projectiles/projectile";
 import { MoveData } from "@shared/socket-protocol";
 import Entity from "../entities/entity";
 import Ship from "../entities/ship";
-import Cannonball from "../entities/projectiles/cannonball";
 
 
 export default class CannonController {
@@ -31,13 +30,16 @@ export default class CannonController {
             y: worldPos.y + Math.sin(worldAngle) * cannonEndOffset,
         };
 
-        const worldVel = ship ? { x: ship.vx, y: ship.vx } : { x: 0, y: 0 };
-        const ball = new Cannonball(`cannonball_${Date.now()}`, spawnPos.x, spawnPos.y, worldAngle);
-        ball.vx += worldVel.x;
-        ball.vy += worldVel.y;
-        ball.firedBy = cannon; // avoid hitting own ship
+        const id = `cannonball_${Date.now()}`;
+        const projectile = new Projectile(
+            id,
+            worldPos.x,
+            worldPos.y,
+            worldAngle,
+            500 // for now
+        );
 
-        this.entityRegistry.create(ball);
+        this.entityRegistry.create(projectile);
     }
 
     /**
