@@ -21,8 +21,6 @@ export default class CannonModel extends InteractableModel {
 
     postUpdate(delta, deltaTime, lerp) {
 
-        console.log(`Reload, elapsed: ${this.reloadTimer}/${this.reloadTime}`);
-
         this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
     }
 

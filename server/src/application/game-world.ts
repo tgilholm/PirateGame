@@ -152,10 +152,12 @@ export default class GameWorld extends EventEmitter {
             const wy = e.parent ? e.parent.y : e.y;
             this.grid.update(e.id, wx, wy); // update the spatial grid
 
+            const delta = e.serialiseDelta();
+
             // Set the data to be broadcast
             entityData.set(e.id, {
                 full: e.serialise(),
-                delta: e.serialiseDelta()
+                delta: delta
             });
         });
 

@@ -46,7 +46,7 @@ app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')))
 */
 const registry = new EntityRegistry();
 const matterEngine = Engine.create({
-  gravity: {x: 0, y: 0}
+  gravity: { x: 0, y: 0 }
 });
 const spatialGrid = new SpatialGrid(512, 2048);
 
