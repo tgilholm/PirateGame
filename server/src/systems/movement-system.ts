@@ -7,6 +7,7 @@ import { EntityConfig } from "../types";
 import { BaseSystem } from "./base-system";
 import Entity from "../entities/entity";
 import Cannon from "../entities/interactables/cannon";
+import NPC from "src/entities/npc";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -35,10 +36,12 @@ export default class MovementSystem implements BaseSystem {
         const players = this.registry.getByType<Player>('player');
         const cannons = this.registry.getByType<Cannon>('cannon');
         const ships = this.registry.getByType<Ship>('ship');
+        const npcs = this.registry.getByType<NPC>('npc');
 
         ships.forEach(ship => this.updateShip(ship, dt));
         players.forEach(player => this.updatePlayer(player, dt, ships));
         cannons.forEach(cannon => this.updateCannon(cannon, dt));
+        npcs.forEach(npc => this.updateNPC(npc, dt));
 
     }
 
@@ -268,5 +271,24 @@ export default class MovementSystem implements BaseSystem {
 
         const maxStep = MAX_CANNON_SPEED * dt;
         cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
+    }
+
+
+    updateNPC(npc: NPC, dt: number)
+    {
+        // If there is a target, continually move towards it
+        if (!npc.target) return; // <-- Remove when npcs can move independently
+
+        
+        // Get angle to target
+        const target = npc.target;
+        const angle = Math.atan2(npc.y - target.y, npc.x - target.x);
+
+        const dx = npc.speed * Math.cos(angle);
+        const dy = npc.speed * Math.sin(angle);
+
+        // Move towards target
+        npc.x -= dx;
+        npc.y -= dy;
     }
 }

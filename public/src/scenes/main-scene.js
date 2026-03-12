@@ -81,8 +81,8 @@ export class MainScene extends Phaser.Scene {
         // Placeholder NPC sprite
         const square = this.make.graphics();
         square.fillStyle(0x0000dd);
-        square.fillRect(0, 0, 10, 10);
-        square.generateTexture('npc_sprite', 10, 10);
+        square.fillRect(0, 0, 30, 30);
+        square.generateTexture('npc_sprite', 30, 30);
         square.destroy();
 
         // Contain the camera in the map

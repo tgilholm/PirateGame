@@ -61,7 +61,7 @@ const engine = new GameEngine({
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
   messageSystem: new MessageSystem(),
-  npcSystem: new NPCSystem(terrainMap, entityFactory, registry)
+  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid)
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);

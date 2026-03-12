@@ -3,6 +3,7 @@ import { BaseSystem } from "./base-system";
 import EntityRegistry from "src/engine/entity-registry";
 import NPC from "src/entities/npc";
 import EntityFactory from "src/entities/entity-factory";
+import SpatialGrid from "src/application/spatial-grid";
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -15,7 +16,8 @@ export default class NPCSystem implements BaseSystem {
 
     constructor(private terrainMap: TerrainMap,
         private entityFactory: EntityFactory,
-        private entityRegistry: EntityRegistry
+        private entityRegistry: EntityRegistry,
+        private spatialGrid: SpatialGrid
     ) {
 
     }
@@ -24,20 +26,49 @@ export default class NPCSystem implements BaseSystem {
         // Get all npcs
         const npcs = this.entityRegistry.getByType<NPC>('npc');
 
-        if (npcs && npcs.length < this.npcLimit)
-        {
-            const {worldX, worldY} = this.getSpawnPoint();
-            
+        // Create more if needed
+        this.generateNPCs(npcs);
+
+        // Check their proximity to a player
+        for (let i = 0; i < npcs.length; i++) {
+            const npc = npcs[i];
+            this.getTarget(npc);
+        }
+    }
+
+
+    getTarget(npc: NPC) {
+        const nearbyEntities = this.spatialGrid.getNearby(npc.x, npc.y);
+
+        nearbyEntities.forEach(id => {
+            const entity = this.entityRegistry.get(id);
+
+            // Only chase players
+            if (entity?.type !== 'player') return;
+
+            // Get distance to player
+            const dist = Math.hypot(npc.x - entity.x, npc.y - entity.y);
+            if (dist < npc.detectionRadius) npc.target = entity
+            else npc.target = null;
+        });
+    }
+
+
+    generateNPCs(npcs: NPC[]) {
+
+        if (npcs && npcs.length < this.npcLimit) {
+            const { worldX, worldY } = this.getSpawnPoint();
+
             const npc = this.entityFactory.createNPC(`npc_${Date.now()}`, worldX, worldY);
             console.log(`[NPCSystem] Created NPC at ${worldX}, ${worldY}`);
         }
     }
 
-    
+
     getSpawnPoint() {
         // Choose a spawn point for the npc
         const spawnPoints = this.terrainMap.getSpawnTiles();
-        
+
         // Choose randomly from the list
         return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
     }
