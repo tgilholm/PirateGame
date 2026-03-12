@@ -1,6 +1,7 @@
 import CannonModel from "../models/cannon-model.js";
 import HelmModel from "../models/helm-model.js";
 import LadderModel from "../models/ladder-model.js";
+import NPCModel from "../models/npc-model.js";
 import PlayerModel from "../models/player-model.js";
 import ProjectileModel from "../models/projectile-model.js";
 import ShipModel from "../models/ship-model.js";
@@ -98,6 +99,6 @@ export default class ModelFactory {
 
     createNPC(data)
     {
-        
+        return new NPCModel(this.scene, data.id, data.x, data.y);
     }
 }
