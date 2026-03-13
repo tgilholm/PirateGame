@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["shared/built/*"]
-    }
+    },
+    "esModuleInterop": true
   }
 }
