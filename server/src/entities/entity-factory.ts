@@ -104,10 +104,13 @@ export default class EntityFactory {
         return npc;
     }
 
-    public createNPCShip(id: string, x: number, y: number): NPCShip
-    {
+    public createNPCShip(id: string, x: number, y: number): NPCShip {
         const npcShip = new NPCShip(id, x, y, this.npcShipConfig);
         this.entityRegistry.create(npcShip);
+
+        this.npcShipConfig.interactables.forEach((item, index) => {
+            this.createInteractable(npcShip, item, index);
+        });
         return npcShip;
     }
 }

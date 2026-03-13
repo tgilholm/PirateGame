@@ -88,6 +88,7 @@ export default class PlayerModel extends Model {
             this.bodySprite.y = 0;
         }
 
+        console.log(pos.x, pos.y);
 
         if (this.health <= 0) {
             console.log("you ded");

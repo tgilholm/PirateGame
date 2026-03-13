@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getTilesetFromLayer } from '../utils/tiles';
-import { buildPathSpline } from 'src/utils/splines';
+import { buildPathSpline } from '../utils/splines';
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods
@@ -35,6 +35,9 @@ export default class TerrainMap {
         this.mapLayers.set('npc-spawns', getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', getTilesetFromLayer(mapData, 'player-spawns') || new Set());
         this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
+    
+        // Create the patrol path
+        this.getNPCPathNodes();
     }
 
     /**

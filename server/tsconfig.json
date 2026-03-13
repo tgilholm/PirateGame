@@ -11,10 +11,12 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "paths": {
-            "@shared/*": ["../shared/built/*"]
+            "@shared/*": [
+                "../shared/built/*"
+            ]
         }
     },
     "include": [
         "src/**/*"
-, "../scripts/plot.ts"    ]
+    ]
 }

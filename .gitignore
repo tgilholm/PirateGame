@@ -4,3 +4,5 @@ package-lock.json
 **/built
 **/browser
 /.venv
+after.png
+before.png

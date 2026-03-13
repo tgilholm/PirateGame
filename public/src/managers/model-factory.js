@@ -85,9 +85,6 @@ export default class ModelFactory {
     createInteractable(data) {
         const parent = data.parentId ? this.modelLookup(data.parentId) : null;
 
-        const prefix = parent ? parent.id : "map";  // parent id or map if null
-
-
         let model;
         switch (data.type) {
             case 'cannon': model = new CannonModel(this.scene, parent, data.id, data.x, data.y); break;

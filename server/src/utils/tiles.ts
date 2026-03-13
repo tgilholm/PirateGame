@@ -9,7 +9,7 @@ import { WorldMap } from "../types";
 export function getTilesetFromLayer(mapData: WorldMap, layerName: string): Array<{ x: number, y: number }> {
     // Get the requested layer
     const layer = mapData.layers.find((l: any) => l.name === layerName);
-    const mapWidth = mapData.width;
+    const tileSize = mapData.tilewidth;
     let output: Array<{ x: number, y: number }> = [];
 
     // No layer found
@@ -27,9 +27,12 @@ export function getTilesetFromLayer(mapData: WorldMap, layerName: string): Array
     // Create the tileset from the buffer
     tileArray.forEach((tileGid, index) => {
         if (tileGid !== 0) {
-            const tileX = index % mapWidth;
-            const tileY = Math.floor(index / mapWidth);
-            output.push({ x: tileX, y: tileY });
+            const tileX = index % mapData.width;                  // tile column
+            const tileY = Math.floor(index / mapData.width);      // tile row
+            output.push({
+                x: tileX * tileSize + tileSize / 2,   // centre of tile in world space
+                y: tileY * tileSize + tileSize / 2
+            });
         }
     });
 

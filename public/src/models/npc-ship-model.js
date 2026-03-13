@@ -1,7 +1,7 @@
-import NPCModel from "./npc-model.js";
+import ShipModel from "./ship-model.js";
 
 
-export default class NPCShipModel extends NPCModel {
+export default class NPCShipModel extends ShipModel {
     /**
      * 
      * @param {Phaser.Scene} scene 
@@ -11,6 +11,6 @@ export default class NPCShipModel extends NPCModel {
      * @param {NPCShipConfig} config 
      */
     constructor(scene, id, x, y, config) {
-        super(scene, id, x, y)
+        super(scene, id, x, y, config)
     }
 }
