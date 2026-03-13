@@ -1,3 +1,6 @@
+import { spawn } from "child_process";
+import path from "path";
+
 /**
  * Uses the Catmull-Rom algorithm to calculate an array
  * containing points of a cardinal spline through a given
@@ -22,8 +25,8 @@ export function buildPathSpline(
 
     // If closed, connect endpoints
     const closed = closeLoop
-        ? [pts[l - 2], pts[l - 1], ...pts, pts[0], pts[1]]  // wrap around
-        : [pts[0], pts[1], ...pts, pts[l - 2], pts[l - 1]]; // duplicate endpoints
+        ? [pts[l - 2], pts[l - 1], ...pts, pts[0], pts[1], pts[2], pts[3]] // wrap TWO nodes at end
+        : [pts[0], pts[1], ...pts, pts[l - 2], pts[l - 1]];
 
     const result: { x: number; y: number }[] = [];
 
@@ -65,4 +68,50 @@ export function buildPathSpline(
     if (!closeLoop) result.push(nodes[nodes.length - 1]);
 
     return result;
-} 
+}
+
+interface PlotOptions {
+    x: number[];
+    y: number[];
+    title?: string;
+    xlabel?: string;
+    ylabel?: string;
+    output?: string;
+}
+
+export function createPlot({
+    x,
+    y,
+    title = "NPC Ship Path",
+    xlabel = "X",
+    ylabel = "Y",
+    output = "path.png",
+}: PlotOptions): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const payload = JSON.stringify({ x, y, title, xlabel, ylabel, output });
+
+
+        const python = spawn("python3", [path.join(__dirname, "path-checker.py")]);
+
+        let stdout = "";
+        let stderr = "";
+
+        python.stdout.on("data", (data: Buffer) => { stdout += data.toString(); });
+        python.stderr.on("data", (data: Buffer) => { stderr += data.toString(); });
+
+        python.on("close", (code: number | null) => {
+            if (code !== 0) {
+                reject(new Error(`path-checker.py exited with code ${code}\n${stderr}`));
+            } else {
+                resolve(stdout.trim());
+            }
+        });
+
+        python.on("error", reject);
+
+        python.stdout.on("data", (data: Buffer) => process.stdout.write(`[Python] ${data.toString()}`));
+        python.stderr.on("data", (data: Buffer) => process.stderr.write(`[Python] ${data.toString()}`))
+        python.stdin.write(payload);
+        python.stdin.end();
+    });
+}

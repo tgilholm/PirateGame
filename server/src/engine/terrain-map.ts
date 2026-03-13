@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { buildPathSpline } from './curve-calc'; // for catmull-rom
+import { buildPathSpline, createPlot } from './curve-calc'; // for catmull-rom
 
 
 /**
@@ -39,12 +39,62 @@ export default class TerrainMap {
         this.getPathNodes();
     }
 
+    sortByNearestNeighbour(nodes: { x: number; y: number }[]) {
+        const remaining = [...nodes];
+        const sorted = [remaining.splice(0, 1)[0]]; // start from first point
+
+        while (remaining.length > 0) {
+            const last = sorted[sorted.length - 1];
+
+            // Find closest unvisited node
+            let nearestIdx = 0;
+            let nearestDist = Infinity;
+            for (let i = 0; i < remaining.length; i++) {
+                const dx = remaining[i].x - last.x;
+                const dy = remaining[i].y - last.y;
+                const dist = dx * dx + dy * dy; // no need for sqrt
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearestIdx = i;
+                }
+            }
+
+            sorted.push(remaining.splice(nearestIdx, 1)[0]);
+        }
+
+        return sorted;
+    }
 
     getPathNodes() {
         // Get from tilemap
         const tiles = this.getTileset('npc-ship-path');   // get in array form
-        const nodes = tiles.map((tile) => ({x: tile.worldX, y : tile.worldY}));
-        const splinePath = buildPathSpline(nodes, 0.5, 25, true);
+        const nodes = tiles.map((tile) => ({ x: tile.worldX, y: tile.worldY }));
+
+        // First find the centre of all the nodes
+        const sorted = this.sortByNearestNeighbour(nodes);
+        const splinePath = buildPathSpline(sorted, 0.5, 25, true);
+
+        const bX = nodes.map((n) => n.x);
+        const bY = nodes.map((n) => n.y);
+
+        const aX = splinePath.map((n) => n.x);
+        const aY = splinePath.map((n) => n.y);
+
+        // Before applying spline algorithm
+        createPlot({
+            x: bX,
+            y: bY,
+            title: 'Before',
+            output: 'before.png'
+        });
+
+        // After
+        createPlot({
+            x: aX,
+            y: aY,
+            title: 'After',
+            output: 'after.png'
+        });
     }
 
 
