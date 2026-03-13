@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { getTilesetFromLayer } from '../utils/tile-layer';
+import { getTilesetFromLayer } from '../utils/tiles';
+import { buildPathSpline } from 'src/utils/splines';
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods
@@ -9,8 +10,8 @@ import { getTilesetFromLayer } from '../utils/tile-layer';
  * to account for any "new" tiles here.
  */
 export default class TerrainMap {
-    private mapLayers: Map<string, Set<string>> = new Map();
-    private pathNodes: Array<number> = [];
+    private mapLayers: Map<string, Array<{ x: number, y: number }>> = new Map();
+    public npcPath: Array<{x: number, y: number}> = [];
     public readonly tileWidth: number;
     public readonly mapWidth: number;
     public readonly mapHeight: number;
@@ -36,9 +37,6 @@ export default class TerrainMap {
         this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
     }
 
-
-
-
     /**
      * Helper method for determining if a given object is on a "solid" island tile or not
      * @param worldX the absolute x coordinate of that object
@@ -55,13 +53,22 @@ export default class TerrainMap {
             return false;
         }
 
-        return islandTiles.has(`${tileX},${tileY}`);
+        return islandTiles.includes({ x: tileX, y: tileY });
+    }
+
+    getNPCPathNodes()
+    {
+        const nodes = this.getTileset('npc-ship-path');
+        this.npcPath = buildPathSpline(nodes, 0.5, 25, true);
     }
 
 
-
-
-    public getTileset(layerName: string) {
+    /**
+     * Gets the array of x and y coordinates for the corresponding layer in the map
+     * @param layerName the name of the layer for which to find coordinates
+     * @returns an array of x and y coordinates, or an empty array if not found
+     */
+    public getTileset(layerName: string): Array<{x: number, y: number}> {
         const layer = this.mapLayers.get(layerName);
 
         if (!layer) {
@@ -69,13 +76,7 @@ export default class TerrainMap {
             return [];
         }
 
-        return Array.from(layer).map(key => {
-            const [tileX, tileY] = key.split(',').map(Number);
-            return {
-                worldX: tileX * this.tileWidth + this.tileWidth / 2,
-                worldY: tileY * this.tileWidth + this.tileWidth / 2
-            };
-        });
+        return layer;
     }
 
     /**

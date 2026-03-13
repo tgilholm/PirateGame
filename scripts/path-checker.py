@@ -18,4 +18,4 @@ plt.tight_layout()
 
 output_path = data.get('output', 'plot.png')
 plt.savefig(output_path)
-print(f"Saved path to: {output_path}")
+print(f"Saved path to: ./{output_path}")

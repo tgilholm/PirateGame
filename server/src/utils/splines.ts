@@ -1,4 +1,3 @@
-
 /**
  * Uses the Catmull-Rom algorithm to calculate an array
  * containing points of a cardinal spline through a given
@@ -16,6 +15,8 @@ export function buildPathSpline(
 
     if (nodes.length < 2) return nodes;
 
+    // Sort nodes
+    nodes = sortByNearestNeighbour(nodes);
 
     // Convert to [x0, y0, ..., xn, yn];
     const pts: number[] = nodes.flatMap(n => [n.x, n.y]);
@@ -66,4 +67,30 @@ export function buildPathSpline(
     if (!closeLoop) result.push(nodes[nodes.length - 1]);
 
     return result;
+}
+
+export function sortByNearestNeighbour(nodes: { x: number; y: number }[]) {
+    const remaining = [...nodes];
+    const sorted = [remaining.splice(0, 1)[0]]; // start from first point
+
+    while (remaining.length > 0) {
+        const last = sorted[sorted.length - 1];
+
+        // Find closest unvisited node
+        let nearestIdx = 0;
+        let nearestDist = Infinity;
+        for (let i = 0; i < remaining.length; i++) {
+            const dx = remaining[i].x - last.x;
+            const dy = remaining[i].y - last.y;
+            const dist = dx * dx + dy * dy; // no need for sqrt
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearestIdx = i;
+            }
+        }
+
+        sorted.push(remaining.splice(nearestIdx, 1)[0]);
+    }
+
+    return sorted;
 }
