@@ -49,6 +49,7 @@ export default class UpgradeHandler {
                 interactable.reloadTime = stats.reloadTime;
                 interactable.cannonDamage = stats.cannonDamage;
                 interactable.cannonRange = stats.cannonRange;
+                interactable.cannonBallSpeed = stats.cannonBallSpeed;
             }
         }
 

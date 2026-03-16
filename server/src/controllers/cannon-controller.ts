@@ -32,10 +32,13 @@ export default class CannonController {
         };
 
         const worldVel = ship ? { x: ship.vx, y: ship.vx } : { x: 0, y: 0 };
-        const ball = new Cannonball(`cannonball_${Date.now()}`, spawnPos.x, spawnPos.y, worldAngle);
+        const ball = new Cannonball(`cannonball_${Date.now()}`, spawnPos.x, spawnPos.y, worldAngle, cannon.cannonBallSpeed);
         ball.vx += worldVel.x;
         ball.vy += worldVel.y;
         ball.firedBy = cannon; // avoid hitting own ship
+        ball.damage = cannon.cannonDamage;
+        ball.ttl = cannon.cannonRange;
+        console.log("[CannonFire] damage=" + ball.damage + " range(ttl)=" + ball.ttl + "ms (~" + Math.round((ball.ttl / 1000) * cannon.cannonBallSpeed / 64) + " grids) speed=" + cannon.cannonBallSpeed);
 
         this.entityRegistry.create(ball);
     }

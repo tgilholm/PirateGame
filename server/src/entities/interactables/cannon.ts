@@ -8,6 +8,7 @@ export default class Cannon extends InteractableEntity {
     reloadTimer: number = 0;
     cannonDamage: number = entityConfig.ship.defaultStats.cannonDamage;
     cannonRange: number = entityConfig.ship.defaultStats.cannonRange;
+    cannonBallSpeed: number = entityConfig.ship.defaultStats.cannonBallSpeed;
 
     constructor(id: string, x: number, y: number, parent: Entity | null) {
         super(id, x, y, parent, 'cannon');

@@ -60,6 +60,7 @@
           "stats": {
             "cannonDamage": 0,
             "cannonRange": 0,
+            "cannonBallSpeed": 0,
             "cannonCount": 0,
             "weight": 0
           }
@@ -69,6 +70,7 @@
           "stats": {
             "cannonDamage": 100,
             "cannonRange": 1000,
+            "cannonBallSpeed": 150,
             "cannonCount": 6,
             "weight": 75
           }
@@ -78,6 +80,7 @@
           "stats": {
             "cannonDamage": 250,
             "cannonRange": 2000,
+            "cannonBallSpeed": 300,
             "cannonCount": 8,
             "weight": 100
           }
@@ -87,6 +90,7 @@
           "stats": {
             "cannonDamage": 500,
             "cannonRange": 3000,
+            "cannonBallSpeed": 200,
             "cannonCount": 12,
             "weight": 250
           }
@@ -96,12 +100,13 @@
           "stats": {
             "cannonDamage": 50,
             "cannonRange": 1500,
+            "cannonBallSpeed": 100,
             "cannonCount": 5,
             "weight": 60
           }
         }
       },
-      "affects": ["cannonDamage", "cannonRange", "cannonCount", "weight"]
+      "affects": ["cannonDamage", "cannonRange", "cannonBallSpeed", "cannonCount", "weight"]
     },
     "head": {
       "name": "Head",

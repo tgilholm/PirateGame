@@ -15,6 +15,8 @@ export type ShipStats = {
     cannonDamage: number;//implemented
     
     cannonRange: number;//implemented
+
+    cannonBallSpeed: number;//implemented
     
     cannonCount: number; //feature yet to be added
     
