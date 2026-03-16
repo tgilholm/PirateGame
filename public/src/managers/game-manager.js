@@ -7,9 +7,20 @@ import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
 import DigMinigame from "../ui/dig-minigame.js";
 
+/**
+ * Client side state manager. Keeps track of players in game, handles
+ * events for the current player and updates all models.
+ */
 export default class GameManager extends Phaser.Events.EventEmitter {
     #playerListCache;
 
+    /**
+     * Abstracts game state from the phaser scene
+     * @param {MainScene} scene the main scene
+     * @param {NetworkManager} network abstracts io events
+     * @param {InputManager} input abstracts key inputs
+     * @param {ModelFactory} modelFactory to create client-side models
+     */
     constructor(scene, network, input, modelFactory) {
         super();
         this.projectiles = [];
@@ -20,11 +31,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.#playerListCache = null;
         this.digMinigame = new DigMinigame();
         this.moveTimer = 0;
-
+        /** @type {PlayerModel} */
         this.localPlayer = null;
         this.playerId = null;
         this.playerListDirty = true;
 
+        /** @type {Map<string, Model>} */
         this.models = new Map();
         this.interactables = [];
         this.closestInteractable = null;
@@ -32,30 +44,42 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.startListeners();
     }
 
+    /**
+     * Sends the READY event to the server, indicating the client has
+     * fully loaded in and is ready to receive the INIT_GAME packet. This step
+     * prevents the client from missing the setup data.
+     * @param {string} username
+     */
     start(username) {
         this.network.emit(ClientEvent.READY, { username });
     }
-
+    /**
+     * Refreshes all client-side objects.
+     */
     update() {
-        if (!this.localPlayer) return;
+        if (!this.localPlayer) return; // dont do anything until the player has joined
 
         const delta = this.scene.game.loop.delta;
+
+        //send diggame packets to server
         if (this.digMinigame) {
             this.digMinigame.update(delta / 1000);
         }
-
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const pos = this.localPlayer.worldPos;
 
+        // Send packets at the server tick rate instead of spamming 60 times a second
         this.moveTimer += delta;
         if (this.moveTimer >= 1000 / 20) {
             this.network.sendMove(inputs);
             this.moveTimer = 0;
         }
 
+        // Move the invisible camera target to the local player's current position
         this.scene.cameraTarget.x = pos.x;
         this.scene.cameraTarget.y = pos.y;
 
+        // Ladders are accessible both off and on ships
         const closest = this.getClosestInteractable(this.localPlayer);
         if (closest && closest.dist < 50) {
             if (closest.item.type === "ladder" || this.localPlayer.parentId == closest.item.parentId) {
@@ -65,9 +89,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.closestInteractable = null;
         }
 
+        // Update all models at once
         this.models.forEach((entity) => {
             if (entity === this.localPlayer) {
-                entity.target.r = inputs.aimAngle;
+                entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
             }
             entity.update(delta);
         });
@@ -81,19 +106,30 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
     }
 
+    /**
+     * Removes and creates all models from the full server sync- this is invoked
+     * on the INIT_GAME packet and should not be used thereafter
+     * @param {Object} data the data from the server
+     */
     onFullSync(data) {
         this.models.forEach(e => e.destroy());
         this.models.clear();
         this.interactables = [];
-        this.localPlayer = null;
+        this.localPlayer = null; // clear local
         this.playerListDirty = true;
-        this.#playerListCache = null;
+        this.#playerListCache = null; // invalidate cache
 
+        // Start fresh with new entity data
         data.entities?.forEach(entityData => this.applyFull(entityData));
         this.resolveLocalPlayer();
         this.refreshInteractables();
     }
 
+    /**
+     * Updates only the models that have changed since the last game state packet from the server,
+     * or those that have come into the view distance of the player
+     * @param {Object} data the data from the server
+     */
     onDeltaSync(data) {
         let needsInteractableRefresh = false;
 
@@ -133,6 +169,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.resolveLocalPlayer();
     }
 
+    /**
+     * Applies a full sync to the model specified in the data from the server. Handles
+     * creating new models and re-parenting existing ones.
+     * @param {Object} data the data from the server
+     */
     applyFull(data) {
         let model = this.models.get(data.id);
 
@@ -154,13 +195,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.models.set(data.id, model);
         }
 
+        // @ts-ignore reparent the player if they left a ship
         if (data.type === "player") this.handleReparent(model, data);
         model.sync(data);
     }
 
     findMatchingPrediction(x, y) {
         let closest = null;
-        let closestDist = 150;
+        let closestDist = 150; // max snap distance in pixels — tune this
 
         this.models.forEach(model => {
             if (!model.isPredicted) return;
@@ -174,10 +216,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
+    /**
+     * Applies a delta sync to the model specified in the data from the server.
+     * @param {Object} delta the data from the server
+     */
     applyDelta(delta) {
         const model = this.models.get(delta.id);
         if (!model) return;
-
+        // @ts-ignore
         if (model.entityType === "player" && delta.parentId !== undefined) {
             this.handleReparent(model, delta);
         }
@@ -185,18 +231,25 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         model.sync(delta);
     }
 
+    /**
+     * Deletes a model from the internal map, removing any child models before themselves
+     * @param {string} id the id of the model to delete
+     * @returns the deleted model
+     */
     removeEntity(id) {
         const model = this.models.get(id);
         if (!model) {
             console.debug(`[GameManager] removeEntity: "${id}" not found, already removed?`);
             return undefined;
         }
-
+        // Remove players from ship before deleting it
         if (model.entityType === "ship") {
             this.models.forEach(entity => {
+                // @ts-ignore
                 if (entity.entityType === "player" && entity.parentId === id) {
-                    model.remove(entity);
-                    this.scene.add.existing(entity);
+                    model.remove(entity);               // detach from container
+                    this.scene.add.existing(entity);    // re-anchor to scene root
+                    // @ts-ignore
                     entity.parentId = null;
                 }
             });
@@ -207,6 +260,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return model;
     }
 
+    /** @returns {Map<string, import("../models/player-model.js").default>} */
     get playerList() {
         if (!this.#playerListCache) {
             this.#playerListCache = new Map();
@@ -217,10 +271,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return this.#playerListCache;
     }
 
+    /**
+     *  Sets up the NetworkManager listeners to respond to updates from
+     * the server and routes input events from the InputManager
+     */
     startListeners() {
+        // Full state packet: replace all entity data
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
-            this.onFullSync(data);
+            this.onFullSync(data); // get everything
         });
 
         this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
@@ -232,7 +291,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             console.log("[Client] DIG_MINIGAME_RESULT received", success);
             this.digMinigame.stop();
         });
-
+        // Delta packet: full for new models and known models that have changed
         this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
         this.input.on("interact", () => {
@@ -258,7 +317,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                 this.network.sendDigStart();
             }
         });
-
+        // Send the one-off events directly to the server
         this.input.on("fire", () => {
             this.network.sendFire();
             this.spawnPredictedProjectile();
@@ -320,6 +379,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.models.set(model.id, model);
     }
 
+    /**
+     * Helper method to add all existing interactables to the internal list
+     */
     refreshInteractables() {
         this.interactables = [];
         this.models.forEach(entity => {
@@ -327,6 +389,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
     }
 
+    /**
+     * Helper method to find the closest interactable object to the player,
+     * using the world coordinates of both
+     * @param {PlayerModel} player
+     * @returns {Object} the closest interactable
+     */
     getClosestInteractable(player) {
         let closest = null;
         let nearestDist = Infinity;
@@ -351,9 +419,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         return closest;
     }
 
+    /**
+     * Handle moving a player into a ship object and vice versa
+     * @param {PlayerModel} player the player for which reparenting is handled
+     * @param {Object} data the data from the server
+     */
     handleReparent(player, data) {
         if (player.parentId === data.parentId) return;
-        this.closestInteractable = null;
+        this.closestInteractable = null; // reset closest interactable
 
         const ship = data.parentId ? this.models.get(data.parentId) : null;
 
@@ -366,15 +439,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         player.setPosition(data.x ?? player.x, data.y ?? player.y);
         player.parentId = data.parentId ?? null;
 
+        // Snap interpolation targets so movement feels instant on reparent
         if (data.x !== undefined) player.target.x = data.x;
         if (data.y !== undefined) player.target.y = data.y;
     }
 
+    /**
+     * Finds and assigns the local player when they have joined
+     */
     resolveLocalPlayer() {
         if (this.localPlayer || !this.playerId) return;
 
         const mine = this.models.get(this.playerId);
         if (mine) {
+            // @ts-ignore
             this.localPlayer = mine;
             this.emit("localPlayerReady", this.localPlayer);
         }
