@@ -467,15 +467,18 @@ input.formElement {
 
 /*Death Screen CSS*/
 #death-screen{
-    display: none;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     font-family: 'Courier New', monospace;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
 }
 
 #death-screen h1{
     font-size: 48px;
     margin-bottom: 20px;
     color: red;
+    font-weight: bold;
 }

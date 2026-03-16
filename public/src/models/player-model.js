@@ -102,7 +102,12 @@ export default class PlayerModel extends Model {
         }
 
         if (this.health <= 0) {
-            console.log("you ded");
+            const deathScreen = document.querySelector('#death-screen');
+            if (deathScreen instanceof HTMLElement){
+                console.log("you ded");
+                deathScreen.style.display = 'flex';
+            }
+            this.scene.scene.pause();
         }
 
         gun.setPosition(
