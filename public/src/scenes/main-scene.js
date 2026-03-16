@@ -52,16 +52,6 @@ export class MainScene extends Phaser.Scene {
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
 
-        this.anims.create({
-            key: "chest-open",
-            frames: this.anims.generateFrameNumbers("chest_open", {
-                start: 0,
-                end: 2
-            }),
-            frameRate: 7,
-            repeat: 0
-        });
-
         // Placeholder player sprite
         const circle = this.make.graphics();
         circle.fillStyle(0xff0000, 1);

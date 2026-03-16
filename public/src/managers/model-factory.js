@@ -13,10 +13,10 @@ import TreasureModel from "../models/treasure-model.js";
 export default class ModelFactory {
 
     /**
-     * Creates a model factory from a scene and config 
+     * Creates a model factory from a scene and config
      * @param {Phaser.Scene} scene the phaser scene
      * @param {EntityConfig} config the config for entities
-     * 
+     *
      */
     constructor(scene, config, modelLookup) {
         this.scene = scene;
@@ -26,7 +26,7 @@ export default class ModelFactory {
 
     /**
      * Creates an entity from the data packet, which must contain "type"
-     * @param {object} data the data packet 
+     * @param {object} data the data packet
      * @returns the created entity
      */
     create(data) {
@@ -48,7 +48,7 @@ export default class ModelFactory {
 
     /**
      * Creates a Ship entity and the interactables contained in it
-     * @param {object} data the data from the server to create the ship from 
+     * @param {object} data the data from the server to create the ship from
      * @returns the ship
      */
     createShip(data) {
@@ -58,7 +58,7 @@ export default class ModelFactory {
 
     /**
      * Creates a player entity from the provided data
-     * @param {object} data the data from the server to create the player from 
+     * @param {object} data the data from the server to create the player from
      * @returns the player
      */
     createPlayer(data) {
@@ -67,7 +67,7 @@ export default class ModelFactory {
 
     /**
      * Creates a projectile from the provided data
-     * @param {object} data the data from the server to create the projectile from 
+     * @param {object} data the data from the server to create the projectile from
      * @returns the projectile
      */
     createProjectile(data) {
@@ -81,7 +81,8 @@ export default class ModelFactory {
             data.x,
             data.y,
             data.state ?? "buried",
-            data.digProgress ?? 0
+            data.digProgress ?? 0,
+            data.goldValue ?? 0
         );
     }
 

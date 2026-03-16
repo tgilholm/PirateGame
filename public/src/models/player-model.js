@@ -90,42 +90,36 @@ export default class PlayerModel extends Model {
         const isBusy = this.isSteering || this.isUsingCannon;
         const showCarry = !!this.isCarrying;
 
+        let bob = 0;
 
-        // If on a ship, move up and down with it
         if (this.parentContainer instanceof ShipModel) {
-            const bob = this.parentContainer.hullSprite.y;
+            bob = this.parentContainer.hullSprite.y;
             this.bodySprite.y = bob;
         } else {
             this.bodySprite.y = 0;
         }
 
-
         if (this.health <= 0) {
             console.log("you ded");
         }
 
-        // Move the gun around the outside of the player
         gun.setPosition(
-            pos.x + Math.cos(this.aimAngle) * 15,   // radius of player
+            pos.x + Math.cos(this.aimAngle) * 15,
             pos.y + Math.sin(this.aimAngle) * 15
         );
         gun.setRotation(this.aimAngle);
 
-        // Move the carried chest around the player using the same aim angle
         this.carrySprite.setPosition(
             Math.cos(this.aimAngle) * 18,
             Math.sin(this.aimAngle) * 18 + bob
         );
         this.carrySprite.setRotation(this.aimAngle);
 
-        // Ignore any relative coordinates/rotation for the name tag- always display upright
         this.nameText.setPosition(pos.x, pos.y - 25);
 
-        // Hide the player's gun and make them slightly transparent when interacting
         this.gun.setVisible(!isBusy && !showCarry);
         this.carrySprite.setVisible(showCarry);
         this.setAlpha(isBusy ? 0.6 : 1.0);
-
 
         this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
         this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
@@ -136,7 +130,7 @@ export default class PlayerModel extends Model {
      * Overrides interpRotation because the player's definition of rotation applies
      * to their gun (for now).
      * @param {number} deltaTime the difference in time in seconds
-     * @param {number} lerp the interpolation factor 
+     * @param {number} lerp the interpolation factor
      */
     interpRotation(deltaTime, lerp) {
         // Rotate the aim angle smoothly
