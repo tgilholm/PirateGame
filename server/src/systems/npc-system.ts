@@ -15,7 +15,7 @@ import NPCShip from "../entities/npcs/npc-ship";
 export default class NPCSystem implements BaseSystem {
 
     npcLimit: number = 12;
-    npcShipLimit: number = 1;
+    npcShipLimit: number = 0;
 
     constructor(private terrainMap: TerrainMap,
         private entityFactory: EntityFactory,
@@ -33,7 +33,6 @@ export default class NPCSystem implements BaseSystem {
         const allNpcs = this.entityRegistry.getByType<NPC>('npc');  // npc ships included
         const ships = this.entityRegistry.getByType<NPCShip>('npc-ship'); // just ships
 
-        console.log(dt)
 
         // Generate if disappeared
         this.generateNPCs(allNpcs);

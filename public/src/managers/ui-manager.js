@@ -15,6 +15,7 @@ export default class UIManager {
         this.gameManager = gameManager;
 
         this.promptElement = document.getElementById('interaction-prompt');
+        this.fpsCounter = document.getElementById('fps-counter');
         this.currentInteractable = null;
     }
 
@@ -51,6 +52,8 @@ export default class UIManager {
             this.updatePlayersPanelDom(this.gameManager.playerList);
             this.gameManager.playerListDirty = false;
         }
+
+        this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
     }
 
     /**

@@ -57,7 +57,7 @@ export class MainScene extends Phaser.Scene {
         // Invisible sprite ignoring player on/off ship state, always follows thi
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
-        this.cameras.main.zoom = 0.5;
+        this.cameras.main.zoom = 0.75;
 
         // Placeholder player sprite- replace in preload() with actual
         const circle = this.make.graphics();
@@ -97,9 +97,6 @@ export class MainScene extends Phaser.Scene {
     update() {
         this.gameManager.update();
         this.uiManager.update();
-
-        // Update minimap marker with current world position
-        //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
     }
 
     /**

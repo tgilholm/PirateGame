@@ -41,7 +41,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         /** @type {Map<string, Model>} */
         this.models = new Map();  // generic entity list
 
-        this.interactables = [];
         this.closestInteractable = null;
 
 
@@ -89,10 +88,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const now = Date.now();
         this.models.forEach((entity, id) => {
 
-            if (entity.isPredicted && now - entity.spawnTime > 150) {
-                entity.destroy();
-                this.models.delete(id);
-            }
+            // if (entity.isPredicted && now - entity.spawnTime > 150) {
+            //     entity.destroy();
+            //     this.models.delete(id);
+            // }
 
             if (entity === this.localPlayer) {
                 entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
@@ -146,7 +145,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Reset the map to 0
         this.models.forEach(e => e.destroy());
         this.models.clear();
-        this.interactables = [];
         this.localPlayer = null;    // clear local
         this.playerListDirty = true;
         this.#playerListCache = null; // invalidate cache
@@ -164,13 +162,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     onDeltaSync(data) {
 
         // Kill old predicted projectiles
-        const now = Date.now();
-        this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 300) {
-                entity.destroy();
-                this.models.delete(id);
-            }
-        });
+        // const now = Date.now();
+        // this.models.forEach((entity, id) => {
+        //     if (entity.isPredicted && now - entity.spawnTime > 300) {
+        //         entity.destroy();
+        //         this.models.delete(id);
+        //     }
+        // });
 
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
@@ -197,17 +195,17 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            if (data.type === 'bullet' || data.type === 'cannonball') {
-                const predicted = this.findMatchingPrediction(data.x, data.y);
-                if (predicted) {
-                    this.models.delete(predicted.id);
-                    predicted.id = data.id;
-                    predicted.isPredicted = false;
-                    this.models.set(data.id, predicted);
-                    predicted.sync(data);
-                    return;
-                }
-            }
+            // if (data.type === 'bullet' || data.type === 'cannonball') {
+            //     const predicted = this.findMatchingPrediction(data.x, data.y);
+            //     if (predicted) {
+            //         this.models.delete(predicted.id);
+            //         predicted.id = data.id;
+            //         predicted.isPredicted = false;
+            //         this.models.set(data.id, predicted);
+            //         predicted.sync(data);
+            //         return;
+            //     }
+            // }
 
             model = this.modelFactory.create(data);
             if (!model) return;
@@ -220,21 +218,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         model.sync(data);
     }
 
-    findMatchingPrediction(x, y) {
-        let closest = null;
-        let closestDist = 150; // max snap distance in pixels — tune this
+    // findMatchingPrediction(x, y) {
+    //     let closest = null;
+    //     let closestDist = 150; // max snap distance in pixels — tune this
 
-        this.models.forEach(model => {
-            if (!model.isPredicted) return;
-            const dist = Phaser.Math.Distance.Between(model.x, model.y, x, y);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = model;
-            }
-        });
+    //     this.models.forEach(model => {
+    //         if (!model.isPredicted) return;
+    //         const dist = Phaser.Math.Distance.Between(model.x, model.y, x, y);
+    //         if (dist < closestDist) {
+    //             closestDist = dist;
+    //             closest = model;
+    //         }
+    //     });
 
-        return closest;
-    }
+    //     return closest;
+    // }
 
     /**
      * Applies a delta sync to the model specified in the data from the server. 
@@ -323,66 +321,66 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Send the one-off events directly to the server
         this.input.on('fire', () => {
             this.network.sendFire();
-            this.spawnPredictedProjectile();
+            //this.spawnPredictedProjectile();
         });
         this.input.on('release', () => this.network.sendRelease());
     }
 
-    spawnPredictedProjectile() {
-        const player = this.localPlayer;
-        if (!player) return;
+    // spawnPredictedProjectile() {
+    //     const player = this.localPlayer;
+    //     if (!player) return;
 
 
 
-        const cam = this.scene.cameras.main;
-        const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
-        const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
-        const playerPos = player.worldPos;
-        const freshAimAngle = Math.atan2(mouseWorldY - playerPos.y, mouseWorldX - playerPos.x);
+    //     const cam = this.scene.cameras.main;
+    //     const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
+    //     const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
+    //     const playerPos = player.worldPos;
+    //     const freshAimAngle = Math.atan2(mouseWorldY - playerPos.y, mouseWorldX - playerPos.x);
 
-        let worldAngle, spawnX, spawnY;
+    //     let worldAngle, spawnX, spawnY;
 
-        if (player.isUsingCannon) {
-            const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
-            if (!cannon || cannon.reloadTimer > 0) return;
+    //     if (player.isUsingCannon) {
+    //         const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
+    //         if (!cannon || cannon.reloadTimer > 0) return;
 
-            const ship = this.models.get(player.parentId);
-            worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
+    //         const ship = this.models.get(player.parentId);
+    //         worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
 
-            const pos = cannon.worldPos;
-            spawnX = pos.x + Math.cos(worldAngle) * 20;
-            spawnY = pos.y + Math.sin(worldAngle) * 20;
-        } else {
-            if (player.reloadTimer > 0) return;
-            worldAngle = freshAimAngle;
-            spawnX = player.gun.x;
-            spawnY = player.gun.y;
-        }
+    //         const pos = cannon.worldPos;
+    //         spawnX = pos.x + Math.cos(worldAngle) * 20;
+    //         spawnY = pos.y + Math.sin(worldAngle) * 20;
+    //     } else {
+    //         if (player.reloadTimer > 0) return;
+    //         worldAngle = freshAimAngle;
+    //         spawnX = player.gun.x;
+    //         spawnY = player.gun.y;
+    //     }
 
 
-        const speed = 600;
-        const model = this.modelFactory.createProjectile({
-            id: `predicted_${Date.now()}`,
-            x: spawnX,
-            y: spawnY,
-            r: worldAngle,
-            type: player.isUsingCannon ? 'cannonball' : 'bullet'
-        });
+    //     const speed = 600;
+    //     const model = this.modelFactory.createProjectile({
+    //         id: `predicted_${Date.now()}`,
+    //         x: spawnX,
+    //         y: spawnY,
+    //         r: worldAngle,
+    //         type: player.isUsingCannon ? 'cannonball' : 'bullet'
+    //     });
 
-        model.velocity.x = Math.cos(worldAngle) * speed;
-        model.velocity.y = Math.sin(worldAngle) * speed;
+    //     model.velocity.x = Math.cos(worldAngle) * speed;
+    //     model.velocity.y = Math.sin(worldAngle) * speed;
 
-        if (player.isUsingCannon) {
-            const ship = this.models.get(player.parentId);
-            model.velocity.x += ship?.velocity.x ?? 0;
-            model.velocity.y += ship?.velocity.y ?? 0;
-        }
+    //     if (player.isUsingCannon) {
+    //         const ship = this.models.get(player.parentId);
+    //         model.velocity.x += ship?.velocity.x ?? 0;
+    //         model.velocity.y += ship?.velocity.y ?? 0;
+    //     }
 
-        model.isPredicted = true;
-        model.initialised = true;
-        model.spawnTime = Date.now();
-        this.models.set(model.id, model);
-    }
+    //     model.isPredicted = true;
+    //     model.initialised = true;
+    //     model.spawnTime = Date.now();
+    //     this.models.set(model.id, model);
+    // }
 
     /**
      * Handle moving a player into a ship object and vice versa
