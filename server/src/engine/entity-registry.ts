@@ -24,7 +24,7 @@ export default class EntityRegistry {
             this.entitiesByType.get(t)!.add(entity.id);
             this.typeCache.delete(t);
         }
-
+        console.debug(`[Registry] Added ${entity.type}:${entity.id}`);
         this.allCache = null;
     }
 

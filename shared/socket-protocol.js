@@ -26,4 +26,5 @@ var ActionType;
     ActionType["INTERACT"] = "INTERACT";
     ActionType["DIG"] = "DIG";
     ActionType["RELEASE"] = "RELEASE";
+    ActionType["TREASURE_INTERACT"] = "TREASURE_INTERACT";
 })(ActionType || (exports.ActionType = ActionType = {}));

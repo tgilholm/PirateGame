@@ -1,7 +1,6 @@
 /** global io */
 
-import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
-import { ServerEvent } from "shared/socket-protocol.js";
+import { ActionType, ClientEvent, ServerEvent } from "shared/built/socket-protocol.js";
 
 /**
  * Owns socket-io logic
@@ -70,6 +69,10 @@ export default class NetworkManager {
         this.sendAction({ type: ActionType.FIRE });
     }
 
+    sendTreasureInteract() {
+        this.sendAction({ type: ActionType.TREASURE_INTERACT });
+    }
+
     /**
      * Sends a player's message to the server
      * @param {string} text 
@@ -77,4 +80,16 @@ export default class NetworkManager {
     sendMessage(text) {
         this.sendAction({ type: ActionType.MESSAGE, data: { text } });
     }
+
+    sendDigStart() {
+        /** @type {import("shared/built/socket-protocol.js").PlayerAction} */
+        const action = {
+            type: "DIG",
+            data: { mode: "start" }
+        };
+
+        this.sendAction(action);
+    }
+
+
 }

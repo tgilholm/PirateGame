@@ -3,7 +3,7 @@
 
 import { Server, Socket } from "socket.io";
 import { z } from 'zod';    // For frontline validation
-import { ActionType, ClientEvent, MoveData, PlayerAction, ServerEvent } from "@shared/socket-protocol";
+import { ActionType, ClientEvent, MoveData, PlayerAction, ServerEvent, DigData } from "@shared/socket-protocol";
 import GameWorld, { WorldEvent } from "./game-world";
 
 /**
@@ -29,13 +29,26 @@ const InteractSchema = z.object({
     parentId: z.string().nullable().optional()
 });
 
+const DigSchema = z.object({
+    mode: z.enum(["start", "hit"]),
+    sliderPosition: z.number().min(0).max(1).optional()
+}).superRefine((data, ctx) => {
+    if (data.mode === "hit" && typeof data.sliderPosition !== "number") {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "sliderPosition is required when mode is 'hit'"
+        });
+    }
+});
+
 // Uses zod to require data/no data for each action type
 const ActionSchema = z.discriminatedUnion("type", [
     z.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) }).strict(),
     z.object({ type: z.literal(ActionType.INTERACT), data: InteractSchema }).strict(),
     z.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) }).strict(),
-    z.object({ type: z.literal(ActionType.DIG) }).strict(),
+    z.object({ type: z.literal(ActionType.DIG), data: DigSchema }).strict(),
     z.object({ type: z.literal(ActionType.FIRE) }).strict(),
+    z.object({type: z.literal(ActionType.TREASURE_INTERACT)}).strict(),
     z.object({ type: z.literal(ActionType.RELEASE) }).strict()
 ])
 

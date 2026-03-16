@@ -8,11 +8,15 @@ import { BaseSystem } from "./base-system";
 import Entity from "../entities/entity";
 import Cannon from "../entities/interactables/cannon";
 import NPC from "src/entities/npc";
+import Treasure from "../entities/treasure";
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
 const MAX_CANNON_SPEED = 20 * (Math.PI / 180); // cannons move towards mouse
 const CANNON_ARC = Math.PI / 4;     // 90 deg
+const CHEST_OBSTACLE_RADIUS = 20;   // loose + dugup chests
+const HOLE_OBSTACLE_RADIUS   = 20;  // open holes
+const HOLE_OBSTACLE_RADIUS_Y = 12;
 
 /**
  * Contains all movement logic for moving entities
@@ -101,6 +105,8 @@ export default class MovementSystem implements BaseSystem {
         if (right) dx += 1;
 
 
+        const aimChanged = Math.abs(player.aimAngle - prevAimAngle) > 0.01;
+        (player as any).prevAimAngle = player.aimAngle;
 
         const prevX = player.x; // to calculate velocity difference for client-side extrapolation
         const prevY = player.y;
@@ -115,7 +121,13 @@ export default class MovementSystem implements BaseSystem {
 
         // Different speed if on land/a ship vs in the sea 
         const onLand = this.terrainMap.isOnIsland(player.x, player.y);
-        const speedMultiplier = (parent || onLand) ? playerConfig.runSpeed : playerConfig.swimSpeed;
+        let runSpeed = playerConfig.runSpeed;
+        let swimSpeed = playerConfig.swimSpeed;
+        if (player.isCarrying) {
+            runSpeed /= 2;
+            swimSpeed /= 2;
+        }
+        const speedMultiplier = (parent || onLand) ? runSpeed : swimSpeed;
         const speed = speedMultiplier * dt * 60;
 
         // Contain the player inside a ship- slide them along the hull if they collide
@@ -176,7 +188,8 @@ export default class MovementSystem implements BaseSystem {
         // Mark dirty if position changed enough
         const moved =
             Math.abs(player.x - prevX) > POS_THRESHOLD ||
-            Math.abs(player.y - prevY) > POS_THRESHOLD
+            Math.abs(player.y - prevY) > POS_THRESHOLD ||
+            aimChanged;
 
         if (moved) player.markDirty();
     }

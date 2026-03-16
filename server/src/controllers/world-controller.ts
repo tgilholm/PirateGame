@@ -87,12 +87,14 @@ export default class WorldController {
 
                 
             case ActionType.DIG:
-                this.playerController.handleDig(player);
+                this.playerController.handleDig(player, action.data);
                 break;
             case ActionType.INTERACT:
                 this.playerController.handleInteract(player, action.data);
                 break;
-
+            case ActionType.TREASURE_INTERACT:
+                this.playerController.handleTreasureInteract(player);
+                break;
             case ActionType.RELEASE:
                 this.playerController.handleRelease(player);
                 break;

@@ -22,6 +22,7 @@ export default class PlayerModel extends Model {
 
         this.isSteering = false;
         this.isUsingCannon = false;
+        this.isCarrying = false;
         this.aimAngle = 0;
         this.parentId = null;
         this.username = null;
@@ -29,6 +30,7 @@ export default class PlayerModel extends Model {
         this.reloadTimer = 0;
         this.reloadIndicator = new ReloadIndicator(scene, this, 22);
         this.healthBar = new HealthBar(scene, 40, 20);
+        this.gold = 0;
 
         // Name text is not a child of the container- avoids counter-rotation logic
         this.nameText = scene.add.text(0, -50, '', {
@@ -42,6 +44,11 @@ export default class PlayerModel extends Model {
         this.add(this.bodySprite);
 
         this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
+        this.carrySprite = scene.add.sprite(0, -22, "treasure-chest");
+        this.carrySprite.setDisplaySize(44, 44);
+        this.carrySprite.setDepth(101);
+        this.carrySprite.setVisible(false);
+        this.add(this.carrySprite);
     }
 
 
@@ -63,6 +70,9 @@ export default class PlayerModel extends Model {
         if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
         if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
         if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
+        if (data.gold !== undefined) this.gold = data.gold;
+        if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
+        if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
 
     }
 
@@ -78,6 +88,7 @@ export default class PlayerModel extends Model {
         const gun = this.gun;
         const pos = this.worldPos;
         const isBusy = this.isSteering || this.isUsingCannon;
+        const showCarry = !!this.isCarrying;
 
 
         // If on a ship, move up and down with it
@@ -100,11 +111,19 @@ export default class PlayerModel extends Model {
         );
         gun.setRotation(this.aimAngle);
 
+        // Move the carried chest around the player using the same aim angle
+        this.carrySprite.setPosition(
+            Math.cos(this.aimAngle) * 18,
+            Math.sin(this.aimAngle) * 18 + bob
+        );
+        this.carrySprite.setRotation(this.aimAngle);
+
         // Ignore any relative coordinates/rotation for the name tag- always display upright
         this.nameText.setPosition(pos.x, pos.y - 25);
 
         // Hide the player's gun and make them slightly transparent when interacting
-        this.gun.setVisible(isBusy ? false : true);
+        this.gun.setVisible(!isBusy && !showCarry);
+        this.carrySprite.setVisible(showCarry);
         this.setAlpha(isBusy ? 0.6 : 1.0);
 
 
@@ -132,6 +151,7 @@ export default class PlayerModel extends Model {
     destroy() {
         if (this.nameText) this.nameText.destroy();
         if (this.gun) this.gun.destroy();
+        if (this.carrySprite) this.carrySprite.destroy();
         this.healthBar?.destroy();
         this.reloadIndicator?.destroy();
 

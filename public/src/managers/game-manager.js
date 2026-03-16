@@ -5,6 +5,7 @@ import InputManager from "./input-manager.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
+import DigMinigame from "../ui/dig-minigame.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -29,7 +30,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.input = input;
         this.modelFactory = modelFactory;
         this.#playerListCache = null;
-
+        this.digMinigame = new DigMinigame();
         this.moveTimer = 0;
 
         /** @type {PlayerModel} */
@@ -64,6 +65,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         if (!this.localPlayer) return;  // dont do anything until the player has joined
 
         const delta = this.scene.game.loop.delta;
+        if (this.digMinigame) {
+            this.digMinigame.update(delta / 1000);
+        }
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const pos = this.localPlayer.worldPos;
 
@@ -146,6 +150,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
             if (entityData.type === 'ship') needsInteractableRefresh = true;
+            if (entityData.isInteractable || entityData.type !== undefined) needsInteractableRefresh = true;
             if (['cannon', 'helm', 'ladder'].includes(entityData.type)) needsInteractableRefresh = true;
             if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
@@ -173,7 +178,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            if (data.type === 'bullet' || data.type === 'cannonball') {
+            if (data.type === 'bullet' || data.type === 'cannonball'||data.type === 'projectile') {
                 const predicted = this.findMatchingPrediction(data.x, data.y);
                 if (predicted) {
                     this.models.delete(predicted.id);
@@ -279,6 +284,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
             this.onFullSync(data); // get everything
+
+            this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
+                console.log("[Client] DIG_MINIGAME_START received", payload);
+                this.digMinigame.start(payload);
+            });
+
+            this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
+                console.log("[Client] DIG_MINIGAME_RESULT received", success);
+                this.digMinigame.stop();
+            });
         });
 
         // Delta packet: full for new models and known models that have changed
@@ -293,6 +308,18 @@ export default class GameManager extends Phaser.Events.EventEmitter {
                     targetType: closest.type,
                     parentId: closest.parentId
                 });
+            }
+        });
+
+        this.input.on('treasureInteract', () => {
+            this.network.sendTreasureInteract();
+        });
+
+        this.input.on('dig', () => {
+            if (this.digMinigame?.active) {
+                this.network.sendDigHit(this.digMinigame.getSliderPosition());
+            } else {
+                this.network.sendDigStart();
             }
         });
 
