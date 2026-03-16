@@ -47,6 +47,8 @@ export default class UpgradeHandler {
         for (const interactable of ship.interactables) {
             if (interactable instanceof Cannon) {
                 interactable.reloadTime = stats.reloadTime;
+                interactable.cannonDamage = stats.cannonDamage;
+                interactable.cannonRange = stats.cannonRange;
             }
         }
 

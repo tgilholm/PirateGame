@@ -7,9 +7,9 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "acceleration": 0.05,
-            "maxSpeed": 1.0,
-            "weight": 50
+            "acceleration": 0,
+            "maxSpeed": 0,
+            "weight": 0
           }
         },
         "LVL2": {
@@ -58,17 +58,17 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "cannonDamage": 10,
-            "cannonRange": 150,
-            "cannonCount": 4,
-            "weight": 50
+            "cannonDamage": 0,
+            "cannonRange": 0,
+            "cannonCount": 0,
+            "weight": 0
           }
         },
         "LVL2": {
           "cost": 100,
           "stats": {
-            "cannonDamage": 20,
-            "cannonRange": 200,
+            "cannonDamage": 100,
+            "cannonRange": 1000,
             "cannonCount": 6,
             "weight": 75
           }
@@ -76,8 +76,8 @@
         "LVL3": {
           "cost": 500,
           "stats": {
-            "cannonDamage": 40,
-            "cannonRange": 250,
+            "cannonDamage": 250,
+            "cannonRange": 2000,
             "cannonCount": 8,
             "weight": 100
           }
@@ -85,8 +85,8 @@
         "kraken": {
           "cost": 1000,
           "stats": {
-            "cannonDamage": 60,
-            "cannonRange": 300,
+            "cannonDamage": 500,
+            "cannonRange": 3000,
             "cannonCount": 12,
             "weight": 250
           }
@@ -94,8 +94,8 @@
         "temp1": {
           "cost": 150,
           "stats": {
-            "cannonDamage": 15,
-            "cannonRange": 160,
+            "cannonDamage": 50,
+            "cannonRange": 1500,
             "cannonCount": 5,
             "weight": 60
           }
@@ -111,7 +111,7 @@
           "cost": 0,
           "stats": {
             "rammingPower": 0,
-            "weight": 50
+            "weight": 0
           }
         },
         "LVL2": {
@@ -156,9 +156,9 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "maxHealth": 200,
-            "crewCapacity": 10,
-            "weight": 50
+            "maxHealth": 0,
+            "crewCapacity": 0,
+            "weight": 0
           }
         },
         "LVL2": {
@@ -207,9 +207,9 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "minimapRange": 100,
-            "visionRange": 1,
-            "weight": 20
+            "minimapRange": 0,
+            "visionRange": 0,
+            "weight": 0
           }
         },
         "LVL2": {
@@ -258,10 +258,10 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "stopPower": 10,
-            "deployTime": 2.0,
-            "retrieveTime": 3.0,
-            "weight": 30
+            "stopPower": 0,
+            "deployTime": 0,
+            "retrieveTime": 0,
+            "weight": 0
           }
         },
         "LVL2": {
@@ -314,9 +314,9 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "turnSpeed": 1.0,
-            "responseTime": 1.0,
-            "weight": 50
+            "turnSpeed": 0,
+            "responseTime": 0,
+            "weight": 0
           }
         },
         "LVL2": {
@@ -366,8 +366,8 @@
           "cost": 0,
           "stats": {
             "reloadTime": 0,
-            "accuracy": 1.0,
-            "weight": 50
+            "accuracy": 0,
+            "weight": 0
           }
         },
         "LVL2": {

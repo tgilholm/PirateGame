@@ -4,25 +4,42 @@ import entityConfig from '../../../shared/entity-config.json';
 
 // all ship stats
 export type ShipStats = {
-    maxHealth: number;
-    crewCapacity: number;
-    acceleration: number;
-    maxSpeed: number;
-    cannonDamage: number;
-    cannonRange: number;
-    cannonCount: number;
-    rammingPower: number;
-    minimapRange: number;
-    visionRange: number;
-    stopPower: number;
-    deployTime: number;
-    retrieveTime: number;
-    turnSpeed: number;
-    responseTime: number;
-    reloadTime: number;
-    accuracy: number;
-    weight: number;
-    frictionAir: number;
+    maxHealth: number;//implemented
+
+    crewCapacity: number; //feature yet to be added
+
+    acceleration: number; //not yet implemented
+
+    maxSpeed: number; //not yet implemented
+
+    cannonDamage: number;//implemented
+    
+    cannonRange: number;//implemented
+    
+    cannonCount: number; //feature yet to be added
+    
+    rammingPower: number; //feature yet to be added
+    
+    minimapRange: number; //feature yet to be added
+    
+    visionRange: number; //feature yet to be added
+    
+    stopPower: number; //not yet implemented
+    
+    deployTime: number; //feature yet to be added
+    
+    retrieveTime: number; //feature yet to be added
+    
+    turnSpeed: number; //not yet implemented
+    
+    responseTime: number; //feature yet to be added
+    
+    reloadTime: number; // (in ms), implemented
+    
+    accuracy: number;  //feature yet to be added
+    weight: number; //not yet implemented
+    
+    frictionAir: number; //not yet implemented
 };
 
 type ComponentsMap = Record<string, {
