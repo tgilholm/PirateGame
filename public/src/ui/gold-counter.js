@@ -26,10 +26,10 @@ export default class GoldCounter {
     //moves the container to area set in ui-config
     applyPosition() {
         const pos = uiConfig.goldCounter.Position;
-        this.container.style.top    = pos.Top;
+        this.container.style.top = pos.Top;
         this.container.style.bottom = pos.Bottom;
-        this.container.style.left   = pos.Left;
-        this.container.style.right  = pos.Right;
+        this.container.style.left = pos.Left;
+        this.container.style.right = pos.Right;
     }
 
     /**
