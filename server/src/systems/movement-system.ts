@@ -158,9 +158,14 @@ export default class MovementSystem implements BaseSystem {
 
             const collisionPadding = -playerConfig.radius;
 
+            const groundTreasures = this.registry
+                .getByType<Treasure>("treasure")
+                .filter(t => t.id !== player.carryingTreasureId);
+
             // Collide with the exterior of ships
             const isColliding = (x: number, y: number) =>
-                this.checkShipCollisions(x, y, ships, collisionPadding);
+                this.checkShipCollisions(x, y, ships, collisionPadding) ||
+                this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius);
 
             // Move freely if not colliding
             if (!isColliding(nextWorldX, nextWorldY)) {
@@ -230,6 +235,39 @@ export default class MovementSystem implements BaseSystem {
             const local = ship.worldToLocal(x, y);
             if (ship.isInside(local.x, local.y, padding)) return true;
         }
+        return false;
+    }
+
+    /**
+     * Helper method to check if a player is currently colliding with a treasure object. Note that this
+     * will only work if the coordinates of both entities are in the same scope- local & local
+     * or global & global.
+     *
+     */
+    private checkTreasureObstacles(
+        x: number,
+        y: number,
+        treasures: Treasure[],
+        playerRadius: number
+    ): boolean {
+        for (const t of treasures) {
+            const dx = x - t.x;
+            const dy = y - t.y;
+
+            if (t.state === "loose" || t.state === "dugup") {
+                const combined = CHEST_OBSTACLE_RADIUS + playerRadius;
+                if (dx * dx + dy * dy < combined * combined) return true;
+
+            } else if (t.state === "hole") {
+                // Ellipse check — holes are visually wider than tall
+                const rx = HOLE_OBSTACLE_RADIUS + playerRadius;
+                const ry = HOLE_OBSTACLE_RADIUS_Y + playerRadius;
+                if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) < 1) return true;
+            }
+
+            // buried / carried / opening do not block movement
+        }
+
         return false;
     }
 

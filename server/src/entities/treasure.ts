@@ -1,6 +1,6 @@
 import Entity from "./entity";
 
-export type TreasureState = "buried" | "opening" | "dugup"| "carried"| "loose"| "hole";
+export type TreasureState = "buried" | "opening" | "dugup" | "carried" | "loose" | "hole";
 
 export default class Treasure extends Entity {
     public goldValue: number;
@@ -28,6 +28,7 @@ export default class Treasure extends Entity {
         successZoneSize: number = 0.2
     ) {
         super(id, "treasure", x, y, 1, null);
+
         this.goldValue = goldValue;
         this.spawnedAt = Date.now();
         this.state = state;
@@ -41,9 +42,9 @@ export default class Treasure extends Entity {
         this.carriedByPendingPlayerId = null;
     }
 
-    override serialise() {
+    protected override toState(): Record<string, any> {
         return {
-            ...super.serialise(),
+            ...super.toState(),
             goldValue: this.goldValue,
             state: this.state,
             digProgress: this.digProgress,
@@ -52,7 +53,7 @@ export default class Treasure extends Entity {
             successZoneStart: this.successZoneStart,
             successZoneSize: this.successZoneSize,
             openedAt: this.openedAt,
-            holeExpiresAt: this.holeExpiresAt,
+            holeExpiresAt: this.holeExpiresAt
         };
     }
 }

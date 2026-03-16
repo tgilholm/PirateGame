@@ -43,6 +43,9 @@ export class StartScene extends Phaser.Scene {
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
 
+        const gold = document.getElementById("gold-counter");
+        if (gold) gold.style.display = "none";
+
 
         // Add the animated background
         this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');

@@ -52,6 +52,8 @@ export class MainScene extends Phaser.Scene {
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
 
+
+
         // Placeholder player sprite
         const circle = this.make.graphics();
         circle.fillStyle(0xff0000, 1);
@@ -89,6 +91,8 @@ export class MainScene extends Phaser.Scene {
     update() {
         this.gameManager.update();
         this.uiManager.update();
+        const gold = document.getElementById("gold-counter");
+        if (gold) gold.style.display = "block";
     }
 
     /**

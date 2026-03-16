@@ -436,6 +436,18 @@ export default class TreasureSystem implements BaseSystem {
                 continue;
             }
 
+            const pos = this.getWorldPosition(player);
+            const angle = typeof player.aimAngle === "number" ? player.aimAngle : 0;
+            const carryDistance = 24;
+
+            const newX = pos.x + Math.cos(angle) * carryDistance;
+            const newY = pos.y + Math.sin(angle) * carryDistance;
+
+            if (treasure.x !== newX || treasure.y !== newY) {
+                treasure.x = newX;
+                treasure.y = newY;
+                treasure.markDirty();
+            }
         }
     }
 
