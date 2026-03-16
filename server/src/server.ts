@@ -30,6 +30,8 @@ import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import NPCSystem from './systems/npc-system';
+import { ServerEvent } from "@shared/socket-protocol";
+import TreasureSystem from "./systems/treasure-system";
 
 // Create the express app & server
 const app = express();
@@ -55,13 +57,15 @@ const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid)
 const entityFactory = new EntityFactory(entityConfig, registry);
+const treasureSystem = new TreasureSystem(registry, entityFactory, terrainMap,entityConfig);
 
 const engine = new GameEngine({
   physicsSystem,
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
   messageSystem: new MessageSystem(),
-  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid)
+  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid),
+    treasureSystem
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);
@@ -69,7 +73,7 @@ const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,
   {
-    playerController: new PlayerController(registry, interactionHandler, upgradeHandler),
+    playerController: new PlayerController(registry, interactionHandler, upgradeHandler,treasureSystem),
     shipController: new ShipController(registry),
     messageController: new MessageController(),
     cannonController: new CannonController(registry)
@@ -80,6 +84,16 @@ const gameWorld = new GameWorld(registry, entityFactory, engine, worldController
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();
+
+treasureSystem.bindUiEvents(
+    (playerId, payload) => {
+        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_START, payload);
+    },
+    (playerId, payload) => {
+        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_RESULT, payload);
+    }
+);
+
 gameWorld.start();
 
 // Starts the server on the provided port

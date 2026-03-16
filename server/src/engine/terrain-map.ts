@@ -13,6 +13,7 @@ export default class TerrainMap {
     private mapLayers: Map<string, Array<{ x: number, y: number }>> = new Map();
     public npcPath: Array<{x: number, y: number}> = [];
     public readonly tileWidth: number;
+    public readonly tileHeight: number;
     public readonly mapWidth: number;
     public readonly mapHeight: number;
 
@@ -26,14 +27,15 @@ export default class TerrainMap {
         const mapPath = path.join(__dirname, '..', mapFileName);
         const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
         this.tileWidth = mapData.tilewidth;
+        this.tileHeight = mapData.tileHeight;
         this.mapHeight = mapData.height;
         this.mapWidth = mapData.width;
-
 
         // Add all the layers you need here
         this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
         this.mapLayers.set('npc-spawns', getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', getTilesetFromLayer(mapData, 'player-spawns') || new Set());
+        this.mapLayers.set('treasure-spawns', this.getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
         this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
     
         // Create the patrol path
