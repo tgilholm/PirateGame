@@ -37,6 +37,7 @@ export default class UpgradeHandler {
             return false;
         }
         ship.components[componentKey] = nextLevel;
+        ship.markDirty(); // force components into the next delta packet
         console.log("[UpgradeHandler] " + ship.id + " " + componentKey + ": " + current + " : " + nextLevel);
         return true;
     }
