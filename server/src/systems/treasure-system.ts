@@ -495,7 +495,7 @@ export default class TreasureSystem implements BaseSystem {
         const shuffled = [...spawnTiles].sort(() => Math.random() - 0.5);
 
         for (const tile of shuffled) {
-            const point: WorldPoint = { x: tile.worldX, y: tile.worldY };
+            const point: WorldPoint = { x: tile.x, y: tile.y };
 
             if (this.isInsideShip(point)) continue;
             if (this.isTooCloseToTreasure(point)) continue;

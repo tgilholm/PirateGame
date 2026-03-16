@@ -35,7 +35,7 @@ export default class TerrainMap {
         this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
         this.mapLayers.set('npc-spawns', getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', getTilesetFromLayer(mapData, 'player-spawns') || new Set());
-        this.mapLayers.set('treasure-spawns', this.getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
+        this.mapLayers.set('treasure-spawns', getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
         this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
     
         // Create the patrol path
