@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Pirate Game</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <!-- The browser cannot load assets in another folder by default -->
+    <script type="importmap">
+    {
+    "imports": {
+        "shared/built/": "/shared/",
+        "shared/": "/shared/",
+        "socket.io-client": "/socket.io/socket.io.js"
+    }
+    }
+    </script>
+
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="src/scenes/index.js" type="module"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Press+Start+2P&family=VT323&display=swap"
+        rel="stylesheet">
+
+
+</head>
+
+<body>
+
+
+    <div id ="death-screen">
+        <h1>YOU DIED</h1>
+        <button id="restart-button">Try Again</button>
+    </div>
+
+
+</body>
+
+
+</html>
