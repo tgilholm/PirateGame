@@ -272,6 +272,9 @@ export default class GameWorld extends EventEmitter {
     public getFullState() {
         return {
             entities: this.registry.getAll().map(e => e.serialise()),
+            mapWidth: this.terrain.widthInPixels,
+            mapHeight: this.terrain.heightInPixels,
+            shopSpawns: this.registry.getByType<Entity>('shop').map(s => ({ X: s.x, Y: s.y })),
         };
     }
 

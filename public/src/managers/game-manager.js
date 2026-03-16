@@ -278,6 +278,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Full state packet: replace all entity data
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
+            this.mapWidth = data.mapWidth;
+            this.mapHeight = data.mapHeight;
+            this.shopSpawns = data.shopSpawns ?? [];
             this.onFullSync(data); // get everything
         });
 

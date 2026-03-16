@@ -1,87 +1,114 @@
 import DomFactory from "./dom-factory.js";
-import UI_CONFIG from "./ui-config.json" with { type: "json" };
+import uiConfig from "./ui-config.json" with { type: "json" };
 
-/**
- * Minimap — owns all minimap DOM elements and marker-drawing logic.
- *
- * Uses DomFactory.createMinimapContent() to inject the <img> and <canvas>
- * into the #minimap-container placeholder, keeping index.html clean.
- */
+//Minimap — builds and manages the minimap and minimap marker
+
 export default class Minimap {
 
     /**
-     * @param {HTMLElement} containerEl - The #minimap-container element to populate.
-     * @param {string} [imgSrc] - URL of the map background image. Defaults to UIConfig value.
-     * @param {number} [size] - Width and height of the minimap in pixels. Defaults to UIConfig value.
+     * @param {HTMLElement} containerEl - The #minimap-container element to populate
      */
-    constructor(containerEl,
-        imgSrc = UI_CONFIG.MINIMAP.IMG_SRC,
-        size = UI_CONFIG.MINIMAP.SIZE) {
+    constructor(containerEl) {
         this.container = containerEl;
-
-        //apply dimensions
-        containerEl.style.width = `${size}px`;
-        containerEl.style.height = `${size}px`;
-
-        //build inner elements via CreateUI
-        const { img, canvas } = DomFactory.createMinimapContent(containerEl, imgSrc);
-        this.img = img;
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
-
-        //sync canvas resolution to container size
-        this.syncSize();
-
-        //map world dimensions – set when initializeMarker() is first called
         this.mapWidth = 0;
         this.mapHeight = 0;
+        this.mapTileWidth = 0;
+        this.mapTileHeight = 0;
+        this.createMinimap();
     }
 
     /**
-     * shows the minimap and draws the initial player marker, calls once when the game world is ready
+     * sets minimap container, and adds the image
+     * @param {string} [imgSrc]
+     * @param {number} [size]
+     */
+    createMinimap(
+        imgSrc = uiConfig.Minimap.ImgSrc,
+        size = uiConfig.Minimap.Size
+    ) {
+        this.container.style.width = size + "px";
+        this.container.style.height = size + "px";
+
+        const { img, canvas } = DomFactory.createMinimapContent(this.container, imgSrc);
+        canvas.width = size;
+        canvas.height = size;
+        this.img = img;
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+    }
+
+    /**
+     * sets minimap to visible and draws marker at players spawn position
      * @param {number} spawnX - Initial world X position of the player.
      * @param {number} spawnY - Initial world Y position of the player.
      * @param {number} mapWidth - pixel width of the game world.
      * @param {number} mapHeight - pixel height of the game world.
      */
-    initializeMarker(spawnX, spawnY, mapWidth, mapHeight) {
+    placeMarker(spawnX, spawnY, mapWidth, mapHeight) {
         this.mapWidth = mapWidth;
         this.mapHeight = mapHeight;
         this.container.style.display = "block";
-        this.updatePlayerMarker(spawnX, spawnY, mapWidth, mapHeight);
+        this.drawMarker(spawnX, spawnY);
     }
 
     /**
-    * redraws the player dot at the given world position, calls every frame
+     * every frame, clears canvas and redraws marker at the players position
      * @param {number} playerX - Current world X position of the player.
      * @param {number} playerY - Current world Y position of the player.
-     * @param {number} mapWidth - pixel width of the game world.
-     * @param {number} mapHeight - pixel height of the game world.
      */
-    updatePlayerMarker(playerX, playerY, mapWidth, mapHeight) {
-        this.syncSize();
-
+    updateMarker(playerX, playerY) {
         const { canvas, ctx } = this;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.drawShops();
+        this.drawMarker(playerX, playerY);
+    }
 
-        const markerX = (playerX / mapWidth) * canvas.width;
-        const markerY = (playerY / mapHeight) * canvas.height;
+    /**
+     * draws marker, conditions from ui-config
+     * @param {number} x - World X position.
+     * @param {number} y - World Y position.
+     */
+    drawMarker(x, y) {
+        const { canvas, ctx } = this;
+        const markerX = (x / this.mapWidth) * canvas.width;
+        const markerY = (y / this.mapHeight) * canvas.height;
 
         ctx.beginPath();
-        ctx.arc(markerX, markerY, UI_CONFIG.MINIMAP.MARKER.RADIUS, 0, Math.PI * 2);
-        ctx.fillStyle = UI_CONFIG.MINIMAP.MARKER.FILL;
+        ctx.arc(markerX, markerY, uiConfig.Minimap.PlayerMarker.Radius, 0, Math.PI * 2);
+        ctx.fillStyle = uiConfig.Minimap.PlayerMarker.Fill;
         ctx.fill();
-        ctx.strokeStyle = UI_CONFIG.MINIMAP.MARKER.STROKE;
-        ctx.lineWidth = UI_CONFIG.MINIMAP.MARKER.LINE_WIDTH;
+        ctx.strokeStyle = uiConfig.Minimap.PlayerMarker.Stroke;
+        ctx.lineWidth = uiConfig.Minimap.PlayerMarker.LineWidth;
         ctx.stroke();
     }
 
-    //Keeps canvas in sync with container display size
-    syncSize() {
-        if (this.canvas.width !== this.container.offsetWidth) {
-            this.canvas.width = this.container.offsetWidth;
-            this.canvas.height = this.container.offsetHeight;
+    //places shop icons on minimap canvas, called after mapTileWidth/Height are set
+    placeShops(mapTileWidth, mapTileHeight, spawns) {
+        this.mapTileWidth = mapTileWidth;
+        this.mapTileHeight = mapTileHeight;
+        this.shops = spawns;
+        this.drawShops();
+    }
+
+    //draws temp icon for shops
+    drawShops() {
+        if (!this.shops) return;
+        const { canvas, ctx } = this;
+        const { Size, Fill, Stroke, LineWidth } = uiConfig.Minimap.ShopMarker;
+        const half = Size / 2;
+
+        for (const shop of this.shops) {
+            const sx = (shop.X / this.mapTileWidth) * canvas.width;
+            const sy = (shop.Y / this.mapTileHeight) * canvas.height;
+
+            ctx.beginPath();
+            ctx.rect(sx - half, sy - half, Size, Size);
+            ctx.fillStyle = Fill;
+            ctx.fill();
+            ctx.strokeStyle = Stroke;
+            ctx.lineWidth = LineWidth;
+            ctx.stroke();
         }
     }
+
 }

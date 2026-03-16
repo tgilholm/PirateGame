@@ -1,4 +1,5 @@
 import GameManager from "./game-manager.js";
+import Minimap from "../ui/minimap.js";
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -16,6 +17,16 @@ export default class UIManager {
 
         this.promptElement = document.getElementById('interaction-prompt');
         this.currentInteractable = null;
+
+        this.minimap = new Minimap(document.getElementById('minimap-container'));
+        this.minimapReady = false;
+
+        gameManager.on('localPlayerReady', (player) => {
+            const pos = player.worldPos;
+            this.minimap.placeMarker(pos.x, pos.y, gameManager.mapWidth, gameManager.mapHeight);
+            this.minimap.placeShops(gameManager.mapWidth, gameManager.mapHeight, gameManager.shopSpawns);
+            this.minimapReady = true;
+        });
     }
 
     /**
@@ -50,6 +61,11 @@ export default class UIManager {
 
             this.updatePlayersPanelDom(this.gameManager.playerList);
             this.gameManager.playerListDirty = false;
+        }
+
+        if (this.minimapReady) {
+            const pos = this.gameManager.localPlayer.worldPos;
+            this.minimap.updateMarker(pos.x, pos.y);
         }
     }
 

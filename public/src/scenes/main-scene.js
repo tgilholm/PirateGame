@@ -88,6 +88,7 @@ export class MainScene extends Phaser.Scene {
         // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.gameManager.start(data.username);
+        
     }
 
     /**
@@ -97,8 +98,7 @@ export class MainScene extends Phaser.Scene {
         this.gameManager.update();
         this.uiManager.update();
 
-        // Update minimap marker with current world position
-        //this.ui.minimap.updatePlayerMarker(this..x, this.cameraTarget.y, this.mapWidth, this.mapHeight);
+
     }
 
     /**

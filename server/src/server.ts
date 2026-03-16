@@ -30,6 +30,7 @@ import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import NPCSystem from './systems/npc-system';
+import ShopSystem from './systems/shop-system';
 
 // Create the express app & server
 const app = express();
@@ -61,7 +62,8 @@ const engine = new GameEngine({
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
   messageSystem: new MessageSystem(),
-  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid)
+  npcSystem: new NPCSystem(terrainMap,entityFactory, registry, spatialGrid),
+  shopSystem: new ShopSystem(terrainMap, entityFactory, registry, spatialGrid)
 });
 
 const upgradeHandler = new UpgradeHandler(entityConfig);

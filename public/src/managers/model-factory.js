@@ -5,6 +5,7 @@ import NPCModel from "../models/npc-model.js";
 import PlayerModel from "../models/player-model.js";
 import ProjectileModel from "../models/projectile-model.js";
 import ShipModel from "../models/ship-model.js";
+import ShopModel from "../models/shop-model.js";
 
 /**
  * Client side factory class for creating models
@@ -38,6 +39,7 @@ export default class ModelFactory {
             case 'helm':
             case 'ladder': return this.createInteractable(data);
             case 'npc': return this.createNPC(data);
+            case 'shop': return this.createShop(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
@@ -97,8 +99,16 @@ export default class ModelFactory {
         return model;
     }
 
-    createNPC(data)
-    {
+    createNPC(data) {
         return new NPCModel(this.scene, data.id, data.x, data.y);
+    }
+
+    /**
+     * Creates a shop model from the provided server data
+     * @param {object} data the data from the server
+     * @returns the shop model
+     */
+    createShop(data) {
+        return new ShopModel(this.scene, data.id, data.x, data.y, this.config.shop);
     }
 }
