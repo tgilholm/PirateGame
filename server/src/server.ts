@@ -24,6 +24,7 @@ import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
 import PlayerController from './controllers/player-controller';
 import UpgradeHandler from './handlers/upgrade-handler';
+import StatsHandler from './handlers/stats-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
@@ -67,7 +68,7 @@ const engine = new GameEngine({
   shopSystem: new ShopSystem(terrainMap, entityFactory, registry, spatialGrid)
 });
 
-const upgradeHandler = new UpgradeHandler(new GoldHandler());
+const upgradeHandler = new UpgradeHandler(new GoldHandler(), new StatsHandler());
 const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,

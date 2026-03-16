@@ -1,9 +1,10 @@
 import Entity from "../entity";
 import InteractableEntity from "./interactable-entity";
+import entityConfig from '../../../../shared/entity-config.json';
 
 export default class Cannon extends InteractableEntity {
     targetAngle: number;    // where the cannon is moving to
-    reloadTime: number = 3000;
+    reloadTime: number = entityConfig.ship.defaultStats.reloadTime;
     reloadTimer: number = 0;
 
     constructor(id: string, x: number, y: number, parent: Entity | null) {

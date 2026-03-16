@@ -1,6 +1,8 @@
 import Ship from '../entities/ship';
 import Player from '../entities/player';
 import GoldHandler from './gold-handler';
+import StatsHandler from './stats-handler';
+import Cannon from '../entities/interactables/cannon';
 import componentsData from '../../jsons/components.json';
 
 const level_progression = ['LVL1', 'LVL2', 'LVL3'];
@@ -8,6 +10,7 @@ const level_progression = ['LVL1', 'LVL2', 'LVL3'];
 export default class UpgradeHandler {
     constructor(
         private readonly goldHandler: GoldHandler,
+        private readonly statsHandler: StatsHandler,
     ) {}
 
     /**
@@ -38,6 +41,15 @@ export default class UpgradeHandler {
         }
         ship.components[componentKey] = nextLevel;
         ship.markDirty(); // force components into the next delta packet
+
+        // Re-calculate and apply stats affected by the upgrade
+        const stats = this.statsHandler.calculateStats(ship);
+        for (const interactable of ship.interactables) {
+            if (interactable instanceof Cannon) {
+                interactable.reloadTime = stats.reloadTime;
+            }
+        }
+
         console.log("[UpgradeHandler] " + ship.id + " " + componentKey + ": " + current + " : " + nextLevel);
         return true;
     }

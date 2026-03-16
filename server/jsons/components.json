@@ -365,7 +365,7 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "fireRate": 1.0,
+            "reloadTime": 0,
             "accuracy": 1.0,
             "weight": 50
           }
@@ -373,7 +373,7 @@
         "LVL2": {
           "cost": 100,
           "stats": {
-            "fireRate": 1.2,
+            "reloadTime": -500,
             "accuracy": 1.1,
             "weight": 75
           }
@@ -381,7 +381,7 @@
         "LVL3": {
           "cost": 500,
           "stats": {
-            "fireRate": 1.5,
+            "reloadTime": -1000,
             "accuracy": 1.2,
             "weight": 100
           }
@@ -389,7 +389,7 @@
         "kraken": {
           "cost": 1000,
           "stats": {
-            "fireRate": 2.0,
+            "reloadTime": -1500,
             "accuracy": 1.5,
             "weight": 250
           }
@@ -397,13 +397,13 @@
         "temp1": {
           "cost": 150,
           "stats": {
-            "fireRate": 1.1,
+            "reloadTime": -100,
             "accuracy": 1.0,
             "weight": 60
           }
         }
       },
-      "affects": ["fireRate", "accuracy", "weight"]
+      "affects": ["reloadTime", "accuracy", "weight"]
     }
   }
 }
