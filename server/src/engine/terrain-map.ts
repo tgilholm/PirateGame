@@ -31,9 +31,9 @@ export default class TerrainMap {
         this.mapLayers.set('islands', this.getTilesetFromLayer(mapData, 'islands') || new Set());
         this.mapLayers.set('npc-spawns', this.getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', this.getTilesetFromLayer(mapData, 'player-spawns') || new Set());
+        this.mapLayers.set('shop-spawns', this.getTilesetFromLayer(mapData, 'shop-spawns') || new Set());
 
     }
-
 
     private getTilesetFromLayer(mapData: any, layerName: string): Set<string> {
         // Find the layer in the map
@@ -42,6 +42,7 @@ export default class TerrainMap {
 
         if (!layer?.data) {
             console.warn(`[TerrainMap] No tilemap layer found with name: ${layerName}`);
+            return tileset;
         }
 
         // Read into a buffer

@@ -24,12 +24,15 @@ import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
 import PlayerController from './controllers/player-controller';
 import UpgradeHandler from './handlers/upgrade-handler';
+import StatsHandler from './handlers/stats-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import NPCSystem from './systems/npc-system';
+import ShopSystem from './systems/shop-system';
+import GoldHandler from './handlers/gold-handler';
 
 // Create the express app & server
 const app = express();
@@ -39,7 +42,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 // Route files to the public folder
 app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')));
-
+app.use('/jsons', express.static(path.join(__dirname, '../jsons')));
 
 /*
   Create the game world. This file acts as the composition root- the start of the dependency
@@ -61,10 +64,11 @@ const engine = new GameEngine({
   movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
   projectileSystem,
   messageSystem: new MessageSystem(),
-  npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid)
+  npcSystem: new NPCSystem(terrainMap,entityFactory, registry, spatialGrid),
+  shopSystem: new ShopSystem(terrainMap, entityFactory, registry, spatialGrid)
 });
 
-const upgradeHandler = new UpgradeHandler(entityConfig);
+const upgradeHandler = new UpgradeHandler(new GoldHandler(), new StatsHandler());
 const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,

@@ -15,9 +15,10 @@ export default class Ship extends Entity {
     pilot: Player | null;
     dimensions: ShipConfig["dimensions"];
     physics: ShipConfig["physics"];
-    interactables: InteractableEntity[]
-    body: Matter.Body
+    interactables: InteractableEntity[];
+    body: Matter.Body;
     inputs: any;
+    components: Record<string, string>;
 
     /**
      * Creates a ship with the provided data
@@ -38,6 +39,16 @@ export default class Ship extends Entity {
         this.dimensions = config.dimensions;
         this.physics = config.physics;
         this.interactables = [];
+        this.components = {
+            body:      'LVL1',
+            sails:     'LVL1',
+            cannons:   'LVL1',
+            head:      'LVL1',
+            crowsNest: 'LVL1',
+            anchor:    'LVL1',
+            rudder:    'LVL1',
+            crew:      'LVL1'
+        };
         this.inputs = {
             up: false,
             down: false,
@@ -71,7 +82,8 @@ export default class Ship extends Entity {
         // Send everything the client needs to display the player
         return {
             ...super.toState(),
-                pilotId: this.pilot?.id,  // For client side messages
+            pilotId: this.pilot?.id,  // For client side messages
+            components: this.components,
         }
     }
 

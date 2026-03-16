@@ -161,6 +161,7 @@ input.formElement {
     z-index: 1000;
     overflow: hidden;
     border: 1px solid #fff;
+    pointer-events: none;
 }
 
 .minimap-img,
@@ -192,85 +193,6 @@ input.formElement {
     white-space: nowrap;
 }
 
-/* ---- Shop ---- */
-#shop-menu {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    background: rgba(13, 47, 79, 0.97);
-    border: 1px solid #fff;
-    border-radius: 4px;
-    padding: 20px;
-    min-width: 300px;
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.shop-title {
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 12px;
-    border-bottom: 1px solid #ffffff55;
-    padding-bottom: 8px;
-}
-
-.shop-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.shop-card {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid #ffffff44;
-    border-radius: 4px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.shop-card-name {
-    font-size: 12px;
-    font-weight: bold;
-    color: #aad4ff;
-}
-
-.shop-card-description {
-    font-size: 11px;
-    color: #ccc;
-    flex: 1;
-}
-
-.shop-card-buy,
-.shop-close-btn {
-    background: royalblue;
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 3px;
-    padding: 4px 8px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.shop-card-buy {
-    align-self: flex-end;
-}
-
-.shop-close-btn {
-    width: 100%;
-    margin-top: 4px;
-}
-
-.shop-card-buy:hover,
-.shop-close-btn:hover {
-    background: deepskyblue;
-}
 /* Active Players Panel */
 .vt323-regular {
     font-family: "VT323", monospace;
@@ -318,3 +240,120 @@ input.formElement {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ---- Shop ---- */
+#shop-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background: rgba(13, 47, 79, 0.97);
+    border: 1px solid #fff;
+    border-radius: 4px;
+    padding: 20px;
+    min-width: 640px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.shop-title {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #ffffff55;
+    padding-bottom: 8px;
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.shop-card {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid #ffffff44;
+    border-radius: 4px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.shop-card-name {
+    font-size: 12px;
+    font-weight: bold;
+    color: #aad4ff;
+}
+
+.shop-card-description {
+    font-size: 11px;
+    color: #ccc;
+    flex: 1;
+}
+
+.shop-card-buy,
+.shop-close-btn {
+    background: royalblue;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.shop-card-level {
+    font-size: 11px;
+    color: #f5c542;
+}
+
+.shop-card-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-card-cost {
+    font-size: 11px;
+    color: #ffd700;
+}
+
+.shop-card-max {
+    background: rgba(255,255,255,0.1);
+    color: #888;
+    border-color: #555;
+    cursor: default;
+}
+
+.shop-close-btn {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.shop-card-buy:hover,
+.shop-close-btn:hover {
+    background: deepskyblue;
+}
+
+/* ---- Gold counter ---- */
+#gold-counter {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: rgba(13, 47, 79, 0.85);
+    border: 1px solid #ffd700;
+    border-radius: 4px;
+    padding: 6px 12px;
+    pointer-events: none;
+}
+
+.gold-counter-amount {
+    font-size: 15px;
+    font-weight: bold;

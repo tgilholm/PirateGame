@@ -233,6 +233,13 @@ export default class GameWorld extends EventEmitter {
                 session.knownEntityIds.add(socketId);
             }
 
+            // Always send the player's own ship delta if it changed (even if out of spatial range)
+            const ownShipId = "ship_" + socketId;
+            const ownShipData = entityData.get(ownShipId);
+            if (ownShipData?.delta && session.knownEntityIds.has(ownShipId)) {
+                deltaEntities.push(ownShipData.delta);
+            }
+
             // New/updated entities
             nearbyIds.forEach(id => {
                 const data = entityData.get(id);
@@ -247,9 +254,9 @@ export default class GameWorld extends EventEmitter {
                 }
             });
 
-            // Out-of-range entities
+            // Out-of-range entities — never evict the player's own ship
             session.knownEntityIds.forEach(id => {
-                if (!nearbyIds.has(id)) {
+                if (!nearbyIds.has(id) && id !== ownShipId) {
                     session.knownEntityIds.delete(id);
                     removedIds.push(id);
                 }
@@ -272,6 +279,9 @@ export default class GameWorld extends EventEmitter {
     public getFullState() {
         return {
             entities: this.registry.getAll().map(e => e.serialise()),
+            mapWidth: this.terrain.widthInPixels,
+            mapHeight: this.terrain.heightInPixels,
+            shopSpawns: this.registry.getByType<Entity>('shop').map(s => ({ X: s.x, Y: s.y })),
         };
     }
 

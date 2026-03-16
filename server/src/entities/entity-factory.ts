@@ -1,9 +1,10 @@
 
 import EntityRegistry from "../engine/entity-registry";
-import { EntityConfig, PlayerConfig, ShipConfig } from "../types";
+import { EntityConfig, PlayerConfig, ShipConfig, ShopConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
+import Shop from "./shop";
 import InteractableEntity from "./interactables/interactable-entity";
 import Cannon from "./interactables/cannon";
 import Ladder from "./interactables/ladder";
@@ -25,6 +26,7 @@ export default class EntityFactory {
 
     playerConfig: PlayerConfig;
     shipConfig: ShipConfig;
+    shopConfig: ShopConfig;
 
     /**
      * Builds an entity factory
@@ -35,7 +37,8 @@ export default class EntityFactory {
         private entityRegistry: EntityRegistry,) {
 
         this.playerConfig = entityConfig.player;
-        this.shipConfig = entityConfig.ship;    // destructure
+        this.shipConfig = entityConfig.ship;
+        this.shopConfig = entityConfig.shop;
     }
 
     /**
@@ -93,6 +96,12 @@ export default class EntityFactory {
             parent.interactables.push(item);
         }
         this.entityRegistry.create(item);
+    }
+
+    public createShop(id: string, x: number, y: number): Shop {
+        const shop = new Shop(id, x, y, this.shopConfig);
+        this.entityRegistry.create(shop);
+        return shop;
     }
 
     public createNPC(id: string, x: number, y: number): NPC {
