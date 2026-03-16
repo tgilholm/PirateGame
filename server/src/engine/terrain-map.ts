@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { getTilesetFromLayer } from '../utils/tiles';
+import { buildPathSpline } from '../utils/splines';
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods
@@ -7,9 +9,9 @@ import path from 'path';
  * solid objects and provide a world border. If making changes to the tilemap, make sure
  * to account for any "new" tiles here.
  */
-
 export default class TerrainMap {
-    private mapLayers: Map<string, Set<string>> = new Map();
+    private mapLayers: Map<string, Array<{ x: number, y: number }>> = new Map();
+    public npcPath: Array<{x: number, y: number}> = [];
     public readonly tileWidth: number;
     public readonly tileHeight: number;
     public readonly mapWidth: number;
@@ -29,46 +31,15 @@ export default class TerrainMap {
         this.mapHeight = mapData.height;
         this.mapWidth = mapData.width;
 
-
         // Add all the layers you need here
-        this.mapLayers.set('islands', this.getTilesetFromLayer(mapData, 'islands') || new Set());
-        this.mapLayers.set('npc-spawns', this.getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
-        this.mapLayers.set('player-spawns', this.getTilesetFromLayer(mapData, 'player-spawns') || new Set());
+        this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
+        this.mapLayers.set('npc-spawns', getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
+        this.mapLayers.set('player-spawns', getTilesetFromLayer(mapData, 'player-spawns') || new Set());
         this.mapLayers.set('treasure-spawns', this.getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
-
-    }
-
-
-    private getTilesetFromLayer(mapData: any, layerName: string): Set<string> {
-        // Find the layer in the map
-        const layer = mapData.layers.find((l: any) => l.name === layerName);
-        let tileset: Set<string> = new Set();
-
-        if (!layer?.data) {
-            console.warn(`[TerrainMap] No tilemap layer found with name: ${layerName}`);
-        }
-
-        // Read into a buffer
-        let tileArray: Uint32Array | number[];
-        if (typeof layer.data === 'string') {
-            const buffer = Buffer.from(layer.data, 'base64');
-            tileArray = new Uint32Array(buffer.buffer, buffer.byteOffset, buffer.length / 4);
-        } else {
-            tileArray = layer.data;
-        }
-
-        // Create the tileset from the buffer
-        tileArray.forEach((tileGid, index) => {
-            if (tileGid !== 0) {
-                const tileX = index % this.mapWidth;
-                const tileY = Math.floor(index / this.mapWidth);
-                tileset.add(`${tileX}, ${tileY}`);
-            }
-        });
-
-        // Output the loaded tileset
-        console.log(`[TerrainMap] Loaded ${tileset.size} tiles from layer: ${layerName}`);
-        return tileset;
+        this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
+    
+        // Create the patrol path
+        this.getNPCPathNodes();
     }
 
     /**
@@ -82,16 +53,28 @@ export default class TerrainMap {
         const tileY = Math.floor(worldY / this.tileWidth);
 
         const islandTiles = this.mapLayers.get('islands');
-        if (!islandTiles){
+        if (!islandTiles) {
             console.warn(`[TerrainMap] isOnIsland check failed`);
-         return false;
+            return false;
         }
-        
-        return islandTiles.has(`${tileX}, ${tileY}`);
+
+        return islandTiles.includes({ x: tileX, y: tileY });
+    }
+
+    getNPCPathNodes()
+    {
+        const nodes = this.getTileset('npc-ship-path');
+        this.npcPath = buildPathSpline(nodes, 0.5, 25, true);
+        console.log(`[TerrainMap] Generated ${this.npcPath.length} path nodes`);
     }
 
 
-    public getTileset(layerName: string) {
+    /**
+     * Gets the array of x and y coordinates for the corresponding layer in the map
+     * @param layerName the name of the layer for which to find coordinates
+     * @returns an array of x and y coordinates, or an empty array if not found
+     */
+    public getTileset(layerName: string): Array<{x: number, y: number}> {
         const layer = this.mapLayers.get(layerName);
 
         if (!layer) {
@@ -99,13 +82,7 @@ export default class TerrainMap {
             return [];
         }
 
-        return Array.from(layer).map(key => {
-            const [tileX, tileY] = key.split(',').map(Number);
-            return {
-                worldX: tileX * this.tileWidth + this.tileWidth / 2,
-                worldY: tileY * this.tileWidth + this.tileWidth / 2
-            };
-        });
+        return layer;
     }
 
     /**

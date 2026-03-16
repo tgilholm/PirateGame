@@ -1,7 +1,8 @@
 
 /** @typedef {import("shared/entity-config.json")} EntityConfig */  // everything
 /** @typedef {import("shared/entity-config.json")["ship"]} ShipConfig */ // just ships
-/** @typedef {import("shared/entity-config.json")["ship"]} PlayerConfig */ // just players
+/** @typedef {import("shared/entity-config.json")["player"]} PlayerConfig */ // just players
+/** @typedef {import("shared/entity-config.json")["npcShip"]} NPCShipConfig */
 
 /**
  * 

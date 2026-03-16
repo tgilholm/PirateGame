@@ -51,6 +51,7 @@ export class MainScene extends Phaser.Scene {
 
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
+        this.cameras.main.zoom = 0.75;
 
 
 

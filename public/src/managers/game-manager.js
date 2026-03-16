@@ -5,6 +5,7 @@ import InputManager from "./input-manager.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
+import InteractableModel from "../models/interactable-model.js";
 import DigMinigame from "../ui/dig-minigame.js";
 
 /**
@@ -37,8 +38,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.playerListDirty = true;
 
         /** @type {Map<string, Model>} */
-        this.models = new Map();
-        this.interactables = [];
+        this.models = new Map();  // generic entity list
+
         this.closestInteractable = null;
 
         this.startListeners();
@@ -68,6 +69,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const pos = this.localPlayer.worldPos;
 
+
         // Send packets at the server tick rate instead of spamming 60 times a second
         this.moveTimer += delta;
         if (this.moveTimer >= 1000 / 20) {
@@ -80,30 +82,60 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.scene.cameraTarget.y = pos.y;
 
         // Ladders are accessible both off and on ships
-        const closest = this.getClosestInteractable(this.localPlayer);
+
+
+        /** @type {Object} */
+        let closest = null;
+        let nearestDist = Infinity;
+        const now = Date.now();
+        this.models.forEach((entity, id) => {
+
+            // if (entity.isPredicted && now - entity.spawnTime > 150) {
+            //     entity.destroy();
+            //     this.models.delete(id);
+            // }
+
+            if (entity === this.localPlayer) {
+                entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
+            }
+
+            // This replaces the getClosestInteractable function, avoiding another for loop
+            if (entity.isInteractable && entity instanceof InteractableModel) {
+                const dist = this.getDistanceToInteractable(this.localPlayer, entity);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    closest = { entity, dist };
+                }
+            }
+
+            entity.update(delta);
+        });
+
+        // Determine if the player "should" send the interact packet
         if (closest && closest.dist < 50) {
-            if (closest.item.type === "ladder" || this.localPlayer.parentId == closest.item.parentId) {
+            if (closest.entity.type === 'ladder' || this.localPlayer.parentId == closest.entity.parentId) { // handles both === null
                 this.closestInteractable = closest;
             }
         } else {
             this.closestInteractable = null;
         }
+    }
 
-        // Update all models at once
-        this.models.forEach((entity) => {
-            if (entity === this.localPlayer) {
-                entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
-            }
-            entity.update(delta);
-        });
+    /**
+     * Convenience method for determining the distance of an interactable object to the player
+     * @param {PlayerModel} player 
+     * @param {InteractableModel} item 
+     */
+    getDistanceToInteractable(player, item) {
+        const itemPos = item.worldPos;
+        const ix = itemPos.x;
+        const iy = itemPos.y;
 
-        const now = Date.now();
-        this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 150) {
-                entity.destroy();
-                this.models.delete(id);
-            }
-        });
+        const playerPos = player.worldPos;
+        const px = playerPos.x;
+        const py = playerPos.y;
+
+        return Phaser.Math.Distance.Between(px, py, ix, iy);
     }
 
     /**
@@ -114,15 +146,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
     onFullSync(data) {
         this.models.forEach(e => e.destroy());
         this.models.clear();
-        this.interactables = [];
-        this.localPlayer = null; // clear local
+        this.localPlayer = null;    // clear local
         this.playerListDirty = true;
         this.#playerListCache = null; // invalidate cache
 
         // Start fresh with new entity data
         data.entities?.forEach(entityData => this.applyFull(entityData));
         this.resolveLocalPlayer();
-        this.refreshInteractables();
     }
 
     /**
@@ -131,25 +161,19 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      * @param {Object} data the data from the server
      */
     onDeltaSync(data) {
-        let needsInteractableRefresh = false;
 
-        const now = Date.now();
-        this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 300) {
-                entity.destroy();
-                this.models.delete(id);
-            }
-        });
+        // Kill old predicted projectiles
+        // const now = Date.now();
+        // this.models.forEach((entity, id) => {
+        //     if (entity.isPredicted && now - entity.spawnTime > 300) {
+        //         entity.destroy();
+        //         this.models.delete(id);
+        //     }
+        // });
 
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
-            if (entityData.type === "ship") needsInteractableRefresh = true;
-            if (entityData.isInteractable || entityData.type !== undefined) needsInteractableRefresh = true;
-            if (["cannon", "helm", "ladder"].includes(entityData.type)) needsInteractableRefresh = true;
-            if (entityData.type === "player") {
-                this.playerListDirty = true;
-                this.#playerListCache = null;
-            }
+            if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
         data.deltaEntities?.forEach(delta => this.applyDelta(delta));
@@ -157,15 +181,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         data.removedIds?.forEach(id => {
             const removed = this.removeEntity(id);
             const removedType = removed?.entityType;
-            if (removedType === "player") {
-                this.playerListDirty = true;
-                this.#playerListCache = null;
-            }
-            if (removedType === "ship") needsInteractableRefresh = true;
-            if (removed?.isInteractable) needsInteractableRefresh = true;
+            if (removedType === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
-        if (needsInteractableRefresh) this.refreshInteractables();
         this.resolveLocalPlayer();
     }
 
@@ -178,17 +196,17 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         let model = this.models.get(data.id);
 
         if (!model) {
-            if (data.type === "bullet" || data.type === "cannonball" || data.type === "projectile") {
-                const predicted = this.findMatchingPrediction(data.x, data.y);
-                if (predicted) {
-                    this.models.delete(predicted.id);
-                    predicted.id = data.id;
-                    predicted.isPredicted = false;
-                    this.models.set(data.id, predicted);
-                    predicted.sync(data);
-                    return;
-                }
-            }
+            // if (data.type === 'bullet' || data.type === 'cannonball') {
+            //     const predicted = this.findMatchingPrediction(data.x, data.y);
+            //     if (predicted) {
+            //         this.models.delete(predicted.id);
+            //         predicted.id = data.id;
+            //         predicted.isPredicted = false;
+            //         this.models.set(data.id, predicted);
+            //         predicted.sync(data);
+            //         return;
+            //     }
+            // }
 
             model = this.modelFactory.create(data);
             if (!model) return;
@@ -200,21 +218,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         model.sync(data);
     }
 
-    findMatchingPrediction(x, y) {
-        let closest = null;
-        let closestDist = 150; // max snap distance in pixels — tune this
+    // findMatchingPrediction(x, y) {
+    //     let closest = null;
+    //     let closestDist = 150; // max snap distance in pixels — tune this
 
-        this.models.forEach(model => {
-            if (!model.isPredicted) return;
-            const dist = Phaser.Math.Distance.Between(model.x, model.y, x, y);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = model;
-            }
-        });
+    //     this.models.forEach(model => {
+    //         if (!model.isPredicted) return;
+    //         const dist = Phaser.Math.Distance.Between(model.x, model.y, x, y);
+    //         if (dist < closestDist) {
+    //             closestDist = dist;
+    //             closest = model;
+    //         }
+    //     });
 
-        return closest;
-    }
+    //     return closest;
+    // }
 
     /**
      * Applies a delta sync to the model specified in the data from the server.
@@ -296,8 +314,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.input.on("interact", () => {
             const target = this.closestInteractable;
-            if (target?.item) {
-                const closest = target.item;
+            if (target?.entity) {
+                const closest = target.entity;
                 this.network.sendInteract({
                     targetId: closest.id,
                     targetType: closest.type,
@@ -320,104 +338,67 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Send the one-off events directly to the server
         this.input.on("fire", () => {
             this.network.sendFire();
-            this.spawnPredictedProjectile();
+            //this.spawnPredictedProjectile();
         });
 
         this.input.on("release", () => this.network.sendRelease());
     }
 
-    spawnPredictedProjectile() {
-        const player = this.localPlayer;
-        if (!player) return;
+    // spawnPredictedProjectile() {
+    //     const player = this.localPlayer;
+    //     if (!player) return;
 
-        const cam = this.scene.cameras.main;
-        const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
-        const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
-        const playerPos = player.worldPos;
-        const freshAimAngle = Math.atan2(mouseWorldY - playerPos.y, mouseWorldX - playerPos.x);
 
-        let worldAngle, spawnX, spawnY;
 
-        if (player.isUsingCannon) {
-            const cannon = [...this.interactables].find(i => i.type === "cannon" && i.userId === player.id);
-            if (!cannon || cannon.reloadTimer > 0) return;
+    //     const cam = this.scene.cameras.main;
+    //     const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
+    //     const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
+    //     const playerPos = player.worldPos;
+    //     const freshAimAngle = Math.atan2(mouseWorldY - playerPos.y, mouseWorldX - playerPos.x);
 
-            const ship = this.models.get(player.parentId);
-            worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
+    //     let worldAngle, spawnX, spawnY;
 
-            const pos = cannon.worldPos;
-            spawnX = pos.x + Math.cos(worldAngle) * 20;
-            spawnY = pos.y + Math.sin(worldAngle) * 20;
-        } else {
-            if (player.reloadTimer > 0) return;
-            worldAngle = freshAimAngle;
-            spawnX = player.gun.x;
-            spawnY = player.gun.y;
-        }
+    //     if (player.isUsingCannon) {
+    //         const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
+    //         if (!cannon || cannon.reloadTimer > 0) return;
 
-        const speed = 600;
-        const model = this.modelFactory.createProjectile({
-            id: `predicted_${Date.now()}`,
-            x: spawnX,
-            y: spawnY,
-            r: worldAngle,
-            type: player.isUsingCannon ? "cannonball" : "bullet"
-        });
+    //         const ship = this.models.get(player.parentId);
+    //         worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
 
-        model.velocity.x = Math.cos(worldAngle) * speed;
-        model.velocity.y = Math.sin(worldAngle) * speed;
+    //         const pos = cannon.worldPos;
+    //         spawnX = pos.x + Math.cos(worldAngle) * 20;
+    //         spawnY = pos.y + Math.sin(worldAngle) * 20;
+    //     } else {
+    //         if (player.reloadTimer > 0) return;
+    //         worldAngle = freshAimAngle;
+    //         spawnX = player.gun.x;
+    //         spawnY = player.gun.y;
+    //     }
 
-        if (player.isUsingCannon) {
-            const ship = this.models.get(player.parentId);
-            model.velocity.x += ship?.velocity.x ?? 0;
-            model.velocity.y += ship?.velocity.y ?? 0;
-        }
 
-        model.isPredicted = true;
-        model.initialised = true;
-        model.spawnTime = Date.now();
-        this.models.set(model.id, model);
-    }
+    //     const speed = 600;
+    //     const model = this.modelFactory.createProjectile({
+    //         id: `predicted_${Date.now()}`,
+    //         x: spawnX,
+    //         y: spawnY,
+    //         r: worldAngle,
+    //         type: player.isUsingCannon ? 'cannonball' : 'bullet'
+    //     });
 
-    /**
-     * Helper method to add all existing interactables to the internal list
-     */
-    refreshInteractables() {
-        this.interactables = [];
-        this.models.forEach(entity => {
-            if (entity.isInteractable) this.interactables.push(entity);
-        });
-    }
+    //     model.velocity.x = Math.cos(worldAngle) * speed;
+    //     model.velocity.y = Math.sin(worldAngle) * speed;
 
-    /**
-     * Helper method to find the closest interactable object to the player,
-     * using the world coordinates of both
-     * @param {PlayerModel} player
-     * @returns {Object} the closest interactable
-     */
-    getClosestInteractable(player) {
-        let closest = null;
-        let nearestDist = Infinity;
+    //     if (player.isUsingCannon) {
+    //         const ship = this.models.get(player.parentId);
+    //         model.velocity.x += ship?.velocity.x ?? 0;
+    //         model.velocity.y += ship?.velocity.y ?? 0;
+    //     }
 
-        const playerMatrix = player.getWorldTransformMatrix();
-        const px = playerMatrix.tx;
-        const py = playerMatrix.ty;
-
-        this.interactables.forEach(item => {
-            const itemMatrix = item.getWorldTransformMatrix();
-            const ix = itemMatrix.tx;
-            const iy = itemMatrix.ty;
-
-            const dist = Phaser.Math.Distance.Between(px, py, ix, iy);
-
-            if (dist < nearestDist) {
-                nearestDist = dist;
-                closest = { item, dist };
-            }
-        });
-
-        return closest;
-    }
+    //     model.isPredicted = true;
+    //     model.initialised = true;
+    //     model.spawnTime = Date.now();
+    //     this.models.set(model.id, model);
+    // }
 
     /**
      * Handle moving a player into a ship object and vice versa

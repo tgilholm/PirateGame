@@ -15,6 +15,8 @@ export default class UIManager {
         this.gameManager = gameManager;
 
         this.promptElement = document.getElementById('interaction-prompt');
+        this.fpsCounter = document.getElementById('fps-counter');
+        this.modelCounter = document.getElementById('model-counter')
         this.currentInteractable = null;
         this.goldElement = document.getElementById('gold-counter');
         this.lastGold = null;
@@ -32,7 +34,7 @@ export default class UIManager {
         const isInteracting = player.isSteering || player.isUsingCannon;
 
         if (target) {
-            const item = target.item;
+            const item = target.entity;
 
             if (isInteracting) {
                 const prompt = item.releasePrompt || "Release";
@@ -53,6 +55,9 @@ export default class UIManager {
             this.updatePlayersPanelDom(this.gameManager.playerList);
             this.gameManager.playerListDirty = false;
         }
+
+        this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
+        this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
     }
 
     /**

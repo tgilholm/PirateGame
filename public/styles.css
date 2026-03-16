@@ -104,6 +104,8 @@ input.formElement {
     border-color: #fff;
 }
 
+
+
 #printStatsButton {
     width: 100%;
     background: royalblue;
@@ -175,6 +177,15 @@ input.formElement {
 .minimap-marker-canvas {
     pointer-events: none;
 }
+
+.game-stats {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+
 
 /* ---- Interaction prompt ---- */
 #interaction-prompt {

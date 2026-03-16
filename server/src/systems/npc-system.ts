@@ -1,10 +1,11 @@
-import TerrainMap from "src/engine/terrain-map";
+import TerrainMap from "../engine/terrain-map";
 import { BaseSystem } from "./base-system";
-import EntityRegistry from "src/engine/entity-registry";
-import NPC from "src/entities/npc";
-import EntityFactory from "src/entities/entity-factory";
-import SpatialGrid from "src/application/spatial-grid";
-import Entity from "src/entities/entity";
+import EntityRegistry from "../engine/entity-registry";
+import NPC from "../entities/npcs/npc";
+import EntityFactory from "../entities/entity-factory";
+import SpatialGrid from "../application/spatial-grid";
+import Entity from "../entities/entity";
+import NPCShip from "../entities/npcs/npc-ship";
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -14,6 +15,7 @@ import Entity from "src/entities/entity";
 export default class NPCSystem implements BaseSystem {
 
     npcLimit: number = 12;
+    npcShipLimit: number = 1;
 
     constructor(private terrainMap: TerrainMap,
         private entityFactory: EntityFactory,
@@ -24,26 +26,73 @@ export default class NPCSystem implements BaseSystem {
     }
 
     update(dt: number): void {
-        // Get all npcs
-        const npcs = this.entityRegistry.getByType<NPC>('npc');
+        // Get patrol path for ships
+        const path = this.terrainMap.npcPath;
+        if (path.length === 0) return;
 
-        // Create more if needed
-        this.generateNPCs(npcs);
+        const allNpcs = this.entityRegistry.getByType<NPC>('npc');  // npc ships included
+        const ships = this.entityRegistry.getByType<NPCShip>('npc-ship'); // just ships
 
-        // Check their proximity to a player
-        for (let i = 0; i < npcs.length; i++) {
-            const npc = npcs[i];
-            const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
-            this.getTarget(npc, nearby);
-            this.removeDead(npc);   // if npc died, remove it
+
+        // Generate if disappeared
+        this.generateNPCs(allNpcs);
+        this.generateNPCShips(ships, path);
+
+        for (const npc of allNpcs) {
+            this.removeDead(npc);
+
+            if (npc instanceof NPCShip) {
+                this.patrol(npc, path, dt);
+
+            } else {
+                const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
+                this.getTarget(npc, nearby);
+
+                if (npc.target)
+                    this.attackTarget(npc, npc.target);
+            }
         }
     }
 
+    patrol(ship: NPCShip, path: Array<{ x: number, y: number }>, dt: number): void {
+        const current = path[ship.pathIndex];
+        const nextIndex = (ship.pathIndex + 1) % path.length;
+        const next = path[nextIndex];
 
-    removeDead(npc: NPC)
-    {
-        if (npc.health <= 0)
-        {
+        const dx = next.x - current.x;
+        const dy = next.y - current.y;
+        const segLength = Math.hypot(dx, dy);
+
+        // prevent dividing by 0
+        if (segLength === 0) {
+            ship.pathIndex = nextIndex;
+            return;
+        }
+
+        // Move between each segment one at a time
+        const moveDistance = ship.patrolSpeed * dt;
+
+        const deltaT = moveDistance / segLength;
+        ship.segmentT += deltaT;
+
+        // If close enough, jump to the next segment
+        if (ship.segmentT >= 1) {
+            ship.segmentT = 0;
+            ship.pathIndex = nextIndex;
+
+            ship.x = next.x;
+            ship.y = next.y;
+        } else {
+            // Otherwise move smoothly
+            ship.x = current.x + dx * ship.segmentT;
+            ship.y = current.y + dy * ship.segmentT;
+        }
+
+        ship.r = Math.atan2(dy, dx);
+    }
+
+    removeDead(npc: NPC) {
+        if (npc.health <= 0) {
             this.spatialGrid.remove(npc.id);
             this.entityRegistry.delete(npc.id);
         }
@@ -62,24 +111,29 @@ export default class NPCSystem implements BaseSystem {
             if (dist < npc.detectionRadius) npc.target = entity
             else npc.target = null;
 
-            if (npc.target && dist < 20) this.attackTarget(npc, npc.target); 
+            if (npc.target && dist < 20) this.attackTarget(npc, npc.target);
         });
     }
 
-    attackTarget(npc: NPC, target: Entity)
-    {
+    attackTarget(npc: NPC, target: Entity) {
         target.health -= npc.attackDamage;
     }
 
 
     generateNPCs(npcs: NPC[]) {
-
-        if (npcs && npcs.length < this.npcLimit) {
-            const { worldX, worldY } = this.getSpawnPoint();
-
-            const npc = this.entityFactory.createNPC(`npc_${Date.now()}`, worldX, worldY);
-            console.log(`[NPCSystem] Created NPC at ${worldX}, ${worldY}`);
+        // Don't include npc ships in count
+        const regularNpcs = npcs.filter(n => !(n instanceof NPCShip));
+        if (regularNpcs.length < this.npcLimit) {
+            const { x, y } = this.getSpawnPoint();
+            this.entityFactory.createNPC(`npc_${Date.now()}`, x, y);
         }
+    }
+
+    generateNPCShips(ships: NPCShip[], path: Array<{ x: number, y: number }>): void {
+        if (ships.length >= this.npcShipLimit || path.length === 0) return;
+
+        const spawn = path[0];
+        this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
     }
 
 
