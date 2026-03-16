@@ -1,5 +1,6 @@
 import GameManager from "./game-manager.js";
 import Minimap from "../ui/minimap.js";
+import ShopUI from "../ui/shop-ui.js";
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -20,6 +21,9 @@ export default class UIManager {
 
         this.minimap = new Minimap(document.getElementById('minimap-container'));
         this.minimapReady = false;
+
+        this.shopUI = new ShopUI(gameManager.network, gameManager);
+        gameManager.on('openShop', () => this.shopUI.open());
 
         gameManager.on('localPlayerReady', (player) => {
             const pos = player.worldPos;

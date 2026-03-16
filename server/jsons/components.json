@@ -5,6 +5,7 @@
       "description": "Sails component - acceleration and max speed",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "acceleration": 0.05,
             "maxSpeed": 1.0,
@@ -12,6 +13,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "acceleration": 0.1,
             "maxSpeed": 1.1,
@@ -19,6 +21,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "acceleration": 0.25,
             "maxSpeed": 1.2,
@@ -26,6 +29,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "acceleration": 0.05,
             "maxSpeed": 0.8,
@@ -33,6 +37,7 @@
           }
         },
         "temp1": {
+            "cost": 150,
             "stats": {
               "acceleration": 0.15,
               "maxSpeed": 1.3,
@@ -51,6 +56,7 @@
       "description": "Cannons component - affects cannons cannon damage, cannonRange and amount",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "cannonDamage": 10,
             "cannonRange": 150,
@@ -59,6 +65,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "cannonDamage": 20,
             "cannonRange": 200,
@@ -67,6 +74,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "cannonDamage": 40,
             "cannonRange": 250,
@@ -75,6 +83,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "cannonDamage": 60,
             "cannonRange": 300,
@@ -83,6 +92,7 @@
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "cannonDamage": 15,
             "cannonRange": 160,
@@ -98,30 +108,35 @@
       "description": "Head component - ramming power",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "rammingPower": 0,
             "weight": 50
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "rammingPower": 5,
             "weight": 75
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "rammingPower": 10,
             "weight": 100
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "rammingPower": 20,
             "weight": 250
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "rammingPower": 2,
             "weight": 60
@@ -139,6 +154,7 @@
       "description": "Body/hull component - max HP, limits the amount of crew on board",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "maxHealth": 200,
             "crewCapacity": 10,
@@ -146,6 +162,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "maxHealth": 400,
             "crewCapacity": 20,
@@ -153,6 +170,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "maxHealth": 500,
             "crewCapacity": 25,
@@ -160,6 +178,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "maxHealth": 1000,
             "crewCapacity": 50,
@@ -167,6 +186,7 @@
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "maxHealth": 250,
             "crewCapacity": 12,
@@ -185,6 +205,7 @@
       "description": "CrowsNest component - minimap vision, visual vision, and crew slots",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "minimapRange": 100,
             "visionRange": 1,
@@ -192,6 +213,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "minimapRange": 150,
             "visionRange": 2,
@@ -199,6 +221,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "minimapRange": 200,
             "visionRange": 3,
@@ -206,6 +229,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "minimapRange": 300,
             "visionRange": 2,
@@ -213,6 +237,7 @@
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "minimapRange": 120,
             "visionRange": 1,
@@ -231,6 +256,7 @@
       "description": "Anchor component - slowdown speed and emergency stop",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "stopPower": 10,
             "deployTime": 2.0,
@@ -239,6 +265,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "stopPower": 20,
             "deployTime": 1.5,
@@ -247,6 +274,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "stopPower": 30,
             "deployTime": 1.0,
@@ -255,6 +283,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "stopPower": 50,
             "deployTime": 0.5,
@@ -263,6 +292,7 @@
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "stopPower": 15,
             "deployTime": 1.8,
@@ -282,6 +312,7 @@
       "description": "Rudder component - turn speed and responsiveness",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "turnSpeed": 1.0,
             "responseTime": 1.0,
@@ -289,6 +320,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "turnSpeed": 1.2,
             "responseTime": 0.8,
@@ -296,6 +328,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "turnSpeed": 1.5,
             "responseTime": 0.6,
@@ -303,6 +336,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "turnSpeed": 1.2,
             "responseTime": 0.8,
@@ -310,6 +344,7 @@
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "turnSpeed": 1.1,
             "responseTime": 0.9,
@@ -328,6 +363,7 @@
       "description": "Crew component - affects fire rate and accuracy of cannons",
       "variants": {
         "LVL1": {
+          "cost": 0,
           "stats": {
             "fireRate": 1.0,
             "accuracy": 1.0,
@@ -335,6 +371,7 @@
           }
         },
         "LVL2": {
+          "cost": 100,
           "stats": {
             "fireRate": 1.2,
             "accuracy": 1.1,
@@ -342,6 +379,7 @@
           }
         },
         "LVL3": {
+          "cost": 500,
           "stats": {
             "fireRate": 1.5,
             "accuracy": 1.2,
@@ -349,6 +387,7 @@
           }
         },
         "kraken": {
+          "cost": 1000,
           "stats": {
             "fireRate": 2.0,
             "accuracy": 1.5,
@@ -356,6 +395,7 @@
           }
         },
         "temp1": {
+          "cost": 150,
           "stats": {
             "fireRate": 1.1,
             "accuracy": 1.0,

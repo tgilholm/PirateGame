@@ -1,6 +1,6 @@
  //import debug-menu from "./debug-menu.js";
  import Minimap from "./minimap.js";
-
+ import GoldCounter from "./gold-counter.js";
 
 
  //Contains UI creation logic
@@ -14,6 +14,8 @@
          //minimap
          this.minimap = new Minimap(document.getElementById("minimap-container"));
 
-     }
+         //gold counter
+         this.goldCounter = new GoldCounter(document.getElementById("gold-counter"));
+    }
 }
    

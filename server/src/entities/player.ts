@@ -8,6 +8,7 @@ import Cannon from "./interactables/cannon";
  */
 export default class Player extends Entity {
     username: string;
+    gold: number;
     isSteering: boolean;
     cannon: Cannon | null;
     isCarrying: boolean;
@@ -40,11 +41,13 @@ export default class Player extends Entity {
     ) {
         super(id, "player", x, y, config.maxHealth, parent);
         this.username = username || "";     // default to no uname
+        this.gold = config.startingGold || 0;// default to 0 gold
 
         // Player-specific detail
         this.isSteering = false;
         this.cannon = null; // not using cannon to start
         this.isCarrying = false;
+        
 
         // Where the player is aiming
         this.aimAngle = 0;

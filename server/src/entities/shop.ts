@@ -1,4 +1,5 @@
 import Entity from "./entity";
+import Player from "./player";
 import { ShopConfig } from "../types";
 
 
@@ -30,5 +31,16 @@ export default class Shop extends Entity {
         this.radius = config.radius;
         this.interactRange = config.interactRange;
         this.texture = config.texture;
+    }
+
+    /**
+     * Returns true if the player is on foot and within this shop's interact range.
+     * @param player the player to check
+     */
+    canInteract(player: Player): boolean {
+        if (player.parent) return false;
+        const dx = this.x - player.x;
+        const dy = this.y - player.y;
+        return Math.sqrt(dx * dx + dy * dy) <= this.interactRange;
     }
 }

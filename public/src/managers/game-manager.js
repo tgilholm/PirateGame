@@ -80,8 +80,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         // Ladders are accessible both off and on ships
         const closest = this.getClosestInteractable(this.localPlayer);
-        if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) { // handles both === null
+        const threshold = closest?.item.type === 'shop' ? closest.item.interactRange : 50;
+        if (closest && closest.dist < threshold) {
+            if (closest.item.type === 'ladder' || closest.item.type === 'shop' || this.localPlayer.parentId == closest.item.parentId) { // handles both === null
                 this.closestInteractable = closest;
             }
         } else {
@@ -226,6 +227,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         }
 
         model.sync(delta);
+
+        if (delta.components !== undefined && delta.id === 'ship_' + this.playerId) {
+            this.emit('localShipUpdated');
+        }
     }
 
     /**
@@ -291,6 +296,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             const target = this.closestInteractable;
             if (target?.item) {
                 const closest = target.item;
+                if (closest.type === 'shop') {
+                    this.emit('openShop');
+                    return;
+                }
                 this.network.sendInteract({
                     targetId: closest.id,
                     targetType: closest.type,
@@ -441,5 +450,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.localPlayer = mine;
             this.emit('localPlayerReady', this.localPlayer);
         }
+    }
+
+    /**
+     * Returns the component variants for the local player's ship, or null if unavailable.
+     * @returns {Record<string, string> | null}
+     */
+    getLocalShipComponents() {
+        if (!this.playerId) return null;
+        const ship = this.models.get('ship_' + this.playerId);
+        return ship?.components ?? null;
     }
 }
