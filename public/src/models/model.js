@@ -145,6 +145,7 @@ export default class Model extends Phaser.GameObjects.Container {
             return this.#worldPos;
         }
 
+
         if (this.parentContainer) {
             const matrix = this.getWorldTransformMatrix();
             this.#worldPos.x = matrix.tx;

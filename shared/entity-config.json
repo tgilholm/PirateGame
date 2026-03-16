@@ -91,5 +91,68 @@
             { "x": 8800,  "y": 12000 },
             { "x": 12000, "y": 12000 }
         ]
+    },
+    "npcShip": {
+        "maxHealth": 10000,
+        "dimensions": {
+            "height": 240,
+            "middleWidth": 360,
+            "bowLength": 180,
+            "sternRadius": 120
+        },
+        "physics": {
+            "turnSpeed": 0.003,
+            "mass": 3000,
+            "frictionAir": 0.001,
+            "restitution": 0.2,
+            "thrust": 0.15
+        },
+        "interactables": [
+            {
+                "type": "helm",
+                "x": -200,
+                "y": 0
+            },
+            {
+                "type": "cannon",
+                "x": -50,
+                "y": -100
+            },
+            {
+                "type": "cannon",
+                "x": -50,
+                "y": 100
+            },
+            {
+                "type": "cannon",
+                "x": 50,
+                "y": -100
+            },
+            {
+                "type": "cannon",
+                "x": 50,
+                "y": 100
+            },
+            {
+                "type": "cannon",
+                "x": 150,
+                "y": -100
+            },
+            {
+                "type": "cannon",
+                "x": 150,
+                "y": 100
+            },
+            {
+                "type": "ladder",
+                "x": -150,
+                "y": 110
+            },
+            {
+                "type": "ladder",
+                "x": -150,
+                "y": -110
+            }
+        ]
     }
 }

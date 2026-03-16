@@ -1,4 +1,3 @@
-
 /* global Phaser, io */
 
 import NetworkManager from "../managers/network-manager.js";
@@ -6,10 +5,6 @@ import GameManager from "../managers/game-manager.js";
 import UIManager from "../managers/ui-manager.js";
 import InputManager from "../managers/input-manager.js";
 import ModelFactory from "../managers/model-factory.js";
-
-
-const socket = globalThis.io();
-
 
 /**
  * The main scene of the Phaser game. This class should act as the "orchestrator"
@@ -20,31 +15,31 @@ export class MainScene extends Phaser.Scene {
     constructor() {
         super('MainScene');
 
-        this.shipParams = null; // retrieve ship width/height etc from server
+        this.shipParams = null;
         this.showDebugHitboxes = true;
         this.debugGraphics = null;
         this.cameraTarget = null;
         this.projectiles = new Map();
 
-
-        // Resize canvas with window
         window.addEventListener('resize', () => {
             this.scale.resize(window.innerWidth, window.innerHeight);
         });
     }
-
 
     /**
      * Executed once at runtime- set up all game objects here, such
      * as setting up user input and socket listeners.
      */
     create(data) {
+        // Create the socket here so it only connects when the scene actually starts,
+        // not at module load time before GameManager exists to receive INIT_GAME
+        const socket = globalThis.io();
+
         this.setupWorld();
 
         //@ts-ignore cheesed into this window
         const entityConfig = window.entityConfig;
         const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
-
 
         this.gameManager = new GameManager(
             this,
@@ -54,11 +49,13 @@ export class MainScene extends Phaser.Scene {
         );
         this.uiManager = new UIManager(this, this.gameManager);
 
-        // Invisible sprite ignoring player on/off ship state, always follows thi
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
+        this.cameras.main.zoom = 0.75;
 
-        // Placeholder player sprite- replace in preload() with actual
+
+
+        // Placeholder player sprite
         const circle = this.make.graphics();
         circle.fillStyle(0xff0000, 1);
         circle.fillCircle(15, 15, 15);
@@ -85,20 +82,19 @@ export class MainScene extends Phaser.Scene {
         square.generateTexture('npc_sprite', 30, 30);
         square.destroy();
 
-        // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.gameManager.start(data.username);
         
     }
 
     /**
-     * The update loop of the game. Updates all dependent classes 
+     * The update loop of the game. Updates all dependent classes
      */
     update() {
         this.gameManager.update();
         this.uiManager.update();
-
-
+        const gold = document.getElementById("gold-counter");
+        if (gold) gold.style.display = "block";
     }
 
     /**

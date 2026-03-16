@@ -1,6 +1,6 @@
 
 import EntityRegistry from "../engine/entity-registry";
-import { EntityConfig, PlayerConfig, ShipConfig, ShopConfig } from "../types";
+import { EntityConfig, NPCShipConfig,  PlayerConfig, ShipConfig, ShopConfig } from "../types";
 import Entity from "./entity";
 import Player from "./player";
 import Ship from "./ship";
@@ -9,7 +9,9 @@ import InteractableEntity from "./interactables/interactable-entity";
 import Cannon from "./interactables/cannon";
 import Ladder from "./interactables/ladder";
 import Helm from "./interactables/helm";
-import NPC from "./npc";
+import NPC from "./npcs/npc";
+import NPCShip from "./npcs/npc-ship";
+import Treasure, { TreasureState } from "./treasure";
 
 
 export interface InteractableInstance {
@@ -27,18 +29,20 @@ export default class EntityFactory {
     playerConfig: PlayerConfig;
     shipConfig: ShipConfig;
     shopConfig: ShopConfig;
+    npcShipConfig: NPCShipConfig;
 
     /**
      * Builds an entity factory
      * @param entityConfig the default data for new entities
      * @param entityRegistry the repository of entities to add to
      */
-    constructor(private entityConfig: EntityConfig,
+    constructor(entityConfig: EntityConfig,
         private entityRegistry: EntityRegistry,) {
 
         this.playerConfig = entityConfig.player;
-        this.shipConfig = entityConfig.ship;
         this.shopConfig = entityConfig.shop;
+        this.shipConfig = entityConfig.ship;    // destructure
+        this.npcShipConfig = entityConfig.npcShip;
     }
 
     /**
@@ -65,7 +69,7 @@ export default class EntityFactory {
      * @returns the ship
      */
     public createShip(id: string, x: number, y: number): Ship {
-        const ship = new Ship(id, x, y, this.shipConfig);
+        const ship = new Ship(id, "ship", x, y, this.shipConfig);
         this.entityRegistry.create(ship);
 
         this.shipConfig.interactables.forEach((item, index) => {
@@ -75,7 +79,33 @@ export default class EntityFactory {
         return ship;
     }
 
-
+    public createTreasure(
+        id: string,
+        x: number,
+        y: number,
+        goldValue: number,
+        state: TreasureState = "buried",
+        digProgress: number = 0,
+        carrierId: string | null = null,
+        digSpeed: number = 1,
+        successZoneStart: number = 0.4,
+        successZoneSize: number = 0.2
+    ): Treasure {
+        const treasure = new Treasure(
+            id,
+            x,
+            y,
+            goldValue,
+            state,
+            digProgress,
+            carrierId,
+            digSpeed,
+            successZoneStart,
+            successZoneSize
+        );
+        this.entityRegistry.create(treasure);
+        return treasure;
+    }
 
     public createInteractable(parent: Ship | null, instance: InteractableInstance, index: number) {
         const { type, x, y } = instance;
@@ -105,8 +135,18 @@ export default class EntityFactory {
     }
 
     public createNPC(id: string, x: number, y: number): NPC {
-        const npc = new NPC(id, x, y);
+        const npc = new NPC(id, "npc", x, y);
         this.entityRegistry.create(npc);
         return npc;
+    }
+
+    public createNPCShip(id: string, x: number, y: number): NPCShip {
+        const npcShip = new NPCShip(id, x, y, this.npcShipConfig);
+        this.entityRegistry.create(npcShip);
+
+        this.npcShipConfig.interactables.forEach((item, index) => {
+            this.createInteractable(npcShip, item, index);
+        });
+        return npcShip;
     }
 }

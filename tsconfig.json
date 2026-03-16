@@ -2,7 +2,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["shared/built/*"]
-    }
-  }
+      "@shared/*": [
+        "shared/built/*"
+      ]
+    },
+    "esModuleInterop": true
+  },
+  "exclude": [
+    "../scripts"
+  ]
 }

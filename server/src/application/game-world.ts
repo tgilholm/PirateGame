@@ -103,8 +103,8 @@ export default class GameWorld extends EventEmitter {
     public addPlayer(socketId: string, username: string) {
 
         // Spawn the player on their own ship
-        const { worldX, worldY } = this.getSpawnPoint()
-        const newShip = this.entityFactory.createShip(`ship_${socketId}`, worldX, worldY);
+        const { x, y } = this.getSpawnPoint()
+        const newShip = this.entityFactory.createShip(`ship_${socketId}`, x, y);
 
         // "hacky" way of adding to the physics world
         const physics = this.engine.systems.get('physics') as PhysicsSystem;
@@ -128,34 +128,34 @@ export default class GameWorld extends EventEmitter {
     getSpawnPoint() {
         const spawnPoints = this.terrain.getTileset('player-spawns');
 
-        let dist = 1000;
-        let spawnPoint = { worldX: 0, worldY: 0 };
-        while (dist > 500) {
-            spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+        // let dist = 1000;
+        // let spawnPoint = { x: 0, y: 0 };
+        // while (dist > 500) {
+        //     spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
 
-            // Get distance to players & ships
-            const ships = this.registry.getByType<Ship>('ship');
-            const players = this.registry.getByType<Player>('player');
+        //     // Get distance to players & ships
+        //     const ships = this.registry.getByType<Ship>('ship');
+        //     const players = this.registry.getByType<Player>('player');
 
-            // Calculate the minimum distance
-            const distances: number[] = [];
-            ships.forEach(ship => distances.push(Math.hypot(ship.x - spawnPoint.worldX, ship.y - spawnPoint.worldY)));
-            players.forEach(player => {
-                // Get world coordinates
-                const worldPos = this.getWorldPosition(player);
-                distances.push(Math.hypot(worldPos.x - spawnPoint.worldX, worldPos.y - spawnPoint.worldY));
+        //     // Calculate the minimum distance
+        //     const distances: number[] = [];
+        //     ships.forEach(ship => distances.push(Math.hypot(ship.x - spawnPoint.x, ship.y - spawnPoint.y)));
+        //     players.forEach(player => {
+        //         // Get world coordinates
+        //         const worldPos = this.getWorldPosition(player);
+        //         distances.push(Math.hypot(worldPos.x - spawnPoint.x, worldPos.y - spawnPoint.y));
 
-            });
+        //     });
 
-            // If all the distances are far enough away, spawn the player
+        //     // If all the distances are far enough away, spawn the player
 
-            console.log(dist, spawnPoint);
-            
+        //     console.log(dist, spawnPoint);
 
-            distances.sort();
-            dist = distances[0];
-        }
-        return spawnPoint;
+
+        //     distances.sort();
+        //     dist = distances[0];
+        // }
+        return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
     }
 
     /**

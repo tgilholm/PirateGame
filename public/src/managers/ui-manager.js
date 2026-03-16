@@ -18,6 +18,8 @@ export default class UIManager {
         this.gameManager = gameManager;
 
         this.promptElement = document.getElementById('interaction-prompt');
+        this.fpsCounter = document.getElementById('fps-counter');
+        this.modelCounter = document.getElementById('model-counter')
         this.currentInteractable = null;
 
         this.minimap = new Minimap(document.getElementById('minimap-container'));
@@ -35,6 +37,8 @@ export default class UIManager {
             this.minimapReady = true;
             this.goldCounter.show();
         });
+        this.goldElement = document.getElementById('gold-counter');
+        this.lastGold = null;
     }
 
     /**
@@ -48,10 +52,11 @@ export default class UIManager {
 
         this.goldCounter.update(player);
 
+        this.updateGoldCounter(player.gold ?? 0);
         const isInteracting = player.isSteering || player.isUsingCannon;
 
         if (target) {
-            const item = target.item;
+            const item = target.entity;
 
             if (isInteracting) {
                 const prompt = item.releasePrompt || "Release";
@@ -77,6 +82,8 @@ export default class UIManager {
             const pos = this.gameManager.localPlayer.worldPos;
             this.minimap.updateMarker(pos.x, pos.y);
         }
+        this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
+        this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
     }
 
     /**
@@ -120,5 +127,13 @@ export default class UIManager {
         list.innerHTML = visible
             .map((p, i) => `<li>${i + 1}. ${p.username || "Anonymous"}</li>`)
             .join("");
+    }
+
+    updateGoldCounter(amount) {
+        if (!this.goldElement) return;
+        if (this.lastGold === amount) return;
+
+        this.goldElement.textContent = `Gold: ${amount}`;
+        this.lastGold = amount;
     }
 }

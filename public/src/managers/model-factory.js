@@ -2,10 +2,12 @@ import CannonModel from "../models/cannon-model.js";
 import HelmModel from "../models/helm-model.js";
 import LadderModel from "../models/ladder-model.js";
 import NPCModel from "../models/npc-model.js";
+import NPCShipModel from "../models/npc-ship-model.js";
 import PlayerModel from "../models/player-model.js";
 import ProjectileModel from "../models/projectile-model.js";
 import ShipModel from "../models/ship-model.js";
 import ShopModel from "../models/shop-model.js";
+import TreasureModel from "../models/treasure-model.js";
 
 /**
  * Client side factory class for creating models
@@ -13,10 +15,10 @@ import ShopModel from "../models/shop-model.js";
 export default class ModelFactory {
 
     /**
-     * Creates a model factory from a scene and config 
+     * Creates a model factory from a scene and config
      * @param {Phaser.Scene} scene the phaser scene
      * @param {EntityConfig} config the config for entities
-     * 
+     *
      */
     constructor(scene, config, modelLookup) {
         this.scene = scene;
@@ -26,7 +28,7 @@ export default class ModelFactory {
 
     /**
      * Creates an entity from the data packet, which must contain "type"
-     * @param {object} data the data packet 
+     * @param {object} data the data packet
      * @returns the created entity
      */
     create(data) {
@@ -35,20 +37,28 @@ export default class ModelFactory {
             case 'player': return this.createPlayer(data);
             case 'bullet':
             case 'cannonball': return this.createProjectile(data);
+            case 'treasure':return this.createTreasure(data);
             case 'cannon':  // all interactables "fall through"
             case 'helm':
             case 'ladder': return this.createInteractable(data);
             case 'npc': return this.createNPC(data);
             case 'shop': return this.createShop(data);
+            case 'npc-ship': return this.createNPCShip(data);
             default:
                 console.warn(`[ModelFactory] Unknown entity type: "${data.type}"`);
                 return null;
         }
     }
 
+
+    createNPCShip(data) {
+        const npcShip = new NPCShipModel(this.scene, data.id, data.x, data.y, this.config.npcShip);
+        return npcShip;
+    }
+
     /**
      * Creates a Ship entity and the interactables contained in it
-     * @param {object} data the data from the server to create the ship from 
+     * @param {object} data the data from the server to create the ship from
      * @returns the ship
      */
     createShip(data) {
@@ -58,7 +68,7 @@ export default class ModelFactory {
 
     /**
      * Creates a player entity from the provided data
-     * @param {object} data the data from the server to create the player from 
+     * @param {object} data the data from the server to create the player from
      * @returns the player
      */
     createPlayer(data) {
@@ -67,20 +77,29 @@ export default class ModelFactory {
 
     /**
      * Creates a projectile from the provided data
-     * @param {object} data the data from the server to create the projectile from 
+     * @param {object} data the data from the server to create the projectile from
      * @returns the projectile
      */
     createProjectile(data) {
         return new ProjectileModel(this.scene, data.id, data.x, data.y, data.r ?? 0, data.type);
     }
 
+    createTreasure(data) {
+        return new TreasureModel(
+            this.scene,
+            data.id,
+            data.x,
+            data.y,
+            data.state ?? "buried",
+            data.digProgress ?? 0,
+            data.goldValue ?? 0
+        );
+    }
+
     /**
      */
     createInteractable(data) {
         const parent = data.parentId ? this.modelLookup(data.parentId) : null;
-
-        const prefix = parent ? parent.id : "map";  // parent id or map if null
-
 
         let model;
         switch (data.type) {

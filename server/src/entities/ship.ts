@@ -29,12 +29,13 @@ export default class Ship extends Entity {
      */
     constructor(
         id: string,
+        type: string = 'ship',
         x: number,
         y: number,
         config: ShipConfig
     ) {
-        super(id, "ship", x, y, config.maxHealth, null);    // ships have no parents
-
+        super(id, type, x, y, config.maxHealth, null);    // ships have no parents
+        this.supertypes = ['ship'];
         this.pilot = null;    // Nobody piloting at startup
         this.dimensions = config.dimensions;
         this.physics = config.physics;
