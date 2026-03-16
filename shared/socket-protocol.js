@@ -11,6 +11,8 @@ var ServerEvent;
     ServerEvent["INIT_GAME"] = "INIT_GAME";
     ServerEvent["KICKED"] = "KICKED";
     ServerEvent["JOIN_FAILED"] = "JOIN_FAILED";
+    ServerEvent["DIG_MINIGAME_START"] = "DIG_MINIGAME_START";
+    ServerEvent["DIG_MINIGAME_RESULT"] = "DIG_MINIGAME_RESULT";
 })(ServerEvent || (exports.ServerEvent = ServerEvent = {}));
 var ClientEvent;
 (function (ClientEvent) {
@@ -19,6 +21,7 @@ var ClientEvent;
 })(ClientEvent || (exports.ClientEvent = ClientEvent = {}));
 var ActionType;
 (function (ActionType) {
+    ActionType["AIM"] = "AIM";
     ActionType["MOVE"] = "MOVE";
     ActionType["FIRE"] = "FIRE";
     ActionType["UPGRADE"] = "UPGRADE";
