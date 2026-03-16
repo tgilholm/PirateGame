@@ -394,7 +394,7 @@
         "kraken": {
           "cost": 1000,
           "stats": {
-            "reloadTime": -1500,
+            "reloadTime": -2000,
             "accuracy": 1.5,
             "weight": 250
           }
