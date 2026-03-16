@@ -84,8 +84,6 @@ export default class WorldController {
                     this.playerController.handleGunFire(player);
                 }
                 break;
-
-                
             case ActionType.DIG:
                 this.playerController.handleDig(player, action.data);
                 break;

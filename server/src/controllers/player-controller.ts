@@ -116,11 +116,11 @@ export default class PlayerController {
         if (data.mode === "start") {
             this.treasureSystem.beginDig(player);
         } else if (data.mode === "hit") {
-            this.treasureSystem.submitDigHit(player, data.sliderPosition ?? -1);
+            this.treasureSystem.submitDigHit(player, data.sliderPosition ?? 0);
         }
     }
 
-    handleTreasureInteract(player: Player): void {
+    handleTreasureInteract(player: Player) {
         this.treasureSystem.interact(player);
     }
 

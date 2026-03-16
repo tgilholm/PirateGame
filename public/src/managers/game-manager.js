@@ -284,16 +284,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
             this.onFullSync(data); // get everything
+        });
 
-            this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
-                console.log("[Client] DIG_MINIGAME_START received", payload);
-                this.digMinigame.start(payload);
-            });
+        this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
+            console.log("[Client] DIG_MINIGAME_START received", payload);
+            this.digMinigame.start(payload);
+        });
 
-            this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
-                console.log("[Client] DIG_MINIGAME_RESULT received", success);
-                this.digMinigame.stop();
-            });
+        this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
+            console.log("[Client] DIG_MINIGAME_RESULT received", success);
+            this.digMinigame.stop();
         });
 
         // Delta packet: full for new models and known models that have changed
