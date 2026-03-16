@@ -321,12 +321,16 @@ input.formElement {
 
 /*Death Screen CSS*/
 #death-screen{
-    display: flex;
+    display: none;
+    position: fixed;
+    z-index: 9999 !important;
+    width: 100%;
+    height: 100%;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     font-family: 'Courier New', monospace;
-    background: rgba(0, 0, 0, 0.3);
+    background: black;
     backdrop-filter: blur(5px);
 }
 
