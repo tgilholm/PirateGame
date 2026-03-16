@@ -57,6 +57,7 @@ export class MainScene extends Phaser.Scene {
         // Invisible sprite ignoring player on/off ship state, always follows thi
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
         this.cameras.main.startFollow(this.cameraTarget);
+        this.cameras.main.zoom = 0.5;
 
         // Placeholder player sprite- replace in preload() with actual
         const circle = this.make.graphics();

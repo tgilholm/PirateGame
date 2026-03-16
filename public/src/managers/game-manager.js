@@ -5,6 +5,7 @@ import InputManager from "./input-manager.js";
 import ModelFactory from "./model-factory.js";
 import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
+import InteractableModel from "../models/interactable-model.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -67,6 +68,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const inputs = this.input.getInputs(this.scene, this.localPlayer);
         const pos = this.localPlayer.worldPos;
 
+
         // Send packets at the server tick rate instead of spamming 60 times a second
         this.moveTimer = (this.moveTimer) + delta;
         if (this.moveTimer >= 1000 / 20) {  // match server tick rate
@@ -79,31 +81,60 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         this.scene.cameraTarget.y = pos.y;
 
         // Ladders are accessible both off and on ships
-        const closest = this.getClosestInteractable(this.localPlayer);
+
+
+        /** @type {Object} */
+        let closest = null;
+        let nearestDist = Infinity;
+        const now = Date.now();
+        this.models.forEach((entity, id) => {
+
+            if (entity.isPredicted && now - entity.spawnTime > 150) {
+                entity.destroy();
+                this.models.delete(id);
+            }
+
+            if (entity === this.localPlayer) {
+                entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
+            }
+
+            // This replaces the getClosestInteractable function, avoiding another for loop
+            if (entity.isInteractable && entity instanceof InteractableModel) {
+                const dist = this.getDistanceToInteractable(this.localPlayer, entity);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    closest = { entity, dist };
+                }
+            }
+
+            entity.update(delta);
+        });
+
+        // Determine if the player "should" send the interact packet
         if (closest && closest.dist < 50) {
-            if (closest.item.type === 'ladder' || this.localPlayer.parentId == closest.item.parentId) { // handles both === null
+            if (closest.entity.type === 'ladder' || this.localPlayer.parentId == closest.entity.parentId) { // handles both === null
                 this.closestInteractable = closest;
             }
         } else {
             this.closestInteractable = null;
         }
+    }
 
-        // Update all models at once
-        this.models.forEach((entity) => {
-            if (entity === this.localPlayer) {
-                entity.target.r = inputs.aimAngle;  // shortcut the aim angle for local player
-            }
-            entity.update(delta);
-        });
+    /**
+     * Convenience method for determining the distance of an interactable object to the player
+     * @param {PlayerModel} player 
+     * @param {InteractableModel} item 
+     */
+    getDistanceToInteractable(player, item) {
+        const itemPos = item.worldPos;
+        const ix = itemPos.x;
+        const iy = itemPos.y;
 
-        const now = Date.now();
-        this.models.forEach((entity, id) => {
-            if (entity.isPredicted && now - entity.spawnTime > 150) {
-                entity.destroy();
-                this.models.delete(id);
-            }
-        });
+        const playerPos = player.worldPos;
+        const px = playerPos.x;
+        const py = playerPos.y;
 
+        return Phaser.Math.Distance.Between(px, py, ix, iy);
     }
 
     /**
@@ -123,7 +154,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Start fresh with new entity data
         data.entities?.forEach(entityData => this.applyFull(entityData));
         this.resolveLocalPlayer();
-        this.refreshInteractables();
     }
 
     /**
@@ -132,7 +162,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      * @param {Object} data the data from the server
      */
     onDeltaSync(data) {
-        let needsInteractableRefresh = false;
 
         // Kill old predicted projectiles
         const now = Date.now();
@@ -145,8 +174,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         data.newEntities?.forEach(entityData => {
             this.applyFull(entityData);
-            if (entityData.type === 'ship') needsInteractableRefresh = true;
-            if (['cannon', 'helm', 'ladder'].includes(entityData.type)) needsInteractableRefresh = true;
             if (entityData.type === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
         });
 
@@ -156,11 +183,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             const removed = this.removeEntity(id);
             const removedType = removed?.entityType;
             if (removedType === 'player') { this.playerListDirty = true; this.#playerListCache = null; }
-            if (removedType === 'ship') needsInteractableRefresh = true;
-            if (removed?.isInteractable) needsInteractableRefresh = true;
         });
 
-        if (needsInteractableRefresh) this.refreshInteractables();
         this.resolveLocalPlayer();
     }
 
@@ -286,8 +310,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         this.input.on('interact', () => {
             const target = this.closestInteractable;
-            if (target?.item) {
-                const closest = target.item;
+            if (target?.entity) {
+                const closest = target.entity;
                 this.network.sendInteract({
                     targetId: closest.id,
                     targetType: closest.type,
@@ -359,47 +383,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         model.spawnTime = Date.now();
         this.models.set(model.id, model);
     }
-
-    /**
-     * Helper method to add all existing interactables to the internal list
-     */
-    refreshInteractables() {
-        this.interactables = [];
-        this.models.forEach(entity => {
-            if (entity.isInteractable) this.interactables.push(entity);
-        });
-    }
-
-    /**
-     * Helper method to find the closest interactable object to the player,
-     * using the world coordinates of both
-     * @param {PlayerModel} player 
-     * @returns {Object} the closest interactable
-     */
-    getClosestInteractable(player) {
-        let closest = null;
-        let nearestDist = Infinity;
-
-        const playerMatrix = player.getWorldTransformMatrix();
-        const px = playerMatrix.tx;
-        const py = playerMatrix.ty;
-
-        this.interactables.forEach(item => {
-            const itemMatrix = item.getWorldTransformMatrix();
-            const ix = itemMatrix.tx;
-            const iy = itemMatrix.ty;
-
-            const dist = Phaser.Math.Distance.Between(px, py, ix, iy);
-
-            if (dist < nearestDist) {
-                nearestDist = dist;
-                closest = { item, dist };
-            }
-        });
-
-        return closest;
-    }
-
 
     /**
      * Handle moving a player into a ship object and vice versa

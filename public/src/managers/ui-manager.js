@@ -30,7 +30,7 @@ export default class UIManager {
         const isInteracting = player.isSteering || player.isUsingCannon;
 
         if (target) {
-            const item = target.item;
+            const item = target.entity;
 
             if (isInteracting) {
                 const prompt = item.releasePrompt || "Release";

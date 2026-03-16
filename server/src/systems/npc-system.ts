@@ -33,6 +33,7 @@ export default class NPCSystem implements BaseSystem {
         const allNpcs = this.entityRegistry.getByType<NPC>('npc');  // npc ships included
         const ships = this.entityRegistry.getByType<NPCShip>('npc-ship'); // just ships
 
+        console.log(dt)
 
         // Generate if disappeared
         this.generateNPCs(allNpcs);
@@ -43,7 +44,6 @@ export default class NPCSystem implements BaseSystem {
 
             if (npc instanceof NPCShip) {
                 this.patrol(npc, path, dt);
-                console.log(npc.x, npc.y);
 
             } else {
                 const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
@@ -52,8 +52,6 @@ export default class NPCSystem implements BaseSystem {
                 if (npc.target)
                     this.attackTarget(npc, npc.target);
             }
-
-
         }
     }
 
