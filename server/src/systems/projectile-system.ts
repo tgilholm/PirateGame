@@ -5,7 +5,7 @@ import SpatialGrid from "../application/spatial-grid";
 import Player from "src/entities/player";
 import Ship from "src/entities/ship";
 import Entity from "src/entities/entity";
-import Shop from "src/entities/shop";
+import Shop from "src/entities/shopimport { SplashEvent } from "@shared/socket-protocol";
 
 /**
  * Updates all projectile objects each tick. Handles collisions between
@@ -14,6 +14,8 @@ import Shop from "src/entities/shop";
  */
 export default class ProjectileSystem implements BaseSystem {
 
+    /** Splash positions queued this tick. Drained by GameWorld each broadcast cycle. */
+    public pendingSplashes: SplashEvent[] = [];
 
     constructor(private entityRegistry: EntityRegistry,
         private grid: SpatialGrid,
@@ -52,6 +54,10 @@ export default class ProjectileSystem implements BaseSystem {
 
         // Delete expired projectiles
         if (proj.ttl <= 0) {
+            if (proj.type === 'cannonball') {
+                // Queue a splash event for GameWorld to broadcast this tick
+                this.pendingSplashes.push({ x: proj.x, y: proj.y });
+            }
             this.destroyEntity(proj);
         }
     }
@@ -77,6 +83,7 @@ export default class ProjectileSystem implements BaseSystem {
             }
 
             if (hit) {
+                if (proj.type === 'cannonball') this.pendingSplashes.push({ x: proj.x, y: proj.y });
                 this.destroyEntity(proj);
             }
         });
@@ -101,6 +108,7 @@ export default class ProjectileSystem implements BaseSystem {
             }
 
             if (hit) {
+                this.pendingSplashes.push({ x: proj.x, y: proj.y });
                 this.destroyEntity(proj);
             }
         });

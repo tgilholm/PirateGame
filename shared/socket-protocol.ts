@@ -53,6 +53,11 @@ export type PlayerAction =
     | { type: ActionType.FIRE; data?: never }
     | { type: ActionType.RELEASE; data?: never}
 
+export interface SplashEvent {
+    x: number;
+    y: number;
+}
+
 
 export interface Action {
     playerId: string;

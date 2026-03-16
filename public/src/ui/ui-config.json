@@ -42,10 +42,10 @@
     "InteractionPrompt": {},
     "goldCounter": {
         "Position": {
-            "Top": "1.25rem",
-            "Right": "1.25rem",
-            "Bottom": null,
-            "Left": null
+            "Top": null,
+            "Right": null,
+            "Bottom": "1.25rem",
+            "Left": "1.25rem"
         }
     }
 }

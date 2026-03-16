@@ -1,13 +1,14 @@
 import GameEngine from "../engine/game-engine";
 import EntityRegistry from "../engine/entity-registry";
 import WorldController from "../controllers/world-controller";
-import { PlayerAction } from "@shared/socket-protocol";
+import { PlayerAction, SplashEvent } from "@shared/socket-protocol";
 import Player from "../entities/player";
 import EntityFactory from "../entities/entity-factory";
 import Ship from "../entities/ship";
 import { EventEmitter } from "events";
 import { CONFIG } from "../config";
 import PhysicsSystem from "../systems/physics-system";
+import ProjectileSystem from "../systems/projectile-system";
 import SpatialGrid from "./spatial-grid";
 import TerrainMap from "src/engine/terrain-map";
 import Entity from "src/entities/entity";
@@ -211,6 +212,8 @@ export default class GameWorld extends EventEmitter {
      */
     private broadcastGameState() {
         const entityData = this.buildEntityData();
+        const projectileSystem = this.engine.systems.get('projectile') as ProjectileSystem;
+        const splashes: SplashEvent[] = projectileSystem.pendingSplashes;
 
         this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
             const session = this.sessions.get(socketId);    // access that player's "known data"
@@ -262,14 +265,22 @@ export default class GameWorld extends EventEmitter {
                 }
             });
 
+            // Only send splashes that are within this player's view distance
+            const splashEvents = splashes.filter(s =>
+                Math.hypot(s.x - wx, s.y - wy) <= this.grid['viewDistance']
+            );
+
             // If nothing has changed, skip it altogether
-            if (!newEntities.length && !deltaEntities.length && !removedIds.length) {
+            if (!newEntities.length && !deltaEntities.length && !removedIds.length && !splashEvents.length) {
                 return null;
             }
 
             // Send to client via socket service
-            return { newEntities, deltaEntities, removedIds };
+            return { newEntities, deltaEntities, removedIds, splashEvents };
         });
+
+        // Drain splashes — they have been broadcast this tick
+        projectileSystem.pendingSplashes = [];
     }
 
     /**
