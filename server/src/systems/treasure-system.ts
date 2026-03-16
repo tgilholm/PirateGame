@@ -472,11 +472,19 @@ export default class TreasureSystem implements BaseSystem {
     }
 
     private findSpawnPoint(): WorldPoint | null {
-        for (let attempt = 0; attempt < 100; attempt++) {
-            const point = this.randomGridPoint();
+        const spawnTiles = this.terrainMap.getTileset('treasure-spawns');
 
-            if (!this.isInsideBounds(point)) continue;
-            if (!this.isValidTerrain(point)) continue;
+        if (spawnTiles.length === 0) {
+            console.warn('[TreasureSystem] No treasure-spawns tiles found in tilemap!');
+            return null;
+        }
+
+        // Shuffle attempts to avoid always picking the same tiles
+        const shuffled = [...spawnTiles].sort(() => Math.random() - 0.5);
+
+        for (const tile of shuffled) {
+            const point: WorldPoint = { x: tile.worldX, y: tile.worldY };
+
             if (this.isInsideShip(point)) continue;
             if (this.isTooCloseToTreasure(point)) continue;
             if (this.isBlockedByRecentHole(point)) continue;
@@ -485,51 +493,6 @@ export default class TreasureSystem implements BaseSystem {
         }
 
         return null;
-    }
-
-    private randomGridPoint(): WorldPoint {
-        const { gridSize } = this.options;
-        const cols = Math.floor(this.terrainMap.widthInPixels / gridSize);
-        const rows = Math.floor(this.terrainMap.heightInPixels / gridSize);
-
-        const cellX = this.randomInt(0, Math.max(0, cols - 1));
-        const cellY = this.randomInt(0, Math.max(0, rows - 1));
-
-        return {
-            x: cellX * gridSize + gridSize / 2,
-            y: cellY * gridSize + gridSize / 2,
-        };
-    }
-
-    private isInsideBounds(point: WorldPoint): boolean {
-        const { spawnPadding } = this.options;
-
-        return (
-            point.x >= spawnPadding &&
-            point.y >= spawnPadding &&
-            point.x <= this.terrainMap.widthInPixels - spawnPadding &&
-            point.y <= this.terrainMap.heightInPixels - spawnPadding
-        );
-    }
-
-    private isValidTerrain(point: WorldPoint): boolean {
-        const inset = 48;
-
-        const offsets = [
-            [0, 0],
-            [-inset, 0],
-            [inset, 0],
-            [0, -inset],
-            [0, inset],
-            [-inset, -inset],
-            [inset, -inset],
-            [-inset, inset],
-            [inset, inset],
-        ];
-
-        return offsets.every(([dx, dy]) =>
-            this.terrainMap.isOnIsland(point.x + dx, point.y + dy)
-        );
     }
 
     private isInsideShip(point: WorldPoint): boolean {

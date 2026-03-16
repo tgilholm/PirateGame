@@ -34,6 +34,7 @@ export default class TerrainMap {
         this.mapLayers.set('islands', this.getTilesetFromLayer(mapData, 'islands') || new Set());
         this.mapLayers.set('npc-spawns', this.getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', this.getTilesetFromLayer(mapData, 'player-spawns') || new Set());
+        this.mapLayers.set('treasure-spawns', this.getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
 
     }
 
@@ -86,7 +87,7 @@ export default class TerrainMap {
          return false;
         }
         
-        return islandTiles.has(`${tileX},${tileY}`);
+        return islandTiles.has(`${tileX}, ${tileY}`);
     }
 
 
