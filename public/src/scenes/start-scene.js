@@ -22,6 +22,12 @@ export class StartScene extends Phaser.Scene {
         this.load.image('helm', '/assets/helm.png')
         this.load.image('ladder', '/assets/ladder.png')
         this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
+        this.load.image('treasure-chest', '/assets/chest.png');
+        this.load.image('x-mark', '/assets/redcross.png');
+        this.load.image('shovel', '/assets/shovel.png');
+        this.load.image("hole", "/assets/hole.png");
+        this.load.spritesheet("chest_open", "/assets/chestopen.png", {frameWidth: 48, frameHeight: 48});
+        this.load.image("chest-in-hole", "/assets/chestinhole.png")
 
         // Resize the game if the window changes size
         window.addEventListener('resize', () => {
@@ -36,6 +42,9 @@ export class StartScene extends Phaser.Scene {
         // width & height are given in game config
         const centerX = this.scale.width / 2;
         const centerY = this.scale.height / 2;
+
+        const gold = document.getElementById("gold-counter");
+        if (gold) gold.style.display = "none";
 
 
         // Add the animated background
@@ -52,6 +61,19 @@ export class StartScene extends Phaser.Scene {
             repeat: -1
         });
         ship.play('fly');
+
+        this.anims.create({
+            key: "chest-open",
+            frames: [
+                { key: "chest_open", frame: 0 },
+                { key: "chest_open", frame: 1 },
+                { key: "chest_open", frame: 2 },
+                { key: "chest_open", frame: 1 },
+                { key: "chest_open", frame: 2 }
+            ],
+            frameRate: 10,
+            repeat: 0
+        });
 
         // Make the title text "wave" in and out
         this.tweens.add({

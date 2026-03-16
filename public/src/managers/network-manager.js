@@ -1,7 +1,6 @@
 /** global io */
 
-import { ActionType, ClientEvent } from "shared/built/socket-protocol.js";
-import { ServerEvent } from "shared/socket-protocol.js";
+import { ActionType, ClientEvent, ServerEvent } from "shared/built/socket-protocol.js";
 
 /**
  * Owns socket-io logic
@@ -22,7 +21,7 @@ export default class NetworkManager {
 
     /**
      * Sends an event to the server
-     * @param {string} event  
+     * @param {string} event
      * @param {any} data
      */
     emit(event, data) {
@@ -39,21 +38,18 @@ export default class NetworkManager {
 
     /**
      * Sends movement inputs from the client to the server
-     * @param {import("shared/socket-protocol.js").MoveData} inputs 
+     * @param {import("shared/socket-protocol.js").MoveData} inputs
      */
     sendMove(inputs) {
         this.sendAction({ type: ActionType.MOVE, data: inputs });
     }
 
     /**
-         * Sends an interaction event to the server
-         * @param {import("shared/socket-protocol.js").InteractData} data 
-         */
+     * Sends an interaction event to the server
+     * @param {import("shared/socket-protocol.js").InteractData} data
+     */
     sendInteract(data) {
-        this.sendAction({
-            type: ActionType.INTERACT,
-            data: data
-        });
+        this.sendAction({ type: ActionType.INTERACT, data });
     }
 
     /**
@@ -70,11 +66,29 @@ export default class NetworkManager {
         this.sendAction({ type: ActionType.FIRE });
     }
 
+    sendTreasureInteract() {
+        this.sendAction({ type: ActionType.TREASURE_INTERACT });
+    }
+
     /**
      * Sends a player's message to the server
-     * @param {string} text 
+     * @param {string} text
      */
     sendMessage(text) {
         this.sendAction({ type: ActionType.MESSAGE, data: { text } });
+    }
+
+    sendDigStart() {
+        this.sendAction({
+            type: ActionType.DIG,
+            data: { mode: "start" }
+        });
+    }
+
+    sendDigHit(sliderPosition) {
+        this.sendAction({
+            type: ActionType.DIG,
+            data: { mode: "hit", sliderPosition }
+        });
     }
 }

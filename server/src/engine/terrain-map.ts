@@ -11,6 +11,7 @@ import path from 'path';
 export default class TerrainMap {
     private mapLayers: Map<string, Set<string>> = new Map();
     public readonly tileWidth: number;
+    public readonly tileHeight: number;
     public readonly mapWidth: number;
     public readonly mapHeight: number;
 
@@ -24,13 +25,16 @@ export default class TerrainMap {
         const mapPath = path.join(__dirname, '..', mapFileName);
         const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
         this.tileWidth = mapData.tilewidth;
+        this.tileHeight = mapData.tileHeight;
         this.mapHeight = mapData.height;
         this.mapWidth = mapData.width;
+
 
         // Add all the layers you need here
         this.mapLayers.set('islands', this.getTilesetFromLayer(mapData, 'islands') || new Set());
         this.mapLayers.set('npc-spawns', this.getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
         this.mapLayers.set('player-spawns', this.getTilesetFromLayer(mapData, 'player-spawns') || new Set());
+        this.mapLayers.set('treasure-spawns', this.getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
 
     }
 
@@ -83,7 +87,7 @@ export default class TerrainMap {
          return false;
         }
         
-        return islandTiles.has(`${tileX},${tileY}`);
+        return islandTiles.has(`${tileX}, ${tileY}`);
     }
 
 
