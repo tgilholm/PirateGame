@@ -6,6 +6,7 @@ import GameManager from "../managers/game-manager.js";
 import UIManager from "../managers/ui-manager.js";
 import InputManager from "../managers/input-manager.js";
 import ModelFactory from "../managers/model-factory.js";
+import AnimationManager from "../managers/animation-manager.js";
 
 
 const socket = globalThis.io();
@@ -52,6 +53,7 @@ export class MainScene extends Phaser.Scene {
             new InputManager(this),
             modelFactory
         );
+        this.animationManager = new AnimationManager(this);
         this.uiManager = new UIManager(this, this.gameManager);
 
         // Invisible sprite ignoring player on/off ship state, always follows thi

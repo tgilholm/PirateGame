@@ -84,7 +84,7 @@ export default class TerrainMap {
          return false;
         }
         
-        return islandTiles.has(`${tileX},${tileY}`);
+        return islandTiles.has(`${tileX}, ${tileY}`);
     }
 
 

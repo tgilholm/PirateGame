@@ -53,9 +53,13 @@ export type PlayerAction =
     | { type: ActionType.FIRE; data?: never }
     | { type: ActionType.RELEASE; data?: never}
 
+//types of splash animations 
+export type SplashType = 'water' | 'land' | 'blood';
+
 export interface SplashEvent {
     x: number;
     y: number;
+    splashType: SplashType;
 }
 
 

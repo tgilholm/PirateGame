@@ -5,7 +5,9 @@ import SpatialGrid from "../application/spatial-grid";
 import Player from "src/entities/player";
 import Ship from "src/entities/ship";
 import Entity from "src/entities/entity";
-import Shop from "src/entities/shopimport { SplashEvent } from "@shared/socket-protocol";
+import Shop from "src/entities/shop";
+import { SplashEvent, SplashType } from "@shared/socket-protocol";
+import TerrainMap from "../engine/terrain-map";
 
 /**
  * Updates all projectile objects each tick. Handles collisions between
@@ -19,6 +21,7 @@ export default class ProjectileSystem implements BaseSystem {
 
     constructor(private entityRegistry: EntityRegistry,
         private grid: SpatialGrid,
+        private terrain: TerrainMap
     ) { }
 
     /**
@@ -55,8 +58,9 @@ export default class ProjectileSystem implements BaseSystem {
         // Delete expired projectiles
         if (proj.ttl <= 0) {
             if (proj.type === 'cannonball') {
-                // Queue a splash event for GameWorld to broadcast this tick
-                this.pendingSplashes.push({ x: proj.x, y: proj.y });
+                // Determine splash type from terrain
+                const splashType: SplashType = this.terrain.isOnIsland(proj.x, proj.y) ? 'land' : 'water';
+                this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType });
             }
             this.destroyEntity(proj);
         }
@@ -83,7 +87,7 @@ export default class ProjectileSystem implements BaseSystem {
             }
 
             if (hit) {
-                if (proj.type === 'cannonball') this.pendingSplashes.push({ x: proj.x, y: proj.y });
+                if (proj.type === 'cannonball') this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType: 'blood' });
                 this.destroyEntity(proj);
             }
         });
@@ -108,7 +112,7 @@ export default class ProjectileSystem implements BaseSystem {
             }
 
             if (hit) {
-                this.pendingSplashes.push({ x: proj.x, y: proj.y });
+                this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType: 'water' });
                 this.destroyEntity(proj);
             }
         });

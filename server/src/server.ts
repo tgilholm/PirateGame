@@ -56,7 +56,7 @@ const spatialGrid = new SpatialGrid(512, 2048);
 
 const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
-const projectileSystem = new ProjectileSystem(registry, spatialGrid)
+const projectileSystem = new ProjectileSystem(registry, spatialGrid, terrainMap)
 const entityFactory = new EntityFactory(entityConfig, registry);
 
 const engine = new GameEngine({
