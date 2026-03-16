@@ -63,6 +63,7 @@ export default class TerrainMap {
     {
         const nodes = this.getTileset('npc-ship-path');
         this.npcPath = buildPathSpline(nodes, 0.5, 25, true);
+        console.log(`[TerrainMap] Generated ${this.npcPath.length} path nodes`);
     }
 
 

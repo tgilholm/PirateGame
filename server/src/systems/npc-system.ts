@@ -15,7 +15,7 @@ import NPCShip from "../entities/npcs/npc-ship";
 export default class NPCSystem implements BaseSystem {
 
     npcLimit: number = 12;
-    npcShipLimit: number = 0;
+    npcShipLimit: number = 1;
 
     constructor(private terrainMap: TerrainMap,
         private entityFactory: EntityFactory,
@@ -54,38 +54,42 @@ export default class NPCSystem implements BaseSystem {
         }
     }
 
-
     patrol(ship: NPCShip, path: Array<{ x: number, y: number }>, dt: number): void {
-        let moveDistance = ship.patrolSpeed * dt;
+        const current = path[ship.pathIndex];
+        const nextIndex = (ship.pathIndex + 1) % path.length;
+        const next = path[nextIndex];
 
-        while (moveDistance > 0) {
-            const nextIndex = (ship.pathIndex + 1) % path.length;
-            const current = path[ship.pathIndex];
-            const next = path[nextIndex];
+        const dx = next.x - current.x;
+        const dy = next.y - current.y;
+        const segLength = Math.hypot(dx, dy);
 
-            const dx = next.x - current.x;
-            const dy = next.y - current.y;
-            const segLength = Math.hypot(dx, dy);
-
-            // How much of this segment is left
-            const remaining = segLength * (1 - ship.segmentT);
-
-            if (moveDistance >= remaining) {
-                // Consume this segment entirely and move to the next
-                moveDistance -= remaining;
-                ship.pathIndex = nextIndex;
-                ship.segmentT = 0;
-            } else {
-                // Advance within the segment
-                ship.segmentT += moveDistance / segLength;
-                ship.x = current.x + dx * ship.segmentT;
-                ship.y = current.y + dy * ship.segmentT;
-                ship.r = Math.atan2(dy, dx);
-                moveDistance = 0;
-            }
+        // prevent dividing by 0
+        if (segLength === 0) {
+            ship.pathIndex = nextIndex;
+            return;
         }
-    }
 
+        // Move between each segment one at a time
+        const moveDistance = ship.patrolSpeed * dt;
+
+        const deltaT = moveDistance / segLength;
+        ship.segmentT += deltaT;
+
+        // If close enough, jump to the next segment
+        if (ship.segmentT >= 1) {
+            ship.segmentT = 0;
+            ship.pathIndex = nextIndex;
+
+            ship.x = next.x;
+            ship.y = next.y;
+        } else {
+            // Otherwise move smoothly
+            ship.x = current.x + dx * ship.segmentT;
+            ship.y = current.y + dy * ship.segmentT;
+        }
+
+        ship.r = Math.atan2(dy, dx);
+    }
 
     removeDead(npc: NPC) {
         if (npc.health <= 0) {
@@ -122,7 +126,6 @@ export default class NPCSystem implements BaseSystem {
         if (regularNpcs.length < this.npcLimit) {
             const { x, y } = this.getSpawnPoint();
             this.entityFactory.createNPC(`npc_${Date.now()}`, x, y);
-            console.log(`[NPCSystem] Created NPC at ${x}, ${y}`);
         }
     }
 
@@ -131,8 +134,6 @@ export default class NPCSystem implements BaseSystem {
 
         const spawn = path[0];
         this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
-
-        console.log(`[NPCSystem] Created NPC Ship at ${spawn.x}, ${spawn.y}`);
     }
 
 

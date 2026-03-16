@@ -16,6 +16,7 @@ export default class UIManager {
 
         this.promptElement = document.getElementById('interaction-prompt');
         this.fpsCounter = document.getElementById('fps-counter');
+        this.modelCounter = document.getElementById('model-counter')
         this.currentInteractable = null;
     }
 
@@ -54,6 +55,7 @@ export default class UIManager {
         }
 
         this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
+        this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
     }
 
     /**

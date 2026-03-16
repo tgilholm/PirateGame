@@ -178,11 +178,13 @@ input.formElement {
     pointer-events: none;
 }
 
-#fps-counter {
+.game-stats {
+    display: block;
     position: absolute;
     top: 0;
     left: 0;
 }
+
 
 
 /* ---- Interaction prompt ---- */

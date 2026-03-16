@@ -9,7 +9,7 @@ export default class NPCShip extends Ship
     patrolSpeed: number = 75;   // how fast it moves when circling
     detectionRadius: number = 1000;
     target: Entity | null = null;
-    segmentT: number = 0;
+    segmentT: number = 0
 
     constructor(id: string, x: number, y: number, config: NPCShipConfig)
     {

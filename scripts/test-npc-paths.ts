@@ -24,7 +24,7 @@ async function main() {
     await createPlot({ x: spline.map(n => n.x), y: spline.map(n => n.y), title: "After", output: "after.png" });
 
     spline.forEach((item) => {
-        console.log(item.x, item.y);
+        console.log(`Adding node: ${item.x}, ${item.y}`);
     });
     console.log("Plots saved: before.png, after.png");
 }
