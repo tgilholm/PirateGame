@@ -161,6 +161,7 @@ input.formElement {
     z-index: 1000;
     overflow: hidden;
     border: 1px solid #fff;
+    pointer-events: none;
 }
 
 .minimap-img,

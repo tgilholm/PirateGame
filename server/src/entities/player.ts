@@ -85,6 +85,7 @@ export default class Player extends Entity {
         return {
             ...super.toState(),
             username: this.username,
+            gold: this.gold,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
             isUsingCannon: !!this.cannon,    // convert to true/false

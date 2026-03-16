@@ -1,6 +1,7 @@
 import GameManager from "./game-manager.js";
 import Minimap from "../ui/minimap.js";
 import ShopUI from "../ui/shop-ui.js";
+import GoldCounter from "../ui/gold-counter.js";
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -25,11 +26,14 @@ export default class UIManager {
         this.shopUI = new ShopUI(gameManager.network, gameManager);
         gameManager.on('openShop', () => this.shopUI.open());
 
+        this.goldCounter = new GoldCounter(document.getElementById('gold-counter'));
+
         gameManager.on('localPlayerReady', (player) => {
             const pos = player.worldPos;
             this.minimap.placeMarker(pos.x, pos.y, gameManager.mapWidth, gameManager.mapHeight);
             this.minimap.placeShops(gameManager.mapWidth, gameManager.mapHeight, gameManager.shopSpawns);
             this.minimapReady = true;
+            this.goldCounter.show();
         });
     }
 
@@ -42,6 +46,8 @@ export default class UIManager {
 
         if (!player) return;
 
+        this.goldCounter.update(player);
+
         const isInteracting = player.isSteering || player.isUsingCannon;
 
         if (target) {
@@ -49,13 +55,13 @@ export default class UIManager {
 
             if (isInteracting) {
                 const prompt = item.releasePrompt || "Release";
-                this.showPrompt(`[Q] ${prompt}`);
+                this.showPrompt("[Q]" + prompt);
             } else {
-                this.showPrompt(`[E] ${item.usePrompt}`);
+                this.showPrompt("[E]" + item.usePrompt);
             }
         } else {
             if (isInteracting) {
-                this.showPrompt(`[Q] Release`);
+                this.showPrompt("[Q] Release");
             } else {
                 this.hidePrompt();
             }

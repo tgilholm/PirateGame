@@ -37,7 +37,7 @@ export default class GoldCounter {
      * @param {import('../models/player-model.js').default} player
      */
     update(player) {
-        if (this.amountEl && player) {
+        if (this.amountEl && player && player.gold != null) {
             this.amountEl.textContent = player.gold.toLocaleString();
         }
     }
