@@ -84,6 +84,7 @@ export class MainScene extends Phaser.Scene {
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.gameManager.start(data.username);
+        
     }
 
     /**

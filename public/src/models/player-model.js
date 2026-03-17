@@ -26,6 +26,7 @@ export default class PlayerModel extends Model {
         this.aimAngle = 0;
         this.parentId = null;
         this.username = null;
+        this.gold = 0;
         this.reloadTime = 0;
         this.reloadTimer = 0;
         this.reloadIndicator = new ReloadIndicator(scene, this, 22);
@@ -65,6 +66,7 @@ export default class PlayerModel extends Model {
             this.username = data.username;
         }
 
+        if (data.gold !== undefined) this.gold = data.gold;
         if (data.isSteering !== undefined) this.isSteering = data.isSteering;
         if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
         if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;

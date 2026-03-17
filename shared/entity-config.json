@@ -3,7 +3,8 @@
         "maxHealth": 100,
         "runSpeed": 5,
         "swimSpeed": 3,
-        "radius": 15
+        "radius": 15,
+        "startingGold": 100000
     },
     "ship": {
         "maxHealth": 1000,
@@ -46,7 +47,38 @@
                 "x": -80,
                 "y": -75
             }
-        ]
+        ],
+        "defaultStats": {
+            "maxHealth": 450,
+            "crewCapacity": 10,
+            "acceleration": 0.15,
+            "maxSpeed": 10,
+            "cannonDamage": 5,
+            "cannonRange": 500,
+            "cannonBallSpeed": 300,
+            "cannonCount": 6,
+            "rammingPower": 10,
+            "minimapRange": 100,
+            "visionRange": 10,
+            "stopPower": 20,
+            "deployTime": 5,
+            "retrieveTime": 5,
+            "turnSpeed": 50,
+            "responseTime": 5,
+            "reloadTime": 3000,
+            "accuracy": 20,
+            "weight": 450,
+            "frictionAir": 0.05
+        }
+    },
+    "shop": {
+        "id": "shop",
+        "type": "shop",
+        "usePrompt": "open shop",
+        "releasePrompt": "close shop",
+        "radius": 40,
+        "interactRange": 100,
+        "texture": "shop"
     },
     "npcShip": {
         "maxHealth": 10000,
@@ -109,6 +141,28 @@
                 "x": -150,
                 "y": -110
             }
-        ]
+        ],
+        "defaultStats": {
+            "maxHealth": 450,
+            "crewCapacity": 10,
+            "acceleration": 0.15,
+            "maxSpeed": 10,
+            "cannonDamage": 5,
+            "cannonRange": 500,
+            "cannonBallSpeed": 300,
+            "cannonCount": 6,
+            "rammingPower": 10,
+            "minimapRange": 100,
+            "visionRange": 10,
+            "stopPower": 20,
+            "deployTime": 5,
+            "retrieveTime": 5,
+            "turnSpeed": 50,
+            "responseTime": 5,
+            "reloadTime": 3000,
+            "accuracy": 20,
+            "weight": 450,
+            "frictionAir": 0.05
+        }
     }
 }

@@ -7,6 +7,7 @@ import map from '../../shared/demo-map.json';
 export type EntityConfig = typeof entityConfig;
 export type PlayerConfig = typeof entityConfig["player"];
 export type ShipConfig = typeof entityConfig["ship"];
+export type ShopConfig = typeof entityConfig["shop"];
 export type NPCShipConfig = typeof entityConfig["npcShip"];
 
 export type WorldMap = typeof map;

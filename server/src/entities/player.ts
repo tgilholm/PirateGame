@@ -42,13 +42,13 @@ export default class Player extends Entity {
     ) {
         super(id, "player", x, y, config.maxHealth, parent);
         this.username = username || "";     // default to no uname
+        this.gold = config.startingGold || 0;// default to 0 gold
 
         // Player-specific detail
         this.isSteering = false;
         this.cannon = null; // not using cannon to start
         this.isCarrying = false;
         this.carryingTreasureId = null;
-        this.gold = 0;
 
         // Where the player is aiming
         this.aimAngle = 0;
@@ -86,14 +86,14 @@ export default class Player extends Entity {
         return {
             ...super.toState(),
             username: this.username,
+            gold: this.gold,
             isSteering: this.isSteering,
             aimAngle: this.aimAngle,
             isUsingCannon: !!this.cannon,    // convert to true/false
             reloadTimer: this.reloadTimer,
             reloadTime: this.reloadTime,
             isCarrying: this.isCarrying,
-            carryingTreasureId: this.carryingTreasureId,
-            gold: this.gold
+            carryingTreasureId: this.carryingTreasureId
         }
 
     }

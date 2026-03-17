@@ -5,6 +5,7 @@ import SpatialGrid from "../application/spatial-grid";
 import Player from "src/entities/player";
 import Ship from "src/entities/ship";
 import Entity from "src/entities/entity";
+import Shop from "src/entities/shop";
 
 /**
  * Updates all projectile objects each tick. Handles collisions between
@@ -26,6 +27,7 @@ export default class ProjectileSystem implements BaseSystem {
         const projectiles = this.entityRegistry.getByType<Projectile>('projectile');
         const players = this.entityRegistry.getByType<Player>('player');
         const ships = this.entityRegistry.getByType<Ship>('ship');
+        const shops = this.entityRegistry.getByType<Shop>('shop');
 
         projectiles.forEach(projectile => {
             const nearby = this.grid.getNearby(projectile.x, projectile.y);
@@ -35,6 +37,9 @@ export default class ProjectileSystem implements BaseSystem {
             this.collidePlayerAndNPC(projectile, nearby);
             if (projectile.ttl <= 0) return;
             this.collideShip(projectile, nearby);
+            if (projectile.ttl <= 0) return;
+            this.collideShop(projectile, nearby);
+            
         });
     }
 
@@ -96,6 +101,19 @@ export default class ProjectileSystem implements BaseSystem {
             }
 
             if (hit) {
+                this.destroyEntity(proj);
+            }
+        });
+    }
+
+    collideShop(proj: Projectile, nearby: Set<string>) {
+        nearby.forEach(id => {
+            const entity = this.entityRegistry.get(id);
+            if (entity?.type !== 'shop') return;
+
+            const shop = entity as Shop;
+            const dist = Math.hypot(proj.x - shop.x, proj.y - shop.y);
+            if (dist < proj.radius + shop.radius) {
                 this.destroyEntity(proj);
             }
         });

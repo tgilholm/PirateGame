@@ -24,14 +24,18 @@ import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
 import PlayerController from './controllers/player-controller';
 import UpgradeHandler from './handlers/upgrade-handler';
+import StatsHandler from './handlers/stats-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import NPCSystem from './systems/npc-system';
+import GoldHandler from './handlers/gold-handler';
 import { ServerEvent } from "@shared/socket-protocol";
 import TreasureSystem from "./systems/treasure-system";
+
+
 
 // Create the express app & server
 const app = express();
@@ -41,7 +45,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 // Route files to the public folder
 app.use(express.static(path.join(__dirname, '../../public')));
 app.use('/shared', express.static(path.join(__dirname, '../../shared/browser')));
-
+app.use('/jsons', express.static(path.join(__dirname, '../jsons')));
 
 /*
   Create the game world. This file acts as the composition root- the start of the dependency
@@ -57,7 +61,7 @@ const terrainMap = new TerrainMap('demo-map.json')
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid)
 const entityFactory = new EntityFactory(entityConfig, registry);
-const treasureSystem = new TreasureSystem(registry, entityFactory, terrainMap,entityConfig);
+const treasureSystem = new TreasureSystem(registry, entityFactory, terrainMap, entityConfig);
 
 const engine = new GameEngine({
   physicsSystem,
@@ -65,15 +69,15 @@ const engine = new GameEngine({
   projectileSystem,
   messageSystem: new MessageSystem(),
   npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid),
-    treasureSystem
+  treasureSystem
 });
 
-const upgradeHandler = new UpgradeHandler(entityConfig);
+const upgradeHandler = new UpgradeHandler(new GoldHandler(), new StatsHandler());
 const interactionHandler = new InteractionHandler();
 
 const worldController = new WorldController(registry,
   {
-    playerController: new PlayerController(registry, interactionHandler, upgradeHandler,treasureSystem),
+    playerController: new PlayerController(registry, interactionHandler, upgradeHandler, treasureSystem),
     shipController: new ShipController(registry),
     messageController: new MessageController(),
     cannonController: new CannonController(registry)
@@ -86,12 +90,12 @@ const socketService = new SocketService(io, gameWorld);
 socketService.initialise();
 
 treasureSystem.bindUiEvents(
-    (playerId, payload) => {
-        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_START, payload);
-    },
-    (playerId, payload) => {
-        io.to(playerId).emit(ServerEvent.DIG_MINIGAME_RESULT, payload);
-    }
+  (playerId, payload) => {
+    io.to(playerId).emit(ServerEvent.DIG_MINIGAME_START, payload);
+  },
+  (playerId, payload) => {
+    io.to(playerId).emit(ServerEvent.DIG_MINIGAME_RESULT, payload);
+  }
 );
 
 gameWorld.start();

@@ -155,15 +155,7 @@ input.formElement {
     font-weight: bold;
 }
 
-/* ---- Minimap ---- */
-#minimap-container {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 1000;
-    overflow: hidden;
-    border: 1px solid #fff;
-}
+
 
 .minimap-img,
 .minimap-marker-canvas {
@@ -203,89 +195,11 @@ input.formElement {
     white-space: nowrap;
 }
 
-/* ---- Shop ---- */
-#shop-menu {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    background: rgba(13, 47, 79, 0.97);
-    border: 1px solid #fff;
-    border-radius: 4px;
-    padding: 20px;
-    min-width: 300px;
-    max-width: 90vw;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.shop-title {
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 12px;
-    border-bottom: 1px solid #ffffff55;
-    padding-bottom: 8px;
-}
-
-.shop-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.shop-card {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid #ffffff44;
-    border-radius: 4px;
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.shop-card-name {
-    font-size: 12px;
-    font-weight: bold;
-    color: #aad4ff;
-}
-
-.shop-card-description {
-    font-size: 11px;
-    color: #ccc;
-    flex: 1;
-}
-
-.shop-card-buy,
-.shop-close-btn {
-    background: royalblue;
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 3px;
-    padding: 4px 8px;
-    font-size: 11px;
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.shop-card-buy {
-    align-self: flex-end;
-}
-
-.shop-close-btn {
-    width: 100%;
-    margin-top: 4px;
-}
-
-.shop-card-buy:hover,
-.shop-close-btn:hover {
-    background: deepskyblue;
-}
 /* Active Players Panel */
 .vt323-regular {
     font-family: "VT323", monospace;
 }
+
 #players-panel {
     position: fixed;
     top: 20px;
@@ -296,20 +210,22 @@ input.formElement {
     max-height: 220px;
 
     background: rgba(0, 0, 0, 0.35);
-    border: 2px solid rgba(255,255,255,0.6);
+    border: 2px solid rgba(255, 255, 255, 0.6);
     border-radius: 8px;
     padding: 10px 12px;
     color: white;
-    font-family: "VT323", monospace; /* match your UI */
+    font-family: "VT323", monospace;
+    /* match your UI */
     font-size: 22px;
-    pointer-events: none; /* won't block game input */
+    pointer-events: none;
+    /* won't block game input */
 }
 
 #players-panel .players-title {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
     padding-bottom: 6px;
     text-align: center;
 }
@@ -317,10 +233,12 @@ input.formElement {
 /* Use an ordered list for the numbering */
 #players-list {
     margin: 0;
-    padding-left: 22px; /* spacing for 1. 2. 3. */
+    padding-left: 22px;
+    /* spacing for 1. 2. 3. */
     list-style-position: outside;
     max-height: 170px;
-    overflow: auto; /* or auto if you want scroll */
+    overflow: auto;
+    /* or auto if you want scroll */
 }
 
 #players-list li {
@@ -330,16 +248,32 @@ input.formElement {
     text-overflow: ellipsis;
 }
 
-#gold-counter {
+.left-panel {
+    display:flex;
+    flex-direction: column;
+}
+
+#minimap-container {
     position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    overflow: hidden;
+    border: 1px solid #fff;
+    pointer-events: none;
+}
+
+#gold-counter {
+    position: relative;
     top: 20px;
     left: 20px;
     right: auto;
     z-index: 1300;
     min-width: 140px;
+    max-width: 150px;
     padding: 10px 14px;
     background: rgba(0, 0, 0, 0.45);
-    border: 2px solid rgba(255,255,255,0.65);
+    border: 2px solid rgba(255, 255, 255, 0.65);
     border-radius: 8px;
     color: #ffd54a;
     font-family: "VT323", monospace;
@@ -347,6 +281,7 @@ input.formElement {
     text-align: center;
     pointer-events: none;
 }
+
 #dig-minigame {
     position: fixed;
     left: 50%;
@@ -390,4 +325,122 @@ input.formElement {
     color: white;
     font-size: 18px;
     font-family: "VT323", monospace;
+}
+
+/* ---- Shop ---- */
+#shop-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background: rgba(13, 47, 79, 0.97);
+    border: 1px solid #fff;
+    border-radius: 4px;
+    padding: 20px;
+    min-width: 640px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.shop-title {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #ffffff55;
+    padding-bottom: 8px;
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.shop-card {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid #ffffff44;
+    border-radius: 4px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.shop-card-name {
+    font-size: 12px;
+    font-weight: bold;
+    color: #aad4ff;
+}
+
+.shop-card-description {
+    font-size: 11px;
+    color: #ccc;
+    flex: 1;
+}
+
+.shop-card-buy,
+.shop-close-btn {
+    background: royalblue;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.shop-card-level {
+    font-size: 11px;
+    color: #f5c542;
+}
+
+.shop-card-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-card-cost {
+    font-size: 11px;
+    color: #ffd700;
+}
+
+.shop-card-max {
+    background: rgba(255, 255, 255, 0.1);
+    color: #888;
+    border-color: #555;
+    cursor: default;
+}
+
+.shop-close-btn {
+    width: 100%;
+    margin-top: 4px;
+}
+
+.shop-card-buy:hover,
+.shop-close-btn:hover {
+    background: deepskyblue;
+}
+
+/* ---- Gold counter ---- */
+#gold-counter {
+    position: fixed;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: rgba(13, 47, 79, 0.85);
+    border: 1px solid #ffd700;
+    border-radius: 4px;
+    padding: 6px 12px;
+    pointer-events: none;
+}
+
+.gold-counter-amount {
+    font-size: 15px;
+    font-weight: bold;
 }

@@ -1,26 +1,44 @@
 {
-    "MINIMAP": {
-        "SIZE": 350,
-        "IMG_SRC": "/assets/minimap.png",
-        "POSITION": {
-            "TOP": "20px",
-            "LEFT": "20px"
+    "Minimap": {
+        "Size": 350,
+        "ImgSrc": "/assets/minimap.png",
+        "Position": {
+            "Top": "20px",
+            "Left": "20px"
         },
-        "MARKER": {
-            "RADIUS": 5,
-            "FILL": "#ff0000",
-            "STROKE": "#ffffff",
-            "LINE_WIDTH": 1.5
+        "PlayerMarker": {
+            "Radius": 5,
+            "Fill": "#ff0000",
+            "Stroke": "#ffffff",
+            "LineWidth": 1.5
+        },
+        "ShopMarker": {
+            "Size": 6,
+            "Fill": "#ffd700",
+            "Stroke": "#ffffff",
+            "LineWidth": 1.5
         }
     },
-    "MESSAGE_TEXT": {
-        "FONT_SIZE": "18px",
-        "COLOR": "#ffffff",
-        "BACKGROUND": "#00000088"
+    "MessageText": {
+        "FontSize": "18px",
+        "Color": "#ffffff",
+        "Background": "#00000088"
     },
-    "DEBUG_MENU": {
-        "TOGGLE_KEY": "X"
+    "DebugMenu": {
+        "ToggleKey": "X"
     },
-    "INTERACTION_PROMPT": {},
-    "SHOP": {}
+    "Shop": {
+        "Radius": 40,
+        "Label": {
+            "Text": "Shop",
+            "FontSize": "13px",
+            "FontFamily": "Consolas",
+            "Color": "#f5c542",
+            "Stroke": "#000000",
+            "StrokeThickness": 3
+        },
+        "ItemCards": {}
+    },
+    "InteractionPrompt": {}
+
 }

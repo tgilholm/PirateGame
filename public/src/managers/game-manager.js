@@ -7,6 +7,7 @@ import Model from "../models/model.js";
 import { MainScene } from "../scenes/main-scene.js";
 import InteractableModel from "../models/interactable-model.js";
 import DigMinigame from "../ui/dig-minigame.js";
+import ShipModel from "../models/ship-model.js";
 
 /**
  * Client side state manager. Keeps track of players in game, handles
@@ -242,11 +243,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         const model = this.models.get(delta.id);
         if (!model) return;
         // @ts-ignore
-        if (model.entityType === "player" && delta.parentId !== undefined) {
+        if (model instanceof PlayerModel && delta.parentId !== undefined) {
             this.handleReparent(model, delta);
         }
 
         model.sync(delta);
+
+        if (delta.components !== undefined && delta.id === 'ship_' + this.playerId) {
+            this.emit('localShipUpdated');
+        }
     }
 
     /**
@@ -297,6 +302,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         // Full state packet: replace all entity data
         this.network.on(ServerEvent.INIT_GAME, (data) => {
             this.playerId = data.id;
+            this.mapWidth = data.mapWidth;
+            this.mapHeight = data.mapHeight;
+            this.shopSpawns = data.shopSpawns ?? [];
             this.onFullSync(data); // get everything
         });
 
@@ -316,6 +324,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             const target = this.closestInteractable;
             if (target?.entity) {
                 const closest = target.entity;
+
+                if (closest.type === 'shop') {
+                    this.emit('openShop');
+                    return;
+                }
                 this.network.sendInteract({
                     targetId: closest.id,
                     targetType: closest.type,
@@ -437,5 +450,17 @@ export default class GameManager extends Phaser.Events.EventEmitter {
             this.localPlayer = mine;
             this.emit("localPlayerReady", this.localPlayer);
         }
+    }
+
+    /**
+     * Returns the component variants for the local player's ship, or null if unavailable.
+     * @returns {Record<string, string> | null}
+     */
+    getLocalShipComponents() {
+        if (!this.playerId) return null;
+        const ship = this.models.get('ship_' + this.playerId);
+
+        if (!(ship instanceof ShipModel)) return null;
+        return ship?.components ?? null;
     }
 }

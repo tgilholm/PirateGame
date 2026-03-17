@@ -113,6 +113,7 @@ export default class ShipModel extends Model {
 
         if (data.av !== undefined) this.angularVelocity = data.av;
         if (data.pilotId !== undefined) this.pilotId = data.pilotId;
+        if (data.components !== undefined) this.components = data.components;
     }
 
     /**
