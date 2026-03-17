@@ -63,6 +63,7 @@ export default class GameWorld extends EventEmitter {
         console.log(`[GameWorld] Starting game at ${this.tickRate} TPS`);
         this.lastTime = Date.now();
         this.tickInterval = setTimeout(() => this.tick(), 1000 / this.tickRate) as any;
+        this.createShops();
     }
 
     /**
@@ -301,5 +302,15 @@ export default class GameWorld extends EventEmitter {
 
         // If the parent is not a ship, return the entity's local position
         return { x: entity.x, y: entity.y };
+    }
+
+    /**
+     * 
+     */
+    private createShops() {
+        const shops = this.terrain.getTileset('shop-spawns');
+        shops.forEach((shop, index) => {
+            this.entityFactory.createShop(`shop_${index}`, shop.x, shop.y);
+        });
     }
 }

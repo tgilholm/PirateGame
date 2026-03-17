@@ -54,7 +54,7 @@
             "acceleration": 0.15,
             "maxSpeed": 10,
             "cannonDamage": 5,
-            "cannonRange": 500, 
+            "cannonRange": 500,
             "cannonBallSpeed": 300,
             "cannonCount": 6,
             "rammingPower": 10,
@@ -80,16 +80,46 @@
         "interactRange": 100,
         "texture": "shop",
         "spawns": [
-            { "x": 4800,  "y": 2400  },
-            { "x": 8000,  "y": 2400  },
-            { "x": 11200, "y": 2400  },
-            { "x": 4000,  "y": 5500  },
-            { "x": 10000, "y": 5500  },
-            { "x": 4800,  "y": 9000  },
-            { "x": 11200, "y": 9000  },
-            { "x": 5500,  "y": 12000 },
-            { "x": 8800,  "y": 12000 },
-            { "x": 12000, "y": 12000 }
+            {
+                "x": 4800,
+                "y": 2400
+            },
+            {
+                "x": 8000,
+                "y": 2400
+            },
+            {
+                "x": 11200,
+                "y": 2400
+            },
+            {
+                "x": 4000,
+                "y": 5500
+            },
+            {
+                "x": 10000,
+                "y": 5500
+            },
+            {
+                "x": 4800,
+                "y": 9000
+            },
+            {
+                "x": 11200,
+                "y": 9000
+            },
+            {
+                "x": 5500,
+                "y": 12000
+            },
+            {
+                "x": 8800,
+                "y": 12000
+            },
+            {
+                "x": 12000,
+                "y": 12000
+            }
         ]
     },
     "npcShip": {
@@ -153,6 +183,28 @@
                 "x": -150,
                 "y": -110
             }
-        ]
+        ],
+        "defaultStats": {
+            "maxHealth": 450,
+            "crewCapacity": 10,
+            "acceleration": 0.15,
+            "maxSpeed": 10,
+            "cannonDamage": 5,
+            "cannonRange": 500,
+            "cannonBallSpeed": 300,
+            "cannonCount": 6,
+            "rammingPower": 10,
+            "minimapRange": 100,
+            "visionRange": 10,
+            "stopPower": 20,
+            "deployTime": 5,
+            "retrieveTime": 5,
+            "turnSpeed": 50,
+            "responseTime": 5,
+            "reloadTime": 3000,
+            "accuracy": 20,
+            "weight": 450,
+            "frictionAir": 0.05
+        }
     }
 }

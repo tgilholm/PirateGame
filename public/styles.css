@@ -155,16 +155,7 @@ input.formElement {
     font-weight: bold;
 }
 
-/* ---- Minimap ---- */
-#minimap-container {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 1000;
-    overflow: hidden;
-    border: 1px solid #fff;
-    pointer-events: none;
-}
+
 
 .minimap-img,
 .minimap-marker-canvas {
@@ -257,13 +248,29 @@ input.formElement {
     text-overflow: ellipsis;
 }
 
-#gold-counter {
+.left-panel {
+    display:flex;
+    flex-direction: column;
+}
+
+#minimap-container {
     position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    overflow: hidden;
+    border: 1px solid #fff;
+    pointer-events: none;
+}
+
+#gold-counter {
+    position: relative;
     top: 20px;
     left: 20px;
     right: auto;
     z-index: 1300;
     min-width: 140px;
+    max-width: 150px;
     padding: 10px 14px;
     background: rgba(0, 0, 0, 0.45);
     border: 2px solid rgba(255, 255, 255, 0.65);

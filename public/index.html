@@ -43,8 +43,17 @@
     <!-- Interaction prompt -->
     <div id="interaction-prompt" style="display:none;"></div>
 
-    <!-- Minimap -->
-    <div id="minimap-container" style="display:none;"></div>
+    <div class="left-panel">
+        <!-- Minimap -->
+        <div id="minimap-container" style="display:none;"></div>
+        <!-- Gold counter -->
+        <div id="gold-counter" style="display: none;">Gold: 0</div>
+
+        <div class="game-stats">
+            <p id="fps-counter" style="color:green;">FPS: </p>
+            <p id="model-counter" style="color: green;">Nearby Models:</p>
+        </div>
+    </div>
 
     <!-- Shop overlay -->
     <div id="shop-menu" style="display:none;"></div>
@@ -55,13 +64,8 @@
         <ol id="players-list"></ol>
     </div>
 
-    <div class="game-stats">
-        <p id="fps-counter" style="color:green;">FPS: </p>
-        <p id="model-counter" style="color: green;">Nearby Models:</p>
-    </div>
 
-    <!-- Gold counter -->
-    <div id="gold-counter" style="display: none;">Gold: 0</div>
+
 
     <!-- Dig minigame UI -->
     <div id="dig-minigame" style="display:none;">

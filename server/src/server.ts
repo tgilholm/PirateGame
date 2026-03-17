@@ -31,10 +31,11 @@ import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import NPCSystem from './systems/npc-system';
-import ShopSystem from './systems/shop-system';
 import GoldHandler from './handlers/gold-handler';
 import { ServerEvent } from "@shared/socket-protocol";
 import TreasureSystem from "./systems/treasure-system";
+
+
 
 // Create the express app & server
 const app = express();
@@ -68,7 +69,6 @@ const engine = new GameEngine({
   projectileSystem,
   messageSystem: new MessageSystem(),
   npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid),
-  shopSystem: new ShopSystem(terrainMap, entityFactory, registry, spatialGrid),
   treasureSystem
 });
 
