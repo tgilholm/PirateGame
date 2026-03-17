@@ -299,7 +299,11 @@ export default class TreasureSystem implements BaseSystem {
 
         const pos = this.getWorldPosition(player);
         const angle = typeof player.aimAngle === "number" ? player.aimAngle : 0;
-        const dropDistance = 24;
+
+        // Must be larger than playerRadius  chest obstacle radius
+        const playerRadius = this.entityConfig.player.radius ?? 16;
+        const chestRadius = 20;
+        const dropDistance = playerRadius + chestRadius + 8;
 
         treasure.state = "loose";
         treasure.carrierId = null;
@@ -401,7 +405,7 @@ export default class TreasureSystem implements BaseSystem {
             treasure.carriedByPendingPlayerId = null;
             treasure.markDirty();
 
-            // Shove any player standing on the hole outward, same as ship spawning does
+            // Shove any player standing on the hole outward
             const players = this.registry.getByType("player") as Player[];
             const shoveRadius = 35;
 
