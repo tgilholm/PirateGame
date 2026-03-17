@@ -74,6 +74,11 @@ export default abstract class Entity {
         };
     }
 
+
+    public get isDead() {
+        return this.health <= 0;
+    }
+
     /**
      * Full serialisation- used when entities first enter the view range of a client
      */

@@ -48,7 +48,7 @@ export default class WorldController {
      */
     public handle(playerId: string, action: PlayerAction) {
         const player = this.entityRegistry.get<Player>(playerId);
-        if (!player) return;
+        if (!player || player.isDead) return;
 
         // Sends to the respective controller
         switch (action.type) {

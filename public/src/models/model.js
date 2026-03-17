@@ -126,6 +126,10 @@ export default class Model extends Phaser.GameObjects.Container {
         this.rotation += rDiff * lerp;
     }
 
+    get isDead() {
+        return this.health <= 0;
+    }
+
 
     /**
      * Returns the relative position of this model. If this model is on a parent object,
