@@ -21,5 +21,9 @@ create(){
         fontFamily: 'Arial',
         color: '#ffffff'
      }).setOrigin(0.5);
+
+     this.input.once('pointerdown', ()=> {
+        this.scene.start('Start');
+     });
 }
 }
