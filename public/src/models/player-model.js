@@ -90,6 +90,8 @@ export default class PlayerModel extends Model {
         }
 
 
+        // If players health is 0 or below, show the death screen
+        // TODO: pass the players gold/score for display on the death screen
         if (this.health <= 0) {
             this.scene.scene.start('DeathScene');
             console.log("you ded");
