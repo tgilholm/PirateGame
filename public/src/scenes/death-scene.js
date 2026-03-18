@@ -7,6 +7,7 @@ create(){
     const centerX = this.scale.width/2;
     const centerY = this.scale.height/2;
 
-    const deathScreenText = this.add.text(centerX, centerY, "YOU DIED!" );
+    const deathScreenText = this.add.text(centerX, centerY, "YOU DIED!",
+     );
 }
 }

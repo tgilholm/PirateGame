@@ -1,5 +1,6 @@
 /* global Phaser */
 
+import DeathScene from "../scenes/death-scene.js";
 import HealthBar from "../ui/health-bar.js";
 import ReloadIndicator from "../ui/reload-indicator.js";
 import Model from "./model.js";
@@ -102,12 +103,8 @@ export default class PlayerModel extends Model {
         }
 
         if (this.health <= 0) {
-            const deathScreen = document.querySelector('#death-screen');
-            if (deathScreen instanceof HTMLElement){
-                console.log("you ded");
-                deathScreen.style.display = 'flex';
-            }
-            this.scene.scene.pause();
+            this.scene.scene.start('DeathScene');
+            console.log("you ded");
         }
 
         gun.setPosition(

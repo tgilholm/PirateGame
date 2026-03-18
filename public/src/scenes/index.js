@@ -1,5 +1,6 @@
 import { StartScene } from "./start-scene.js";
 import { MainScene } from "./main-scene.js";
+import DeathScene from "./death-scene.js";
 
 // Replace the div with the actual game canvas
 const parent = document.getElementById('game-container');
@@ -13,7 +14,7 @@ const config = {
     pixelArt: true,
     backgroundColor: '#2d80c9',
     parent: parent,
-    scene: [StartScene, MainScene],     // Add all scenes in
+    scene: [StartScene, MainScene, DeathScene],     // Add all scenes in
 
     render: {
         mipmapFilter: 'NEAREST',
