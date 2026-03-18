@@ -318,25 +318,3 @@ input.formElement {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/*Death Screen CSS*/
-#death-screen{
-    display: none;
-    position: fixed;
-    z-index: 9999 !important;
-    width: 100%;
-    height: 100%;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Courier New', monospace;
-    background: black;
-    backdrop-filter: blur(5px);
-}
-
-#death-screen h1{
-    font-size: 48px;
-    margin-bottom: 20px;
-    color: red;
-    font-weight: bold;
-}
