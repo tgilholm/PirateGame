@@ -443,4 +443,24 @@ input.formElement {
 .gold-counter-amount {
     font-size: 15px;
     font-weight: bold;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.35);
+    padding-bottom: 6px;
+    text-align: center;
+}
+
+/* Use an ordered list for the numbering */
+#players-list {
+    margin: 0;
+    padding-left: 22px; /* spacing for 1. 2. 3. */
+    list-style-position: outside;
+    max-height: 170px;
+    overflow: auto; /* or auto if you want scroll */
+}
+
+#players-list li {
+    line-height: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

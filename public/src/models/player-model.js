@@ -1,5 +1,6 @@
 /* global Phaser */
 
+import DeathScene from "../scenes/death-scene.js";
 import HealthBar from "../ui/health-bar.js";
 import ReloadIndicator from "../ui/reload-indicator.js";
 import Model from "./model.js";
@@ -101,7 +102,11 @@ export default class PlayerModel extends Model {
             this.bodySprite.y = 0;
         }
 
+
+        // If players health is 0 or below, show the death screen
+        // TODO: pass the players gold/score for display on the death screen
         if (this.health <= 0) {
+            this.scene.scene.start('DeathScene');
             console.log("you ded");
         }
 
