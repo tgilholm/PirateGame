@@ -15,8 +15,7 @@ import TerrainMap from "../engine/terrain-map";
  * damage to the struck object
  */
 export default class ProjectileSystem implements BaseSystem {
-
-    /** Splash positions queued this tick. Drained by GameWorld each broadcast cycle. */
+ 
     public pendingSplashes: SplashEvent[] = [];
 
     constructor(private entityRegistry: EntityRegistry,
@@ -61,7 +60,6 @@ export default class ProjectileSystem implements BaseSystem {
             const splashType: SplashType = proj.type === "cannonball"
                 ? (onLand ? "cannon-land" : "cannon-water")
                 : (onLand ? "bullet-land" : "bullet-water");
-            console.log("[ProjectileSystem] TTL expired splash — type:" + splashType + " x:" + Math.round(proj.x) + " y:" + Math.round(proj.y));
             this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType });
             this.destroyEntity(proj);
         }
@@ -83,7 +81,6 @@ export default class ProjectileSystem implements BaseSystem {
                 entity.markDirty();
 
                 const splashType: SplashType = proj.type === 'cannonball' ? 'cannon-blood' : 'bullet-blood';
-                console.log("[ProjectileSystem] Player/NPC hit splash — type:" + splashType + " x:" + Math.round(proj.x) + " y:" + Math.round(proj.y));
                 this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType });
                 proj.ttl = -1; 
                 this.destroyEntity(proj);

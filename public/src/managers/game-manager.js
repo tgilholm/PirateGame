@@ -133,7 +133,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
      * @param {Object} data the data from the server
      */
     onDeltaSync(data) {
-        console.log('[GameManager] onDeltaSync — splashEvents:', data.splashEvents, '| keys:', Object.keys(data));
         let needsInteractableRefresh = false;
 
         // Kill old predicted projectiles
@@ -167,7 +166,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
         // Forward cannonball splash effects to the AnimationManager
         if (data.splashEvents?.length) {
-            console.log('[GameManager] splashEvents received from server:', data.splashEvents);
             this.scene.animationManager?.handleSplashEvents(data.splashEvents);
         }
     }

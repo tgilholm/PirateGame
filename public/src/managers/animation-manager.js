@@ -15,8 +15,6 @@ export default class AnimationManager {
      * registers all animation definitions to phaser
      */
     registerAnimations() {
-        console.log('[AnimationManager] registerAnimations() called');
-
         const defs = [
             { key: "cannon-water-splash", texture: "cannon-water-splash" },
             { key: "cannon-dust-splash",  texture: "cannon-dust-splash"  },
@@ -40,13 +38,7 @@ export default class AnimationManager {
                     repeat: 0
                 });
 
-                console.log(`[AnimationManager] anim "${key}" created`);
-
-            } else {
-
-                console.log(`[AnimationManager] anim "${key}" already exists, skipping`);
-
-            }
+            } 
 
         });
     }
@@ -76,12 +68,8 @@ export default class AnimationManager {
     sprite.setOrigin(0.5, 0.8);
     sprite.setDepth(10);
     sprite.setScale(4);
-    
-
     sprite.setBlendMode(Phaser.BlendModes.ADD);
-
     sprite.play(animKey);
-
     sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
         sprite.destroy();
     });
