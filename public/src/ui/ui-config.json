@@ -1,51 +1,51 @@
 {
-    "Minimap": {
-        "Size": 350,
-        "ImgSrc": "/assets/minimap.png",
-        "Position": {
-            "Top": "20px",
-            "Left": "20px"
-        },
-        "PlayerMarker": {
-            "Radius": 5,
-            "Fill": "#ff0000",
-            "Stroke": "#ffffff",
-            "LineWidth": 1.5
-        },
-        "ShopMarker": {
-            "Size": 6,
-            "Fill": "#ffd700",
-            "Stroke": "#ffffff",
-            "LineWidth": 1.5
-        }
-    },
-    "MessageText": {
-        "FontSize": "18px",
-        "Color": "#ffffff",
-        "Background": "#00000088"
-    },
-    "DebugMenu": {
-        "ToggleKey": "X"
-    },
-    "Shop": {
-        "Radius": 40,
-        "Label": {
-            "Text": "Shop",
-            "FontSize": "13px",
-            "FontFamily": "Consolas",
-            "Color": "#f5c542",
-            "Stroke": "#000000",
-            "StrokeThickness": 3
-        },
-        "ItemCards": {}
-    },
-    "InteractionPrompt": {},
-    "goldCounter": {
-        "Position": {
-            "Top": null,
-            "Right": null,
-            "Bottom": "1.25rem",
-            "Left": "1.25rem"
-        }
-    }
+	"Minimap": {
+		"Size": 350,
+		"ImgSrc": "/assets/minimap.png",
+		"Position": {
+			"Top": "20px",
+			"Left": "20px"
+		},
+		"PlayerMarker": {
+			"Radius": 5,
+			"Fill": "#ff0000",
+			"Stroke": "#ffffff",
+			"LineWidth": 1.5
+		},
+		"ShopMarker": {
+			"Size": 6,
+			"Fill": "#ffd700",
+			"Stroke": "#ffffff",
+			"LineWidth": 1.5
+		}
+	},
+	"MessageText": {
+		"FontSize": "18px",
+		"Color": "#ffffff",
+		"Background": "#00000088"
+	},
+	"DebugMenu": {
+		"ToggleKey": "X"
+	},
+	"Shop": {
+		"Radius": 40,
+		"Label": {
+			"Text": "Shop",
+			"FontSize": "13px",
+			"FontFamily": "Consolas",
+			"Color": "#f5c542",
+			"Stroke": "#000000",
+			"StrokeThickness": 3
+		},
+		"ItemCards": {}
+	},
+	"InteractionPrompt": {},
+	"goldCounter": {
+		"Position": {
+			"Top": null,
+			"Right": null,
+			"Bottom": "1.25rem",
+			"Left": "1.25rem"
+		}
+	}
 }

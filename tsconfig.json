@@ -1,14 +1,10 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": [
-        "shared/built/*"
-      ]
-    },
-    "esModuleInterop": true
-  },
-  "exclude": [
-    "../scripts"
-  ]
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@shared/*": ["shared/built/*"]
+		},
+		"esModuleInterop": true
+	},
+	"exclude": ["../scripts"]
 }

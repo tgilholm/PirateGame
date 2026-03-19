@@ -1,17 +1,18 @@
 {
-  "compilerOptions": {
-    "module": "ESNext",
-    "target": "ESNext",
-    "checkJs": true,
-    "noImplicitAny": false,
-    "resolveJsonModule": true,
-    "baseUrl": "./",
-    
-    "paths": {
-      "*": ["src/*"],
-      "shared/*": ["./shared/*"]
-    },
-    "types": ["phaser"] //a lot of annoying problems listed with phaser but they are fine at runtime, this gets rid of them apparently 
-  },
-  "exclude": ["node_modules"]
+	"compilerOptions": {
+		"module": "ESNext",
+		"target": "ESNext",
+		"checkJs": true,
+		"noImplicitAny": false,
+		"moduleResolution": "bundler",
+		"resolveJsonModule": true,
+		"baseUrl": "./",
+
+		"paths": {
+			"*": ["src/*"],
+			"shared/*": ["./shared/*"]
+		},
+		"types": ["phaser"] //a lot of annoying problems listed with phaser but they are fine at runtime, this gets rid of them apparently
+	},
+	"exclude": ["node_modules"]
 }

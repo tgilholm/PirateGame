@@ -1,7 +1,7 @@
 {
-  "watch": ["server/built"],
-  "ext": "js,json",
-  "ignore": ["server/src", "shared/src"],
-  "delay": "1500",
-  "exec": "node -r tsconfig-paths/register server/built/server.js"
+	"watch": ["server/built"],
+	"ext": "js,json",
+	"ignore": ["server/src", "shared/src"],
+	"delay": "1500",
+	"exec": "node -r tsconfig-paths/register server/built/server.js"
 }
