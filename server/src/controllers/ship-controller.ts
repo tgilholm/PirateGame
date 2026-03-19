@@ -43,12 +43,20 @@ export default class ShipController {
 		}
 
 		// Steer ship
-		if (data.left) {
-			ship.turnAngle = ship.turnAngle - 0.1;
+		else if (data.left) {
+			ship.turnAngle -= 0.02;
+		} else if (data.right) {
+			ship.turnAngle += 0.02;
 		}
 
-		if (data.right) {
-			ship.turnAngle = ship.turnAngle + 0.1;
+		// Turning deadzone
+		if (ship.body.isSleeping) {
+			ship.turnAngle = 0; // don't keep spinning
+		}
+
+		// Avoid weird division
+		if (-0.001 < ship.turnAngle && ship.turnAngle < 0.001) {
+			ship.turnAngle = 0;
 		}
 	}
 }

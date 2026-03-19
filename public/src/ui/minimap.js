@@ -43,7 +43,7 @@ export default class Minimap {
 	placeMarker(spawnX, spawnY, mapWidth, mapHeight) {
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
-		this.container.style.display = 'block';
+		this.container.style.display = 'none';
 		this.drawMarker(spawnX, spawnY);
 	}
 

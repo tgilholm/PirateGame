@@ -42,7 +42,7 @@ export default class GoldCounter {
 
 	//Shows the counter
 	show() {
-		this.container.style.display = 'flex';
+		this.container.style.display = 'none';
 	}
 
 	//hides the counter

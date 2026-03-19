@@ -289,8 +289,9 @@ export default class MovementSystem implements BaseSystem {
 				sailThrust = thrust * 0.5;
 				break;
 			case SailState.NO_SAIL:
+				// Do nothing, ship slows down
+				sailThrust = 0;
 				break;
-			// Do nothing, ship slows down
 		}
 
 		const force = {

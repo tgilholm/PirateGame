@@ -93,7 +93,7 @@ export default class Ship extends Entity {
 	}
 
 	public set turnAngle(newAngle: number) {
-		this._turnAngle = Math.max(Math.min(-1, newAngle), 1);
+		this._turnAngle = Math.min(Math.max(-1, newAngle), 1);
 	}
 
 	public get turnAngle() {

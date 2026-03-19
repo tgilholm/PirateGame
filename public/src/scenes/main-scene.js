@@ -95,7 +95,7 @@ export class MainScene extends Phaser.Scene {
 		this.gameManager.update();
 		this.uiManager.update();
 		const gold = document.getElementById('gold-counter');
-		if (gold) gold.style.display = 'block';
+		if (gold) gold.style.display = 'none';
 	}
 
 	/**

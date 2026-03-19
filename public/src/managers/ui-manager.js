@@ -22,6 +22,8 @@ export default class UIManager {
 		this.fpsCounter = document.getElementById('fps-counter');
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
+		this.menu = document.getElementById('left-panel');
+		this.menu.style.display = 'block';
 		this.currentInteractable = null;
 
 		this.minimap = new Minimap(document.getElementById('minimap-container'));
@@ -92,10 +94,11 @@ export default class UIManager {
 
 		const ship = this.gameManager.models.get(player.parentId);
 
+		this.shipStats.style.display = 'flex';
 		if (ship && ship instanceof ShipModel) {
-			this.shipStats.innerText = `Local Ship:
-			Sail State: ${ship.sailState},
-			Turn Angle: ${ship.turnAngle},
+			this.shipStats.innerText = `Local Ship: ${ship.id};
+			Sail State: ${ship.sailState}
+			Turn Angle: ${ship.turnAngle}
 			Anchored: ${ship.anchored}
 			`;
 		} else {
