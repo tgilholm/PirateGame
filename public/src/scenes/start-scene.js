@@ -12,17 +12,20 @@ export class StartScene extends Phaser.Scene {
    * Preload all the assets for the game before the player presses "join".
    */
   preload() {
-    this.load.image("background", "assets/water.png");
-    this.load.image("title", "assets/title.png");
+    this.load.image('background', 'assets/water.png');
+    this.load.image('title', 'assets/title.png');
     //this.load.image('cannonball','assets/cannonball.png') // yoohoooo
-    this.load.spritesheet("ship", "assets/ship.png", {
-      frameWidth: 320,
-      frameHeight: 320,
-    });
+    this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
+    this.load.spritesheet('cannon-water-splash', 'assets/cannon-water-splash.png', { frameWidth: 25, frameHeight: 25 });
+    this.load.spritesheet('cannon-dust-splash', 'assets/cannon-dust-splash.png', { frameWidth: 25, frameHeight: 25 });
+    this.load.spritesheet('cannon-blood-splash', 'assets/cannon-blood-splash.png', { frameWidth: 25, frameHeight: 25 });
+    this.load.spritesheet('bullet-water-splash', 'assets/bullet-water-splash.png', { frameWidth: 25, frameHeight: 25 });
+    this.load.spritesheet('bullet-dust-splash', 'assets/bullet-dust-splash.png', { frameWidth: 25, frameHeight: 25 });
+    this.load.spritesheet('bullet-blood-splash', 'assets/bullet-blood-splash.png', { frameWidth: 25, frameHeight: 25 });
     this.load.image("tiles", "/assets/terrain-tilesheet.png");
-    this.load.image("cannon", "/assets/cannon.png");
-    this.load.image("helm", "/assets/helm.png");
-    this.load.image("ladder", "/assets/ladder.png");
+    this.load.image('cannon', '/assets/cannon.png');
+    this.load.image('helm', '/assets/helm.png')
+    this.load.image('ladder', '/assets/ladder.png')
     this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
     this.load.image("treasure-chest", "/assets/chest.png");
     this.load.image("x-mark", "/assets/redcross.png");
@@ -34,25 +37,7 @@ export class StartScene extends Phaser.Scene {
     });
     this.load.image("chest-in-hole", "/assets/chestinhole.png");
 
-    /**
-     * Preload all the assets for the game before the player presses "join".
-     */
-    preload() {
-        this.load.image('background', 'assets/water.png');
-        this.load.image('title', 'assets/title.png');
-        //this.load.image('cannonball','assets/cannonball.png') // yoohoooo
-        this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
-        this.load.spritesheet('cannon-water-splash', 'assets/cannon-water-splash.png', { frameWidth: 25, frameHeight: 25 });
-        this.load.spritesheet('cannon-dust-splash', 'assets/cannon-dust-splash.png', { frameWidth: 25, frameHeight: 25 });
-        this.load.spritesheet('cannon-blood-splash', 'assets/cannon-blood-splash.png', { frameWidth: 25, frameHeight: 25 });
-        this.load.spritesheet('bullet-water-splash', 'assets/bullet-water-splash.png', { frameWidth: 25, frameHeight: 25 });
-        this.load.spritesheet('bullet-dust-splash', 'assets/bullet-dust-splash.png', { frameWidth: 25, frameHeight: 25 });
-        this.load.spritesheet('bullet-blood-splash', 'assets/bullet-blood-splash.png', { frameWidth: 25, frameHeight: 25 });
-        this.load.image("tiles", "/assets/terrain-tilesheet.png");
-        this.load.image('cannon', '/assets/cannon.png');
-        this.load.image('helm', '/assets/helm.png')
-        this.load.image('ladder', '/assets/ladder.png')
-        this.load.tilemapTiledJSON("map", "/shared/demo-map.json");
+
     // Resize the game if the window changes size
     window.addEventListener("resize", () => {
       this.scale.resize(window.innerWidth, window.innerHeight);
@@ -118,11 +103,10 @@ export class StartScene extends Phaser.Scene {
     let startBtn = document.getElementById("start-btn");
     let form = document.getElementById('input-form');
     startBtn.addEventListener("click", () => this.goToMain());
-    form.addEventListener("submit", (e) => 
-        {
-            e.preventDefault();
-            this.goToMain();
-        });
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      this.goToMain();
+    });
   }
 
   goToMain() {
