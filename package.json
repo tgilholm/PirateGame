@@ -22,7 +22,8 @@
 		"start": "npm run build:all && node -r tsconfig-paths/register server/built/server.js",
 		"dev": "npm run clean && npm run build:shared && npm run build:server && concurrently \"tsc -p shared/tsconfig.json --watch\" \"tsc -p server/tsconfig.json --watch\" \"nodemon --watch server/src server/built/server.js\"",
 		"prepare": "husky",
-		"check-path": "ts-node scripts/test-npc-paths.ts"
+		"check-path": "ts-node scripts/test-npc-paths.ts",
+		"lint:all": "eslint --fix \"**/*.{ts,js,mjs}\" && prettier --write --cache \"**/*.{ts,js,mjs,json}\""
 	},
 	"dependencies": {
 		"eslint": "^10.0.3",
