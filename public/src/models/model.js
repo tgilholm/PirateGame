@@ -62,7 +62,7 @@ export default class Model extends Phaser.GameObjects.Container {
             this.initialised = true;
         }
     }
-
+    
 
     /**
      * Updates this model's movement, only if it is a non-static object. Otherwise,
