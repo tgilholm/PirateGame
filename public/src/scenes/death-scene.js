@@ -4,6 +4,7 @@ export default class DeathScene extends Phaser.Scene{
     }
 
 create(){
+    const inputForm = document.getElementById('input-form');
     const centerX = this.scale.width/2;
     const centerY = this.scale.height/2;
 
@@ -24,6 +25,7 @@ create(){
 
      this.input.once('pointerdown', ()=> {
         this.scene.start('Start');
+        inputForm.style.display = 'flex';
      });
 }
 }
