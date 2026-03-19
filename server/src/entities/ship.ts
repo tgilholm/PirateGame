@@ -27,6 +27,7 @@ export default class Ship extends Entity {
 	body: Matter.Body;
 	sailState: SailState;
 	anchored: boolean;
+	private _turnAngle: number = 0;
 	components: Record<string, string>;
 
 	/**
@@ -85,7 +86,18 @@ export default class Ship extends Entity {
 			...super.toState(),
 			pilotId: this.pilot?.id, // For client side messages
 			components: this.components,
+			sailState: this.sailState,
+			anchored: this.anchored,
+			turnAngle: this.turnAngle,
 		};
+	}
+
+	public set turnAngle(newAngle: number) {
+		this._turnAngle = Math.max(Math.min(-1, newAngle), 1);
+	}
+
+	public get turnAngle() {
+		return this._turnAngle;
 	}
 
 	/**

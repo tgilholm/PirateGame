@@ -2,6 +2,7 @@ import GameManager from './game-manager.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
 import GoldCounter from '../ui/gold-counter.js';
+import ShipModel from '../models/ship-model.js';
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -20,6 +21,7 @@ export default class UIManager {
 		this.promptElement = document.getElementById('interaction-prompt');
 		this.fpsCounter = document.getElementById('fps-counter');
 		this.modelCounter = document.getElementById('model-counter');
+		this.shipStats = document.getElementById('ship-stats');
 		this.currentInteractable = null;
 
 		this.minimap = new Minimap(document.getElementById('minimap-container'));
@@ -87,6 +89,18 @@ export default class UIManager {
 		}
 		this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
 		this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
+
+		const ship = this.gameManager.models.get(player.parentId);
+
+		if (ship && ship instanceof ShipModel) {
+			this.shipStats.innerText = `Local Ship:
+			Sail State: ${ship.sailState},
+			Turn Angle: ${ship.turnAngle},
+			Anchored: ${ship.anchored}
+			`;
+		} else {
+			this.shipStats.innerText = `Not on a ship`;
+		}
 	}
 
 	/**

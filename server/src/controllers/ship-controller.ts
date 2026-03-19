@@ -20,15 +20,35 @@ export default class ShipController {
 		if (data.up) {
 			switch (ship.sailState) {
 				case SailState.HALF_SAIL:
-
+					ship.sailState = SailState.FULL_SAIL;
+					break;
 				case SailState.NO_SAIL:
-
+					ship.sailState = SailState.HALF_SAIL;
+				default:
+					// Do nothing
+					break;
+			}
+			// Reduce sail
+		} else if (data.down) {
+			switch (ship.sailState) {
+				case SailState.FULL_SAIL:
+					ship.sailState = SailState.HALF_SAIL;
+					break;
+				case SailState.HALF_SAIL:
+					ship.sailState = SailState.NO_SAIL;
 				default:
 					// Do nothing
 					break;
 			}
 		}
 
-		// Reduce sail
+		// Steer ship
+		if (data.left) {
+			ship.turnAngle = ship.turnAngle - 0.1;
+		}
+
+		if (data.right) {
+			ship.turnAngle = ship.turnAngle + 0.1;
+		}
 	}
 }

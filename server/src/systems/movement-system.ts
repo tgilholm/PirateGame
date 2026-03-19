@@ -2,7 +2,7 @@ import { Body } from 'matter-js';
 import EntityRegistry from '../engine/entity-registry';
 import TerrainMap from '../engine/terrain-map';
 import Player from '../entities/player';
-import Ship from '../entities/ship';
+import Ship, { SailState } from '../entities/ship';
 import { EntityConfig } from '../types';
 import { BaseSystem } from './base-system';
 import Entity from '../entities/entity';
@@ -270,23 +270,35 @@ export default class MovementSystem implements BaseSystem {
 	 * @param dt the difference in time from the last update
 	 */
 	updateShip(ship: Ship, dt: number) {
-		//const { up, left, right } = ship.inputs;    // ships can't move backwards
 		const body = ship.body;
+
+		// Set velocity based on sail state
+		const sailState = ship.sailState;
+		const turnAngle = ship.turnAngle;
 		const { turnSpeed, thrust } = ship.physics;
 
-		// Add turn speed
-		//if (left) Body.setAngularVelocity(body, -turnSpeed);
-		//if (right) Body.setAngularVelocity(body, turnSpeed);
+		// Turning
+		Body.setAngularVelocity(body, turnSpeed * turnAngle);
 
-		// Apply force to the matter body
-		//if (up) {
+		let sailThrust: number = thrust;
+		switch (sailState) {
+			case SailState.FULL_SAIL:
+				sailThrust = thrust;
+				break;
+			case SailState.HALF_SAIL:
+				sailThrust = thrust * 0.5;
+				break;
+			case SailState.NO_SAIL:
+				break;
+			// Do nothing, ship slows down
+		}
+
 		const force = {
-			x: Math.cos(body.angle) * thrust,
-			y: Math.sin(body.angle) * thrust,
+			x: Math.cos(body.angle) * sailThrust,
+			y: Math.sin(body.angle) * sailThrust,
 		};
 
 		Body.applyForce(body, body.position, force);
-		//}
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {

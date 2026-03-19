@@ -1,84 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Pirate Game</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<link rel="stylesheet" type="text/css" href="styles.css" />
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Pirate Game</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="stylesheet" type="text/css" href="styles.css" />
+		<!-- The browser cannot load assets in another folder by default -->
+		<script type="importmap">
+			{
+				"imports": {
+					"shared/built/": "/shared/",
+					"shared/": "/shared/",
+					"socket.io-client": "/socket.io/socket.io.js"
+				}
+			}
+		</script>
 
-    <!-- The browser cannot load assets in another folder by default -->
-    <script type="importmap">
-        {
-        "imports": {
-            "shared/built/": "/shared/",
-            "shared/": "/shared/",
-            "socket.io-client": "/socket.io/socket.io.js"
-        }
-        }
-    </script>
+		<script src="//cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="src/scenes/index.js" type="module"></script>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Press+Start+2P&family=VT323&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
 
-    <script src="//cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="src/scenes/index.js" type="module"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Press+Start+2P&family=VT323&display=swap"
-        rel="stylesheet">
-</head>
+	<body>
+		<div id="game-container"></div>
 
-<body>
-    <div id="game-container"></div>
+		<form id="input-form">
+			<div class="border">
+				<input
+					class="formElement"
+					id="input-text"
+					type="text"
+					name="username"
+					placeholder="Enter Username"
+					required
+					maxlength="16"
+				/>
+			</div>
+			<div class="border">
+				<button class="formElement" id="start-btn" type="button">Start Game</button>
+			</div>
+		</form>
 
-    <form id="input-form">
-        <div class="border">
-            <input class="formElement" id="input-text" type="text" name="username" placeholder="Enter Username" required
-                maxlength="16">
-        </div>
-        <div class="border">
-            <button class="formElement" id="start-btn" type="button">Start Game</button>
-        </div>
-    </form>
+		<!-- Interaction prompt -->
+		<div id="interaction-prompt" style="display: none"></div>
 
-    <!-- Interaction prompt -->
-    <div id="interaction-prompt" style="display:none;"></div>
+		<div class="left-panel">
+			<!-- Minimap -->
+			<div id="minimap-container" style="display: none"></div>
+			<!-- Gold counter -->
+			<div id="gold-counter" style="display: none">Gold: 0</div>
 
-    <div class="left-panel">
-        <!-- Minimap -->
-        <div id="minimap-container" style="display:none;"></div>
-        <!-- Gold counter -->
-        <div id="gold-counter" style="display: none;">Gold: 0</div>
+			<div class="game-stats">
+				<p id="fps-counter" style="color: green">FPS:</p>
+				<p id="model-counter" style="color: green">Nearby Models:</p>
+				<p id="ship-stats" style="color: green">Player Ship:</p>
+			</div>
+		</div>
 
-        <div class="game-stats">
-            <p id="fps-counter" style="color:green;">FPS: </p>
-            <p id="model-counter" style="color: green;">Nearby Models:</p>
-        </div>
-    </div>
+		<!-- Shop overlay -->
+		<div id="shop-menu" style="display: none"></div>
 
-    <!-- Shop overlay -->
-    <div id="shop-menu" style="display:none;"></div>
+		<!--Active Player Container-->
+		<div id="players-panel" style="display: none">
+			<div class="players-title">Players Online</div>
+			<ol id="players-list"></ol>
+		</div>
 
-    <!--Active Player Container-->
-    <div id="players-panel" style="display:none;">
-        <div class="players-title">Players Online</div>
-        <ol id="players-list"></ol>
-    </div>
+		<!-- Dig minigame UI -->
+		<div id="dig-minigame" style="display: none">
+			<div id="dig-bar">
+				<div id="dig-success-zone"></div>
+				<div id="dig-slider"></div>
+			</div>
+			<div id="dig-label">Press X in the green zone</div>
+		</div>
 
-    <!-- Dig minigame UI -->
-    <div id="dig-minigame" style="display:none;">
-        <div id="dig-bar">
-            <div id="dig-success-zone"></div>
-            <div id="dig-slider"></div>
-        </div>
-        <div id="dig-label">Press X in the green zone</div>
-    </div>
-
-    <div id ="death-screen">
-        <h1>YOU DIED</h1>
-        <button id="restart-button">Try Again</button>
-    </div>
-
-
-</body>
-
+		<div id="death-screen">
+			<h1>YOU DIED</h1>
+			<button id="restart-button">Try Again</button>
+		</div>
+	</body>
 </html>
