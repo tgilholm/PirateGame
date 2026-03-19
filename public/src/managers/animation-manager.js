@@ -1,5 +1,5 @@
 /**
- * manages simple animations (e.g. cannonball splashes), Sprite-sheet layout, 6-frame horizontal strip, 64 × 64 pixles per frame
+ * manages simple animations (e.g. cannonball splashes), Sprite-sheet layout, 8-frame grid (3 cols × 3 rows, last cell empty), 25 × 25 pixels per frame, sheet 75 × 75
  */
 export default class AnimationManager {
 
@@ -15,21 +15,39 @@ export default class AnimationManager {
      * registers all animation definitions to phaser
      */
     registerAnimations() {
+        console.log('[AnimationManager] registerAnimations() called');
+
         const defs = [
-            { key: "water-splash", texture: "water-splash" },
-            { key: "dust-splash",  texture: "dust-splash"  },
-            { key: "blood-splash", texture: "blood-splash" },
+            { key: "cannon-water-splash", texture: "cannon-water-splash" },
+            { key: "cannon-dust-splash",  texture: "cannon-dust-splash"  },
+            { key: "cannon-blood-splash", texture: "cannon-blood-splash" },
+            { key: "bullet-water-splash", texture: "bullet-water-splash" },
+            { key: "bullet-dust-splash",  texture: "bullet-dust-splash"  },
+            { key: "bullet-blood-splash", texture: "bullet-blood-splash" },
         ];
 
         defs.forEach(({ key, texture }) => {
             if (!this.scene.anims.exists(key)) {
-                this.scene.anims.create({
-                    key,
-                    frames: this.scene.anims.generateFrameNumbers(texture, { start: 0, end: 5 }),
-                    frameRate: 12, // plays in ~0.5 s
-                    repeat: 0 // one-time
+                const frames = this.scene.anims.generateFrameNumbers(texture, {
+                    start: 0,
+                    end: 7
                 });
+
+                this.scene.anims.create({
+                    key: key,
+                    frames: frames,
+                    frameRate: 12,
+                    repeat: 0
+                });
+
+                console.log(`[AnimationManager] anim "${key}" created`);
+
+            } else {
+
+                console.log(`[AnimationManager] anim "${key}" already exists, skipping`);
+
             }
+
         });
     }
 
@@ -38,30 +56,39 @@ export default class AnimationManager {
      *
      * @param {number} x  world x
      * @param {number} y  world y
-     * @param {"water" | "land" | "blood"} splashType  which animation to play
+     * @param {"cannon-water" | "cannon-land" | "cannon-blood" | "bullet-water" | "bullet-land" | "bullet-blood"} splashType  which animation to play
      */
-    playSplash(x, y, splashType = "water") {
-        const keyMap = {
-            water: "water-splash",
-            land: "dust-splash",
-            blood: "blood-splash",
-        };
+    playSplash(x, y, splashType = "cannon-water") {
 
-        const animKey = keyMap[splashType] ?? "water-splash";
-        const sprite = this.scene.add.sprite(x, y, animKey);
-        sprite.setDepth(10); // above water, below UI Z-level
-        sprite.play(animKey);
+    const keyMap = {
+        'cannon-water': 'cannon-water-splash',
+        'cannon-land':  'cannon-dust-splash',
+        'cannon-blood': 'cannon-blood-splash',
+        'bullet-water': 'bullet-water-splash',
+        'bullet-land':  'bullet-dust-splash',
+        'bullet-blood': 'bullet-blood-splash',
+    };
 
-        //destroy when the animation finishes
-        sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-            sprite.destroy();
-        });
-    }
+    const animKey = keyMap[splashType] ?? 'cannon-water-splash';
+
+    const sprite = this.scene.add.sprite(x, y + 6, animKey);
+
+    sprite.setOrigin(0.5, 0.8);
+    sprite.setDepth(10);
+    sprite.setScale(4);
+    
+
+    sprite.setBlendMode(Phaser.BlendModes.ADD);
+
+    sprite.play(animKey);
+
+    sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        sprite.destroy();
+    });
+}
 
     /**
-     * selects correct splash animation
-     *
-     * @param {Array<{x: number, y: number, splashType: "water"|"land"|"blood"}>} splashEvents
+     * @param {Array<{x: number, y: number, splashType: "cannon-water"|"cannon-land"|"cannon-blood"|"bullet-water"|"bullet-land"|"bullet-blood"}>} splashEvents
      */
     handleSplashEvents(splashEvents) {
         if (!splashEvents?.length) return;
