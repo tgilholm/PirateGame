@@ -6,8 +6,6 @@ import entityConfig from '../../../shared/entity-config.json';
 export type ShipStats = {
     maxHealth: number;//implemented
 
-    crewCapacity: number; //feature yet to be added
-
     acceleration: number; //not yet implemented
 
     maxSpeed: number; //not yet implemented
@@ -18,19 +16,11 @@ export type ShipStats = {
 
     cannonBallSpeed: number;//implemented
     
-    cannonCount: number; //feature yet to be added
-    
     rammingPower: number; //feature yet to be added
     
     minimapRange: number; //feature yet to be added
     
     visionRange: number; //feature yet to be added
-    
-    stopPower: number; //not yet implemented
-    
-    deployTime: number; //feature yet to be added
-    
-    retrieveTime: number; //feature yet to be added
     
     turnSpeed: number; //not yet implemented
     
@@ -39,6 +29,7 @@ export type ShipStats = {
     reloadTime: number; // (in ms), implemented
     
     accuracy: number;  //feature yet to be added
+    
     weight: number; //not yet implemented
     
     frictionAir: number; //not yet implemented
