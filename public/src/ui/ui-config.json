@@ -39,6 +39,13 @@
         },
         "ItemCards": {}
     },
-    "InteractionPrompt": {}
-
+    "InteractionPrompt": {},
+    "goldCounter": {
+        "Position": {
+            "Top": null,
+            "Right": null,
+            "Bottom": "1.25rem",
+            "Left": "1.25rem"
+        }
+    }
 }

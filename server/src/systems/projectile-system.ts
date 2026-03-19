@@ -6,6 +6,8 @@ import Player from "src/entities/player";
 import Ship from "src/entities/ship";
 import Entity from "src/entities/entity";
 import Shop from "src/entities/shop";
+import { SplashEvent, SplashType } from "@shared/socket-protocol";
+import TerrainMap from "../engine/terrain-map";
 
 /**
  * Updates all projectile objects each tick. Handles collisions between
@@ -13,10 +15,12 @@ import Shop from "src/entities/shop";
  * damage to the struck object
  */
 export default class ProjectileSystem implements BaseSystem {
-
+ 
+    public pendingSplashes: SplashEvent[] = [];
 
     constructor(private entityRegistry: EntityRegistry,
         private grid: SpatialGrid,
+        private terrain: TerrainMap
     ) { }
 
     /**
@@ -52,18 +56,20 @@ export default class ProjectileSystem implements BaseSystem {
 
         // Delete expired projectiles
         if (proj.ttl <= 0) {
+            const onLand = this.terrain.isOnIsland(proj.x, proj.y);
+            const splashType: SplashType = proj.type === "cannonball"
+                ? (onLand ? "cannon-land" : "cannon-water")
+                : (onLand ? "bullet-land" : "bullet-water");
+            this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType });
             this.destroyEntity(proj);
         }
     }
 
     collidePlayerAndNPC(proj: Projectile, nearby: Set<string>) {
-
-        let hit = false;
-
-        nearby.forEach(id => {
+        for (const id of nearby) {
             const entity = this.entityRegistry.get(id);
-            if (!entity || proj.firedBy === entity) return;
-            if (!(entity.type === 'player' || entity.type === 'npc')) return;
+            if (!entity || proj.firedBy === entity) continue;
+            if (!(entity.type === 'player' || entity.type === 'npc')) continue;
 
             const worldPos = entity.parent
                 ? (entity.parent as Ship).localToWorld(entity.x, entity.y)
@@ -73,37 +79,34 @@ export default class ProjectileSystem implements BaseSystem {
             if (dist < proj.radius + 25) { // 15 = player radius
                 entity.health -= proj.damage;
                 entity.markDirty();
-                hit = true;
-            }
 
-            if (hit) {
+                const splashType: SplashType = proj.type === 'cannonball' ? 'cannon-blood' : 'bullet-blood';
+                this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType });
+                proj.ttl = -1; 
                 this.destroyEntity(proj);
+                break;
             }
-        });
+        }
     }
 
     collideShip(proj: Projectile, nearby: Set<string>) {
-        let hit = false;
-
         if (proj.type !== 'cannonball') return; // bullets don't damage ships
 
-        nearby.forEach(id => {
+        for (const id of nearby) {
             const entity = this.entityRegistry.get(id);
-
-            if (entity?.type !== 'ship' || proj.firedBy?.parent === entity) return;
+            if (entity?.type !== 'ship' || proj.firedBy?.parent === entity) continue;
             const ship = entity as Ship;
 
             const local = ship.worldToLocal(proj.x, proj.y);
             if (ship.isInside(local.x, local.y, -proj.radius)) {
                 ship.health -= proj.damage;
                 ship.markDirty();
-                hit = true;
-            }
-
-            if (hit) {
+                this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType: 'cannon-water' });
+                proj.ttl = -1;
                 this.destroyEntity(proj);
+                break;
             }
-        });
+        }
     }
 
     collideShop(proj: Projectile, nearby: Set<string>) {

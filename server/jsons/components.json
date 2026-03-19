@@ -61,7 +61,6 @@
             "cannonDamage": 0,
             "cannonRange": 0,
             "cannonBallSpeed": 0,
-            "cannonCount": 0,
             "weight": 0
           }
         },
@@ -71,7 +70,6 @@
             "cannonDamage": 100,
             "cannonRange": 1000,
             "cannonBallSpeed": 150,
-            "cannonCount": 6,
             "weight": 75
           }
         },
@@ -81,7 +79,6 @@
             "cannonDamage": 250,
             "cannonRange": 2000,
             "cannonBallSpeed": 300,
-            "cannonCount": 8,
             "weight": 100
           }
         },
@@ -91,7 +88,6 @@
             "cannonDamage": 500,
             "cannonRange": 3000,
             "cannonBallSpeed": 200,
-            "cannonCount": 12,
             "weight": 250
           }
         },
@@ -101,12 +97,11 @@
             "cannonDamage": 50,
             "cannonRange": 1500,
             "cannonBallSpeed": 100,
-            "cannonCount": 5,
             "weight": 60
           }
         }
       },
-      "affects": ["cannonDamage", "cannonRange", "cannonBallSpeed", "cannonCount", "weight"]
+      "affects": ["cannonDamage", "cannonRange", "cannonBallSpeed", "weight"]
     },
     "head": {
       "name": "Head",
@@ -162,7 +157,6 @@
           "cost": 0,
           "stats": {
             "maxHealth": 0,
-            "crewCapacity": 0,
             "weight": 0
           }
         },
@@ -170,7 +164,6 @@
           "cost": 100,
           "stats": {
             "maxHealth": 400,
-            "crewCapacity": 20,
             "weight": 100
           }
         },
@@ -178,7 +171,6 @@
           "cost": 500,
           "stats": {
             "maxHealth": 500,
-            "crewCapacity": 25,
             "weight": 125
           }
         },
@@ -186,7 +178,6 @@
           "cost": 1000,
           "stats": {
             "maxHealth": 1000,
-            "crewCapacity": 50,
             "weight": 250
           }
         },
@@ -194,7 +185,6 @@
           "cost": 150,
           "stats": {
             "maxHealth": 250,
-            "crewCapacity": 12,
             "weight": 60
           }
         }
@@ -203,7 +193,7 @@
         "x": 0,
         "y": 0
       },
-      "affects": ["maxHealth", "crewCapacity", "weight"]
+      "affects": ["maxHealth", "weight"]
     },
     "crowsNest": {
       "name": "CrowsNest",
@@ -263,45 +253,30 @@
         "LVL1": {
           "cost": 0,
           "stats": {
-            "stopPower": 0,
-            "deployTime": 0,
-            "retrieveTime": 0,
             "weight": 0
           }
         },
         "LVL2": {
           "cost": 100,
           "stats": {
-            "stopPower": 20,
-            "deployTime": 1.5,
-            "retrieveTime": 2.5,
             "weight": 50
           }
         },
         "LVL3": {
           "cost": 500,
           "stats": {
-            "stopPower": 30,
-            "deployTime": 1.0,
-            "retrieveTime": 2.0,
             "weight": 70
           }
         },
         "kraken": {
           "cost": 1000,
           "stats": {
-            "stopPower": 50,
-            "deployTime": 0.5,
-            "retrieveTime": 1.0,
             "weight": 150
           }
         },
         "temp1": {
           "cost": 150,
           "stats": {
-            "stopPower": 15,
-            "deployTime": 1.8,
-            "retrieveTime": 2.8,
             "weight": 40
           }
         }
@@ -310,7 +285,7 @@
         "x": -50,
         "y": 20
       },
-      "affects": ["stopPower", "deployTime", "retrieveTime", "weight"]
+      "affects": ["weight"]
     },
     "rudder": {
       "name": "Rudder",
@@ -394,7 +369,7 @@
         "kraken": {
           "cost": 1000,
           "stats": {
-            "reloadTime": -1500,
+            "reloadTime": -2000,
             "accuracy": 1.5,
             "weight": 250
           }

@@ -186,6 +186,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
         });
 
         this.resolveLocalPlayer();
+
+        // Forward cannonball splash effects to the AnimationManager
+        if (data.splashEvents?.length) {
+            this.scene.animationManager?.handleSplashEvents(data.splashEvents);
+        }
     }
 
     /**

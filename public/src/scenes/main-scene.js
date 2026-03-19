@@ -5,6 +5,7 @@ import GameManager from "../managers/game-manager.js";
 import UIManager from "../managers/ui-manager.js";
 import InputManager from "../managers/input-manager.js";
 import ModelFactory from "../managers/model-factory.js";
+import AnimationManager from "../managers/animation-manager.js";
 
 /**
  * The main scene of the Phaser game. This class should act as the "orchestrator"
@@ -47,6 +48,7 @@ export class MainScene extends Phaser.Scene {
             new InputManager(this),
             modelFactory
         );
+        this.animationManager = new AnimationManager(this);
         this.uiManager = new UIManager(this, this.gameManager);
 
         this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
