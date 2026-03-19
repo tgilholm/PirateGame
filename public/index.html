@@ -9,13 +9,13 @@
 
     <!-- The browser cannot load assets in another folder by default -->
     <script type="importmap">
-    {
-    "imports": {
-        "shared/built/": "/shared/",
-        "shared/": "/shared/",
-        "socket.io-client": "/socket.io/socket.io.js"
-    }
-    }
+        {
+        "imports": {
+            "shared/built/": "/shared/",
+            "shared/": "/shared/",
+            "socket.io-client": "/socket.io/socket.io.js"
+        }
+        }
     </script>
 
     <script src="//cdn.jsdelivr.net/npm/phaser@3.86.0/dist/phaser.js"></script>
@@ -25,8 +25,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Press+Start+2P&family=VT323&display=swap"
         rel="stylesheet">
-
-
 </head>
 
 <body>
@@ -42,19 +40,23 @@
         </div>
     </form>
 
-
-
     <!-- Interaction prompt -->
     <div id="interaction-prompt" style="display:none;"></div>
 
-    <!-- Minimap -->
-    <div id="minimap-container" style="display:none;"></div>
+    <div class="left-panel">
+        <!-- Minimap -->
+        <div id="minimap-container" style="display:none;"></div>
+        <!-- Gold counter -->
+        <div id="gold-counter" style="display: none;">Gold: 0</div>
+
+        <div class="game-stats">
+            <p id="fps-counter" style="color:green;">FPS: </p>
+            <p id="model-counter" style="color: green;">Nearby Models:</p>
+        </div>
+    </div>
 
     <!-- Shop overlay -->
     <div id="shop-menu" style="display:none;"></div>
-
-    <!-- Gold counter -->
-    <div id="gold-counter" style="display:none;"></div>
 
     <!--Active Player Container-->
     <div id="players-panel" style="display:none;">
@@ -62,7 +64,21 @@
         <ol id="players-list"></ol>
     </div>
 
-</body>
+    <!-- Dig minigame UI -->
+    <div id="dig-minigame" style="display:none;">
+        <div id="dig-bar">
+            <div id="dig-success-zone"></div>
+            <div id="dig-slider"></div>
+        </div>
+        <div id="dig-label">Press X in the green zone</div>
+    </div>
 
+    <div id ="death-screen">
+        <h1>YOU DIED</h1>
+        <button id="restart-button">Try Again</button>
+    </div>
+
+
+</body>
 
 </html>

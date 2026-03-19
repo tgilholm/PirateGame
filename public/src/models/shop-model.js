@@ -1,10 +1,11 @@
+import InteractableModel from "./interactable-model.js";
 import Model from "./model.js";
 
 /**
  * Client-side representation of a shop. Static interactable point that players
  * approach to buy upgrades. Draws itself as a gold circle with a label.
  */
-export default class ShopModel extends Model {
+export default class ShopModel extends InteractableModel {
 
     /**
      * @param {Phaser.Scene} scene
@@ -14,11 +15,9 @@ export default class ShopModel extends Model {
      * @param {import("shared/entity-config.json")["shop"]} config
      */
     constructor(scene, id, x, y, config) {
-        super(scene, id, x, y, 'shop', 0, true);  //Shops never move
+        super(scene, null, id, 'shop', x, y, 'shop', 'Use Shop', '');
         this.isInteractable = true;
         this.type = 'shop';
-        this.usePrompt = config.usePrompt;
-        this.releasePrompt = config.releasePrompt;
         this.interactRange = config.interactRange;
 
         const radius = config.radius;

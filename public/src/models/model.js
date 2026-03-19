@@ -62,7 +62,7 @@ export default class Model extends Phaser.GameObjects.Container {
             this.initialised = true;
         }
     }
-
+    
 
     /**
      * Updates this model's movement, only if it is a non-static object. Otherwise,
@@ -126,6 +126,10 @@ export default class Model extends Phaser.GameObjects.Container {
         this.rotation += rDiff * lerp;
     }
 
+    get isDead() {
+        return this.health <= 0;
+    }
+
 
     /**
      * Returns the relative position of this model. If this model is on a parent object,
@@ -144,6 +148,7 @@ export default class Model extends Phaser.GameObjects.Container {
         if (this.#cachedFrame === currentFrame) {
             return this.#worldPos;
         }
+
 
         if (this.parentContainer) {
             const matrix = this.getWorldTransformMatrix();

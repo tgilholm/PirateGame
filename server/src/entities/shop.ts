@@ -1,13 +1,13 @@
-import Entity from "./entity";
 import Player from "./player";
 import { ShopConfig } from "../types";
+import InteractableEntity from "./interactables/interactable-entity";
 
 
 /**
  * The server-side representation of a shop entity. Shops are static, indestructible
  * interactable points on the map that players can approach to buy upgrades.
  */
-export default class Shop extends Entity {
+export default class Shop extends InteractableEntity {
 
     radius: number;
     interactRange: number;
@@ -26,7 +26,7 @@ export default class Shop extends Entity {
         y: number,
         config: ShopConfig
     ) {
-        super(id, "shop", x, y, Infinity, null); // shops have no parents and are indestructible
+        super(id, x, y, null, 'shop'); // shops have no parents and are indestructible
 
         this.radius = config.radius;
         this.interactRange = config.interactRange;

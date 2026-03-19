@@ -3,6 +3,8 @@ import Matter from 'matter-js';
 import { BaseSystem } from "./base-system";
 import TerrainMap from "../engine/terrain-map";
 import Ship from "../entities/ship";
+import NPC from "src/entities/npcs/npc";
+import NPCShip from "src/entities/npcs/npc-ship";
 
 // Thresholds over which the matter body has moved enough to justify sending it
 const POS_THRESHOLD = 0.5;
@@ -53,9 +55,9 @@ export default class PhysicsSystem implements BaseSystem {
         Matter.World.add(this.engine.world, walls);
 
         // Add a rectangle at each solid object
-        terrainMap.getTileset('islands').forEach(({ worldX, worldY }) => {
+        terrainMap.getTileset('islands').forEach(({ x, y }) => {
             const body = Matter.Bodies.rectangle(
-                worldX, worldY,
+                x, y,
                 terrainMap.tileWidth, terrainMap.tileWidth,
                 { isStatic: true, label: 'island' }
             );

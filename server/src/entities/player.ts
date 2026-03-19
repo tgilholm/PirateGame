@@ -8,10 +8,11 @@ import Cannon from "./interactables/cannon";
  */
 export default class Player extends Entity {
     username: string;
-    gold: number;
     isSteering: boolean;
     cannon: Cannon | null;
     isCarrying: boolean;
+    carryingTreasureId: string | null = null;
+    gold: number = 0;
     inputs: {
         up: boolean;
         down: boolean;
@@ -47,7 +48,7 @@ export default class Player extends Entity {
         this.isSteering = false;
         this.cannon = null; // not using cannon to start
         this.isCarrying = false;
-        
+        this.carryingTreasureId = null;
 
         // Where the player is aiming
         this.aimAngle = 0;
@@ -90,7 +91,9 @@ export default class Player extends Entity {
             aimAngle: this.aimAngle,
             isUsingCannon: !!this.cannon,    // convert to true/false
             reloadTimer: this.reloadTimer,
-            reloadTime: this.reloadTime
+            reloadTime: this.reloadTime,
+            isCarrying: this.isCarrying,
+            carryingTreasureId: this.carryingTreasureId
         }
 
     }
