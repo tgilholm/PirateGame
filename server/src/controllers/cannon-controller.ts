@@ -1,68 +1,79 @@
-import Cannon from "../entities/interactables/cannon";
-import EntityRegistry from "../engine/entity-registry";
-import Projectile from "../entities/projectiles/projectile";
-import { MoveData } from "@shared/socket-protocol";
-import Entity from "../entities/entity";
-import Ship from "../entities/ship";
-import Cannonball from "../entities/projectiles/cannonball";
-
+import Cannon from '../entities/interactables/cannon';
+import EntityRegistry from '../engine/entity-registry';
+import { MoveData } from '@shared/socket-protocol';
+import Entity from '../entities/entity';
+import Ship from '../entities/ship';
+import Cannonball from '../entities/projectiles/cannonball';
 
 export default class CannonController {
+	constructor(private entityRegistry: EntityRegistry) {}
 
+	handleMove(cannon: Cannon, data: MoveData): void {
+		if (!cannon) return;
+		cannon.targetAngle = data.aimAngle;
+	}
 
-    constructor(private entityRegistry: EntityRegistry) { }
+	handleFire(cannon: Cannon): void {
+		if (!cannon || !cannon.isReloaded) return;
+		cannon.reloadTimer = cannon.reloadTime; // reset the reload timer
+		const ship = cannon.parent as Ship | null;
 
-    handleMove(cannon: Cannon, data: MoveData): void {
-        if (!cannon) return;
-        cannon.targetAngle = data.aimAngle;
-    }
+		const cannonEndOffset = 20; // distance from the center of the cannon to the tip
+		const worldAngle = ship ? cannon.r + ship.r : cannon.r;
 
-    handleFire(cannon: Cannon): void {
-        if (!cannon || !cannon.isReloaded) return;
-        cannon.reloadTimer = cannon.reloadTime; // reset the reload timer
-        const ship = cannon.parent as Ship | null;
+		const worldPos = this.getWorldPosition(cannon);
+		const spawnPos = {
+			x: worldPos.x + Math.cos(worldAngle) * cannonEndOffset,
+			y: worldPos.y + Math.sin(worldAngle) * cannonEndOffset,
+		};
 
-        const cannonEndOffset = 20; // distance from the center of the cannon to the tip
-        const worldAngle = ship ? cannon.r + ship.r : cannon.r;
+		const worldVel = ship ? { x: ship.vx, y: ship.vx } : { x: 0, y: 0 };
+		const ball = new Cannonball(
+			`cannonball_${Date.now()}`,
+			spawnPos.x,
+			spawnPos.y,
+			worldAngle,
+			cannon.cannonBallSpeed
+		);
+		ball.vx += worldVel.x;
+		ball.vy += worldVel.y;
+		ball.firedBy = cannon; // avoid hitting own ship
+		ball.damage = cannon.cannonDamage;
+		ball.ttl = cannon.cannonRange;
+		console.log(
+			'[CannonFire] damage=' +
+				ball.damage +
+				' range(ttl)=' +
+				ball.ttl +
+				'ms (~' +
+				Math.round(((ball.ttl / 1000) * cannon.cannonBallSpeed) / 64) +
+				' grids) speed=' +
+				cannon.cannonBallSpeed
+		);
 
-        const worldPos = this.getWorldPosition(cannon);
-        const spawnPos = {
-            x: worldPos.x + Math.cos(worldAngle) * cannonEndOffset,
-            y: worldPos.y + Math.sin(worldAngle) * cannonEndOffset,
-        };
+		this.entityRegistry.create(ball);
+	}
 
-        const worldVel = ship ? { x: ship.vx, y: ship.vx } : { x: 0, y: 0 };
-        const ball = new Cannonball(`cannonball_${Date.now()}`, spawnPos.x, spawnPos.y, worldAngle, cannon.cannonBallSpeed);
-        ball.vx += worldVel.x;
-        ball.vy += worldVel.y;
-        ball.firedBy = cannon; // avoid hitting own ship
-        ball.damage = cannon.cannonDamage;
-        ball.ttl = cannon.cannonRange;
-        console.log("[CannonFire] damage=" + ball.damage + " range(ttl)=" + ball.ttl + "ms (~" + Math.round((ball.ttl / 1000) * cannon.cannonBallSpeed / 64) + " grids) speed=" + cannon.cannonBallSpeed);
+	/**
+	 * Helper method to get the absolute coordinates of an entity if they are on a ship.
+	 * @param entity the entity for which to find the absolute coordinates
+	 * @returns
+	 */
+	private getWorldPosition(entity: Entity) {
+		if (!entity.parent) {
+			// If the entity has no parent, its coordinates are already in world space
+			return { x: entity.x, y: entity.y };
+		}
 
-        this.entityRegistry.create(ball);
-    }
+		const parent = this.entityRegistry.get<Ship>(entity.parent.id);
 
-    /**
-     * Helper method to get the absolute coordinates of an entity if they are on a ship.
-     * @param entity the entity for which to find the absolute coordinates
-     * @returns 
-     */
-    private getWorldPosition(entity: Entity) {
-        if (!entity.parent) {
-            // If the entity has no parent, its coordinates are already in world space
-            return { x: entity.x, y: entity.y };
-        }
+		// If the parent is a ship, use its localToWorld method
+		if (parent) {
+			const ship = parent as Ship;
+			return ship.localToWorld(entity.x, entity.y);
+		}
 
-        const parent = this.entityRegistry.get<Ship>(entity.parent.id);
-
-        // If the parent is a ship, use its localToWorld method
-        if (parent) {
-            const ship = parent as Ship;
-            return ship.localToWorld(entity.x, entity.y);
-        }
-
-        // If the parent is not a ship, return the entity's local position
-        return { x: entity.x, y: entity.y };
-    }
+		// If the parent is not a ship, return the entity's local position
+		return { x: entity.x, y: entity.y };
+	}
 }

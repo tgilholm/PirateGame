@@ -1,161 +1,155 @@
 /* global Phaser */
 
-import DeathScene from "../scenes/death-scene.js";
-import HealthBar from "../ui/health-bar.js";
-import ReloadIndicator from "../ui/reload-indicator.js";
-import Model from "./model.js";
-import ShipModel from "./ship-model.js";
+import HealthBar from '../ui/health-bar.js';
+import ReloadIndicator from '../ui/reload-indicator.js';
+import Model from './model.js';
+import ShipModel from './ship-model.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
  */
 export default class PlayerModel extends Model {
+	/**
+	 * Constructs a player in the specified scene with the provided id and coordinates
+	 * @param {Phaser.Scene} scene the scene to add this player to
+	 * @param {string} id the id (usually the socket id) of this player
+	 * @param {number} x the start x coordinate (relative/absolute)
+	 * @param {number} y the start y coordinate (relative/absolute)
+	 */
+	constructor(scene, id, x, y) {
+		super(scene, id, x, y, 'player', 0, false); // players can move
 
-    /**
-     * Constructs a player in the specified scene with the provided id and coordinates
-     * @param {Phaser.Scene} scene the scene to add this player to
-     * @param {string} id the id (usually the socket id) of this player
-     * @param {number} x the start x coordinate (relative/absolute)
-     * @param {number} y the start y coordinate (relative/absolute)
-     */
-    constructor(scene, id, x, y) {
-        super(scene, id, x, y, 'player', 0, false); // players can move
+		this.isSteering = false;
+		this.isUsingCannon = false;
+		this.isCarrying = false;
+		this.aimAngle = 0;
+		this.parentId = null;
+		this.username = null;
+		this.gold = 0;
+		this.reloadTime = 0;
+		this.reloadTimer = 0;
+		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
+		this.healthBar = new HealthBar(scene, 40, 20);
+		this.gold = 0;
 
-        this.isSteering = false;
-        this.isUsingCannon = false;
-        this.isCarrying = false;
-        this.aimAngle = 0;
-        this.parentId = null;
-        this.username = null;
-        this.gold = 0;
-        this.reloadTime = 0;
-        this.reloadTimer = 0;
-        this.reloadIndicator = new ReloadIndicator(scene, this, 22);
-        this.healthBar = new HealthBar(scene, 40, 20);
-        this.gold = 0;
+		// Name text is not a child of the container- avoids counter-rotation logic
+		this.nameText = scene.add
+			.text(0, -50, '', {
+				fontSize: '12px',
+				fontFamily: 'Consolas',
+				color: '#ffffff',
+				backgroundColor: '#00000088',
+				padding: { x: 6, y: 4 },
+			})
+			.setOrigin(0.5, 1)
+			.setDepth(100)
+			.setPosition(0, -25);
+		this.bodySprite = scene.add.sprite(0, 0, 'player_circle');
+		this.add(this.bodySprite);
 
-        // Name text is not a child of the container- avoids counter-rotation logic
-        this.nameText = scene.add.text(0, -50, '', {
-            fontSize: '12px',
-            fontFamily: 'Consolas',
-            color: '#ffffff',
-            backgroundColor: '#00000088',
-            padding: { x: 6, y: 4 }
-        }).setOrigin(0.5, 1).setDepth(100).setPosition(0, -25);
-        this.bodySprite = scene.add.sprite(0, 0, 'player_circle');
-        this.add(this.bodySprite);
+		this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
+		this.carrySprite = scene.add.sprite(0, -22, 'treasure-chest');
+		this.carrySprite.setDisplaySize(44, 44);
+		this.carrySprite.setDepth(101);
+		this.carrySprite.setVisible(false);
+		this.add(this.carrySprite);
+	}
 
-        this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
-        this.carrySprite = scene.add.sprite(0, -22, "treasure-chest");
-        this.carrySprite.setDisplaySize(44, 44);
-        this.carrySprite.setDepth(101);
-        this.carrySprite.setVisible(false);
-        this.add(this.carrySprite);
-    }
+	/**
+	 * Extend the base sync() method with generic model data, and provide player-specific data
+	 * from the server here.
+	 * @param {Object} data the data from the server
+	 */
+	sync(data) {
+		super.sync(data); // Sync generic model data
 
+		if (data.username && this.nameText.text !== data.username) {
+			this.nameText.setText(data.username);
+			this.username = data.username;
+		}
 
-    /**
-     * Extend the base sync() method with generic model data, and provide player-specific data
-     * from the server here.
-     * @param {Object} data the data from the server
-     */
-    sync(data) {
-        super.sync(data);   // Sync generic model data
+		if (data.gold !== undefined) this.gold = data.gold;
+		if (data.isSteering !== undefined) this.isSteering = data.isSteering;
+		if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
+		if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
+		if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
+		if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
+		if (data.gold !== undefined) this.gold = data.gold;
+		if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
+		if (data.carryingTreasureId !== undefined)
+			this.carryingTreasureId = data.carryingTreasureId;
+	}
 
-        if (data.username && this.nameText.text !== data.username) {
-            this.nameText.setText(data.username);
-            this.username = data.username;
-        }
+	/**
+	 * Override the postUpdate() class to provide functionality specific to this player,
+	 * without needing to touch the base update() class
+	 * @param {number} delta the difference in time from the last update
+	 * @param {number} deltaTime the delta, in seconds
+	 * @param {number} lerp the lerp factor, calculated from the delta
+	 */
+	postUpdate(delta, deltaTime, lerp) {
+		const gun = this.gun;
+		const pos = this.worldPos;
+		const isBusy = this.isSteering || this.isUsingCannon;
+		const showCarry = !!this.isCarrying;
 
-        if (data.gold !== undefined) this.gold = data.gold;
-        if (data.isSteering !== undefined) this.isSteering = data.isSteering;
-        if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
-        if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
-        if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
-        if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
-        if (data.gold !== undefined) this.gold = data.gold;
-        if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
-        if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
+		let bob = 0;
 
-    }
+		if (this.parentContainer instanceof ShipModel) {
+			bob = this.parentContainer.hullSprite.y;
+			this.bodySprite.y = bob;
+		} else {
+			this.bodySprite.y = 0;
+		}
 
+		// If players health is 0 or below, show the death screen
+		// TODO: pass the players gold/score for display on the death screen
+		if (this.health <= 0) {
+			this.scene.scene.start('DeathScene');
+			console.log('you ded');
+		}
 
-    /**
-     * Override the postUpdate() class to provide functionality specific to this player,
-     * without needing to touch the base update() class
-     * @param {number} delta the difference in time from the last update
-     * @param {number} deltaTime the delta, in seconds
-     * @param {number} lerp the lerp factor, calculated from the delta
-     */
-    postUpdate(delta, deltaTime, lerp) {
-        const gun = this.gun;
-        const pos = this.worldPos;
-        const isBusy = this.isSteering || this.isUsingCannon;
-        const showCarry = !!this.isCarrying;
+		gun.setPosition(pos.x + Math.cos(this.aimAngle) * 15, pos.y + Math.sin(this.aimAngle) * 15);
+		gun.setRotation(this.aimAngle);
 
-        let bob = 0;
+		this.carrySprite.setPosition(
+			Math.cos(this.aimAngle) * 18,
+			Math.sin(this.aimAngle) * 18 + bob
+		);
+		this.carrySprite.setRotation(this.aimAngle);
 
-        if (this.parentContainer instanceof ShipModel) {
-            bob = this.parentContainer.hullSprite.y;
-            this.bodySprite.y = bob;
-        } else {
-            this.bodySprite.y = 0;
-        }
+		this.nameText.setPosition(pos.x, pos.y - 25);
 
+		this.gun.setVisible(!isBusy && !showCarry);
+		this.carrySprite.setVisible(showCarry);
+		this.setAlpha(isBusy ? 0.6 : 1.0);
 
-        // If players health is 0 or below, show the death screen
-        // TODO: pass the players gold/score for display on the death screen
-        if (this.health <= 0) {
-            this.scene.scene.start('DeathScene');
-            console.log("you ded");
-        }
+		this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
+		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
+	}
 
-        gun.setPosition(
-            pos.x + Math.cos(this.aimAngle) * 15,
-            pos.y + Math.sin(this.aimAngle) * 15
-        );
-        gun.setRotation(this.aimAngle);
+	/**
+	 * Overrides interpRotation because the player's definition of rotation applies
+	 * to their gun (for now).
+	 * @param {number} deltaTime the difference in time in seconds
+	 * @param {number} lerp the interpolation factor
+	 */
+	interpRotation(deltaTime, lerp) {
+		// Rotate the aim angle smoothly
+		const aimDiff = Phaser.Math.Angle.Wrap(this.target.r - this.aimAngle);
+		this.aimAngle += aimDiff * lerp;
+	}
 
-        this.carrySprite.setPosition(
-            Math.cos(this.aimAngle) * 18,
-            Math.sin(this.aimAngle) * 18 + bob
-        );
-        this.carrySprite.setRotation(this.aimAngle);
+	/**
+	 * Removes this player from the game and destroys all connected sprites
+	 */
+	destroy() {
+		if (this.nameText) this.nameText.destroy();
+		if (this.gun) this.gun.destroy();
+		if (this.carrySprite) this.carrySprite.destroy();
+		this.healthBar?.destroy();
+		this.reloadIndicator?.destroy();
 
-        this.nameText.setPosition(pos.x, pos.y - 25);
-
-        this.gun.setVisible(!isBusy && !showCarry);
-        this.carrySprite.setVisible(showCarry);
-        this.setAlpha(isBusy ? 0.6 : 1.0);
-
-        this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
-        this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
-    }
-
-
-    /**
-     * Overrides interpRotation because the player's definition of rotation applies
-     * to their gun (for now).
-     * @param {number} deltaTime the difference in time in seconds
-     * @param {number} lerp the interpolation factor
-     */
-    interpRotation(deltaTime, lerp) {
-        // Rotate the aim angle smoothly
-        const aimDiff = Phaser.Math.Angle.Wrap(this.target.r - this.aimAngle);
-        this.aimAngle += aimDiff * lerp;
-    }
-
-
-    /**
-     * Removes this player from the game and destroys all connected sprites
-     */
-    destroy() {
-        if (this.nameText) this.nameText.destroy();
-        if (this.gun) this.gun.destroy();
-        if (this.carrySprite) this.carrySprite.destroy();
-        this.healthBar?.destroy();
-        this.reloadIndicator?.destroy();
-
-        super.destroy();
-    }
+		super.destroy();
+	}
 }

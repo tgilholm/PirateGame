@@ -1,163 +1,163 @@
 {
-    "player": {
-        "maxHealth": 100,
-        "runSpeed": 5,
-        "swimSpeed": 3,
-        "radius": 15,
-        "startingGold": 100000
-    },
-    "ship": {
-        "maxHealth": 1000,
-        "dimensions": {
-            "height": 160,
-            "middleWidth": 200,
-            "bowLength": 100,
-            "sternRadius": 80
-        },
-        "physics": {
-            "turnSpeed": 0.003,
-            "mass": 300,
-            "frictionAir": 0.001,
-            "restitution": 0.2,
-            "thrust": 0.15
-        },
-        "interactables": [
-            {
-                "type": "helm",
-                "x": -100,
-                "y": 0
-            },
-            {
-                "type": "cannon",
-                "x": 30,
-                "y": -55
-            },
-            {
-                "type": "cannon",
-                "x": 30,
-                "y": 55
-            },
-            {
-                "type": "ladder",
-                "x": -80,
-                "y": 75
-            },
-            {
-                "type": "ladder",
-                "x": -80,
-                "y": -75
-            }
-        ],
-        "defaultStats": {
-            "maxHealth": 450,
-            "acceleration": 0.15,
-            "maxSpeed": 10,
-            "cannonDamage": 5,
-            "cannonRange": 500,
-            "cannonBallSpeed": 300,
-            "rammingPower": 10,
-            "minimapRange": 100,
-            "visionRange": 10,
-            "turnSpeed": 50,
-            "responseTime": 5,
-            "reloadTime": 3000,
-            "accuracy": 20,
-            "weight": 450,
-            "frictionAir": 0.05
-        }
-    },
-    "shop": {
-        "id": "shop",
-        "type": "shop",
-        "usePrompt": "open shop",
-        "releasePrompt": "close shop",
-        "radius": 40,
-        "interactRange": 100,
-        "texture": "shop"
-    },
-    "npcShip": {
-        "maxHealth": 10000,
-        "dimensions": {
-            "height": 240,
-            "middleWidth": 360,
-            "bowLength": 180,
-            "sternRadius": 120
-        },
-        "physics": {
-            "turnSpeed": 0.003,
-            "mass": 3000,
-            "frictionAir": 0.001,
-            "restitution": 0.2,
-            "thrust": 0.15
-        },
-        "interactables": [
-            {
-                "type": "helm",
-                "x": -200,
-                "y": 0
-            },
-            {
-                "type": "cannon",
-                "x": -50,
-                "y": -100
-            },
-            {
-                "type": "cannon",
-                "x": -50,
-                "y": 100
-            },
-            {
-                "type": "cannon",
-                "x": 50,
-                "y": -100
-            },
-            {
-                "type": "cannon",
-                "x": 50,
-                "y": 100
-            },
-            {
-                "type": "cannon",
-                "x": 150,
-                "y": -100
-            },
-            {
-                "type": "cannon",
-                "x": 150,
-                "y": 100
-            },
-            {
-                "type": "ladder",
-                "x": -150,
-                "y": 110
-            },
-            {
-                "type": "ladder",
-                "x": -150,
-                "y": -110
-            }
-        ],
-        "defaultStats": {
-            "maxHealth": 450,
-            "crewCapacity": 10,
-            "acceleration": 0.15,
-            "maxSpeed": 10,
-            "cannonDamage": 5,
-            "cannonRange": 500,
-            "cannonBallSpeed": 300,
-            "cannonCount": 6,
-            "rammingPower": 10,
-            "minimapRange": 100,
-            "visionRange": 10,
-            "stopPower": 20,
-            "deployTime": 5,
-            "retrieveTime": 5,
-            "turnSpeed": 50,
-            "responseTime": 5,
-            "reloadTime": 3000,
-            "accuracy": 20,
-            "weight": 450,
-            "frictionAir": 0.05
-        }
-    }
+	"player": {
+		"maxHealth": 100,
+		"runSpeed": 5,
+		"swimSpeed": 3,
+		"radius": 15,
+		"startingGold": 100000
+	},
+	"ship": {
+		"maxHealth": 1000,
+		"dimensions": {
+			"height": 160,
+			"middleWidth": 200,
+			"bowLength": 100,
+			"sternRadius": 80
+		},
+		"physics": {
+			"turnSpeed": 0.003,
+			"mass": 600,
+			"frictionAir": 0.00001,
+			"restitution": 0.2,
+			"thrust": 0.15
+		},
+		"interactables": [
+			{
+				"type": "helm",
+				"x": -100,
+				"y": 0
+			},
+			{
+				"type": "cannon",
+				"x": 30,
+				"y": -55
+			},
+			{
+				"type": "cannon",
+				"x": 30,
+				"y": 55
+			},
+			{
+				"type": "ladder",
+				"x": -80,
+				"y": 75
+			},
+			{
+				"type": "ladder",
+				"x": -80,
+				"y": -75
+			}
+		],
+		"defaultStats": {
+			"maxHealth": 450,
+			"acceleration": 0.15,
+			"maxSpeed": 10,
+			"cannonDamage": 5,
+			"cannonRange": 500,
+			"cannonBallSpeed": 300,
+			"rammingPower": 10,
+			"minimapRange": 100,
+			"visionRange": 10,
+			"turnSpeed": 50,
+			"responseTime": 5,
+			"reloadTime": 3000,
+			"accuracy": 20,
+			"weight": 450,
+			"frictionAir": 0.05
+		}
+	},
+	"shop": {
+		"id": "shop",
+		"type": "shop",
+		"usePrompt": "open shop",
+		"releasePrompt": "close shop",
+		"radius": 40,
+		"interactRange": 100,
+		"texture": "shop"
+	},
+	"npcShip": {
+		"maxHealth": 10000,
+		"dimensions": {
+			"height": 240,
+			"middleWidth": 360,
+			"bowLength": 180,
+			"sternRadius": 120
+		},
+		"physics": {
+			"turnSpeed": 0.003,
+			"mass": 3000,
+			"frictionAir": 0.001,
+			"restitution": 0.2,
+			"thrust": 0.15
+		},
+		"interactables": [
+			{
+				"type": "helm",
+				"x": -200,
+				"y": 0
+			},
+			{
+				"type": "cannon",
+				"x": -50,
+				"y": -100
+			},
+			{
+				"type": "cannon",
+				"x": -50,
+				"y": 100
+			},
+			{
+				"type": "cannon",
+				"x": 50,
+				"y": -100
+			},
+			{
+				"type": "cannon",
+				"x": 50,
+				"y": 100
+			},
+			{
+				"type": "cannon",
+				"x": 150,
+				"y": -100
+			},
+			{
+				"type": "cannon",
+				"x": 150,
+				"y": 100
+			},
+			{
+				"type": "ladder",
+				"x": -150,
+				"y": 110
+			},
+			{
+				"type": "ladder",
+				"x": -150,
+				"y": -110
+			}
+		],
+		"defaultStats": {
+			"maxHealth": 450,
+			"crewCapacity": 10,
+			"acceleration": 0.15,
+			"maxSpeed": 10,
+			"cannonDamage": 5,
+			"cannonRange": 500,
+			"cannonBallSpeed": 300,
+			"cannonCount": 6,
+			"rammingPower": 10,
+			"minimapRange": 100,
+			"visionRange": 10,
+			"stopPower": 20,
+			"deployTime": 5,
+			"retrieveTime": 5,
+			"turnSpeed": 50,
+			"responseTime": 5,
+			"reloadTime": 3000,
+			"accuracy": 20,
+			"weight": 450,
+			"frictionAir": 0.05
+		}
+	}
 }

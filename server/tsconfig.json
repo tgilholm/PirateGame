@@ -1,22 +1,18 @@
 {
-    "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "rootDir": "./src",
-        "outDir": "./built",
-        "baseUrl": ".",
-        "target": "es2022",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "strict": true,
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "paths": {
-            "@shared/*": [
-                "../shared/built/*"
-            ]
-        }
-    },
-    "include": [
-        "src/**/*"
-    ]
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./built",
+		"baseUrl": ".",
+		"target": "es2022",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"strict": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"paths": {
+			"@shared/*": ["../shared/built/*"]
+		}
+	},
+	"include": ["src/**/*"]
 }
