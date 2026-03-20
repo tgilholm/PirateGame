@@ -103,7 +103,7 @@ export default class UIManager {
 			`;
 
 			// Smoothly update zoom to new value
-			const targetZoom = 0.8 - ship.sailState * (0.8 - 0.45);
+			const targetZoom = 0.8 - ship.sailState * (0.8 - 0.6);
 			const cam = this.scene.cameras.main;
 			cam.zoom += (targetZoom - cam.zoom) * 0.05;
 		} else {
