@@ -101,8 +101,14 @@ export default class UIManager {
 			Turn Angle: ${ship.turnAngle}
 			Anchored: ${ship.anchored}
 			`;
+
+			// Smoothly update zoom to new value
+			const targetZoom = 0.8 - ship.sailState * (0.8 - 0.45);
+			const cam = this.scene.cameras.main;
+			cam.zoom += (targetZoom - cam.zoom) * 0.05;
 		} else {
 			this.shipStats.innerText = `Not on a ship`;
+			this.scene.cameras.main.zoomTo(0.8); // default off ship
 		}
 	}
 

@@ -5,15 +5,6 @@ import InteractableEntity from './interactables/interactable-entity';
 import Player from './player';
 
 /**
- * Defines the state of this Ship entity's sails
- */
-export enum SailState {
-	FULL_SAIL = 'FULL_SAIL',
-	HALF_SAIL = 'HALF_SAIL',
-	NO_SAIL = 'NO_SAIL',
-}
-
-/**
  * The server-side representation of an individual ship's state, acting as the "source of truth"
  * for each ship in the game. Ships are "physics parents", meaning that other entities (players,
  * cannons, etc) can be "parented" to a ship and move with it. They are also designed to operate
@@ -25,9 +16,9 @@ export default class Ship extends Entity {
 	physics: ShipConfig['physics'];
 	interactables: InteractableEntity[];
 	body: Matter.Body;
-	sailState: SailState;
 	anchored: boolean;
 	private _turnAngle: number = 0;
+	private _sailState: number = 0; // not moving
 	components: Record<string, string>;
 
 	/**
@@ -55,9 +46,6 @@ export default class Ship extends Entity {
 			rudder: 'LVL1',
 			crew: 'LVL1',
 		};
-
-		// Start not moving
-		this.sailState = SailState.NO_SAIL;
 
 		// For adding to the matter-js world
 		this.body = this.createPhysicsBody(x, y);
@@ -98,6 +86,14 @@ export default class Ship extends Entity {
 
 	public get turnAngle() {
 		return this._turnAngle;
+	}
+
+	public set sailState(newSail: number) {
+		this._sailState = Math.max(Math.min(1, newSail), 0);
+	}
+
+	public get sailState() {
+		return this._sailState;
 	}
 
 	/**

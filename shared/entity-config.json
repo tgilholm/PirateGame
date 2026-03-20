@@ -19,7 +19,7 @@
 			"mass": 600,
 			"frictionAir": 0.00001,
 			"restitution": 0.2,
-			"thrust": 0.05
+			"thrust": 0.15
 		},
 		"interactables": [
 			{

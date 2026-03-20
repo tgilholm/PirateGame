@@ -2,7 +2,7 @@ import { Body } from 'matter-js';
 import EntityRegistry from '../engine/entity-registry';
 import TerrainMap from '../engine/terrain-map';
 import Player from '../entities/player';
-import Ship, { SailState } from '../entities/ship';
+import Ship from '../entities/ship';
 import { EntityConfig } from '../types';
 import { BaseSystem } from './base-system';
 import Entity from '../entities/entity';
@@ -271,32 +271,20 @@ export default class MovementSystem implements BaseSystem {
 	 */
 	updateShip(ship: Ship, dt: number) {
 		const body = ship.body;
-
-		// Set velocity based on sail state
 		const sailState = ship.sailState;
 		const turnAngle = ship.turnAngle;
 		const { turnSpeed, thrust } = ship.physics;
+		const speed = ship.body.speed;
+		const maxSpeed = 5;
+		const speedRatio = Math.min(speed / maxSpeed, 1);
+		const turnScale = 1 - speedRatio * 0.6; // linear
 
 		// Turning
-		Body.setAngularVelocity(body, turnSpeed * turnAngle);
-
-		let sailThrust: number = thrust;
-		switch (sailState) {
-			case SailState.FULL_SAIL:
-				sailThrust = thrust;
-				break;
-			case SailState.HALF_SAIL:
-				sailThrust = thrust * 0.5;
-				break;
-			case SailState.NO_SAIL:
-				// Do nothing, ship slows down
-				sailThrust = 0;
-				break;
-		}
+		Body.setAngularVelocity(body, turnSpeed * turnAngle * turnScale);
 
 		const force = {
-			x: Math.cos(body.angle) * sailThrust,
-			y: Math.sin(body.angle) * sailThrust,
+			x: Math.cos(body.angle) * thrust * sailState,
+			y: Math.sin(body.angle) * thrust * sailState,
 		};
 
 		Body.applyForce(body, body.position, force);

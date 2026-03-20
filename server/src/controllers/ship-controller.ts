@@ -1,5 +1,5 @@
 import EntityRegistry from '../engine/entity-registry';
-import Ship, { SailState } from '../entities/ship';
+import Ship from '../entities/ship';
 import { MoveData } from '@shared/socket-protocol';
 
 /**
@@ -16,37 +16,17 @@ export default class ShipController {
 	 * @param data the movement data to provide to the ship
 	 */
 	handleMove(ship: Ship, data: MoveData): void {
-		// Increase sail
+		// Accel/decel
 		if (data.up) {
-			switch (ship.sailState) {
-				case SailState.HALF_SAIL:
-					ship.sailState = SailState.FULL_SAIL;
-					break;
-				case SailState.NO_SAIL:
-					ship.sailState = SailState.HALF_SAIL;
-				default:
-					// Do nothing
-					break;
-			}
-			// Reduce sail
+			ship.sailState += 0.03;
 		} else if (data.down) {
-			switch (ship.sailState) {
-				case SailState.FULL_SAIL:
-					ship.sailState = SailState.HALF_SAIL;
-					break;
-				case SailState.HALF_SAIL:
-					ship.sailState = SailState.NO_SAIL;
-				default:
-					// Do nothing
-					break;
-			}
+			ship.sailState -= 0.05;
 		}
-
 		// Steer ship
-		else if (data.left) {
-			ship.turnAngle -= 0.02;
+		if (data.left) {
+			ship.turnAngle -= 0.03;
 		} else if (data.right) {
-			ship.turnAngle += 0.02;
+			ship.turnAngle += 0.03;
 		}
 
 		// Turning deadzone
