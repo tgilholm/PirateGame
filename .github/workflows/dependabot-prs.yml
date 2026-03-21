@@ -1,0 +1,25 @@
+name: Auto-merge Dependabot
+on:
+    pull_request:
+    workflow_dispatch:
+        inputs:
+            pr_url:
+                description: PR URL to merge
+                required: true
+
+permissions:
+    contents: write
+    pull-requests: write
+
+jobs:
+    auto-merge:
+        runs-on: ubuntu-latest
+        if: github.actor == 'dependabot[bot]' || github.event_name == 'workflow_dispatch'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+            - name: Auto-merge
+              run: gh pr merge --auto --merge "$PR_URL"
+              env:
+                  PR_URL: ${{ github.event.pull_request.html_url || inputs.pr_url }}
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

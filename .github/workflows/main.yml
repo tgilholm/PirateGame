@@ -20,8 +20,8 @@ jobs:
           script: |
             cd /home/pirategame
             git fetch origin main
-            git reset --hard origin/main # reset local changes
-            git pull # just in case
+            git checkout main
+            git reset --hard origin/main
             
             npm install
             npm run build:all
