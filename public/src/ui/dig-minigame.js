@@ -42,7 +42,7 @@ export default class DigMinigame {
 	update(dt) {
 		if (!this.active) return;
 
-		this.elapsedMs += dt * 250;
+		this.elapsedMs += dt * 1000;
 
 		// bounce left/right across the bar
 		this.position += this.direction * this.speed * dt * 0.65;

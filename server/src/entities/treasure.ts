@@ -1,4 +1,5 @@
 import Entity from './entity';
+import Ship from './ship';
 
 export type TreasureState = 'buried' | 'opening' | 'dugup' | 'carried' | 'loose' | 'hole';
 
@@ -41,14 +42,23 @@ export default class Treasure extends Entity {
 		this.holeExpiresAt = null;
 		this.carriedByPendingPlayerId = null;
 	}
+	//return position of chest when on ship parent
+	public getChestShipPos(): { x: number; y: number } {
+		if (this.parent instanceof Ship) {
+			return (this.parent as Ship).localToWorld(this.x, this.y);
+		}
+		return { x: this.x, y: this.y };
+	}
 
 	protected override toState(): Record<string, any> {
+		const worldPos = this.getChestShipPos();
 		return {
 			...super.toState(),
+			x: worldPos.x,
+			y: worldPos.y,
 			goldValue: this.goldValue,
 			state: this.state,
 			digProgress: this.digProgress,
-			carrierId: this.carrierId,
 			digSpeed: this.digSpeed,
 			successZoneStart: this.successZoneStart,
 			successZoneSize: this.successZoneSize,

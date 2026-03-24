@@ -6,6 +6,7 @@ import Player from '../entities/player';
 import Ship from '../entities/ship';
 import { BaseSystem } from './base-system';
 import { EntityConfig } from '../types';
+import Shop from '../entities/shop';
 
 type WorldPoint = { x: number; y: number };
 
@@ -150,7 +151,7 @@ export default class TreasureSystem implements BaseSystem {
 
 		if (!nearest) return false;
 
-		const durationMs = 2500;
+		const durationMs = 10000;
 		this.activeDigSessions.set(player.id, {
 			playerId: player.id,
 			treasureId: nearest.id,
@@ -162,7 +163,7 @@ export default class TreasureSystem implements BaseSystem {
 			(nearest.goldValue - this.options.minGold) /
 			Math.max(1, this.options.maxGold - this.options.minGold);
 
-		const digSpeed = 0.9 + normalized * 2.2;
+		const digSpeed = 2.5 + normalized * 4.0;
 		const successZoneSize = 0.24 - normalized * 0.1;
 		const successZoneStart = Math.random() * (1 - successZoneSize);
 
@@ -236,8 +237,9 @@ export default class TreasureSystem implements BaseSystem {
 		for (const treasure of treasures) {
 			if (treasure.state !== 'dugup' && treasure.state !== 'loose') continue;
 
-			const dx = playerPos.x - treasure.x;
-			const dy = playerPos.y - treasure.y;
+			const worldPos = treasure.getChestShipPos();
+			const dx = playerPos.x - worldPos.x;
+			const dy = playerPos.y - worldPos.y;
 			const distSq = dx * dx + dy * dy;
 
 			if (distSq <= nearestDistSq) {
@@ -249,11 +251,12 @@ export default class TreasureSystem implements BaseSystem {
 		if (!nearest) return false;
 
 		if (nearest.state === 'dugup') {
+			const worldPos = nearest.getChestShipPos();
 			const holeId = `treasure_hole_${this.nextTreasureId++}`;
 			this.entityFactory.createTreasure(
 				holeId,
-				nearest.x,
-				nearest.y,
+				worldPos.x,
+				worldPos.y,
 				0,
 				'hole',
 				0,
@@ -272,7 +275,9 @@ export default class TreasureSystem implements BaseSystem {
 		nearest.carrierId = player.id;
 		nearest.carriedByPendingPlayerId = null;
 		nearest.openedAt = null;
+		nearest.parent = null;
 		nearest.markDirty();
+
 		player.isCarrying = true;
 		player.carryingTreasureId = nearest.id;
 		player.markDirty();
@@ -298,14 +303,30 @@ export default class TreasureSystem implements BaseSystem {
 		const chestRadius = 20;
 		const dropDistance = playerRadius + chestRadius + 8;
 
+		const worldDropX = pos.x + Math.cos(angle) * dropDistance;
+		const worldDropY = pos.y + Math.sin(angle) * dropDistance;
+
 		treasure.state = 'loose';
 		treasure.carrierId = null;
 		treasure.carriedByPendingPlayerId = null;
 		treasure.openedAt = null;
-		treasure.x = pos.x + Math.cos(angle) * dropDistance;
-		treasure.y = pos.y + Math.sin(angle) * dropDistance;
-		treasure.markDirty();
 
+		//handles chest position when dropped on ship
+		if (player.parent instanceof Ship) {
+			// Parent the chest to the ship so it moves with it
+			const ship = player.parent as Ship;
+			const local = ship.worldToLocal(worldDropX, worldDropY);
+			// If aimed position is inside the hull, push outward to the edge
+			treasure.x = local.x;
+			treasure.y = local.y;
+			treasure.parent = ship;
+		} else {
+			treasure.x = worldDropX;
+			treasure.y = worldDropY;
+			treasure.parent = null;
+		}
+
+		treasure.markDirty();
 		player.isCarrying = false;
 		player.carryingTreasureId = null;
 		player.markDirty();
@@ -443,6 +464,7 @@ export default class TreasureSystem implements BaseSystem {
 			if (treasure.x !== newX || treasure.y !== newY) {
 				treasure.x = newX;
 				treasure.y = newY;
+				treasure.parent = null;
 				treasure.markDirty();
 			}
 		}
@@ -450,10 +472,12 @@ export default class TreasureSystem implements BaseSystem {
 
 	private resolveDeposits(): void {
 		const players = this.registry.getByType('player') as Player[];
+		const shops = this.registry.getByType('shop') as Shop[];
 
 		for (const player of players) {
 			if (!player.isCarrying || !player.carryingTreasureId) continue;
-			if (!(player.parent instanceof Ship)) continue;
+			const canDeposit = shops.some((shop) => shop.canInteract(player));
+			if (!canDeposit) continue;
 
 			const treasure = this.registry.get(player.carryingTreasureId) as Treasure | null;
 
