@@ -34,7 +34,7 @@
 		"socket.io": "^4.8.3",
 		"socket.io-client": "^4.8.3",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.9.3",
+		"typescript": "^6.0.2",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
