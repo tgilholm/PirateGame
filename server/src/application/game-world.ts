@@ -260,6 +260,10 @@ export default class GameWorld extends EventEmitter {
 			const splashEvents = splashes.filter(
 				(s) => Math.hypot(s.x - wx, s.y - wy) <= this.grid['viewDistance']
 			);
+			const allPlayers = this.registry.getByType<Player>('player').map((p) => ({
+				id: p.id,
+				username: p.username,
+			}));
 
 			// If nothing has changed, skip it altogether
 			if (
@@ -270,9 +274,8 @@ export default class GameWorld extends EventEmitter {
 			) {
 				return null;
 			}
-
 			// Send to client via socket service
-			return { newEntities, deltaEntities, removedIds, splashEvents };
+			return { newEntities, deltaEntities, removedIds, splashEvents, allPlayers };
 		});
 
 		// Drain splashes — they have been broadcast this tick
@@ -289,6 +292,9 @@ export default class GameWorld extends EventEmitter {
 			mapWidth: this.terrain.widthInPixels,
 			mapHeight: this.terrain.heightInPixels,
 			shopSpawns: this.registry.getByType<Entity>('shop').map((s) => ({ X: s.x, Y: s.y })),
+			allPlayers: this.registry
+				.getByType<Player>('player')
+				.map((p) => ({ id: p.id, username: p.username })),
 		};
 	}
 
