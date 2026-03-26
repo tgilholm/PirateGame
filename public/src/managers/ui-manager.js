@@ -81,7 +81,7 @@ export default class UIManager {
 		}
 
 		if (this.gameManager.playerListDirty) {
-			this.updatePlayersPanelDom(this.gameManager.playerList);
+			this.updatePlayersPanelDom(this.gameManager.allPlayers);
 			this.gameManager.playerListDirty = false;
 		}
 
@@ -137,19 +137,17 @@ export default class UIManager {
 
 	/**
 	 * Takes a list of players and refreshes the "active player" list
-	 * @param {Object} playerList the list of players
+	 * @param {Object} allPlayers the list of players
 	 */
-	updatePlayersPanelDom(playerList) {
+	updatePlayersPanelDom(allPlayers) {
 		const panel = document.getElementById('players-panel');
 		const list = document.getElementById('players-list');
-
 		if (!panel || !list) return;
-
 		panel.style.display = 'block';
-		const players = Array.from(playerList.values());
-		players.sort((a, b) => (a.username || '').localeCompare(b.username || ''));
-		const visible = players.slice(0, 10);
-		list.innerHTML = visible
+		const sorted = [...allPlayers].sort((a, b) =>
+			(a.username || '').localeCompare(b.username || '')
+		);
+		list.innerHTML = sorted
 			.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`)
 			.join('');
 	}
