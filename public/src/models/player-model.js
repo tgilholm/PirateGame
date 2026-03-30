@@ -1,9 +1,10 @@
 /* global Phaser */
 
 import HealthBar from '../ui/health-bar.js';
-import ReloadIndicator from '../ui/reload-indicator.js';
 import Model from './model.js';
 import ShipModel from './ship-model.js';
+import DeathScene from "../scenes/death-scene.js";
+import ReloadIndicator from "../ui/reload-indicator.js";
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
