@@ -1,5 +1,6 @@
 /* global Phaser */
 
+
 import DeathScene from "../scenes/death-scene.js";
 import HealthBar from "../ui/health-bar.js";
 import ReloadIndicator from "../ui/reload-indicator.js";
@@ -95,7 +96,10 @@ export default class PlayerModel extends Model {
         // TODO: pass the players gold/score for display on the death screen
         if (this.health <= 0 && !this.isDead) {
             this.isDead = true;
-            this.scene.events.emit('playerDied');
+            // @ts-ignore //see if theres a better way to do this if time
+            if (this === this.scene.gameManager?.localPlayer) {
+                this.scene.events.emit('playerDied')
+            }
             console.log("you ded");
         }
 
