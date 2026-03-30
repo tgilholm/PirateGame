@@ -23,6 +23,7 @@ export default class PlayerModel extends Model {
 
         this.isSteering = false;
         this.isUsingCannon = false;
+        this.isDead = false;
         this.aimAngle = 0;
         this.parentId = null;
         this.username = null;
@@ -92,8 +93,9 @@ export default class PlayerModel extends Model {
 
         // If players health is 0 or below, show the death screen
         // TODO: pass the players gold/score for display on the death screen
-        if (this.health <= 0) {
-            this.scene.scene.start('DeathScene');
+        if (this.health <= 0 && !this.isDead) {
+            this.isDead = true;
+            this.scene.events.emit('playerDied');
             console.log("you ded");
         }
 

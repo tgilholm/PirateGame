@@ -27,5 +27,5 @@ create(){
         this.scene.start('Start');
         inputForm.style.display = 'flex';
      });
-}
+    }
 }

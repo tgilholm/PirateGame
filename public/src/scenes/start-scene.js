@@ -76,7 +76,7 @@ export class StartScene extends Phaser.Scene {
                 document.getElementById('input-form').style.display = 'none';
                 this.scene.start('MainScene', { username });      // Pass the username to the main scene
             }
-        })
+        },{ once: true})
     }
 
 

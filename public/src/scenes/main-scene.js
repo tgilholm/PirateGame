@@ -88,7 +88,12 @@ export class MainScene extends Phaser.Scene {
         // Contain the camera in the map
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.gameManager.start(data.username);
-    }
+
+        // call to destroy game manager on shutdown
+        this.events.on('shutdown', ()=> {
+            this.gameManager.destroy();
+        })
+    }   
 
     /**
      * The update loop of the game. Updates all dependent classes 
@@ -114,4 +119,6 @@ export class MainScene extends Phaser.Scene {
 
         [this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach(l => l.setCullPadding(2, 2));
     }
+
+
 }

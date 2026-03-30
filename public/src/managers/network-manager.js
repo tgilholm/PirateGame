@@ -20,6 +20,10 @@ export default class NetworkManager {
         this.socket.on(event, callback);
     }
 
+    off(event) {
+        this.socket.off(event);
+    }
+
     /**
      * Sends an event to the server
      * @param {string} event  
