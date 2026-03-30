@@ -130,7 +130,6 @@ export class StartScene extends Phaser.Scene {
 		let inputText = document.getElementById('input-text');
 		// @ts-ignore because getElementById returns HTMLElement, not HTMLInputElement- it works regardless
 		let username = inputText.value;
-
 		if (username) // not null or empty
 		{
 			// Hide the form before continuing

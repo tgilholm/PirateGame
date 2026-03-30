@@ -84,6 +84,7 @@ export class MainScene extends Phaser.Scene {
 		square.generateTexture('npc_sprite', 30, 30);
 		square.destroy();
 
+		// Contain the camera in the map
 		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 		this.gameManager.start(data.username);
 	}
@@ -104,6 +105,11 @@ export class MainScene extends Phaser.Scene {
 	setupWorld() {
 		this.map = this.make.tilemap({ key: 'map' });
 		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
+
+		// call to destroy game manager on shutdown
+		this.events.on('shutdown', () => {
+			this.gameManager.destroy();
+		});
 
 		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
 		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);

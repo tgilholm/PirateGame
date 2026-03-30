@@ -19,14 +19,18 @@ export default class NetworkManager {
 		this.socket.on(event, callback);
 	}
 
-	/**
-	 * Sends an event to the server
-	 * @param {string} event
-	 * @param {any} data
-	 */
-	emit(event, data) {
-		this.socket.emit(event, data);
-	}
+    off(event) {
+        this.socket.off(event);
+    }
+
+    /**
+     * Sends an event to the server
+     * @param {string} event  
+     * @param {any} data
+     */
+    emit(event, data) {
+        this.socket.emit(event, data);
+    }
 
 	/**
 	 * Sends any event matching PlayerAction to the server

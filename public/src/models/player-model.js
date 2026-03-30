@@ -30,7 +30,6 @@ export default class PlayerModel extends Model {
 		this.reloadTimer = 0;
 		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
 		this.healthBar = new HealthBar(scene, 40, 20);
-		this.gold = 0;
 
 		// Name text is not a child of the container- avoids counter-rotation logic
 		this.nameText = scene.add
@@ -102,12 +101,12 @@ export default class PlayerModel extends Model {
 			this.bodySprite.y = 0;
 		}
 
-		// If players health is 0 or below, show the death screen
-		// TODO: pass the players gold/score for display on the death screen
-		if (this.health <= 0) {
-			this.scene.scene.start('DeathScene');
-			console.log('you ded');
-		}
+        // If players health is 0 or below, show the death screen
+        // TODO: pass the players gold/score for display on the death screen
+        if (this.isDead) {
+            this.scene.events.emit('playerDied');
+            console.log("you ded");
+        }
 
 		gun.setPosition(pos.x + Math.cos(this.aimAngle) * 15, pos.y + Math.sin(this.aimAngle) * 15);
 		gun.setRotation(this.aimAngle);
