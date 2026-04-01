@@ -330,13 +330,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
-        // Delta packet: full for new models and known models that have changed
-        this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
+		// Delta packet: full for new models and known models that have changed
+		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
-        // start death screen when player dies
-        this.scene.events.on('playerDied', () => {
-            this.scene.scene.start('DeathScene');
-        })
+		// start death screen when player dies
+		this.scene.events.on('playerDied', () => {
+			this.scene.scene.start('DeathScene');
+		});
 
 		this.input.on('interact', () => {
 			const target = this.closestInteractable;
@@ -459,29 +459,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	resolveLocalPlayer() {
 		if (this.localPlayer || !this.playerId) return;
 
-        const mine = this.models.get(this.playerId);
-        if (mine) {
-            // @ts-ignore
-            this.localPlayer = mine;
-            this.emit('localPlayerReady', this.localPlayer);
-        }
-    }
-
-    // destroy game manager
-    destroy(){
-        this.network.off(ServerEvent.INIT_GAME);
-        this.network.off(ServerEvent.GAME_STATE);
-        this.models.forEach(e => e.destroy());
-        this.models.clear();
-        this.localPlayer = null;
-    }
-}
 		const mine = this.models.get(this.playerId);
 		if (mine) {
 			// @ts-ignore
 			this.localPlayer = mine;
 			this.emit('localPlayerReady', this.localPlayer);
 		}
+	}
+
+	// destroy game manager
+	destroy() {
+		this.network.off(ServerEvent.INIT_GAME);
+		this.network.off(ServerEvent.GAME_STATE);
+		this.models.forEach((e) => e.destroy());
+		this.models.clear();
+		this.localPlayer = null;
 	}
 
 	/**
