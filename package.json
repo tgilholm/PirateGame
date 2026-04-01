@@ -34,14 +34,14 @@
 		"socket.io": "^4.8.3",
 		"socket.io-client": "^4.8.3",
 		"ts-node": "^10.9.2",
-		"typescript": "^5.9.3",
+		"typescript": "^5.8.3",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@types/express": "^5.0.6",
 		"@types/matter-js": "^0.20.2",
-		"@types/socket.io-client": "^1.4.36",
+		"@types/socket.io-client": "^3.0.0",
 		"@types/ws": "^8.18.1",
 		"@typescript-eslint/parser": "^8.57.1",
 		"concurrently": "^9.2.1",

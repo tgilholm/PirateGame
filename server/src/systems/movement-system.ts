@@ -245,8 +245,9 @@ export default class MovementSystem implements BaseSystem {
 		playerRadius: number
 	): boolean {
 		for (const t of treasures) {
-			const dx = x - t.x;
-			const dy = y - t.y;
+			const worldPos = t.getChestShipPos();
+			const dx = x - worldPos.x;
+			const dy = y - worldPos.y;
 
 			if (t.state === 'loose' || t.state === 'dugup') {
 				const combined = CHEST_OBSTACLE_RADIUS + playerRadius;
@@ -257,10 +258,7 @@ export default class MovementSystem implements BaseSystem {
 				const ry = HOLE_OBSTACLE_RADIUS_Y + playerRadius;
 				if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) < 1) return true;
 			}
-
-			// buried / carried / opening do not block movement
 		}
-
 		return false;
 	}
 

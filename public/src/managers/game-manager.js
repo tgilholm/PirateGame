@@ -33,10 +33,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.#playerListCache = null;
 		this.digMinigame = new DigMinigame();
 		this.moveTimer = 0;
+		this.allPlayers = [];
+		this.playerListDirty = true;
 		/** @type {PlayerModel} */
 		this.localPlayer = null;
 		this.playerId = null;
-		this.playerListDirty = true;
 
 		/** @type {Map<string, Model>} */
 		this.models = new Map(); // generic entity list
@@ -171,6 +172,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		//         this.models.delete(id);
 		//     }
 		// });
+
+		if (data.allPlayers) {
+			this.allPlayers = data.allPlayers;
+			this.playerListDirty = true;
+		}
 
 		data.newEntities?.forEach((entityData) => {
 			this.applyFull(entityData);
@@ -313,6 +319,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		// Full state packet: replace all entity data
 		this.network.on(ServerEvent.INIT_GAME, (data) => {
 			this.playerId = data.id;
+			this.allPlayers = data.allPlayers ?? [];
 			this.mapWidth = data.mapWidth;
 			this.mapHeight = data.mapHeight;
 			this.shopSpawns = data.shopSpawns ?? [];

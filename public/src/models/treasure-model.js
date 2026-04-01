@@ -21,7 +21,7 @@ export default class TreasureModel extends Model {
 
 		this.add(this.holeSprite);
 		this.add(this.sprite);
-		this.setDepth(10);
+		this.setDepth(15);
 
 		this.applyVisuals();
 	}
