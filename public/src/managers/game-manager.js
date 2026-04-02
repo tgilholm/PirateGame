@@ -343,8 +343,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			if ((id = this.localPlayer.id)) {
 				this.emit('playerDied');
 			}
+		});
 
-			console.log('Player Died');
+		this.network.on(ServerEvent.SUNK, (id) => {
+			if ((id = this.localPlayer.id)) {
+				this.emit('shipSunk');
+			}
 		});
 
 		this.input.on('interact', () => {

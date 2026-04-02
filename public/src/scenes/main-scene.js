@@ -89,7 +89,13 @@ export class MainScene extends Phaser.Scene {
 		this.gameManager.start(data.username);
 
 		this.gameManager.on('playerDied', () => {
-			this.uiManager.showDeathMessage();
+			//this.uiManager.showDeathMessage();
+			// Show respawn indicator
+			console.log('dead');
+		});
+
+		this.gameManager.on('shipSunk', () => {
+			this.uiManager.showShipSunkMessage();
 		});
 	}
 

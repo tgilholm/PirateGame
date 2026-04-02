@@ -25,7 +25,7 @@ export default class UIManager {
 		this.menu = document.getElementById('left-panel');
 		this.deathMessage = document.getElementById('death-screen');
 
-		this.deathMessage.style.display = 'block';
+		this.deathMessage.style.display = 'none';
 		this.menu.style.display = 'block';
 		this.currentInteractable = null;
 
@@ -115,9 +115,8 @@ export default class UIManager {
 		}
 	}
 
-	showDeathMessage() {
-		this.deathMessage.style.display = 'block';
-		console.log('shown death message');
+	showShipSunkMessage() {
+		this.deathMessage.style.display = 'flex';
 	}
 
 	/**

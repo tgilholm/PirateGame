@@ -210,9 +210,17 @@ export default class GameWorld extends EventEmitter {
 
 		const players = this.registry.getByType<Player>('player');
 		players.forEach((player) => {
+			// Tell the player to respawn
 			if (player.isDead) {
-				console.log(`Player Died: ${player.id}`);
+				console.log(`[GameWorld] Player Died: ${player.id}`);
 				this.emit(WorldEvent.PLAYER_DIED, player.id);
+			}
+
+			// Tell the player their ship has sunk
+			const ship = player.ship;
+			if (ship.isDead) {
+				console.log(`[GameWorld] Player Ship Sunk: ${ship.id}`);
+				this.emit(WorldEvent.SHIP_SUNK, player.id);
 			}
 		});
 
