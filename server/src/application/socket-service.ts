@@ -92,6 +92,12 @@ export default class SocketService {
 			}
 		);
 
+		this.world.on(WorldEvent.PLAYER_DIED, (id) => {
+			console.log(`[SocketService] Player ${id} died`);
+
+			this.io.to(id).emit(ServerEvent.DEAD, id);
+		});
+
 		// Handle new clients
 		this.io.on('connection', (socket: Socket) => {
 			console.log(`[SocketService] Client connected: ${socket.id}`);

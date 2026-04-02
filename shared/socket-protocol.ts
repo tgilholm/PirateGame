@@ -10,6 +10,8 @@ export enum ServerEvent {
 	JOIN_FAILED = 'JOIN_FAILED',
 	DIG_MINIGAME_START = 'DIG_MINIGAME_START',
 	DIG_MINIGAME_RESULT = 'DIG_MINIGAME_RESULT',
+	DEAD = 'DEAD',
+	SUNK = 'SUNK',
 }
 
 export enum ClientEvent {

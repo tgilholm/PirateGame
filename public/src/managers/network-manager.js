@@ -23,10 +23,6 @@ export default class NetworkManager {
 		this.socket.off(event);
 	}
 
-	off(event) {
-		this.socket.off(event);
-	}
-
 	/**
 	 * Sends an event to the server
 	 * @param {string} event

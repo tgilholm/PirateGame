@@ -335,14 +335,16 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			console.log('[Client] DIG_MINIGAME_RESULT received', success);
 			this.digMinigame.stop();
 		});
-		// Delta packet: full for new models and known models that have changed
-		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
+
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
-		// start death screen when player dies
-		this.scene.events.on('playerDied', () => {
-			this.scene.scene.start('DeathScene');
+		this.network.on(ServerEvent.DEAD, (id) => {
+			if ((id = this.localPlayer.id)) {
+				this.emit('playerDied');
+			}
+
+			console.log('Player Died');
 		});
 
 		this.input.on('interact', () => {

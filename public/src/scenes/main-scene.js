@@ -87,6 +87,10 @@ export class MainScene extends Phaser.Scene {
 		// Contain the camera in the map
 		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 		this.gameManager.start(data.username);
+
+		this.gameManager.on('playerDied', () => {
+			//this.uiManager.showDeathMessage();
+		});
 	}
 
 	/**
@@ -95,7 +99,7 @@ export class MainScene extends Phaser.Scene {
 	update() {
 		this.gameManager.update();
 		this.uiManager.update();
-		const gold = document.getElementById('gold-counter');
+		const gold = document.getElementById('gold-counter'); // ui concern
 		if (gold) gold.style.display = 'none';
 	}
 

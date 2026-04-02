@@ -3,8 +3,7 @@
 import HealthBar from '../ui/health-bar.js';
 import Model from './model.js';
 import ShipModel from './ship-model.js';
-import DeathScene from "../scenes/death-scene.js";
-import ReloadIndicator from "../ui/reload-indicator.js";
+import ReloadIndicator from '../ui/reload-indicator.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -102,12 +101,11 @@ export default class PlayerModel extends Model {
 			this.bodySprite.y = 0;
 		}
 
-        // If players health is 0 or below, show the death screen
-        // TODO: pass the players gold/score for display on the death screen
-        if (this.isDead) {
-            this.scene.events.emit('playerDied');
-            console.log("you ded");
-        }
+		// If players health is 0 or below, show the death screen
+		// TODO: pass the players gold/score for display on the death screen
+		if (this.isDead) {
+			this.scene.events.emit('playerDied');
+		}
 
 		gun.setPosition(pos.x + Math.cos(this.aimAngle) * 15, pos.y + Math.sin(this.aimAngle) * 15);
 		gun.setRotation(this.aimAngle);

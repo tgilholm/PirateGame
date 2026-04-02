@@ -19,6 +19,8 @@ import Entity from 'src/entities/entity';
 export enum WorldEvent {
 	GAME_STATE = 'GAME_STATE',
 	GAME_STATE_PER_PLAYER = 'GAME_STATE_PER_PLAYER',
+	PLAYER_DIED = 'PLAYER_DIED',
+	SHIP_SUNK = 'SHIP_SUNK',
 }
 
 /**
@@ -205,6 +207,14 @@ export default class GameWorld extends EventEmitter {
 		const entityData = this.buildEntityData();
 		const projectileSystem = this.engine.systems.get('projectile') as ProjectileSystem;
 		const splashes: SplashEvent[] = projectileSystem.pendingSplashes;
+
+		const players = this.registry.getByType<Player>('player');
+		players.forEach((player) => {
+			if (player.isDead) {
+				console.log(`Player Died: ${player.id}`);
+				this.emit(WorldEvent.PLAYER_DIED, player.id);
+			}
+		});
 
 		this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
 			const session = this.sessions.get(socketId); // access that player's "known data"
