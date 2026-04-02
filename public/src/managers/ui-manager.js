@@ -23,6 +23,9 @@ export default class UIManager {
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
 		this.menu = document.getElementById('left-panel');
+		this.deathMessage = document.getElementById('death-screen');
+
+		this.deathMessage.style.display = 'block';
 		this.menu.style.display = 'block';
 		this.currentInteractable = null;
 
@@ -110,6 +113,11 @@ export default class UIManager {
 			this.shipStats.innerText = `Not on a ship`;
 			this.scene.cameras.main.zoomTo(0.8); // default off ship
 		}
+	}
+
+	showDeathMessage() {
+		this.deathMessage.style.display = 'block';
+		console.log('shown death message');
 	}
 
 	/**

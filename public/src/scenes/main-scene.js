@@ -89,7 +89,7 @@ export class MainScene extends Phaser.Scene {
 		this.gameManager.start(data.username);
 
 		this.gameManager.on('playerDied', () => {
-			//this.uiManager.showDeathMessage();
+			this.uiManager.showDeathMessage();
 		});
 	}
 
