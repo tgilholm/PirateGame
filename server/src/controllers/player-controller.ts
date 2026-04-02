@@ -96,6 +96,29 @@ export default class PlayerController {
 		}
 	}
 
+	handleDeath(player: Player): void {
+		// Start the player's respawn timer
+
+		if (!player.respawnStarted) {
+			player.respawnStarted = true;
+			player.respawnTimer = player.respawnTime; // reset
+		}
+
+		player.markDirty();
+	}
+
+	handleRespawn(player: Player): void {
+		player.respawnStarted = false;
+
+		// Put them back on their ship with full health
+		const ship = player.ship;
+
+		player.parent = ship;
+		player.x = 0;
+		player.y = 0;
+		player.health = player.maxHealth;
+	}
+
 	/**
 	 * Handles players releasing an interactable that they are using.
 	 * @param player the player to handle the release event for

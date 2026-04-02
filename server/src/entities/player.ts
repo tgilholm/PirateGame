@@ -25,6 +25,10 @@ export default class Player extends Entity {
 	reloadTime: number = 1000;
 	reloadTimer: number = 0;
 
+	respawnTime: number = 5000;
+	respawnTimer: number = 0;
+	respawnStarted: boolean = false;
+
 	/**
 	 * Builds a player with the specified data
 	 * @param id the id of the player
@@ -99,6 +103,7 @@ export default class Player extends Entity {
 			reloadTime: this.reloadTime,
 			isCarrying: this.isCarrying,
 			carryingTreasureId: this.carryingTreasureId,
+			respawnTimer: this.respawnTimer,
 		};
 	}
 }

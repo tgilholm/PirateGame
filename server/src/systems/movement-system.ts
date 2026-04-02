@@ -63,6 +63,12 @@ export default class MovementSystem implements BaseSystem {
 			player.markDirty();
 		}
 
+		// move to own system
+		if (player.respawnTimer > 0 && player.respawnStarted) {
+			player.respawnTimer = Math.max(0, player.respawnTimer - dt * 1000);
+			player.markDirty();
+		}
+
 		// Keep track of aim angle- don't send for static players
 		const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
 		if (Math.abs(player.aimAngle - prevAimAngle) > 0.01) {
@@ -286,8 +292,6 @@ export default class MovementSystem implements BaseSystem {
 		};
 
 		Body.applyForce(body, body.position, force);
-
-		ship.health -= 20;
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {

@@ -4,6 +4,7 @@ import HealthBar from '../ui/health-bar.js';
 import Model from './model.js';
 import ShipModel from './ship-model.js';
 import ReloadIndicator from '../ui/reload-indicator.js';
+import RespawnIndicator from '../ui/respawn-indicator.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -28,8 +29,10 @@ export default class PlayerModel extends Model {
 		this.gold = 0;
 		this.reloadTime = 0;
 		this.reloadTimer = 0;
+		this.respawnTimer = 0;
 		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
 		this.healthBar = new HealthBar(scene, 40, 20);
+		this.respawnIndicator = new RespawnIndicator(scene, this, 50, 50);
 
 		// Name text is not a child of the container- avoids counter-rotation logic
 		this.nameText = scene.add
@@ -77,6 +80,8 @@ export default class PlayerModel extends Model {
 		if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
 		if (data.carryingTreasureId !== undefined)
 			this.carryingTreasureId = data.carryingTreasureId;
+
+		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
 	}
 
 	/**
@@ -118,6 +123,7 @@ export default class PlayerModel extends Model {
 
 		this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
+		this.respawnIndicator.update(this.respawnTimer);
 	}
 
 	/**
