@@ -123,6 +123,9 @@ input.formElement {
 }
 
 #death-screen {
+	width: 100vw;
+	height: 100vh;
+	backdrop-filter: blur(10px);
 	font-family: 'VT323', monospace;
 	position: fixed;
 	top: 45%;
@@ -130,6 +133,7 @@ input.formElement {
 	transform: translate(-50%, -50%);
 	display: none;
 	flex-direction: column;
+	justify-content: center;
 	align-items: center;
 	text-align: center;
 	gap: 12px;
