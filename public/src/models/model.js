@@ -140,21 +140,23 @@ export default class Model extends Phaser.GameObjects.Container {
 	 * excessive getWorldTransformMatrix() calls.
 	 */
 	get worldPos() {
-		const currentFrame = this.scene.game.loop.frame;
-		if (this.#cachedFrame === currentFrame) {
-			return this.#worldPos;
-		}
+		if (this.scene.game) {
+			const currentFrame = this.scene.game.loop.frame;
+			if (this.#cachedFrame === currentFrame) {
+				return this.#worldPos;
+			}
 
-		if (this.parentContainer) {
-			const matrix = this.getWorldTransformMatrix();
-			this.#worldPos.x = matrix.tx;
-			this.#worldPos.y = matrix.ty;
-		} else {
-			this.#worldPos.x = this.x;
-			this.#worldPos.y = this.y;
-		}
+			if (this.parentContainer) {
+				const matrix = this.getWorldTransformMatrix();
+				this.#worldPos.x = matrix.tx;
+				this.#worldPos.y = matrix.ty;
+			} else {
+				this.#worldPos.x = this.x;
+				this.#worldPos.y = this.y;
+			}
 
-		this.#cachedFrame = currentFrame;
+			this.#cachedFrame = currentFrame;
+		}
 		return this.#worldPos;
 	}
 

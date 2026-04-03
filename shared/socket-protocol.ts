@@ -29,6 +29,8 @@ export enum ActionType {
 	DIG = 'DIG',
 	RELEASE = 'RELEASE',
 	TREASURE_INTERACT = 'TREASURE_INTERACT',
+	RESPAWN_SHIP = 'RESPAWN',
+	QUIT = 'QUIT',
 }
 
 export interface MoveData {
@@ -62,7 +64,9 @@ export type PlayerAction =
 	| { type: ActionType.MESSAGE; data?: { text: string } } // the message
 	| { type: ActionType.DIG; data: DigData }
 	| { type: ActionType.FIRE; data?: never }
-	| { type: ActionType.RELEASE; data?: never };
+	| { type: ActionType.RELEASE; data?: never }
+	| { type: ActionType.QUIT; data?: never }
+	| { type: ActionType.RESPAWN_SHIP; data?: never };
 
 //types of splash animations
 export type SplashType =

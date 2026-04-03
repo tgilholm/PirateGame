@@ -112,10 +112,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		// Determine if the player "should" send the interact packet
 		if (closest && closest.dist < 50) {
-			if (
-				closest.entity.type === 'ladder' ||
-				this.localPlayer.parentId == closest.entity.parentId
-			) {
+			if (closest.entity.type === 'ladder' || this.localPlayer.parentId == closest.entity.parentId) {
 				// handles both === null
 				this.closestInteractable = closest;
 			}
@@ -386,6 +383,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
+
+		this.input.on('respawn', () => this.network.sendRespawn());
+
+		this.input.on('quit', () => this.network.sendQuit());
 	}
 
 	// spawnPredictedProjectile() {

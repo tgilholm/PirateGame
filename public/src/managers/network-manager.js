@@ -103,4 +103,15 @@ export default class NetworkManager {
 			data: { mode: 'hit', sliderPosition },
 		});
 	}
+
+	sendRespawn() {
+		this.sendAction({
+			type: ActionType.RESPAWN_SHIP,
+		});
+	}
+	sendQuit() {
+		this.sendAction({
+			type: ActionType.QUIT,
+		});
+	}
 }

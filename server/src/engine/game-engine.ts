@@ -5,6 +5,7 @@ import MovementSystem from '../systems/movement-system';
 import PhysicsSystem from '../systems/physics-system';
 import ProjectileSystem from '../systems/projectile-system';
 import TreasureSystem from '../systems/treasure-system';
+import SpawnSystem from 'src/systems/spawn-system';
 
 /**
  * Defines the systems that must be provided into GameEngine instances
@@ -16,6 +17,7 @@ export interface GameSystems {
 	messageSystem: MessageSystem;
 	npcSystem: NPCSystem;
 	treasureSystem: TreasureSystem;
+	spawnSystem: SpawnSystem;
 }
 
 /**
@@ -36,6 +38,7 @@ export default class GameEngine {
 		this.systems.set('message', systems.messageSystem);
 		this.systems.set('npc', systems.npcSystem);
 		this.systems.set('treasure', systems.treasureSystem);
+		this.systems.set('spawns', systems.spawnSystem);
 
 		this.systemArray = Array.from(this.systems.values()); // cache systems
 	}

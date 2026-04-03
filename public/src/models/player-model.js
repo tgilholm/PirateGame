@@ -32,7 +32,7 @@ export default class PlayerModel extends Model {
 		this.respawnTimer = 0;
 		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
 		this.healthBar = new HealthBar(scene, 40, 20);
-		this.respawnIndicator = new RespawnIndicator(scene, this, 50, 50);
+		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
 
 		// Name text is not a child of the container- avoids counter-rotation logic
 		this.nameText = scene.add
@@ -78,8 +78,7 @@ export default class PlayerModel extends Model {
 		if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
 		if (data.gold !== undefined) this.gold = data.gold;
 		if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
-		if (data.carryingTreasureId !== undefined)
-			this.carryingTreasureId = data.carryingTreasureId;
+		if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
 
 		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
 	}
@@ -94,11 +93,10 @@ export default class PlayerModel extends Model {
 	postUpdate(delta, deltaTime, lerp) {
 		const gun = this.gun;
 		const pos = this.worldPos;
-		const isBusy = this.isSteering || this.isUsingCannon;
+		const isBusy = this.isSteering || this.isUsingCannon || this.isDead; // busy dyin'
 		const showCarry = !!this.isCarrying;
 
-		let bob = 0;
-
+		let bob = 0; // hi bob
 		if (this.parentContainer instanceof ShipModel) {
 			bob = this.parentContainer.hullSprite.y;
 			this.bodySprite.y = bob;
@@ -106,24 +104,28 @@ export default class PlayerModel extends Model {
 			this.bodySprite.y = 0;
 		}
 
+		// Gun is drawn at edge of player sprite
 		gun.setPosition(pos.x + Math.cos(this.aimAngle) * 15, pos.y + Math.sin(this.aimAngle) * 15);
 		gun.setRotation(this.aimAngle);
 
-		this.carrySprite.setPosition(
-			Math.cos(this.aimAngle) * 18,
-			Math.sin(this.aimAngle) * 18 + bob
-		);
-		this.carrySprite.setRotation(this.aimAngle);
+		this.carrySprite.setPosition(Math.cos(this.aimAngle) * 18, Math.sin(this.aimAngle) * 18 + bob);
 
+		// manually update position for non-container objects
+		this.carrySprite.setRotation(this.aimAngle);
 		this.nameText.setPosition(pos.x, pos.y - 25);
+		this.respawnIndicator.text.setPosition(pos.x, pos.y);
 
 		this.gun.setVisible(!isBusy && !showCarry);
 		this.carrySprite.setVisible(showCarry);
-		this.setAlpha(isBusy ? 0.6 : 1.0);
+		this.setAlpha(isBusy ? 0.6 : 1.0); // visual feedback if using cannon/helm etc
 
 		this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
+
+		// Visual feedback for 'dead' players
+		this.nameText.setColor(this.isDead ? '#ee0000' : '#ffffff'); // red: dead, white: alive
+		this.nameText.setAlpha(this.isDead ? 0.7 : 1);
 	}
 
 	/**

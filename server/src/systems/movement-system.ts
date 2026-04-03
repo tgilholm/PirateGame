@@ -194,9 +194,7 @@ export default class MovementSystem implements BaseSystem {
 
 		// Mark dirty if position changed enough
 		const moved =
-			Math.abs(player.x - prevX) > POS_THRESHOLD ||
-			Math.abs(player.y - prevY) > POS_THRESHOLD ||
-			aimChanged;
+			Math.abs(player.x - prevX) > POS_THRESHOLD || Math.abs(player.y - prevY) > POS_THRESHOLD || aimChanged;
 
 		if (moved) player.markDirty();
 	}
@@ -244,12 +242,7 @@ export default class MovementSystem implements BaseSystem {
 	 * or global & global.
 	 *
 	 */
-	private checkTreasureObstacles(
-		x: number,
-		y: number,
-		treasures: Treasure[],
-		playerRadius: number
-	): boolean {
+	private checkTreasureObstacles(x: number, y: number, treasures: Treasure[], playerRadius: number): boolean {
 		for (const t of treasures) {
 			const worldPos = t.getChestShipPos();
 			const dx = x - worldPos.x;
@@ -292,6 +285,8 @@ export default class MovementSystem implements BaseSystem {
 		};
 
 		Body.applyForce(body, body.position, force);
+
+		//ship.health -= 10;
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {
@@ -309,10 +304,7 @@ export default class MovementSystem implements BaseSystem {
 		while (localTarget < -Math.PI) localTarget += 2 * Math.PI;
 
 		const facingAngle = cannon.y < 0 ? -Math.PI / 2 : Math.PI / 2;
-		const clampedTarget = Math.max(
-			facingAngle - CANNON_ARC,
-			Math.min(facingAngle + CANNON_ARC, localTarget)
-		);
+		const clampedTarget = Math.max(facingAngle - CANNON_ARC, Math.min(facingAngle + CANNON_ARC, localTarget));
 
 		let diff = clampedTarget - cannon.r;
 		while (diff > Math.PI) diff -= 2 * Math.PI;

@@ -51,18 +51,32 @@ export default class WorldController {
 		const player = this.entityRegistry.get<Player>(playerId);
 		if (!player) return;
 
-		if (player.isDead) {
-			this.playerController.handleDeath(player);
-		}
-
+		// Check for respawn before checking for death- otherwise this block is never invoked
 		if (player.respawnStarted && player.respawnTimer <= 0) {
 			this.playerController.handleRespawn(player);
 		}
 
-		// Sends to the respective controller
+		// Handle respawn/quit event first
+		if (action.type === ActionType.RESPAWN_SHIP) {
+			this.playerController.handleRespawnShip(player);
+		}
+
+		if (action.type === ActionType.QUIT) {
+			//this.playerController.handleQuit(player);
+		}
+
+		if (player.isDead) {
+			this.playerController.handleDeath(player);
+			return; // don't handle actions if dead, just respawn
+		}
+
+		if (player.ship.isDead) {
+			return;
+		}
+
 		switch (action.type) {
+			// Send move inputs based on player context
 			case ActionType.MOVE:
-				// If the player is controlling a cannon, send move inputs to the cannon
 				if (player.cannon) {
 					this.cannonController.handleMove(player.cannon, action.data);
 

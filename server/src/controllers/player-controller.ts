@@ -12,22 +12,20 @@ import Helm from '../entities/interactables/helm';
 import Ladder from '../entities/interactables/ladder';
 import Bullet from '../entities/projectiles/bullet';
 import TreasureSystem from '../systems/treasure-system';
+import SpawnSystem from 'src/systems/spawn-system';
 
 /**
  * Handles events affecting the player
  */
 export default class PlayerController {
 	/**
-	 * Creates the player controller
-	 * @param entityRegistry to reference the entities in the game
-	 * @param interactionHandler delegates interaction specifics
-	 * @param upgradeHandler delegates upgrade specifics
 	 */
 	constructor(
 		private entityRegistry: EntityRegistry,
 		private interactionHandler: InteractionHandler,
 		private upgradeHandler: UpgradeHandler,
-		private treasureSystem: TreasureSystem
+		private treasureSystem: TreasureSystem,
+		private spawnSystem: SpawnSystem
 	) {}
 
 	/**
@@ -73,22 +71,14 @@ export default class PlayerController {
 			if (!ship) return;
 			switch (interactable.type) {
 				case 'helm':
-					this.interactionHandler.handleHelmInteraction(
-						player,
-						ship,
-						interactable as Helm
-					);
+					this.interactionHandler.handleHelmInteraction(player, ship, interactable as Helm);
 					break;
 
 				case 'cannon':
 					this.interactionHandler.handleCannonInteraction(player, interactable as Cannon);
 					break;
 				case 'ladder':
-					this.interactionHandler.handleLadderInteraction(
-						player,
-						ship,
-						interactable as Ladder
-					);
+					this.interactionHandler.handleLadderInteraction(player, ship, interactable as Ladder);
 					break;
 				default:
 					return;
@@ -96,13 +86,36 @@ export default class PlayerController {
 		}
 	}
 
+	handleRespawnShip(player: Player): void {
+		// Respawn ship & player at a new location
+		// TODO: Ensure player is a set distance from their death point
+
+		const ship = player.ship;
+		const { x, y } = this.spawnSystem.getSpawnPoint();
+
+		ship.x = x;
+		ship.y = y;
+		ship.health = ship.maxHealth;
+
+		// Existing method already puts player at 0,0 on their ship
+		this.handleRespawn(player);
+		ship.markDirty();
+	}
+
 	handleDeath(player: Player): void {
 		// Start the player's respawn timer
-
 		if (!player.respawnStarted) {
 			player.respawnStarted = true;
 			player.respawnTimer = player.respawnTime; // reset
 		}
+
+		// Null player inputs so they can't keep moving
+		player.inputs = {
+			up: false,
+			down: false,
+			left: false,
+			right: false,
+		};
 
 		player.markDirty();
 	}
@@ -117,6 +130,7 @@ export default class PlayerController {
 		player.x = 0;
 		player.y = 0;
 		player.health = player.maxHealth;
+		player.markDirty();
 	}
 
 	/**
@@ -163,12 +177,7 @@ export default class PlayerController {
 		// Get player world pos
 		const worldPos = this.getWorldPosition(player);
 
-		const bullet = new Bullet(
-			`bullet_${Date.now()}_${player.id}`,
-			worldPos.x,
-			worldPos.y,
-			player.aimAngle
-		);
+		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
 		bullet.vx += player.vx;
 		bullet.vy += player.vy;
 		bullet.firedBy = player;
@@ -187,16 +196,7 @@ export default class PlayerController {
 					const dx = s.x - player.x;
 					const dy = s.y - player.y;
 					const dist = Math.round(Math.sqrt(dx * dx + dy * dy));
-					return (
-						's.id' +
-						'(dist=' +
-						dist +
-						',range=' +
-						s.interactRange +
-						',onFoot=' +
-						!player.parent +
-						')'
-					);
+					return 's.id' + '(dist=' + dist + ',range=' + s.interactRange + ',onFoot=' + !player.parent + ')';
 				})
 				.join(' | ');
 			console.log(
