@@ -285,8 +285,6 @@ export default class MovementSystem implements BaseSystem {
 		};
 
 		Body.applyForce(body, body.position, force);
-
-		ship.health -= 10;
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {
