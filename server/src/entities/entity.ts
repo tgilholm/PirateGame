@@ -18,6 +18,7 @@ export default abstract class Entity {
 	// "Dirty"- meaning this entity has changed recently
 	public dirty: boolean = true; // starts dirty so first broadcast always sends
 	private lastSent: Record<string, any> = {}; // keep track per-entity
+	public pendingTeleport: boolean = false; // used for respawn
 
 	/**
 	 * Builds an entity with the provided data
@@ -28,14 +29,7 @@ export default abstract class Entity {
 	 * @param maxHealth the starting/max health of this entity
 	 * @param parent the physics parent of this entity (e.g. a Ship)
 	 */
-	constructor(
-		id: string,
-		type: string,
-		x: number,
-		y: number,
-		maxHealth: number,
-		parent: Entity | null
-	) {
+	constructor(id: string, type: string, x: number, y: number, maxHealth: number, parent: Entity | null) {
 		this.id = id;
 		this.type = type;
 		this.x = x;
@@ -66,6 +60,7 @@ export default abstract class Entity {
 	 */
 	public clearDirty(): void {
 		this.dirty = false;
+		this.pendingTeleport = false;
 	}
 
 	protected toState(): Record<string, any> {
@@ -81,6 +76,7 @@ export default abstract class Entity {
 			parentId: this.parent?.id ?? null,
 			health: this.health,
 			maxHealth: this.maxHealth,
+			teleport: this.pendingTeleport,
 		};
 	}
 
@@ -105,15 +101,16 @@ export default abstract class Entity {
 	 * @returns a record of the changes, or null if nothing has changed.
 	 */
 	serialiseDelta(): Record<string, any> | null {
+		const delta: Record<string, any> = { id: this.id };
+
 		if (this.dirty) {
 			const state = this.toState();
 			this.clearDirty();
 			this.lastSent = { ...state };
-			return state; // full state as delta — no double call
+			return state; // full state as delta  no double call
 		}
 
 		const current = this.toState();
-		const delta: Record<string, any> = { id: this.id };
 		let hasChanges = false;
 
 		for (const key of Object.keys(current)) {

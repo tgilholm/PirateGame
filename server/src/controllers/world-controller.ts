@@ -6,6 +6,7 @@ import Player from '../entities/player';
 import Ship from '../entities/ship';
 import MessageController from './message-controller';
 import CannonController from './cannon-controller';
+import SessionHandler from 'src/handlers/session-handler';
 
 /**
  * Defines the controllers that must be passed to this one
@@ -34,6 +35,7 @@ export default class WorldController {
 	 */
 	constructor(
 		private entityRegistry: EntityRegistry,
+		private sessionHandler: SessionHandler,
 		controllers: GameControllers
 	) {
 		this.shipController = controllers.shipController;
@@ -49,12 +51,36 @@ export default class WorldController {
 	 */
 	public handle(playerId: string, action: PlayerAction) {
 		const player = this.entityRegistry.get<Player>(playerId);
-		if (!player || player.isDead) return;
+		if (!player) return;
 
-		// Sends to the respective controller
+		if (action.type === ActionType.QUIT) {
+			this.sessionHandler.removePlayer(playerId);
+			return; // don't process any further actions
+		}
+
+		// Check for respawn before checking for death- otherwise this block is never invoked
+		if (player.respawnStarted && player.respawnTimer <= 0) {
+			this.playerController.handleRespawn(player);
+		}
+
+		// Handle respawn/quit event first
+		if (action.type === ActionType.RESPAWN_SHIP) {
+			this.playerController.handleRespawnShip(player);
+		}
+
+		// check for ship death before player death
+		if (player.ship.isDead) {
+			return;
+		}
+
+		if (player.isDead) {
+			this.playerController.handleDeath(player);
+			return; // don't handle actions if dead, just respawn
+		}
+
 		switch (action.type) {
+			// Send move inputs based on player context
 			case ActionType.MOVE:
-				// If the player is controlling a cannon, send move inputs to the cannon
 				if (player.cannon) {
 					this.cannonController.handleMove(player.cannon, action.data);
 

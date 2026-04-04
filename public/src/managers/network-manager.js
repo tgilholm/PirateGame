@@ -19,6 +19,10 @@ export default class NetworkManager {
 		this.socket.on(event, callback);
 	}
 
+	off(event) {
+		this.socket.off(event);
+	}
+
 	/**
 	 * Sends an event to the server
 	 * @param {string} event
@@ -97,6 +101,17 @@ export default class NetworkManager {
 		this.sendAction({
 			type: ActionType.DIG,
 			data: { mode: 'hit', sliderPosition },
+		});
+	}
+
+	sendRespawn() {
+		this.sendAction({
+			type: ActionType.RESPAWN_SHIP,
+		});
+	}
+	sendQuit() {
+		this.sendAction({
+			type: ActionType.QUIT,
 		});
 	}
 }

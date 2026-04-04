@@ -33,6 +33,8 @@ import NPCSystem from './systems/npc-system';
 import GoldHandler from './handlers/gold-handler';
 import { ServerEvent } from '@shared/socket-protocol';
 import TreasureSystem from './systems/treasure-system';
+import SpawnSystem from './systems/spawn-system';
+import SessionHandler from './handlers/session-handler';
 
 // Create the express app & server
 const app = express();
@@ -59,10 +61,12 @@ const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid, terrainMap);
 const entityFactory = new EntityFactory(entityConfig, registry);
 const treasureSystem = new TreasureSystem(registry, entityFactory, terrainMap, entityConfig);
+const spawnSystem = new SpawnSystem(terrainMap);
 
 const engine = new GameEngine({
 	physicsSystem,
 	movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
+	spawnSystem,
 	projectileSystem,
 	messageSystem: new MessageSystem(),
 	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid),
@@ -71,14 +75,10 @@ const engine = new GameEngine({
 
 const upgradeHandler = new UpgradeHandler(new GoldHandler(), new StatsHandler());
 const interactionHandler = new InteractionHandler();
+const sessionHandler = new SessionHandler(registry, entityFactory, engine, spatialGrid);
 
-const worldController = new WorldController(registry, {
-	playerController: new PlayerController(
-		registry,
-		interactionHandler,
-		upgradeHandler,
-		treasureSystem
-	),
+const worldController = new WorldController(registry, sessionHandler, {
+	playerController: new PlayerController(registry, interactionHandler, upgradeHandler, treasureSystem, spawnSystem),
 	shipController: new ShipController(registry),
 	messageController: new MessageController(),
 	cannonController: new CannonController(registry),
@@ -90,7 +90,8 @@ const gameWorld = new GameWorld(
 	engine,
 	worldController,
 	spatialGrid,
-	terrainMap
+	terrainMap,
+	sessionHandler
 );
 const socketService = new SocketService(io, gameWorld);
 

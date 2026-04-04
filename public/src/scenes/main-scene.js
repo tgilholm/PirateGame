@@ -36,20 +36,16 @@ export class MainScene extends Phaser.Scene {
 		// not at module load time before GameManager exists to receive INIT_GAME
 		const socket = globalThis.io();
 
+		// Allow key inputs again
+		this.input.keyboard.enableGlobalCapture();
+
 		this.setupWorld();
 
 		//@ts-ignore cheesed into this window
 		const entityConfig = window.entityConfig;
-		const modelFactory = new ModelFactory(this, entityConfig, (id) =>
-			this.gameManager.models.get(id)
-		);
+		const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
 
-		this.gameManager = new GameManager(
-			this,
-			new NetworkManager(socket),
-			new InputManager(this),
-			modelFactory
-		);
+		this.gameManager = new GameManager(this, new NetworkManager(socket), new InputManager(this), modelFactory);
 		this.animationManager = new AnimationManager(this);
 		this.uiManager = new UIManager(this, this.gameManager);
 
@@ -84,8 +80,20 @@ export class MainScene extends Phaser.Scene {
 		square.generateTexture('npc_sprite', 30, 30);
 		square.destroy();
 
+		// Contain the camera in the map
 		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 		this.gameManager.start(data.username);
+
+		this.gameManager.on('shipSunk', () => {
+			console.log('sunk');
+
+			this.uiManager.showShipSunkMessage();
+		});
+	}
+
+	goToStart() {
+		// Hide all game-related prompts
+		this.scene.start('StartScene');
 	}
 
 	/**
@@ -94,7 +102,7 @@ export class MainScene extends Phaser.Scene {
 	update() {
 		this.gameManager.update();
 		this.uiManager.update();
-		const gold = document.getElementById('gold-counter');
+		const gold = document.getElementById('gold-counter'); // ui concern
 		if (gold) gold.style.display = 'none';
 	}
 
@@ -105,12 +113,15 @@ export class MainScene extends Phaser.Scene {
 		this.map = this.make.tilemap({ key: 'map' });
 		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
 
+		// call to destroy game manager on shutdown
+		this.events.on('shutdown', () => {
+			this.gameManager.destroy();
+		});
+
 		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
 		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
 		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
 
-		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) =>
-			l.setCullPadding(2, 2)
-		);
+		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
 	}
 }

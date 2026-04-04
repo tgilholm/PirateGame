@@ -38,6 +38,19 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 		scene.input.keyboard.on('keydown-Q', () => this.emit('release'));
 		scene.input.keyboard.on('keydown-X', () => this.emit('dig'));
 		scene.input.keyboard.on('keydown-SPACE', () => this.emit('fire'));
+
+		const respawnButton = document.getElementById('restart-button');
+		const quitButton = document.getElementById('quit-button');
+		const visible = respawnButton.style.display !== 'none' && quitButton.style.display !== 'none';
+
+		respawnButton.addEventListener('click', () => {
+			// Allow only if on screen
+			if (visible) this.emit('respawn');
+		});
+
+		quitButton.addEventListener('click', () => {
+			if (visible) this.emit('quit');
+		});
 	}
 
 	/**

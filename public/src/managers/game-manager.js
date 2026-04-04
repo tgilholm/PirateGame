@@ -112,10 +112,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		// Determine if the player "should" send the interact packet
 		if (closest && closest.dist < 50) {
-			if (
-				closest.entity.type === 'ladder' ||
-				this.localPlayer.parentId == closest.entity.parentId
-			) {
+			if (closest.entity.type === 'ladder' || this.localPlayer.parentId == closest.entity.parentId) {
 				// handles both === null
 				this.closestInteractable = closest;
 			}
@@ -335,8 +332,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			console.log('[Client] DIG_MINIGAME_RESULT received', success);
 			this.digMinigame.stop();
 		});
+
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
+
+		this.network.on(ServerEvent.DEAD, (id) => {
+			if ((id = this.localPlayer.id)) {
+				this.emit('playerDied');
+			}
+		});
+
+		this.network.on(ServerEvent.SUNK, (id) => {
+			if ((id = this.localPlayer.id)) {
+				this.emit('shipSunk');
+			}
+		});
 
 		this.input.on('interact', () => {
 			const target = this.closestInteractable;
@@ -373,6 +383,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
+
+		this.input.on('respawn', () => this.network.sendRespawn());
+
+		this.input.on('quit', () => {
+			this.network.sendQuit();
+			this.scene.goToStart();
+		});
 	}
 
 	// spawnPredictedProjectile() {
@@ -465,6 +482,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.localPlayer = mine;
 			this.emit('localPlayerReady', this.localPlayer);
 		}
+	}
+
+	// destroy game manager
+	destroy() {
+		this.network.off(ServerEvent.INIT_GAME);
+		this.network.off(ServerEvent.GAME_STATE);
+		this.models.forEach((e) => e.destroy());
+		this.models.clear();
+		this.localPlayer = null;
 	}
 
 	/**

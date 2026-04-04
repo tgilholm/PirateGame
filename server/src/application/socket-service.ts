@@ -2,13 +2,7 @@
 
 import { Server, Socket } from 'socket.io';
 import { z } from 'zod'; // For frontline validation
-import {
-	ActionType,
-	ClientEvent,
-	MoveData,
-	PlayerAction,
-	ServerEvent,
-} from '@shared/socket-protocol';
+import { ActionType, ClientEvent, MoveData, PlayerAction, ServerEvent } from '@shared/socket-protocol';
 import GameWorld, { WorldEvent } from './game-world';
 
 /**
@@ -35,6 +29,7 @@ const InteractSchema = z.object({
 	parentId: z.string().nullable().optional(),
 });
 
+// todo fix- deprecated
 const DigSchema = z
 	.object({
 		mode: z.enum(['start', 'hit']),
@@ -51,17 +46,15 @@ const DigSchema = z
 
 // Uses zod to require data/no data for each action type
 const ActionSchema = z.discriminatedUnion('type', [
-	z
-		.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) })
-		.strict(),
+	z.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) }).strict(),
 	z.object({ type: z.literal(ActionType.INTERACT), data: InteractSchema }).strict(),
-	z
-		.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) })
-		.strict(),
+	z.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) }).strict(),
 	z.object({ type: z.literal(ActionType.DIG), data: DigSchema }).strict(),
 	z.object({ type: z.literal(ActionType.FIRE) }).strict(),
 	z.object({ type: z.literal(ActionType.TREASURE_INTERACT) }).strict(),
 	z.object({ type: z.literal(ActionType.RELEASE) }).strict(),
+	z.object({ type: z.literal(ActionType.RESPAWN_SHIP) }).strict(),
+	z.object({ type: z.literal(ActionType.QUIT) }).strict(),
 ]);
 
 /**
@@ -80,17 +73,23 @@ export default class SocketService {
 	 */
 	public initialise() {
 		// Send the game data pertaining to that specific player- the ships/players/object near them
-		this.world.on(
-			WorldEvent.GAME_STATE_PER_PLAYER,
-			(getStateForSocket: (id: string) => any) => {
-				this.io.sockets.sockets.forEach((socket) => {
-					const state = getStateForSocket(socket.id);
-					if (state) {
-						socket.emit(ServerEvent.GAME_STATE, state);
-					}
-				});
-			}
-		);
+		this.world.on(WorldEvent.GAME_STATE_PER_PLAYER, (getStateForSocket: (id: string) => any) => {
+			this.io.sockets.sockets.forEach((socket) => {
+				const state = getStateForSocket(socket.id);
+				if (state) {
+					socket.emit(ServerEvent.GAME_STATE, state);
+				}
+			});
+		});
+
+		// Handle player/ship death
+		this.world.on(WorldEvent.PLAYER_DIED, (id) => {
+			this.io.to(id).emit(ServerEvent.DEAD, id);
+		});
+
+		this.world.on(WorldEvent.SHIP_SUNK, (id) => {
+			this.io.to(id).emit(ServerEvent.SUNK, id);
+		});
 
 		// Handle new clients
 		this.io.on('connection', (socket: Socket) => {
@@ -114,10 +113,7 @@ export default class SocketService {
 				// zod validation for all other action types
 				const result = ActionSchema.safeParse(action);
 				if (!result.success) {
-					console.warn(
-						`[SocketService] Invalid action from ${socket.id}:`,
-						z.treeifyError(result.error)
-					);
+					console.warn(`[SocketService] Invalid action from ${socket.id}:`, z.treeifyError(result.error));
 					return;
 				}
 				this.world.handleAction(socket.id, result.data);

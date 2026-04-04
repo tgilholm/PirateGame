@@ -7,11 +7,11 @@ import EntityFactory from '../entities/entity-factory';
 import Ship from '../entities/ship';
 import { EventEmitter } from 'events';
 import { CONFIG } from '../config';
-import PhysicsSystem from '../systems/physics-system';
 import ProjectileSystem from '../systems/projectile-system';
 import SpatialGrid from './spatial-grid';
 import TerrainMap from 'src/engine/terrain-map';
 import Entity from 'src/entities/entity';
+import SessionHandler from 'src/handlers/session-handler';
 
 /**
  * Communication contract between this game world and the socket service
@@ -19,14 +19,8 @@ import Entity from 'src/entities/entity';
 export enum WorldEvent {
 	GAME_STATE = 'GAME_STATE',
 	GAME_STATE_PER_PLAYER = 'GAME_STATE_PER_PLAYER',
-}
-
-/**
- * Used to determine whether a full state or delta is required for an entity
- */
-interface ClientSession {
-	socketId: string;
-	knownEntityIds: Set<string>; // the entities this client "knows" about already
+	PLAYER_DIED = 'PLAYER_DIED',
+	SHIP_SUNK = 'SHIP_SUNK',
 }
 
 /**
@@ -37,7 +31,6 @@ export default class GameWorld extends EventEmitter {
 	private tickRate = CONFIG.TICK_RATE;
 	private tickInterval?: NodeJS.Timeout;
 	private lastTime: number = 0;
-	private sessions: Map<string, ClientSession> = new Map(); // state held by each client
 
 	/**
 	 * Creates a game world with the provided dependencies
@@ -53,7 +46,8 @@ export default class GameWorld extends EventEmitter {
 		private engine: GameEngine,
 		private controller: WorldController,
 		private grid: SpatialGrid,
-		private terrain: TerrainMap
+		private terrain: TerrainMap,
+		private sessionHandler: SessionHandler
 	) {
 		super();
 	}
@@ -99,78 +93,12 @@ export default class GameWorld extends EventEmitter {
 		this.controller.handle(socketId, action);
 	}
 
-	/**
-	 * Called by SocketService when a player says they are READY
-	 */
 	public addPlayer(socketId: string, username: string) {
-		// Spawn the player on their own ship
-		const { x, y } = this.getSpawnPoint();
-		const newShip = this.entityFactory.createShip(`ship_${socketId}`, x, y);
-
-		// "hacky" way of adding to the physics world
-		const physics = this.engine.systems.get('physics') as PhysicsSystem;
-		physics.addBody(newShip.body);
-
-		this.entityFactory.createPlayer(socketId, 0, 0, newShip, username);
-
-		// No known entities for new players
-		this.sessions.set(socketId, {
-			socketId,
-			knownEntityIds: new Set(), // empty set to start
-		});
+		this.sessionHandler.addPlayer(socketId, username);
 	}
 
-	getSpawnPoint() {
-		const spawnPoints = this.terrain.getTileset('player-spawns');
-
-		// let dist = 1000;
-		// let spawnPoint = { x: 0, y: 0 };
-		// while (dist > 500) {
-		//     spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
-
-		//     // Get distance to players & ships
-		//     const ships = this.registry.getByType<Ship>('ship');
-		//     const players = this.registry.getByType<Player>('player');
-
-		//     // Calculate the minimum distance
-		//     const distances: number[] = [];
-		//     ships.forEach(ship => distances.push(Math.hypot(ship.x - spawnPoint.x, ship.y - spawnPoint.y)));
-		//     players.forEach(player => {
-		//         // Get world coordinates
-		//         const worldPos = this.getWorldPosition(player);
-		//         distances.push(Math.hypot(worldPos.x - spawnPoint.x, worldPos.y - spawnPoint.y));
-
-		//     });
-
-		//     // If all the distances are far enough away, spawn the player
-
-		//     console.log(dist, spawnPoint);
-
-		//     distances.sort();
-		//     dist = distances[0];
-		// }
-		return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
-	}
-
-	/**
-	 * Called by SocketService on disconnect
-	 */
 	public removePlayer(socketId: string) {
-		this.registry.delete(socketId);
-
-		// remove the matter body
-		const physics = this.engine.systems.get('physics') as PhysicsSystem;
-		const ship = this.registry.get<Ship>(`ship_${socketId}`);
-
-		if (ship) {
-			physics.removeBody(ship.body); // remove the ship's physics body
-			this.registry.delete(`ship_${socketId}`); // remove their ship
-		}
-
-		// Remove them from the spatial grid and the session list
-		this.grid.remove(socketId);
-		this.grid.remove(`ship_${socketId}`);
-		this.sessions.delete(socketId);
+		this.sessionHandler.removePlayer(socketId);
 	}
 
 	private buildEntityData(): Map<string, { full: any; delta: any }> {
@@ -206,8 +134,24 @@ export default class GameWorld extends EventEmitter {
 		const projectileSystem = this.engine.systems.get('projectile') as ProjectileSystem;
 		const splashes: SplashEvent[] = projectileSystem.pendingSplashes;
 
+		const players = this.registry.getByType<Player>('player');
+		players.forEach((player) => {
+			// Tell the player to respawn
+			if (player.isDead) {
+				console.log(`[GameWorld] Player Died: ${player.id}`);
+				this.emit(WorldEvent.PLAYER_DIED, player.id);
+			}
+
+			// Tell the player their ship has sunk
+			const ship = player.ship;
+			if (ship.isDead) {
+				console.log(`[GameWorld] Player Ship Sunk: ${ship.id}`);
+				this.emit(WorldEvent.SHIP_SUNK, player.id);
+			}
+		});
+
 		this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
-			const session = this.sessions.get(socketId); // access that player's "known data"
+			const session = this.sessionHandler.getSession(socketId); // access that player's "known data"
 			const player = this.registry.get<Player>(socketId);
 
 			if (!session || !player) return null; // break early
@@ -257,21 +201,14 @@ export default class GameWorld extends EventEmitter {
 			});
 
 			// Only send splashes that are within this player's view distance
-			const splashEvents = splashes.filter(
-				(s) => Math.hypot(s.x - wx, s.y - wy) <= this.grid['viewDistance']
-			);
+			const splashEvents = splashes.filter((s) => Math.hypot(s.x - wx, s.y - wy) <= this.grid['viewDistance']);
 			const allPlayers = this.registry.getByType<Player>('player').map((p) => ({
 				id: p.id,
 				username: p.username,
 			}));
 
 			// If nothing has changed, skip it altogether
-			if (
-				!newEntities.length &&
-				!deltaEntities.length &&
-				!removedIds.length &&
-				!splashEvents.length
-			) {
+			if (!newEntities.length && !deltaEntities.length && !removedIds.length && !splashEvents.length) {
 				return null;
 			}
 			// Send to client via socket service
@@ -292,9 +229,7 @@ export default class GameWorld extends EventEmitter {
 			mapWidth: this.terrain.widthInPixels,
 			mapHeight: this.terrain.heightInPixels,
 			shopSpawns: this.registry.getByType<Entity>('shop').map((s) => ({ X: s.x, Y: s.y })),
-			allPlayers: this.registry
-				.getByType<Player>('player')
-				.map((p) => ({ id: p.id, username: p.username })),
+			allPlayers: this.registry.getByType<Player>('player').map((p) => ({ id: p.id, username: p.username })),
 		};
 	}
 

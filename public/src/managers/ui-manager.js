@@ -23,6 +23,12 @@ export default class UIManager {
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
 		this.menu = document.getElementById('left-panel');
+		this.deathMessage = document.getElementById('death-screen');
+		this.positionElement = document.getElementById('position');
+		this.shipPositionElement = document.getElementById('ship-position');
+		this.playerStats = document.getElementById('player-stats');
+
+		this.deathMessage.style.display = 'none';
 		this.menu.style.display = 'block';
 		this.currentInteractable = null;
 
@@ -37,11 +43,7 @@ export default class UIManager {
 		gameManager.on('localPlayerReady', (player) => {
 			const pos = player.worldPos;
 			this.minimap.placeMarker(pos.x, pos.y, gameManager.mapWidth, gameManager.mapHeight);
-			this.minimap.placeShops(
-				gameManager.mapWidth,
-				gameManager.mapHeight,
-				gameManager.shopSpawns
-			);
+			this.minimap.placeShops(gameManager.mapWidth, gameManager.mapHeight, gameManager.shopSpawns);
 			this.minimapReady = true;
 			this.goldCounter.show();
 		});
@@ -110,6 +112,28 @@ export default class UIManager {
 			this.shipStats.innerText = `Not on a ship`;
 			this.scene.cameras.main.zoomTo(0.8); // default off ship
 		}
+
+		const playerShip = this.gameManager.models.get(player.shipId);
+
+		if (playerShip && !playerShip.isDead) {
+			this.deathMessage.style.display = 'none';
+		}
+
+		this.positionElement.innerText = `Pos: x=${player.x}, y=${player.y}`;
+		this.shipPositionElement.innerText = `Ship Pos: x=${playerShip.x}, y=${playerShip.y}`;
+		this.playerStats.innerText = `
+		Player Stats:
+		vx=${player.velocity.x}, vy=${player.velocity.y}, targetX=${player.target.x}, targetY=${player.target.y},
+
+		Ship Stats:
+		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
+		`;
+
+		console.log(this.deathMessage.style.display);
+	}
+
+	showShipSunkMessage() {
+		this.deathMessage.style.display = 'flex';
 	}
 
 	/**
@@ -144,12 +168,8 @@ export default class UIManager {
 		const list = document.getElementById('players-list');
 		if (!panel || !list) return;
 		panel.style.display = 'block';
-		const sorted = [...allPlayers].sort((a, b) =>
-			(a.username || '').localeCompare(b.username || '')
-		);
-		list.innerHTML = sorted
-			.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`)
-			.join('');
+		const sorted = [...allPlayers].sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+		list.innerHTML = sorted.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`).join('');
 	}
 
 	updateGoldCounter(amount) {

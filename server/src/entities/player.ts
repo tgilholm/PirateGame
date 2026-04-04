@@ -1,6 +1,7 @@
 import { PlayerConfig } from '../types';
 import Entity from './entity';
 import Cannon from './interactables/cannon';
+import Ship from './ship';
 
 /**
  * The server-side representation of an individual player's state, acting as the "source of truth"
@@ -12,6 +13,7 @@ export default class Player extends Entity {
 	cannon: Cannon | null;
 	isCarrying: boolean;
 	carryingTreasureId: string | null = null;
+	ship: Ship; // the player's own ship
 	gold: number = 0;
 	inputs: {
 		up: boolean;
@@ -23,6 +25,10 @@ export default class Player extends Entity {
 	reloadTime: number = 1000;
 	reloadTimer: number = 0;
 
+	respawnTime: number = 5000;
+	respawnTimer: number = 0;
+	respawnStarted: boolean = false;
+
 	/**
 	 * Builds a player with the specified data
 	 * @param id the id of the player
@@ -32,19 +38,13 @@ export default class Player extends Entity {
 	 * @param username chosen by the player
 	 * @param config config data read from entityConfig
 	 */
-	constructor(
-		id: string,
-		x: number,
-		y: number,
-		parent: Entity | null,
-		username: string,
-		config: PlayerConfig
-	) {
+	constructor(id: string, x: number, y: number, parent: Entity | null, username: string, config: PlayerConfig) {
 		super(id, 'player', x, y, config.maxHealth, parent);
 		this.username = username || ''; // default to no uname
 		this.gold = config.startingGold || 0; // default to 0 gold
 
 		// Player-specific detail
+		this.ship = parent as Ship;
 		this.isSteering = false;
 		this.cannon = null; // not using cannon to start
 		this.isCarrying = false;
@@ -96,6 +96,8 @@ export default class Player extends Entity {
 			reloadTime: this.reloadTime,
 			isCarrying: this.isCarrying,
 			carryingTreasureId: this.carryingTreasureId,
+			respawnTimer: this.respawnTimer,
+			shipId: this.ship.id,
 		};
 	}
 }
