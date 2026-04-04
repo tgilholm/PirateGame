@@ -32,10 +32,7 @@ export default class ShipModel extends Model {
 		const offsetX = this.dimensions.sternRadius + this.dimensions.middleWidth / 2 + padding;
 		const offsetY = this.dimensions.height / 2 + padding;
 		const totalW =
-			this.dimensions.middleWidth +
-			this.dimensions.bowLength +
-			this.dimensions.sternRadius +
-			padding * 2;
+			this.dimensions.middleWidth + this.dimensions.bowLength + this.dimensions.sternRadius + padding * 2;
 		const totalH = this.dimensions.height + padding * 2;
 
 		// Add the actual sprite
@@ -107,10 +104,7 @@ export default class ShipModel extends Model {
 		super.sync(data);
 
 		// Snap if distance has changed a lot
-		if (
-			!this.initialised ||
-			Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150
-		) {
+		if (!this.initialised || Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
 			this.x = data.x;
 			this.y = data.y;
 			this.rotation = data.r;
@@ -123,6 +117,8 @@ export default class ShipModel extends Model {
 		if (data.sailState !== undefined) this.sailState = data.sailState;
 		if (data.anchored !== undefined) this.anchored = data.anchored;
 		if (data.turnAngle !== undefined) this.turnAngle = data.turnAngle;
+
+		console.log(data.teleport);
 	}
 
 	/**

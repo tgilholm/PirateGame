@@ -30,6 +30,7 @@ export default class Model extends Phaser.GameObjects.Container {
 		this.maxHealth = 0;
 		this.isPredicted = false;
 		this.spawnTime = Date.now();
+		this.teleport = false;
 
 		this.scene.add.existing(this);
 	}
@@ -45,13 +46,27 @@ export default class Model extends Phaser.GameObjects.Container {
 	 * @param {Object} data the data from the server
 	 */
 	sync(data) {
-		if (data.x !== undefined) this.target.x = data.x;
-		if (data.y !== undefined) this.target.y = data.y;
-		if (data.vx !== undefined) this.velocity.x = data.vx;
-		if (data.vy !== undefined) this.velocity.y = data.vy;
-		if (data.r !== undefined) this.target.r = data.r;
+		if (data.teleport) {
+			console.log(data);
+			this.x = data.x;
+			this.y = data.y;
+			this.target.x = data.x;
+			this.target.y = data.y;
+			this.velocity.x = 0;
+			this.velocity.y = 0;
+		} else {
+			if (data.x !== undefined) this.target.x = data.x;
+			if (data.y !== undefined) this.target.y = data.y;
+			if (data.vx !== undefined) this.velocity.x = data.vx;
+			if (data.vy !== undefined) this.velocity.y = data.vy;
+			if (data.r !== undefined) this.target.r = data.r;
+		}
+
+		console.log(this.velocity.x, this.velocity.y);
+
 		if (data.health !== undefined) this.health = data.health;
 		if (data.maxHealth !== undefined) this.maxHealth = data.maxHealth;
+		if (data.teleport !== undefined) this.teleport = data.teleport;
 
 		// Snap on first packet
 		if (!this.initialised) {
@@ -103,6 +118,7 @@ export default class Model extends Phaser.GameObjects.Container {
 	 */
 	interpPosition(deltaTime, lerp) {
 		// Extrapolate expected position using velocity and time
+		if (this.teleport) return;
 		const predictedX = this.target.x + this.velocity.x * deltaTime;
 		const predictedY = this.target.y + this.velocity.y * deltaTime;
 
@@ -119,6 +135,7 @@ export default class Model extends Phaser.GameObjects.Container {
 	 * @param {number} lerp the interpolation factor
 	 */
 	interpRotation(deltaTime, lerp) {
+		if (this.teleport) return;
 		const rDiff = Phaser.Math.Angle.Wrap(this.target.r - this.rotation);
 		this.rotation += rDiff * lerp;
 	}

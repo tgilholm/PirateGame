@@ -38,14 +38,7 @@ export default class Player extends Entity {
 	 * @param username chosen by the player
 	 * @param config config data read from entityConfig
 	 */
-	constructor(
-		id: string,
-		x: number,
-		y: number,
-		parent: Entity | null,
-		username: string,
-		config: PlayerConfig
-	) {
+	constructor(id: string, x: number, y: number, parent: Entity | null, username: string, config: PlayerConfig) {
 		super(id, 'player', x, y, config.maxHealth, parent);
 		this.username = username || ''; // default to no uname
 		this.gold = config.startingGold || 0; // default to 0 gold
@@ -104,6 +97,7 @@ export default class Player extends Entity {
 			isCarrying: this.isCarrying,
 			carryingTreasureId: this.carryingTreasureId,
 			respawnTimer: this.respawnTimer,
+			shipId: this.ship.id,
 		};
 	}
 }

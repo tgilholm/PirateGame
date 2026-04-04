@@ -65,13 +65,14 @@ export default class WorldController {
 			//this.playerController.handleQuit(player);
 		}
 
+		// check for ship death before player death
+		if (player.ship.isDead) {
+			return;
+		}
+
 		if (player.isDead) {
 			this.playerController.handleDeath(player);
 			return; // don't handle actions if dead, just respawn
-		}
-
-		if (player.ship.isDead) {
-			return;
 		}
 
 		switch (action.type) {

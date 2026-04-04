@@ -13,6 +13,7 @@ import Ladder from '../entities/interactables/ladder';
 import Bullet from '../entities/projectiles/bullet';
 import TreasureSystem from '../systems/treasure-system';
 import SpawnSystem from 'src/systems/spawn-system';
+import Matter from 'matter-js';
 
 /**
  * Handles events affecting the player
@@ -93,9 +94,20 @@ export default class PlayerController {
 		const ship = player.ship;
 		const { x, y } = this.spawnSystem.getSpawnPoint();
 
+		ship.body.position.x = x;
+		ship.body.position.y = y;
 		ship.x = x;
 		ship.y = y;
 		ship.health = ship.maxHealth;
+
+		// velocity has to be set like this
+		// ship.vx is mirrored directly from the physics body
+		const vec = Matter.Vector.create(0, 0);
+		Matter.Body.setVelocity(ship.body, vec);
+
+		// tell client to skip extrapolation
+		ship.pendingTeleport = true;
+		player.pendingTeleport = true;
 
 		// Existing method already puts player at 0,0 on their ship
 		this.handleRespawn(player);
@@ -130,7 +142,17 @@ export default class PlayerController {
 		player.x = 0;
 		player.y = 0;
 		player.health = player.maxHealth;
+
+		player.inputs = {
+			up: false,
+			down: false,
+			left: false,
+			right: false,
+		};
+
 		player.markDirty();
+
+		console.log(player.x, player.y);
 	}
 
 	/**

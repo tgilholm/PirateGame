@@ -79,7 +79,7 @@ export default class PlayerModel extends Model {
 		if (data.gold !== undefined) this.gold = data.gold;
 		if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
 		if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
-
+		if (data.shipId !== undefined) this.shipId = data.shipId;
 		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
 	}
 
