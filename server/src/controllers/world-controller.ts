@@ -6,6 +6,7 @@ import Player from '../entities/player';
 import Ship from '../entities/ship';
 import MessageController from './message-controller';
 import CannonController from './cannon-controller';
+import SessionHandler from 'src/handlers/session-handler';
 
 /**
  * Defines the controllers that must be passed to this one
@@ -34,6 +35,7 @@ export default class WorldController {
 	 */
 	constructor(
 		private entityRegistry: EntityRegistry,
+		private sessionHandler: SessionHandler,
 		controllers: GameControllers
 	) {
 		this.shipController = controllers.shipController;
@@ -51,6 +53,11 @@ export default class WorldController {
 		const player = this.entityRegistry.get<Player>(playerId);
 		if (!player) return;
 
+		if (action.type === ActionType.QUIT) {
+			this.sessionHandler.removePlayer(playerId);
+			return; // don't process any further actions
+		}
+
 		// Check for respawn before checking for death- otherwise this block is never invoked
 		if (player.respawnStarted && player.respawnTimer <= 0) {
 			this.playerController.handleRespawn(player);
@@ -59,10 +66,6 @@ export default class WorldController {
 		// Handle respawn/quit event first
 		if (action.type === ActionType.RESPAWN_SHIP) {
 			this.playerController.handleRespawnShip(player);
-		}
-
-		if (action.type === ActionType.QUIT) {
-			//this.playerController.handleQuit(player);
 		}
 
 		// check for ship death before player death

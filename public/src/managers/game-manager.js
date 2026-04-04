@@ -386,7 +386,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		this.input.on('respawn', () => this.network.sendRespawn());
 
-		this.input.on('quit', () => this.network.sendQuit());
+		this.input.on('quit', () => {
+			this.network.sendQuit();
+			this.scene.goToStart();
+		});
 	}
 
 	// spawnPredictedProjectile() {

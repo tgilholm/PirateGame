@@ -34,6 +34,7 @@ import GoldHandler from './handlers/gold-handler';
 import { ServerEvent } from '@shared/socket-protocol';
 import TreasureSystem from './systems/treasure-system';
 import SpawnSystem from './systems/spawn-system';
+import SessionHandler from './handlers/session-handler';
 
 // Create the express app & server
 const app = express();
@@ -74,15 +75,24 @@ const engine = new GameEngine({
 
 const upgradeHandler = new UpgradeHandler(new GoldHandler(), new StatsHandler());
 const interactionHandler = new InteractionHandler();
+const sessionHandler = new SessionHandler(registry, entityFactory, engine, spatialGrid);
 
-const worldController = new WorldController(registry, {
+const worldController = new WorldController(registry, sessionHandler, {
 	playerController: new PlayerController(registry, interactionHandler, upgradeHandler, treasureSystem, spawnSystem),
 	shipController: new ShipController(registry),
 	messageController: new MessageController(),
 	cannonController: new CannonController(registry),
 });
 
-const gameWorld = new GameWorld(registry, entityFactory, engine, worldController, spatialGrid, terrainMap);
+const gameWorld = new GameWorld(
+	registry,
+	entityFactory,
+	engine,
+	worldController,
+	spatialGrid,
+	terrainMap,
+	sessionHandler
+);
 const socketService = new SocketService(io, gameWorld);
 
 socketService.initialise();

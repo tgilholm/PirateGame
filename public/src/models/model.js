@@ -62,8 +62,6 @@ export default class Model extends Phaser.GameObjects.Container {
 			if (data.r !== undefined) this.target.r = data.r;
 		}
 
-		console.log(this.velocity.x, this.velocity.y);
-
 		if (data.health !== undefined) this.health = data.health;
 		if (data.maxHealth !== undefined) this.maxHealth = data.maxHealth;
 		if (data.teleport !== undefined) this.teleport = data.teleport;

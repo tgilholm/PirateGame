@@ -117,8 +117,6 @@ export default class ShipModel extends Model {
 		if (data.sailState !== undefined) this.sailState = data.sailState;
 		if (data.anchored !== undefined) this.anchored = data.anchored;
 		if (data.turnAngle !== undefined) this.turnAngle = data.turnAngle;
-
-		console.log(data.teleport);
 	}
 
 	/**

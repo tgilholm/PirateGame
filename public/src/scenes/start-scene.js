@@ -4,8 +4,19 @@
  */
 export class StartScene extends Phaser.Scene {
 	constructor() {
-		super('Start');
+		super('StartScene');
 		this.background = null;
+		this.ui = document.getElementById('ui-container');
+		this.form = document.getElementById('input-form');
+
+		// Get the username from the textinput
+		let startBtn = document.getElementById('start-btn');
+
+		startBtn.addEventListener('click', () => this.goToMain());
+		this.form.addEventListener('submit', (e) => {
+			e.preventDefault();
+			this.goToMain();
+		});
 	}
 
 	/**
@@ -65,6 +76,9 @@ export class StartScene extends Phaser.Scene {
 	 * Creates the moving background and sets up a listener on the input form
 	 */
 	create() {
+		this.resetUI();
+		this.input.keyboard.disableGlobalCapture(); // stop key events going to the game instead of the form
+
 		// width & height are given in game config
 		const centerX = this.scale.width / 2;
 		const centerY = this.scale.height / 2;
@@ -73,13 +87,7 @@ export class StartScene extends Phaser.Scene {
 		if (gold) gold.style.display = 'none';
 
 		// Add the animated background
-		this.background = this.add.tileSprite(
-			centerX,
-			centerY,
-			this.scale.width,
-			this.scale.height,
-			'background'
-		);
+		this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
 
 		const title = this.add.image(centerX, 200, 'title');
 		const ship = this.add.sprite(centerX, 700, 'ship');
@@ -115,15 +123,14 @@ export class StartScene extends Phaser.Scene {
 			yoyo: true,
 			loop: -1,
 		});
+	}
 
-		// Get the username from the textinput
-		let startBtn = document.getElementById('start-btn');
-		let form = document.getElementById('input-form');
-		startBtn.addEventListener('click', () => this.goToMain());
-		form.addEventListener('submit', (e) => {
-			e.preventDefault();
-			this.goToMain();
-		});
+	/**
+	 * Hides all in-game UI elements and shows the input form. Used when returning to the start scene
+	 */
+	resetUI() {
+		this.ui.style.display = 'none';
+		this.form.style.display = 'flex';
 	}
 
 	goToMain() {
@@ -133,7 +140,8 @@ export class StartScene extends Phaser.Scene {
 		if (username) // not null or empty
 		{
 			// Hide the form before continuing
-			document.getElementById('input-form').style.display = 'none';
+			this.form.style.display = 'none';
+			this.ui.style.display = 'flex';
 			this.scene.start('MainScene', { username }); // Pass the username to the main scene
 		}
 	}

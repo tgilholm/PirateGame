@@ -30,12 +30,6 @@
 
 	<body>
 		<div id="game-container"></div>
-		<div id="death-screen">
-			<h1>Scuttled!</h1>
-			<h2>Your ship has sunk. Respawn or return to the main menu.</h2>
-			<button id="restart-button">Respawn</button>
-			<button id="quit-button">Quit</button>
-		</div>
 
 		<form id="input-form">
 			<div class="border">
@@ -54,41 +48,49 @@
 			</div>
 		</form>
 
-		<!-- Interaction prompt -->
-		<div id="interaction-prompt" style="display: none"></div>
+		<div id="ui-container">
+			<!-- Interaction prompt -->
+			<div id="interaction-prompt" style="display: none"></div>
 
-		<div class="left-panel" id="left-panel">
-			<!-- Minimap -->
-			<div id="minimap-container" style="display: none"></div>
-			<!-- Gold counter -->
-			<div id="gold-counter" style="display: none">Gold: 0</div>
+			<div class="left-panel" id="left-panel">
+				<!-- Minimap -->
+				<div id="minimap-container" style="display: none"></div>
+				<!-- Gold counter -->
+				<div id="gold-counter" style="display: none">Gold: 0</div>
 
-			<div class="game-stats">
-				<p id="fps-counter" style="color: green">FPS:</p>
-				<p id="model-counter" style="color: green">Nearby Models:</p>
-				<p id="ship-stats" style="color: green">Player Ship:</p>
-				<p id="position" style="color: green">Position:</p>
-				<p id="ship-position" style="color: green">Ship Position:</p>
-				<p id="player-stats" style="color: green"></p>
+				<div class="game-stats">
+					<p id="fps-counter" style="color: green">FPS:</p>
+					<p id="model-counter" style="color: green">Nearby Models:</p>
+					<p id="ship-stats" style="color: green">Player Ship:</p>
+					<p id="position" style="color: green">Position:</p>
+					<p id="ship-position" style="color: green">Ship Position:</p>
+					<p id="player-stats" style="color: green"></p>
+				</div>
 			</div>
-		</div>
 
-		<!-- Shop overlay -->
-		<div id="shop-menu" style="display: none"></div>
+			<!-- Shop overlay -->
+			<div id="shop-menu" style="display: none"></div>
 
-		<!--Active Player Container-->
-		<div id="players-panel" style="display: none">
-			<div class="players-title">Players Online</div>
-			<ol id="players-list"></ol>
-		</div>
-
-		<!-- Dig minigame UI -->
-		<div id="dig-minigame" style="display: none">
-			<div id="dig-bar">
-				<div id="dig-success-zone"></div>
-				<div id="dig-slider"></div>
+			<!--Active Player Container-->
+			<div id="players-panel" style="display: none">
+				<div class="players-title">Players Online</div>
+				<ol id="players-list"></ol>
 			</div>
-			<div id="dig-label">Press X in the green zone</div>
+
+			<!-- Dig minigame UI -->
+			<div id="dig-minigame" style="display: none">
+				<div id="dig-bar">
+					<div id="dig-success-zone"></div>
+					<div id="dig-slider"></div>
+				</div>
+				<div id="dig-label">Press X in the green zone</div>
+			</div>
+			<div id="death-screen">
+				<h1>Scuttled!</h1>
+				<h2>Your ship has sunk. Respawn or return to the main menu.</h2>
+				<button id="restart-button">Respawn</button>
+				<button id="quit-button">Quit</button>
+			</div>
 		</div>
 	</body>
 </html>

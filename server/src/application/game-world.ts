@@ -7,12 +7,11 @@ import EntityFactory from '../entities/entity-factory';
 import Ship from '../entities/ship';
 import { EventEmitter } from 'events';
 import { CONFIG } from '../config';
-import PhysicsSystem from '../systems/physics-system';
 import ProjectileSystem from '../systems/projectile-system';
 import SpatialGrid from './spatial-grid';
 import TerrainMap from 'src/engine/terrain-map';
 import Entity from 'src/entities/entity';
-import SpawnSystem from 'src/systems/spawn-system';
+import SessionHandler from 'src/handlers/session-handler';
 
 /**
  * Communication contract between this game world and the socket service
@@ -25,14 +24,6 @@ export enum WorldEvent {
 }
 
 /**
- * Used to determine whether a full state or delta is required for an entity
- */
-interface ClientSession {
-	socketId: string;
-	knownEntityIds: Set<string>; // the entities this client "knows" about already
-}
-
-/**
  * The GameWorld class abstracts the specifics of each game from the server. It emits
  * events listened to by the SocketService to deliver game state to each player.
  */
@@ -40,7 +31,6 @@ export default class GameWorld extends EventEmitter {
 	private tickRate = CONFIG.TICK_RATE;
 	private tickInterval?: NodeJS.Timeout;
 	private lastTime: number = 0;
-	private sessions: Map<string, ClientSession> = new Map(); // state held by each client
 
 	/**
 	 * Creates a game world with the provided dependencies
@@ -56,7 +46,8 @@ export default class GameWorld extends EventEmitter {
 		private engine: GameEngine,
 		private controller: WorldController,
 		private grid: SpatialGrid,
-		private terrain: TerrainMap
+		private terrain: TerrainMap,
+		private sessionHandler: SessionHandler
 	) {
 		super();
 	}
@@ -102,48 +93,12 @@ export default class GameWorld extends EventEmitter {
 		this.controller.handle(socketId, action);
 	}
 
-	/**
-	 * Called by SocketService when a player says they are READY
-	 */
 	public addPlayer(socketId: string, username: string) {
-		// Spawn the player on their own ship
-		const spawnSystem = this.engine.systems.get('spawns') as SpawnSystem;
-
-		const { x, y } = spawnSystem.getSpawnPoint();
-		const newShip = this.entityFactory.createShip(`ship_${socketId}`, x, y);
-
-		// "hacky" way of adding to the physics world
-		const physics = this.engine.systems.get('physics') as PhysicsSystem;
-		physics.addBody(newShip.body);
-
-		this.entityFactory.createPlayer(socketId, 0, 0, newShip, username);
-
-		// No known entities for new players
-		this.sessions.set(socketId, {
-			socketId,
-			knownEntityIds: new Set(), // empty set to start
-		});
+		this.sessionHandler.addPlayer(socketId, username);
 	}
 
-	/**
-	 * Called by SocketService on disconnect
-	 */
 	public removePlayer(socketId: string) {
-		this.registry.delete(socketId);
-
-		// remove the matter body
-		const physics = this.engine.systems.get('physics') as PhysicsSystem;
-		const ship = this.registry.get<Ship>(`ship_${socketId}`);
-
-		if (ship) {
-			physics.removeBody(ship.body); // remove the ship's physics body
-			this.registry.delete(`ship_${socketId}`); // remove their ship
-		}
-
-		// Remove them from the spatial grid and the session list
-		this.grid.remove(socketId);
-		this.grid.remove(`ship_${socketId}`);
-		this.sessions.delete(socketId);
+		this.sessionHandler.removePlayer(socketId);
 	}
 
 	private buildEntityData(): Map<string, { full: any; delta: any }> {
@@ -196,7 +151,7 @@ export default class GameWorld extends EventEmitter {
 		});
 
 		this.emit(WorldEvent.GAME_STATE_PER_PLAYER, (socketId: string) => {
-			const session = this.sessions.get(socketId); // access that player's "known data"
+			const session = this.sessionHandler.getSession(socketId); // access that player's "known data"
 			const player = this.registry.get<Player>(socketId);
 
 			if (!session || !player) return null; // break early

@@ -129,7 +129,7 @@ export default class UIManager {
 		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
 		`;
 
-		//console.log(this.positionElement.innerText, this.shipPositionElement.innerText, this.playerStats.innerText);
+		console.log(this.deathMessage.style.display);
 	}
 
 	showShipSunkMessage() {

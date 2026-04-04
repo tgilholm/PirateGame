@@ -36,20 +36,16 @@ export class MainScene extends Phaser.Scene {
 		// not at module load time before GameManager exists to receive INIT_GAME
 		const socket = globalThis.io();
 
+		// Allow key inputs again
+		this.input.keyboard.enableGlobalCapture();
+
 		this.setupWorld();
 
 		//@ts-ignore cheesed into this window
 		const entityConfig = window.entityConfig;
-		const modelFactory = new ModelFactory(this, entityConfig, (id) =>
-			this.gameManager.models.get(id)
-		);
+		const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
 
-		this.gameManager = new GameManager(
-			this,
-			new NetworkManager(socket),
-			new InputManager(this),
-			modelFactory
-		);
+		this.gameManager = new GameManager(this, new NetworkManager(socket), new InputManager(this), modelFactory);
 		this.animationManager = new AnimationManager(this);
 		this.uiManager = new UIManager(this, this.gameManager);
 
@@ -88,15 +84,16 @@ export class MainScene extends Phaser.Scene {
 		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 		this.gameManager.start(data.username);
 
-		this.gameManager.on('playerDied', () => {
-			//this.uiManager.showDeathMessage();
-			// Show respawn indicator
-			console.log('dead');
-		});
-
 		this.gameManager.on('shipSunk', () => {
+			console.log('sunk');
+
 			this.uiManager.showShipSunkMessage();
 		});
+	}
+
+	goToStart() {
+		// Hide all game-related prompts
+		this.scene.start('StartScene');
 	}
 
 	/**
@@ -125,8 +122,6 @@ export class MainScene extends Phaser.Scene {
 		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
 		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
 
-		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) =>
-			l.setCullPadding(2, 2)
-		);
+		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
 	}
 }
