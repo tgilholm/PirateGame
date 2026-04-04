@@ -1,6 +1,6 @@
 import Cannon from '../entities/interactables/cannon';
 import Helm from '../entities/interactables/helm';
-import InteractableEntity from '../entities/interactables/interactable-entity';
+import Interactable from '../entities/interactables/interactable';
 import Ladder from '../entities/interactables/ladder';
 import Player from '../entities/player';
 import Ship from '../entities/ship';
@@ -97,7 +97,7 @@ export default class InteractionHandler {
 	 * @param ship the ship (if any) the interactable is on
 	 * @param interactable the interactable (if any) the player wants to release
 	 */
-	handleRelease(player: Player, ship: Ship | null, interactable: InteractableEntity | null) {
+	handleRelease(player: Player, ship: Ship | null, interactable: Interactable | null) {
 		if (!interactable || interactable.user !== player) return; // player can only release if using
 
 		interactable.user = null;

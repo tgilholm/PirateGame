@@ -1,8 +1,8 @@
 import Entity from '../entity';
-import InteractableEntity from './interactable-entity';
+import Interactable from './interactable';
 import entityConfig from '../../../../shared/entity-config.json';
 
-export default class Cannon extends InteractableEntity {
+export default class Cannon extends Interactable {
 	targetAngle: number; // where the cannon is moving to
 	reloadTime: number = entityConfig.ship.defaultStats.reloadTime;
 	reloadTimer: number = 0;

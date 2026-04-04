@@ -28,6 +28,7 @@ export default class Player extends Entity {
 	respawnTime: number = 5000;
 	respawnTimer: number = 0;
 	respawnStarted: boolean = false;
+	deathNotified: boolean = false;
 
 	/**
 	 * Builds a player with the specified data

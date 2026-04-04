@@ -1,12 +1,12 @@
 import Player from './player';
 import { ShopConfig } from '../types';
-import InteractableEntity from './interactables/interactable-entity';
+import Interactable from './interactables/interactable';
 
 /**
  * The server-side representation of a shop entity. Shops are static, indestructible
  * interactable points on the map that players can approach to buy upgrades.
  */
-export default class Shop extends InteractableEntity {
+export default class Shop extends Interactable {
 	radius: number;
 	interactRange: number;
 	texture: string;

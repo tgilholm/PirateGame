@@ -4,7 +4,7 @@ import Entity from './entity';
 import Player from './player';
 import Ship from './ship';
 import Shop from './shop';
-import InteractableEntity from './interactables/interactable-entity';
+import Interactable from './interactables/interactable';
 import Cannon from './interactables/cannon';
 import Ladder from './interactables/ladder';
 import Helm from './interactables/helm';
@@ -52,13 +52,7 @@ export default class EntityFactory {
 	 * @param username the username chosen by the player
 	 * @returns the player
 	 */
-	public createPlayer(
-		id: string,
-		x: number,
-		y: number,
-		parent: Entity | null,
-		username: string
-	): Player {
+	public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
 		const player = new Player(id, x, y, parent, username, this.playerConfig);
 		this.entityRegistry.create(player);
 		return player;
@@ -116,7 +110,7 @@ export default class EntityFactory {
 		const prefix = parent ? parent.id : 'map'; // parent id or map if null
 		const id = `${prefix}_${type}_${index}`;
 
-		let item: InteractableEntity;
+		let item: Interactable;
 
 		switch (type) {
 			case 'cannon':
@@ -130,7 +124,7 @@ export default class EntityFactory {
 				break;
 
 			default:
-				item = new InteractableEntity(id, x, y, parent);
+				item = new Interactable(id, x, y, parent);
 		}
 
 		if (parent) {

@@ -1,7 +1,7 @@
 import { Bodies, Body } from 'matter-js';
 import { ShipConfig } from '../types';
 import Entity from './entity';
-import InteractableEntity from './interactables/interactable-entity';
+import Interactable from './interactables/interactable';
 import Player from './player';
 
 /**
@@ -14,12 +14,13 @@ export default class Ship extends Entity {
 	pilot: Player | null;
 	dimensions: ShipConfig['dimensions'];
 	physics: ShipConfig['physics'];
-	interactables: InteractableEntity[];
+	interactables: Interactable[];
 	body: Matter.Body;
 	anchored: boolean;
 	private _turnAngle: number = 0;
 	private _sailState: number = 0; // not moving
 	components: Record<string, string>;
+	sunkNotified: boolean = false;
 
 	/**
 	 * Creates a ship with the provided data

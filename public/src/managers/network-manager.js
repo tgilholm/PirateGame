@@ -6,6 +6,9 @@ import { ActionType, ClientEvent, ServerEvent } from 'shared/built/socket-protoc
  * Owns socket-io logic
  */
 export default class NetworkManager {
+	/**
+	 *
+	 */
 	constructor(socket) {
 		this.socket = socket;
 	}
@@ -19,8 +22,12 @@ export default class NetworkManager {
 		this.socket.on(event, callback);
 	}
 
+	/**
+	 *
+	 * @param {string} event
+	 */
 	off(event) {
-		this.socket.off(event);
+		this.socket.removeAllListeners(event);
 	}
 
 	/**

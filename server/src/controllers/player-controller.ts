@@ -4,7 +4,7 @@ import EntityRegistry from '../engine/entity-registry';
 import Player from '../entities/player';
 import UpgradeHandler from '../handlers/upgrade-handler';
 import { InteractData, MoveData, UpgradeData, DigData } from '@shared/socket-protocol';
-import InteractableEntity from '../entities/interactables/interactable-entity';
+import Interactable from '../entities/interactables/interactable';
 import InteractionHandler from '../handlers/interaction-handler';
 import Entity from '../entities/entity';
 import Cannon from '../entities/interactables/cannon';
@@ -50,7 +50,7 @@ export default class PlayerController {
 	 * @param data the data matching InteractData, containing the id of the target interactable
 	 */
 	handleInteract(player: Player, data: InteractData): void {
-		const interactable = this.entityRegistry.get<InteractableEntity>(data.targetId);
+		const interactable = this.entityRegistry.get<Interactable>(data.targetId);
 
 		if (!interactable) return; // couldn't find interactable
 
@@ -108,6 +108,7 @@ export default class PlayerController {
 		// tell client to skip extrapolation
 		ship.pendingTeleport = true;
 		player.pendingTeleport = true;
+		ship.sunkNotified = false;
 
 		// Existing method already puts player at 0,0 on their ship
 		this.handleRespawn(player);
@@ -129,6 +130,7 @@ export default class PlayerController {
 			right: false,
 		};
 
+		player.deathNotified = false;
 		player.markDirty();
 	}
 
@@ -151,8 +153,6 @@ export default class PlayerController {
 		};
 
 		player.markDirty();
-
-		console.log(player.x, player.y);
 	}
 
 	/**
@@ -161,7 +161,7 @@ export default class PlayerController {
 	 */
 	handleRelease(player: Player): void {
 		// Get all interactables
-		const interactables = this.entityRegistry.getByType<InteractableEntity>('interactable');
+		const interactables = this.entityRegistry.getByType<Interactable>('interactable');
 		let interactable = null;
 
 		// Find that interactable
