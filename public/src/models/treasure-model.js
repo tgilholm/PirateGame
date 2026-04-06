@@ -1,25 +1,16 @@
 /* global Phaser */
-import Model from './model.js';
+import InteractableModel from './interactable-model.js';
 
-export default class TreasureModel extends Model {
+export default class TreasureModel extends InteractableModel {
 	constructor(scene, id, x, y, state = 'buried', digProgress = 0, goldValue = 0) {
-		super(scene, id, x, y, 'treasure', 0, false);
+		super(scene, null, id, 'treasure', x, y, 'x-mark', 'Dig up treasure');
 
 		this.state = state;
 		this.digProgress = digProgress;
 		this.goldValue = goldValue;
 		this.carrierId = null;
 
-		this.holeSprite = scene.add.sprite(0, 0, 'hole');
-		this.holeSprite.setOrigin(0.5, 0.5);
-		this.holeSprite.setDisplaySize(56, 56);
-		this.holeSprite.setVisible(false);
-
-		this.sprite = scene.add.sprite(0, 0, 'x-mark');
-		this.sprite.setOrigin(0.5, 0.5);
 		this.sprite.setDisplaySize(48, 48);
-
-		this.add(this.holeSprite);
 		this.add(this.sprite);
 		this.setDepth(15);
 
@@ -37,10 +28,7 @@ export default class TreasureModel extends Model {
 		if (data.goldValue !== undefined) this.goldValue = data.goldValue;
 
 		if (previousState !== this.state) {
-			if (
-				this.state === 'opening' ||
-				(this.state === 'dugup' && previousState === 'buried')
-			) {
+			if (this.state === 'opening' || (this.state === 'dugup' && previousState === 'buried')) {
 				this.playChestReveal();
 			}
 		}
@@ -50,7 +38,7 @@ export default class TreasureModel extends Model {
 
 	applyVisuals() {
 		this.sprite.setVisible(false);
-		this.holeSprite.setVisible(false);
+		//this.holeSprite.setVisible(false);
 
 		if (this.state === 'buried') {
 			this.sprite.setVisible(true);
@@ -61,26 +49,26 @@ export default class TreasureModel extends Model {
 			this.sprite.setTexture('chest_open');
 			this.sprite.setDisplaySize(80, 80);
 		} else if (this.state === 'dugup') {
-			this.holeSprite.setVisible(true);
+			//this.holeSprite.setVisible(true);
 			this.sprite.setVisible(true);
 			this.sprite.setTexture('chest-in-hole');
 			this.sprite.setDisplaySize(80, 80);
 		} else if (this.state === 'carried') {
 			this.sprite.setVisible(false);
-			this.holeSprite.setVisible(false);
+			//this.holeSprite.setVisible(false);
 		} else if (this.state === 'loose') {
 			this.sprite.setVisible(true);
 			this.sprite.setTexture('treasure-chest');
 			this.sprite.setDisplaySize(64, 64);
 		} else if (this.state === 'hole') {
 			this.sprite.setVisible(false);
-			this.holeSprite.setVisible(true);
+			//this.holeSprite.setVisible(true);
 		}
 	}
 
 	playChestReveal() {
 		this.sprite.setVisible(true);
-		this.holeSprite.setVisible(false);
+		//this.holeSprite.setVisible(false);
 		this.sprite.setTexture('chest_open');
 		this.sprite.setDisplaySize(80, 80);
 

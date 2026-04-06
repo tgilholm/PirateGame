@@ -1,9 +1,9 @@
-import Entity from './entity';
+import Interactable from './interactables/interactable';
 import Ship from './ship';
 
 export type TreasureState = 'buried' | 'opening' | 'dugup' | 'carried' | 'loose' | 'hole';
 
-export default class Treasure extends Entity {
+export default class Treasure extends Interactable {
 	public goldValue: number;
 	public spawnedAt: number;
 	public state: TreasureState;
@@ -28,7 +28,7 @@ export default class Treasure extends Entity {
 		successZoneStart: number = 0.4,
 		successZoneSize: number = 0.2
 	) {
-		super(id, 'treasure', x, y, 1, null);
+		super(id, x, y, null, 'treasure');
 
 		this.goldValue = goldValue;
 		this.spawnedAt = Date.now();
