@@ -1,5 +1,5 @@
 /*
-    Defines the communication protocol between clients and servers. This avoids messy
+    Defines the communication protocol between clients and the server. This avoids messy
     "string-based" communication, which is prone to typos
 */
 
@@ -28,9 +28,18 @@ export enum ActionType {
 	INTERACT = 'INTERACT',
 	DIG = 'DIG',
 	RELEASE = 'RELEASE',
-	TREASURE_INTERACT = 'TREASURE_INTERACT',
 	RESPAWN_SHIP = 'RESPAWN',
 	QUIT = 'QUIT',
+}
+
+export enum TreasureState {
+	BURIED = 'BURIED',
+	OPENING = 'OPENING',
+	DUGUP = 'DUGUP',
+	DIGGING = 'DIGGING',
+	CARRIED = 'CARRIED',
+	DROPPED = 'DROPPED',
+	HOLE = 'HOLE',
 }
 
 export interface MoveData {
@@ -51,24 +60,18 @@ export interface InteractData {
 	parentId?: string | null;
 }
 
-export interface DigData {
-	mode: 'start' | 'hit';
-	sliderPosition?: number; // 0..1, only used for mode === "hit"
-}
-
 export type PlayerAction =
 	| { type: ActionType.MOVE; data: MoveData } // Must match interface
 	| { type: ActionType.UPGRADE; data: UpgradeData }
 	| { type: ActionType.INTERACT; data: InteractData }
-	| { type: ActionType.TREASURE_INTERACT }
 	| { type: ActionType.MESSAGE; data?: { text: string } } // the message
-	| { type: ActionType.DIG; data: DigData }
+	| { type: ActionType.DIG; data?: never } // client doesn't determine if a hit landed
 	| { type: ActionType.FIRE; data?: never }
 	| { type: ActionType.RELEASE; data?: never }
 	| { type: ActionType.QUIT; data?: never }
 	| { type: ActionType.RESPAWN_SHIP; data?: never };
 
-//types of splash animations
+//types of splash animations -- ui concern only, doesn't need to be sent over the network
 export type SplashType =
 	| 'cannon-water'
 	| 'cannon-land'

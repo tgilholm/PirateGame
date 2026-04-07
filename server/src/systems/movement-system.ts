@@ -7,8 +7,9 @@ import { EntityConfig } from '../types';
 import { BaseSystem } from './base-system';
 import Entity from '../entities/entity';
 import Cannon from '../entities/interactables/cannon';
-import NPC from 'src/entities/npcs/npc';
-import Treasure from '../entities/treasure';
+import NPC from '../entities/npcs/npc';
+import { TreasureState } from '@shared/socket-protocol';
+import Treasure from '../entities/interactables/treasure';
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -128,7 +129,7 @@ export default class MovementSystem implements BaseSystem {
 		const onLand = this.terrainMap.isOnIsland(player.x, player.y);
 		let runSpeed = playerConfig.runSpeed;
 		let swimSpeed = playerConfig.swimSpeed;
-		if (player.isCarrying) {
+		if (player.carrying) {
 			runSpeed /= 2;
 			swimSpeed /= 2;
 		}
@@ -164,7 +165,7 @@ export default class MovementSystem implements BaseSystem {
 
 			const groundTreasures = this.registry
 				.getByType<Treasure>('treasure')
-				.filter((t) => t.id !== player.carryingTreasureId);
+				.filter((t) => t.id !== player.carrying?.id);
 
 			// Collide with the exterior of ships
 			const isColliding = (x: number, y: number) =>
@@ -248,11 +249,11 @@ export default class MovementSystem implements BaseSystem {
 			const dx = x - worldPos.x;
 			const dy = y - worldPos.y;
 
-			if (t.state === 'loose' || t.state === 'dugup') {
+			if (t.state === TreasureState.DROPPED || t.state === TreasureState.DUGUP) {
 				const combined = CHEST_OBSTACLE_RADIUS + playerRadius;
 				if (dx * dx + dy * dy < combined * combined) return true;
-			} else if (t.state === 'hole') {
-				// Ellipse check — holes are visually wider than tall
+			} else if (t.state === TreasureState.HOLE) {
+				//holes are visually wider than tall
 				const rx = HOLE_OBSTACLE_RADIUS + playerRadius;
 				const ry = HOLE_OBSTACLE_RADIUS_Y + playerRadius;
 				if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) < 1) return true;

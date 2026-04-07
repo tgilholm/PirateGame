@@ -1,25 +1,13 @@
 /* global Phaser */
-import Model from './model.js';
+import { TreasureState } from 'shared/built/socket-protocol.js';
+import InteractableModel from './interactable-model.js';
 
-export default class TreasureModel extends Model {
-	constructor(scene, id, x, y, state = 'buried', digProgress = 0, goldValue = 0) {
-		super(scene, id, x, y, 'treasure', 0, false);
+export default class TreasureModel extends InteractableModel {
+	constructor(scene, id, x, y, state = TreasureState.BURIED) {
+		super(scene, null, id, 'treasure', x, y, 'x-mark', 'Dig up treasure');
 
 		this.state = state;
-		this.digProgress = digProgress;
-		this.goldValue = goldValue;
-		this.carrierId = null;
-
-		this.holeSprite = scene.add.sprite(0, 0, 'hole');
-		this.holeSprite.setOrigin(0.5, 0.5);
-		this.holeSprite.setDisplaySize(56, 56);
-		this.holeSprite.setVisible(false);
-
-		this.sprite = scene.add.sprite(0, 0, 'x-mark');
-		this.sprite.setOrigin(0.5, 0.5);
 		this.sprite.setDisplaySize(48, 48);
-
-		this.add(this.holeSprite);
 		this.add(this.sprite);
 		this.setDepth(15);
 
@@ -28,8 +16,12 @@ export default class TreasureModel extends Model {
 
 	sync(data) {
 		const previousState = this.state;
-
 		super.sync(data);
+
+		if (data.x !== undefined || data.y !== undefined) {
+			this.x = this.target.x;
+			this.y = this.target.y;
+		}
 
 		if (data.state !== undefined) this.state = data.state;
 		if (data.digProgress !== undefined) this.digProgress = data.digProgress;
@@ -38,8 +30,8 @@ export default class TreasureModel extends Model {
 
 		if (previousState !== this.state) {
 			if (
-				this.state === 'opening' ||
-				(this.state === 'dugup' && previousState === 'buried')
+				this.state === TreasureState.OPENING ||
+				(this.state === TreasureState.DUGUP && previousState === TreasureState.BURIED)
 			) {
 				this.playChestReveal();
 			}
@@ -49,38 +41,40 @@ export default class TreasureModel extends Model {
 	}
 
 	applyVisuals() {
-		this.sprite.setVisible(false);
-		this.holeSprite.setVisible(false);
-
-		if (this.state === 'buried') {
-			this.sprite.setVisible(true);
+		if (this.state === TreasureState.BURIED) {
 			this.sprite.setTexture('x-mark');
 			this.sprite.setDisplaySize(48, 48);
-		} else if (this.state === 'opening') {
-			this.sprite.setVisible(true);
+			this.isInteractable = true;
+		} else if (this.state === TreasureState.OPENING) {
 			this.sprite.setTexture('chest_open');
 			this.sprite.setDisplaySize(80, 80);
-		} else if (this.state === 'dugup') {
-			this.holeSprite.setVisible(true);
-			this.sprite.setVisible(true);
+			this.isInteractable = false;
+		} else if (this.state === TreasureState.DUGUP) {
+			this.usePrompt = 'Pick up treasure';
 			this.sprite.setTexture('chest-in-hole');
 			this.sprite.setDisplaySize(80, 80);
-		} else if (this.state === 'carried') {
+			this.isInteractable = true;
+		} else if (this.state === TreasureState.CARRIED) {
 			this.sprite.setVisible(false);
-			this.holeSprite.setVisible(false);
-		} else if (this.state === 'loose') {
+			this.isInteractable = false;
+		} else if (this.state === TreasureState.DROPPED) {
 			this.sprite.setVisible(true);
+			this.usePrompt = 'Pick up treasure';
 			this.sprite.setTexture('treasure-chest');
 			this.sprite.setDisplaySize(64, 64);
-		} else if (this.state === 'hole') {
-			this.sprite.setVisible(false);
-			this.holeSprite.setVisible(true);
+			this.isInteractable = true;
+		} else if (this.state === TreasureState.HOLE) {
+			this.sprite.setTexture('hole');
+			this.sprite.setDisplaySize(64, 64);
+			this.isInteractable = false;
 		}
+
+		// Go underneath ships when dropped off them
+		this.parentId ? this.setDepth(15) : this.setDepth(1); // underneath the ship
 	}
 
 	playChestReveal() {
 		this.sprite.setVisible(true);
-		this.holeSprite.setVisible(false);
 		this.sprite.setTexture('chest_open');
 		this.sprite.setDisplaySize(80, 80);
 

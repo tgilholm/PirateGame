@@ -22,7 +22,6 @@ export default class PlayerModel extends Model {
 
 		this.isSteering = false;
 		this.isUsingCannon = false;
-		this.isCarrying = false;
 		this.aimAngle = 0;
 		this.parentId = null;
 		this.username = null;
@@ -54,6 +53,7 @@ export default class PlayerModel extends Model {
 		this.carrySprite.setDisplaySize(44, 44);
 		this.carrySprite.setDepth(101);
 		this.carrySprite.setVisible(false);
+		this.carrySprite.setRotation(Math.PI / 2);
 		this.add(this.carrySprite);
 	}
 
@@ -77,10 +77,13 @@ export default class PlayerModel extends Model {
 		if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
 		if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
 		if (data.gold !== undefined) this.gold = data.gold;
-		if (data.isCarrying !== undefined) this.isCarrying = data.isCarrying;
-		if (data.carryingTreasureId !== undefined) this.carryingTreasureId = data.carryingTreasureId;
 		if (data.shipId !== undefined) this.shipId = data.shipId;
 		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
+		if (data.activeMinigame !== undefined) this.activeMinigame = data.activeMinigame;
+
+		if ('carryingId' in data) {
+			this.carryingId = data.carryingId;
+		}
 	}
 
 	/**
@@ -94,7 +97,7 @@ export default class PlayerModel extends Model {
 		const gun = this.gun;
 		const pos = this.worldPos;
 		const isBusy = this.isSteering || this.isUsingCannon || this.isDead; // busy dyin'
-		const showCarry = !!this.isCarrying;
+		const showCarry = !!this.carryingId;
 
 		let bob = 0; // hi bob
 		if (this.parentContainer instanceof ShipModel) {

@@ -19,6 +19,7 @@ export default class UIManager {
 		this.gameManager = gameManager;
 
 		this.promptElement = document.getElementById('interaction-prompt');
+		this.releaseElement = document.getElementById('release-prompt');
 		this.fpsCounter = document.getElementById('fps-counter');
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
@@ -61,30 +62,42 @@ export default class UIManager {
 		if (!player) return;
 
 		this.goldCounter.update(player);
-
 		this.updateGoldCounter(player.gold ?? 0);
+
+		let useText = null;
+		let releaseText = null;
 		const isInteracting = player.isSteering || player.isUsingCannon;
 
-		if (target) {
-			const item = target.entity;
+		if (isInteracting) {
+			const prompt = target?.entity?.releasePrompt || 'Release';
+			releaseText = `[Q] ${prompt}`;
+		} else if (player.carryingId) {
+			const carriedModel = this.gameManager.models.get(player.carryingId);
+			if (carriedModel) {
+				// @ts-ignore
+				releaseText = `[Q] Drop ${carriedModel.type}`;
+			}
+		}
 
-			if (isInteracting) {
-				const prompt = item.releasePrompt || 'Release';
-				this.showPrompt('[Q]' + prompt);
-			} else {
-				this.showPrompt('[E]' + item.usePrompt);
-			}
-		} else {
-			if (isInteracting) {
-				this.showPrompt('[Q] Release');
-			} else {
-				this.hidePrompt();
-			}
+		if (target && !isInteracting) {
+			useText = `[E] ${target.entity.usePrompt || 'Interact'}`;
 		}
 
 		if (this.gameManager.playerListDirty) {
 			this.updatePlayersPanelDom(this.gameManager.allPlayers);
 			this.gameManager.playerListDirty = false;
+		}
+
+		if (useText) {
+			this.showPrompt(useText, this.promptElement);
+		} else {
+			this.hidePrompt(this.promptElement);
+		}
+
+		if (releaseText) {
+			this.showPrompt(releaseText, this.releaseElement);
+		} else {
+			this.hidePrompt(this.releaseElement);
 		}
 
 		if (this.minimapReady) {
@@ -122,8 +135,9 @@ export default class UIManager {
 		this.positionElement.innerText = `Pos: x=${player.x}, y=${player.y}`;
 		this.shipPositionElement.innerText = `Ship Pos: x=${playerShip.x}, y=${playerShip.y}`;
 		this.playerStats.innerText = `
-		Player Stats:
-		vx=${player.velocity.x}, vy=${player.velocity.y}, targetX=${player.target.x}, targetY=${player.target.y},
+		Player Stats: gold=${player.gold}
+		vx=${player.velocity.x}, vy=${player.velocity.y}, targetX=${player.target.x}, targetY=${player.target.y}, \n
+		carrying? ${player.carryingId}, cannon? ${player.isUsingCannon}, steering? ${player.isSteering}, nearest entity: ${target?.entity.type}
 
 		Ship Stats:
 		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
@@ -135,25 +149,27 @@ export default class UIManager {
 	}
 
 	/**
-	 * Removes the interaction prompt from the users screen if it is being shown
+	 * Hides the specified prompt
+	 * @param {HTMLElement} htmlElement
 	 */
-	hidePrompt() {
-		if (this.promptElement.style.display !== 'none') {
-			this.promptElement.style.display = 'none';
+	hidePrompt(htmlElement) {
+		if (htmlElement.style.display !== 'none') {
+			htmlElement.style.display = 'none';
 		}
 	}
 
 	/**
 	 * Shows an interaction prompt to the user
 	 * @param {string} promptText the text to display
+	 * @param {HTMLElement} htmlElement
 	 */
-	showPrompt(promptText) {
-		if (this.promptElement.textContent !== promptText) {
-			this.promptElement.textContent = promptText;
+	showPrompt(promptText, htmlElement) {
+		if (htmlElement.textContent !== promptText) {
+			htmlElement.textContent = promptText;
 		}
 
-		if (this.promptElement.style.display !== 'block') {
-			this.promptElement.style.display = 'block';
+		if (htmlElement.style.display !== 'block') {
+			htmlElement.style.display = 'block';
 		}
 	}
 

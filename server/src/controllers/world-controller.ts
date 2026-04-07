@@ -99,9 +99,11 @@ export default class WorldController {
 				this.playerController.handleUpgrade(player, action.data);
 				break;
 
-			// Checks if the player is controlling a cannon.
 			case ActionType.FIRE:
-				// Again check if controlling a cannon- but not necessarily on a ship- land cannons?
+				if (player.isDigging) {
+					this.playerController.handleDig(player);
+				}
+
 				if (player.cannon) {
 					this.cannonController.handleFire(player.cannon);
 				} else {
@@ -109,14 +111,8 @@ export default class WorldController {
 					this.playerController.handleGunFire(player);
 				}
 				break;
-			case ActionType.DIG:
-				this.playerController.handleDig(player, action.data);
-				break;
 			case ActionType.INTERACT:
 				this.playerController.handleInteract(player, action.data);
-				break;
-			case ActionType.TREASURE_INTERACT:
-				this.playerController.handleTreasureInteract(player);
 				break;
 			case ActionType.RELEASE:
 				this.playerController.handleRelease(player);
