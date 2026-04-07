@@ -1,13 +1,15 @@
 {
 	"compilerOptions": {
+		"composite": true,
+		"incremental": true,
+		"declaration": true,
+		"declarationMap": true,
 		"outDir": "./built",
 		"esModuleInterop": true,
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"target": "es2022",
-		"declaration": true,
-		"declarationMap": true,
 		"baseUrl": "."
 	},
 	"include": ["./**/*.ts"]

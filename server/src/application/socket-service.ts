@@ -11,6 +11,7 @@ import GameWorld, { WorldEvent } from './game-world';
  * @returns true if the move matches the schema, false otherwise
  */
 function isValidMove(data: MoveData): boolean {
+	/////////////////////////////////
 	return (
 		data &&
 		typeof data.up === 'boolean' &&
@@ -50,7 +51,9 @@ export default class SocketService {
 	constructor(
 		private io: Server,
 		private world: GameWorld
-	) {}
+	) {
+		console.log('launched');
+	}
 
 	/**
 	 * Starts the listeners

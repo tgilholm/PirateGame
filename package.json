@@ -15,13 +15,14 @@
 	"type": "commonjs",
 	"main": "server.js",
 	"scripts": {
-		"clean": "shx rm -rf server/built shared/built shared/browser && npm run prepare",
-		"build:shared": "tsc -p shared/tsconfig.json && tsc -p shared/tsconfig.browser.json && shx cp shared/*.json shared/built/ && shx cp shared/*.json shared/browser/",
-		"build:server": "tsc -p server/tsconfig.json && shx cp shared/*.json server/built/ && node scripts/copy-py.mjs",
-		"build:all": "npm run build:shared && npm run build:server",
+		"clean": "shx rm -rf server/built shared/built shared/browser",
+		"copy-assets": "shx mkdir -p server/built shared/built shared/browser && shx cp shared/*.json server/built/ && shx cp shared/*.json shared/built/ && shx cp shared/*.json shared/browser/",
+		"build:server": "tsc -b server/tsconfig.json && npm run copy-assets",
+		"build:shared-browser": "tsc -b shared/tsconfig.browser.json",
+		"build:all": "npm run build:server && npm run build:shared-browser",
 		"start": "npm run build:all && node -r tsconfig-paths/register server/built/server.js",
 		"quickstart": "node -r tsconfig-paths/register server/built/server.js",
-		"dev": "npm run build:shared && npm run build:server && concurrently \"tsc -p shared/tsconfig.json --watch\" \"tsc -p server/tsconfig.json --watch\" \"nodemon --watch server/src server/built/server.js\"",
+		"dev": "concurrently \"tsc -b server/tsconfig.json --watch\" \"tsc -p shared/tsconfig.browser.json --watch\" \"tsx watch server/src/server.ts\"",
 		"prepare": "husky",
 		"check-path": "ts-node scripts/test-npc-paths.ts",
 		"lint:all": "eslint --fix \"**/*.{ts,js,mjs}\" && prettier --write --cache \"**/*.{ts,js,mjs,json}\""
@@ -53,6 +54,7 @@
 		"prettier": "^3.8.1",
 		"shx": "^0.4.0",
 		"tsconfig-paths": "^4.2.0",
+		"tsx": "^4.21.0",
 		"undici-types": "^8.0.2"
 	}
 }

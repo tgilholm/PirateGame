@@ -24,8 +24,15 @@ export default class TerrainMap {
 	 * @returns
 	 */
 	constructor(mapFileName: string) {
-		const mapPath = path.join(__dirname, '..', mapFileName);
-		const mapData = JSON.parse(fs.readFileSync(mapPath, 'utf-8'));
+		const devPath = path.resolve(process.cwd(), 'shared', mapFileName);
+		const prodPath = path.join(__dirname, '..', mapFileName);
+		const final = fs.existsSync(devPath) ? devPath : prodPath;
+
+		if (!fs.existsSync(final)) {
+			throw new Error(`[TerrainMap] Map file not found at ${devPath} or ${prodPath}`);
+		}
+
+		const mapData = JSON.parse(fs.readFileSync(final, 'utf-8'));
 		this.tileWidth = mapData.tilewidth;
 		this.tileHeight = mapData.tileHeight;
 		this.mapHeight = mapData.height;

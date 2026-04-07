@@ -6,3 +6,4 @@ package-lock.json
 /.venv
 after.png
 before.png
+server/tsconfig.tsbuildinfo
