@@ -4,7 +4,6 @@ import WorldController from '../controllers/world-controller';
 import { PlayerAction, SplashEvent } from '@shared/socket-protocol';
 import Player from '../entities/player';
 import EntityFactory from '../entities/entity-factory';
-import Ship from '../entities/ship';
 import { EventEmitter } from 'events';
 import { CONFIG } from '../config';
 import ProjectileSystem from '../systems/projectile-system';
@@ -233,24 +232,6 @@ export default class GameWorld extends EventEmitter {
 			shopSpawns: this.registry.getByType<Entity>('shop').map((s) => ({ X: s.x, Y: s.y })),
 			allPlayers: this.registry.getByType<Player>('player').map((p) => ({ id: p.id, username: p.username })),
 		};
-	}
-
-	private getWorldPosition(entity: Entity) {
-		if (!entity.parent) {
-			// If the entity has no parent, its coordinates are already in world space
-			return { x: entity.x, y: entity.y };
-		}
-
-		const parent = this.registry.get<Ship>(entity.parent.id);
-
-		// If the parent is a ship, use its localToWorld method
-		if (parent) {
-			const ship = parent as Ship;
-			return ship.localToWorld(entity.x, entity.y);
-		}
-
-		// If the parent is not a ship, return the entity's local position
-		return { x: entity.x, y: entity.y };
 	}
 
 	/**

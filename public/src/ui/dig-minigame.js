@@ -1,13 +1,11 @@
+/**
+ * Client-side representation of dig minigame
+ */
 export default class DigMinigame {
 	constructor() {
 		this.active = false;
-		this.position = 0;
-		this.direction = 1;
-		this.speed = 1;
-		this.successZoneStart = 0.4;
-		this.successZoneSize = 0.18;
-		this.durationMs = 2500;
-		this.elapsedMs = 0;
+		this.currentPos = 0;
+		this.targetPos = 0;
 
 		this.root = document.getElementById('dig-minigame');
 		this.slider = document.getElementById('dig-slider');
@@ -15,23 +13,24 @@ export default class DigMinigame {
 		this.label = document.getElementById('dig-label');
 	}
 
-	start(config) {
-		this.active = true;
-		this.position = 0;
-		this.direction = 1;
-		this.elapsedMs = 0;
+	sync(data) {
+		if (!data) {
+			if (this.active) this.stop();
+			return; // server not sending updates, game over
+		}
 
-		this.speed = config.digSpeed ?? 1.2;
-		this.successZoneStart = config.successZoneStart ?? 0.4;
-		this.successZoneSize = config.successZoneSize ?? 0.18;
-		this.durationMs = config.durationMs ?? 625;
+		// server sent an update, wake up the minigame
+		if (!this.active) this.active = true;
 
 		this.root.style.display = 'block';
-		this.zone.style.left = `${this.successZoneStart * 100}%`;
-		this.zone.style.width = `${this.successZoneSize * 100}%`;
-		this.label.textContent = 'Press X in the green zone';
+		this.zone.style.left = `${data.start * 100}%`; // css minigame is cursed
+		this.zone.style.width = `${data.size * 100}%`;
+		this.targetPos = data.pos; // for interp
 
-		this.render();
+		// snap on first packet
+		if (Math.abs(this.currentPos - this.targetPos) > 0.2) {
+			this.currentPos = this.targetPos;
+		}
 	}
 
 	stop() {
@@ -42,31 +41,14 @@ export default class DigMinigame {
 	update(dt) {
 		if (!this.active) return;
 
-		this.elapsedMs += dt * 1000;
-
-		// bounce left/right across the bar
-		this.position += this.direction * this.speed * dt * 0.65;
-
-		if (this.position >= 1) {
-			this.position = 1;
-			this.direction = -1;
-		} else if (this.position <= 0) {
-			this.position = 0;
-			this.direction = 1;
-		}
-
-		if (this.elapsedMs >= this.durationMs) {
-			this.stop();
-		}
+		// add extrap if lagging behind too much
+		const lerpFactor = 0.2;
+		this.currentPos += (this.targetPos - this.currentPos) * lerpFactor;
 
 		this.render();
 	}
 
 	render() {
-		this.slider.style.left = `${this.position * 100}%`;
-	}
-
-	getSliderPosition() {
-		return this.position;
+		this.slider.style.left = `${this.currentPos * 100}%`;
 	}
 }
