@@ -26,6 +26,8 @@ export default class DigMinigame {
 		this.zone.style.left = `${data.start * 100}%`; // css minigame is cursed
 		this.zone.style.width = `${data.size * 100}%`;
 		this.targetPos = data.pos; // for interp
+		this.direction = data.dir; // for extrap
+		this.speed = data.speed;
 
 		// snap on first packet
 		if (Math.abs(this.currentPos - this.targetPos) > 0.2) {
@@ -41,9 +43,19 @@ export default class DigMinigame {
 	update(dt) {
 		if (!this.active) return;
 
-		// add extrap if lagging behind too much
-		const lerpFactor = 0.2;
-		this.currentPos += (this.targetPos - this.currentPos) * lerpFactor;
+		// Extrapolate based on server data
+		this.currentPos += this.direction * this.speed * dt;
+		const syncError = this.targetPos - this.currentPos;
+		this.currentPos += syncError * 0.1;
+
+		// bounce off walls
+		if (this.currentPos >= 1) {
+			this.currentPos = 1;
+			this.direction = -1;
+		} else if (this.currentPos <= 0) {
+			this.currentPos = 0;
+			this.direction = 1;
+		}
 
 		this.render();
 	}

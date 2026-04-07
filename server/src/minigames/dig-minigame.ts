@@ -33,6 +33,7 @@ export default class DigMinigame extends Minigame {
 			size: this.successZoneSize,
 			start: this.successZoneStart,
 			pos: this.sliderPosition,
+			speed: this.speed,
 			dir: this.direction,
 		};
 	}
