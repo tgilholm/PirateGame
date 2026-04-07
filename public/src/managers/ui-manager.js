@@ -1,7 +1,5 @@
 import GameManager from './game-manager.js';
-import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
-import GoldCounter from '../ui/gold-counter.js';
 import ShipModel from '../models/ship-model.js';
 
 /**
@@ -18,37 +16,31 @@ export default class UIManager {
 		this.scene = scene;
 		this.gameManager = gameManager;
 
+		// interaction
 		this.promptElement = document.getElementById('interaction-prompt');
 		this.releaseElement = document.getElementById('release-prompt');
+
+		// debug
 		this.fpsCounter = document.getElementById('fps-counter');
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
-		this.menu = document.getElementById('left-panel');
-		this.deathMessage = document.getElementById('death-screen');
 		this.positionElement = document.getElementById('position');
 		this.shipPositionElement = document.getElementById('ship-position');
 		this.playerStats = document.getElementById('player-stats');
 
+		// game
+		this.deathMessage = document.getElementById('death-screen');
 		this.deathMessage.style.display = 'none';
-		this.menu.style.display = 'block';
-		this.currentInteractable = null;
 
-		this.minimap = new Minimap(document.getElementById('minimap-container'));
-		this.minimapReady = false;
+		// left panel
+		this.goldCounter = document.getElementById('gold-counter');
+		this.minimapContainer = document.getElementById('minimap-container');
+
+		this.currentInteractable = null;
 
 		this.shopUI = new ShopUI(gameManager.network, gameManager);
 		gameManager.on('openShop', () => this.shopUI.open());
 
-		this.goldCounter = new GoldCounter(document.getElementById('gold-counter'));
-
-		gameManager.on('localPlayerReady', (player) => {
-			const pos = player.worldPos;
-			this.minimap.placeMarker(pos.x, pos.y, gameManager.mapWidth, gameManager.mapHeight);
-			this.minimap.placeShops(gameManager.mapWidth, gameManager.mapHeight, gameManager.shopSpawns);
-			this.minimapReady = true;
-			this.goldCounter.show();
-		});
-		this.goldElement = document.getElementById('gold-counter');
 		this.lastGold = null;
 	}
 
@@ -61,7 +53,6 @@ export default class UIManager {
 
 		if (!player) return;
 
-		this.goldCounter.update(player);
 		this.updateGoldCounter(player.gold ?? 0);
 
 		let useText = null;
@@ -100,10 +91,6 @@ export default class UIManager {
 			this.hidePrompt(this.releaseElement);
 		}
 
-		if (this.minimapReady) {
-			const pos = this.gameManager.localPlayer.worldPos;
-			this.minimap.updateMarker(pos.x, pos.y);
-		}
 		this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
 		this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
 
@@ -187,10 +174,9 @@ export default class UIManager {
 	}
 
 	updateGoldCounter(amount) {
-		if (!this.goldElement) return;
-		if (this.lastGold === amount) return;
-
-		this.goldElement.textContent = `Gold: ${amount}`;
-		this.lastGold = amount;
+		// if (!this.goldElement) return;
+		// if (this.lastGold === amount) return;
+		// this.goldElement.textContent = `Gold: ${amount}`;
+		// this.lastGold = amount;
 	}
 }
