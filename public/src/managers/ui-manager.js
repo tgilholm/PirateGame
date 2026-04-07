@@ -1,6 +1,7 @@
 import GameManager from './game-manager.js';
 import ShipModel from '../models/ship-model.js';
 import Minimap from '../ui/minimap.js';
+import ShopUI from '../ui/shop-ui.js';
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -42,8 +43,11 @@ export default class UIManager {
 		// game
 		this.deathMessage = document.getElementById('death-screen');
 		this.deathMessage.style.display = 'none';
+
+		// shop
+		this.shopUI = new ShopUI(gameManager);
 		this.shopMenu = document.getElementById('shop-menu');
-		gameManager.on('openShop', () => (this.shopMenu.style.display = 'flex'));
+		gameManager.on('openShop', () => this.shopUI.show());
 
 		// left panel
 		this.minimapContainer = document.getElementById('minimap-container');
@@ -53,8 +57,6 @@ export default class UIManager {
 		this.goldCounter.style.display = 'flex';
 
 		this.currentInteractable = null;
-
-		//this.shopUI = new ShopUI(gameManager.network, gameManager);
 
 		this.lastGold = null;
 

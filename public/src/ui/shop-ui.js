@@ -1,6 +1,4 @@
-﻿import DomFactory from './dom-factory.js';
-
-//component catalogue
+﻿// MOVE TO SHARED
 const COMPONENTS = [
 	{ key: 'sails', name: 'Sails', description: 'Acceleration and max speed' },
 	{ key: 'cannons', name: 'Cannons', description: 'Damage, range and cannon count' },
@@ -14,7 +12,7 @@ const COMPONENTS = [
 
 const level_progression = ['LVL1', 'LVL2', 'LVL3'];
 
-//get component cost data from json
+// MOVE TO SHARED
 let componentsData = null;
 fetch('/jsons/components.json')
 	.then((r) => r.json())
@@ -23,21 +21,20 @@ fetch('/jsons/components.json')
 	})
 	.catch(() => {}); //
 
-//builds and manages shop overlay
-export default class ShopUI {
-	/**
-	 * @param {import('../managers/network-manager.js').default} network
-	 * @param {import('../managers/game-manager.js').default} gameManager
-	 */
-	constructor(network, gameManager) {
-		this.network = network;
+export default class ShopUI extends Phaser.Events.EventEmitter {
+	constructor(gameManager) {
+		super();
 		this.gameManager = gameManager;
-		this.goldCounter = null;
-		this.menuEl = document.getElementById('shop-menu');
-		this.gridEl = null;
-		this.lastComponents = null;
+		this.shopMenu = document.getElementById('shop-menu');
+		this.template = document.getElementById('shop-card-template');
 
-		this.initLayout();
+		const closeButton = document.getElementById('shop-close-button');
+		closeButton.addEventListener('click', () => {
+			this.shopMenu.style.display = 'none';
+		});
+
+		// Only update shop if actually inside it
+		this.gameManager.on('localShipUpdated', () => {});
 
 		//rebuilds the shop grid
 		this.gameManager.on('localShipUpdated', () => {
@@ -48,33 +45,25 @@ export default class ShopUI {
 				}
 			}
 		});
+
+		this.goldCounter = null;
+		this.gridEl = null;
+		this.lastComponents = null;
 	}
 
-	//initialises the shop layout
-	initLayout() {
-		this.menuEl.innerHTML = '';
-
-		const title = DomFactory.createElement('h2', ['shop-title']);
-		title.textContent = 'Ship Upgrades';
-		this.menuEl.appendChild(title);
-
-		this.gridEl = DomFactory.createElement('div', ['shop-grid']);
-		this.menuEl.appendChild(this.gridEl);
-
-		this.menuEl.appendChild(DomFactory.createButton('Close', () => this.close(), ['shop-close-button']));
+	get isVisible() {
+		return this.shopMenu.style.display !== 'none';
 	}
 
-	//makes the shop overlay visible
-	open() {
-		this.lastComponents = null; // force rebuild on open
-		const comps = this.gameManager.getLocalShipComponents();
-		this.build(comps);
-		this.menuEl.style.display = 'block';
+	show() {
+		// this.lastComponents = null; // force rebuild on open
+		// const comps = this.gameManager.getLocalShipComponents();
+		// this.build(comps);
+		this.shopMenu.style.display = 'block';
 	}
 
-	//hides shop overlay
-	close() {
-		this.menuEl.style.display = 'none';
+	hide() {
+		this.shopMenu.style.display = 'none';
 	}
 
 	/**
