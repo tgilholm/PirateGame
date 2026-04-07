@@ -19,10 +19,10 @@ export default class DigMinigame extends Minigame {
 		this.sliderPosition += this.direction * this.speed * dt;
 
 		if (this.sliderPosition >= 1) {
-			this.sliderPosition = 1;
+			this.sliderPosition = 1 - (this.sliderPosition - 1);
 			this.direction = -1;
 		} else if (this.sliderPosition <= 0) {
-			this.sliderPosition = 0;
+			this.sliderPosition = Math.abs(this.sliderPosition);
 			this.direction = 1;
 		}
 	}

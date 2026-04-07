@@ -58,7 +58,13 @@ export default class TreasureSystem implements BaseSystem {
 	public createSession(player: Player, treasure: Treasure) {
 		// Only allow if non-existent
 		if (!this.digSessions.has(player.id)) {
-			this.digSessions.set(player.id, new DigMinigame(3000, treasure, 0.4, Math.random(), Math.random()));
+			const size = 0.4;
+			const max = 1.0 - size; // don't go off the side
+
+			const randomStart = Math.random() * max;
+			const initialPos = Math.random();
+
+			this.digSessions.set(player.id, new DigMinigame(3000, treasure, size, randomStart, initialPos));
 			treasure.state = TreasureState.DIGGING;
 			player.isDigging = true;
 		}
