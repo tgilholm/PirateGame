@@ -34,7 +34,6 @@ export default class UIManager {
 
 		// left panel
 		this.goldCounter = document.getElementById('gold-counter');
-		this.minimapContainer = document.getElementById('minimap-container');
 
 		this.currentInteractable = null;
 
@@ -50,47 +49,14 @@ export default class UIManager {
 	update() {
 		const target = this.gameManager.closestInteractable;
 		const player = this.gameManager.localPlayer;
-
 		if (!player) return;
 
 		this.updateGoldCounter(player.gold ?? 0);
+		this.updateInteractionPrompts(player, target);
+		this.updateDebugStats(player, target);
+	}
 
-		let useText = null;
-		let releaseText = null;
-		const isInteracting = player.isSteering || player.isUsingCannon;
-
-		if (isInteracting) {
-			const prompt = target?.entity?.releasePrompt || 'Release';
-			releaseText = `[Q] ${prompt}`;
-		} else if (player.carryingId) {
-			const carriedModel = this.gameManager.models.get(player.carryingId);
-			if (carriedModel) {
-				// @ts-ignore
-				releaseText = `[Q] Drop ${carriedModel.type}`;
-			}
-		}
-
-		if (target && !isInteracting) {
-			useText = `[E] ${target.entity.usePrompt || 'Interact'}`;
-		}
-
-		if (this.gameManager.playerListDirty) {
-			this.updatePlayersPanelDom(this.gameManager.allPlayers);
-			this.gameManager.playerListDirty = false;
-		}
-
-		if (useText) {
-			this.showPrompt(useText, this.promptElement);
-		} else {
-			this.hidePrompt(this.promptElement);
-		}
-
-		if (releaseText) {
-			this.showPrompt(releaseText, this.releaseElement);
-		} else {
-			this.hidePrompt(this.releaseElement);
-		}
-
+	updateDebugStats(player, target) {
 		this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
 		this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
 
@@ -129,6 +95,44 @@ export default class UIManager {
 		Ship Stats:
 		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
 		`;
+	}
+
+	updateInteractionPrompts(player, target) {
+		let useText = null;
+		let releaseText = null;
+		const isInteracting = player.isSteering || player.isUsingCannon;
+
+		if (isInteracting) {
+			const prompt = target?.entity?.releasePrompt || 'Release';
+			releaseText = `[Q] ${prompt}`;
+		} else if (player.carryingId) {
+			const carriedModel = this.gameManager.models.get(player.carryingId);
+			if (carriedModel) {
+				// @ts-ignore
+				releaseText = `[Q] Drop ${carriedModel.type}`;
+			}
+		}
+
+		if (target && !isInteracting) {
+			useText = `[E] ${target.entity.usePrompt || 'Interact'}`;
+		}
+
+		if (this.gameManager.playerListDirty) {
+			this.updatePlayersPanelDom(this.gameManager.allPlayers);
+			this.gameManager.playerListDirty = false;
+		}
+
+		if (useText) {
+			this.showPrompt(useText, this.promptElement);
+		} else {
+			this.hidePrompt(this.promptElement);
+		}
+
+		if (releaseText) {
+			this.showPrompt(releaseText, this.releaseElement);
+		} else {
+			this.hidePrompt(this.releaseElement);
+		}
 	}
 
 	showShipSunkMessage() {

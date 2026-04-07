@@ -123,5 +123,44 @@ export class MainScene extends Phaser.Scene {
 		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
 
 		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
+
+		// Generate a scaled down version of the map to use as a minimap
+		// this creates a 1x1 pixel for each tile of a different colour for each layer
+		const mapW = this.map.width;
+		const mapH = this.map.height;
+		const rt = this.add.renderTexture(0, 0, mapW, mapH).setVisible(false);
+
+		const g = this.add.graphics();
+		for (let y = 0; y < mapH; y++) {
+			for (let x = 0; x < mapW; x++) {
+				let color = null;
+
+				if (this.islandsLayer.hasTileAt(x, y)) {
+					color = 0x29bb65; // green
+				} else if (this.shallowsLayer.hasTileAt(x, y)) {
+					color = 0xabe3f5; // light blue
+				} else if (this.seaLayer.hasTileAt(x, y)) {
+					color = 0x83c8de; // darker blue
+				}
+
+				if (color !== null) {
+					g.fillStyle(color, 1);
+					g.fillRect(x, y, 1, 1);
+				}
+			}
+		}
+
+		rt.draw(g);
+		g.destroy();
+
+		// convert to a png and apply to html element
+		rt.snapshot((image) => {
+			const htmlImage = document.getElementById('minimap');
+			if (htmlImage && image instanceof HTMLImageElement) {
+				//@ts-ignore
+				htmlImage.src = image.src;
+			}
+			rt.destroy(); // Free GPU memory
+		});
 	}
 }

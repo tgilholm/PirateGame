@@ -57,12 +57,13 @@ input.formElement {
 
 #minimap-container {
 	position: fixed;
-	display: none;
+	display: flex;
 	top: 16px;
 	left: 16px;
 	z-index: 1000;
 	overflow: hidden;
-	border: 1px solid #fff;
+	border: 2px solid rgba(255, 255, 255, 0.6);
+	border-radius: 8px;
 	pointer-events: none;
 }
 
