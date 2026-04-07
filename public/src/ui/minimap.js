@@ -28,24 +28,51 @@ export default class Minimap {
 	 * @param {number} worldY
 	 * @param {string} colour
 	 */
-	drawMarker(worldX, worldY, colour = 'red') {
+	drawCircle(worldX, worldY, colour = 'red', radius = 1.5) {
 		if (!this.context) return;
-		this.clear();
 
-		const radius = 1.5;
 		const startAngle = 0;
 		const endAngle = Math.PI * 2;
-		const tileSize = this.map.tileWidth; // square, 64x64
 
 		// convert to canvas context
-		const x = worldX / tileSize;
-		const y = worldY / tileSize;
+		const { x, y } = this.getCanvasPos(worldX, worldY);
 
 		this.context.fillStyle = colour;
 		this.context.beginPath();
 
 		this.context.arc(x, y, radius, startAngle, endAngle); // a circle
 		this.context.fill();
+	}
+
+	drawRect(worldX, worldY, worldWidth, worldHeight, colour = 'red') {
+		if (!this.context) return;
+		const tileSize = this.map.tileHeight;
+
+		const { x, y } = this.getCanvasPos(worldX, worldY);
+		const width = worldWidth / tileSize;
+		const height = worldHeight / tileSize;
+
+		this.context.fillStyle = colour;
+		this.context.beginPath();
+		this.context.fillRect(x, y, width, height);
+	}
+
+	drawAngledRect(worldX, worldY, worldWidth, worldHeight, angle, colour = 'red') {
+		if (!this.context) return;
+		const tileSize = this.map.tileHeight;
+
+		const { x, y } = this.getCanvasPos(worldX, worldY);
+		const width = worldWidth / tileSize;
+		const height = worldHeight / tileSize;
+
+		this.context.save();
+		this.context.translate(x, y); // move rotation origin point
+		this.context.rotate(angle);
+		this.context.fillStyle = colour;
+		this.context.fillRect(-width / 2, -height / 2, width, height); // midpoint of rect
+
+		// reset for next item
+		this.context.restore();
 	}
 
 	/**
@@ -106,8 +133,7 @@ export default class Minimap {
 		});
 	}
 
-	update() {}
-
-	/** */
-	updatePlayerMarker(player) {}
+	getCanvasPos(worldX, worldY, tileSize = 64) {
+		return { x: worldX / tileSize, y: worldY / tileSize };
+	}
 }

@@ -1,6 +1,7 @@
 import GameManager from './game-manager.js';
 import ShopUI from '../ui/shop-ui.js';
 import ShipModel from '../models/ship-model.js';
+import Minimap from '../ui/minimap.js';
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -11,10 +12,13 @@ export default class UIManager {
 	 * Constructs the UI manager for the specified Scene
 	 * @param {Phaser.Scene} scene the scene to provide UI for
 	 * @param {GameManager} gameManager to access the state of the game
+	 * @param {Minimap} minimap
+	 * @param {Phaser.Tilemaps.Tilemap} map
 	 */
-	constructor(scene, gameManager) {
+	constructor(scene, gameManager, minimap, map) {
 		this.scene = scene;
 		this.gameManager = gameManager;
+		this.minimap = minimap;
 
 		// interaction
 		this.promptElement = document.getElementById('interaction-prompt');
@@ -41,6 +45,24 @@ export default class UIManager {
 		gameManager.on('openShop', () => this.shopUI.open());
 
 		this.lastGold = null;
+
+		const layers = [
+			{ name: 'sea', colour: 0x83c8de }, // darker blue
+			{ name: 'shallows', colour: 0xabe3f5 }, // light blue
+			{ name: 'islands', colour: 0x29bb65 }, // green
+		];
+
+		this.setupMinimap(map, scene, layers);
+	}
+
+	async setupMinimap(map, scene, layers) {
+		const mapSrc = await this.minimap.createMinimapImage(map, scene, layers);
+		const minimapImage = document.getElementById('minimap');
+
+		if (minimapImage) {
+			//@ts-ignore
+			minimapImage.src = mapSrc;
+		}
 	}
 
 	/**
@@ -54,6 +76,36 @@ export default class UIManager {
 		this.updateGoldCounter(player.gold ?? 0);
 		this.updateInteractionPrompts(player, target);
 		this.updateDebugStats(player, target);
+		this.updateMinimap();
+	}
+
+	updateMinimap() {
+		if (!this.minimap || !this.gameManager.localPlayer) return;
+		const localPlayer = this.gameManager.localPlayer;
+
+		this.minimap.clear();
+
+		// Draw shops
+		this.gameManager.shopSpawns?.forEach((shop) => {
+			this.minimap.drawCircle(shop.x, shop.y, '#f1c40f', 5);
+		});
+
+		// Draw ships
+		this.gameManager.minimalShips.forEach((ship) => {
+			this.minimap.drawAngledRect(ship.x, ship.y, 500, 150, ship.r, 'brown');
+		});
+
+		// Draw NPCs
+		this.gameManager.minimalNPCs.forEach((npc) => {
+			this.minimap.drawCircle(npc.x, npc.y, 'blue', 2);
+		});
+
+		// Draw players
+		this.gameManager.minimalPlayers.forEach((player) => {
+			const colour = player === localPlayer ? 'green' : 'red';
+
+			this.minimap.drawCircle(player.x, player.y, colour, 3);
+		});
 	}
 
 	updateDebugStats(player, target) {
@@ -118,7 +170,7 @@ export default class UIManager {
 		}
 
 		if (this.gameManager.playerListDirty) {
-			this.updatePlayersPanelDom(this.gameManager.allPlayers);
+			this.updatePlayersPanelDom(this.gameManager.minimalPlayers);
 			this.gameManager.playerListDirty = false;
 		}
 

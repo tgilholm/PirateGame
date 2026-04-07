@@ -36,11 +36,15 @@ export class MainScene extends Phaser.Scene {
 		// Create the socket here so it only connects when the scene actually starts,
 		// not at module load time before GameManager exists to receive INIT_GAME
 		const socket = globalThis.io();
+		this.map = this.make.tilemap({ key: 'map' });
 
 		// Allow key inputs again
 		this.input.keyboard.enableGlobalCapture();
 
 		this.setupWorld();
+
+		const canvas = document.getElementById('minimap-canvas');
+		if (!(canvas instanceof HTMLCanvasElement)) return; // shut up the linter
 
 		//@ts-ignore cheesed into this window
 		const entityConfig = window.entityConfig;
@@ -48,7 +52,9 @@ export class MainScene extends Phaser.Scene {
 
 		this.gameManager = new GameManager(this, new NetworkManager(socket), new InputManager(this), modelFactory);
 		this.animationManager = new AnimationManager(this);
-		this.uiManager = new UIManager(this, this.gameManager);
+
+		const minimap = new Minimap(this.map, canvas);
+		this.uiManager = new UIManager(this, this.gameManager, minimap, this.map);
 
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
 		this.cameras.main.startFollow(this.cameraTarget);
@@ -108,43 +114,18 @@ export class MainScene extends Phaser.Scene {
 
 		const gold = document.getElementById('gold-counter'); // ui concern
 		if (gold) gold.style.display = 'none';
-
-		const player = this.gameManager.localPlayer;
-
-		if (this.minimap && player) {
-			this.minimap.drawMarker(player.worldPos.x, player.worldPos.y);
-		}
 	}
 
 	/**
 	 * Generates the tilemap for this world from the provided tilesheet
 	 */
-	async setupWorld() {
-		this.map = this.make.tilemap({ key: 'map' });
+	setupWorld() {
 		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
-		const canvas = document.getElementById('minimap-canvas');
-
-		if (!(canvas instanceof HTMLCanvasElement)) return; // shut up the linter
-		this.minimap = new Minimap(this.map, canvas);
 
 		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
 		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
 		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
 
 		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
-
-		const layers = [
-			{ name: 'sea', colour: 0x83c8de }, // darker blue
-			{ name: 'shallows', colour: 0xabe3f5 }, // light blue
-			{ name: 'islands', colour: 0x29bb65 }, // green
-		];
-
-		const mapSrc = await this.minimap.createMinimapImage(this.map, this, layers);
-		const minimapImage = document.getElementById('minimap');
-
-		if (minimapImage) {
-			//@ts-ignore
-			minimapImage.src = mapSrc;
-		}
 	}
 }

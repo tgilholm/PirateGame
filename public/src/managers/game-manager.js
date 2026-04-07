@@ -33,7 +33,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.#playerListCache = null;
 		this.digMinigame = new DigMinigame();
 		this.moveTimer = 0;
-		this.allPlayers = [];
 		this.playerListDirty = true;
 		/** @type {PlayerModel} */
 		this.localPlayer = null;
@@ -43,6 +42,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.models = new Map(); // generic entity list
 
 		this.closestInteractable = null;
+
+		this.minimalPlayers = [];
+		this.minimalNPCs = [];
+		this.minimalShips = [];
+		this.minimalInteractables = [];
 
 		this.startListeners();
 	}
@@ -87,7 +91,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		/** @type {Object} */
 		let closest = null;
 		let nearestDist = Infinity;
-		const now = Date.now();
 		this.models.forEach((entity, id) => {
 			if (entity === this.localPlayer) {
 				entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
@@ -158,10 +161,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	 * @param {Object} data the data from the server
 	 */
 	onDeltaSync(data) {
-		if (data.allPlayers) {
-			this.allPlayers = data.allPlayers;
+		if (data.minimalPlayers) {
+			this.minimalPlayers = data.minimalPlayers;
 			this.playerListDirty = true;
 		}
+
+		if (data.minimalShips) this.minimalShips = data.minimalShips;
+		if (data.minimalNPCs) this.minimalNPCs = data.minimalNPCs;
+		if (data.minimalInteractables) this.minimalInteractables = data.minimalInteractables;
 
 		data.newEntities?.forEach((entityData) => {
 			this.applyFull(entityData);

@@ -70,6 +70,17 @@ export default class Player extends Entity {
 		return this.reloadTimer <= 0;
 	}
 
+	get worldPos(): { x: number; y: number } {
+		if (this.parent) {
+			const ship = this.parent as Ship;
+			const { x, y } = ship.localToWorld(this.x, this.y);
+
+			return { x: x, y: y };
+		} else {
+			return { x: this.x, y: this.y };
+		}
+	}
+
 	/**
 	 * Override base method appending player-specific data for network transmission
 	 */
