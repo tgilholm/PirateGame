@@ -22,7 +22,6 @@ export class MainScene extends Phaser.Scene {
 		this.debugGraphics = null;
 		this.cameraTarget = null;
 		this.projectiles = new Map();
-		this.minimap = new Minimap();
 
 		window.addEventListener('resize', () => {
 			this.scale.resize(window.innerWidth, window.innerHeight);
@@ -87,9 +86,11 @@ export class MainScene extends Phaser.Scene {
 		this.gameManager.start(data.username);
 
 		this.gameManager.on('shipSunk', () => {
-			console.log('sunk');
-
 			this.uiManager.showShipSunkMessage();
+		});
+
+		this.events.on('shutdown', () => {
+			this.gameManager.destroy();
 		});
 	}
 
@@ -104,8 +105,15 @@ export class MainScene extends Phaser.Scene {
 	update() {
 		this.gameManager.update();
 		this.uiManager.update();
+
 		const gold = document.getElementById('gold-counter'); // ui concern
 		if (gold) gold.style.display = 'none';
+
+		const player = this.gameManager.localPlayer;
+
+		if (this.minimap && player) {
+			this.minimap.drawMarker(player.worldPos.x, player.worldPos.y);
+		}
 	}
 
 	/**
@@ -114,11 +122,10 @@ export class MainScene extends Phaser.Scene {
 	async setupWorld() {
 		this.map = this.make.tilemap({ key: 'map' });
 		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
+		const canvas = document.getElementById('minimap-canvas');
 
-		// call to destroy game manager on shutdown
-		this.events.on('shutdown', () => {
-			this.gameManager.destroy();
-		});
+		if (!(canvas instanceof HTMLCanvasElement)) return; // shut up the linter
+		this.minimap = new Minimap(this.map, canvas);
 
 		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
 		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
