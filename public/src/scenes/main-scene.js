@@ -22,6 +22,7 @@ export class MainScene extends Phaser.Scene {
 		this.debugGraphics = null;
 		this.cameraTarget = null;
 		this.projectiles = new Map();
+		this.targetZoom = 0.8;
 
 		window.addEventListener('resize', () => {
 			this.scale.resize(window.innerWidth, window.innerHeight);
@@ -49,16 +50,27 @@ export class MainScene extends Phaser.Scene {
 		//@ts-ignore cheesed into this window
 		const entityConfig = window.entityConfig;
 		const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
-
-		this.gameManager = new GameManager(this, new NetworkManager(socket), new InputManager(this), modelFactory);
+		this.inputManager = new InputManager(this);
+		this.gameManager = new GameManager(this, new NetworkManager(socket), this.inputManager, modelFactory);
 		this.animationManager = new AnimationManager(this);
 
 		const minimap = new Minimap(this.map, canvas);
 		this.uiManager = new UIManager(this, this.gameManager, minimap, this.map);
 
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
-		this.cameras.main.startFollow(this.cameraTarget);
-		this.cameras.main.zoom = 0.8;
+		const camera = this.cameras.main;
+
+		camera.startFollow(this.cameraTarget);
+		camera.zoom = this.targetZoom;
+
+		this.inputManager.on('zoom', (deltaY) => {
+			const step = deltaY > 0 ? -0.1 : 0.1;
+
+			const minZoom = 0.4;
+			const maxZoom = 1.25;
+
+			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom); // between 30%-150% zoom
+		});
 
 		// Placeholder player sprite
 		const circle = this.make.graphics();
@@ -111,6 +123,9 @@ export class MainScene extends Phaser.Scene {
 	update() {
 		this.gameManager.update();
 		this.uiManager.update();
+
+		const camera = this.cameras.main;
+		camera.zoom += (this.targetZoom - camera.zoom) * 0.1;
 
 		const gold = document.getElementById('gold-counter'); // ui concern
 		if (gold) gold.style.display = 'none';

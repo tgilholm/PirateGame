@@ -92,7 +92,7 @@ export default class UIManager {
 
 		// Draw ships
 		this.gameManager.minimalShips.forEach((ship) => {
-			this.minimap.drawAngledRect(ship.x, ship.y, 500, 150, ship.r, 'brown');
+			this.minimap.drawAngledRect(ship.x, ship.y, 750, 250, ship.r, 'brown');
 		});
 
 		// Draw NPCs
@@ -121,14 +121,6 @@ export default class UIManager {
 			Turn Angle: ${ship.turnAngle}
 			Anchored: ${ship.anchored}
 			`;
-
-			// Smoothly update zoom to new value
-			const targetZoom = 0.8 - ship.sailState * (0.8 - 0.6);
-			const cam = this.scene.cameras.main;
-			cam.zoom += (targetZoom - cam.zoom) * 0.05;
-		} else {
-			this.shipStats.innerText = `Not on a ship`;
-			this.scene.cameras.main.zoomTo(0.8); // default off ship
 		}
 
 		const playerShip = this.gameManager.models.get(player.shipId);

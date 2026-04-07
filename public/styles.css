@@ -61,8 +61,8 @@ input.formElement {
 	top: 16px;
 	left: 16px;
 	z-index: 1000;
-	width: 250px;
-	height: 250px;
+	width: 300px;
+	height: 300px;
 	overflow: hidden;
 	border: 2px solid rgba(255, 255, 255, 0.6);
 	border-radius: 8px;

@@ -107,7 +107,7 @@ export default class GameWorld extends EventEmitter {
 		this.minimalShips = this.registry.getByType('ship').map((s) => ({
 			x: s.x,
 			y: s.y,
-			r: s.r,
+			r: s.r, // todo width/height
 		}));
 
 		// npc ships are included in minimal ships- no need to send them twice
