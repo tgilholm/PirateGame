@@ -1,15 +1,24 @@
+import Treasure from '../entities/interactables/treasure';
 import Cannon from '../entities/interactables/cannon';
 import Helm from '../entities/interactables/helm';
 import Interactable from '../entities/interactables/interactable';
 import Ladder from '../entities/interactables/ladder';
 import Player from '../entities/player';
 import Ship from '../entities/ship';
+import TreasureSystem from '../systems/treasure-system';
+import { TreasureState } from '@shared/socket-protocol';
+import EntityRegistry from 'src/engine/entity-registry';
 
 /**
  * Handler class- provides methods for each type of player interaction with interactable entities,
  * for example cannons, helms, treasure chests etc.
  */
 export default class InteractionHandler {
+	constructor(
+		private treasureSystem: TreasureSystem,
+		private registry: EntityRegistry
+	) {}
+
 	/**
 	 * Handles the interaction of a player with a helm object, and therefore take control of the ship
 	 * by resetting the ship's pilot to that player. Only allows the interaction if the player is on
@@ -91,6 +100,47 @@ export default class InteractionHandler {
 	}
 
 	/**
+	 * Starts an interaction with a treasure object
+	 * @param player
+	 * @param treasure
+	 * @returns
+	 */
+	handleTreasureInteraction(player: Player, treasure: Treasure) {
+		const busy = player.carrying || treasure.state === TreasureState.DIGGING || treasure.user || player.isDigging;
+		if (busy) return; // treasure can only be dug by one player at a time
+
+		switch (treasure.state) {
+			case TreasureState.BURIED:
+				// start digging
+				treasure.user = player;
+				this.treasureSystem.createSession(player, treasure);
+				break;
+			case TreasureState.DUGUP:
+				// pick up, create hole
+				treasure.user = player;
+				player.carrying = treasure;
+
+				treasure.state = TreasureState.CARRIED;
+				this.treasureSystem.createHole(treasure);
+
+				break;
+			case TreasureState.DROPPED:
+				// pick up, no hole
+				treasure.user = player;
+				player.carrying = treasure;
+				treasure.parent = null;
+				treasure.state = TreasureState.CARRIED;
+				break;
+			default:
+				// opening, carried, hole- do nothing
+				break;
+		}
+
+		treasure.markDirty();
+		player.markDirty();
+	}
+
+	/**
 	 * Ends any continued interaction a player currently has with an interactable object. If the player
 	 * was controlling a helm, they are removed from the ship's pilot too
 	 * @param player the player releasing an interactable
@@ -111,6 +161,35 @@ export default class InteractionHandler {
 
 			case 'cannon':
 				player.cannon = null;
+				break;
+
+			case 'treasure':
+				const treasure = interactable as Treasure;
+				const ships = this.registry.getByType<Ship>('ship');
+				player.carrying = null;
+
+				const angle = player.aimAngle;
+				const dropWorldX = treasure.x + 20 * Math.cos(angle);
+				const dropWorldY = treasure.y + 20 * Math.sin(angle);
+
+				treasure.parent = null;
+				for (const ship of ships) {
+					const local = ship.worldToLocal(dropWorldX, dropWorldY);
+					if (ship.isInside(local.x, local.y, 0)) {
+						treasure.x = local.x;
+						treasure.y = local.y;
+						treasure.parent = ship;
+						break;
+					}
+				}
+
+				if (!treasure.parent) {
+					treasure.x = dropWorldX;
+					treasure.y = dropWorldY;
+				}
+
+				this.treasureSystem.deleteSession(player);
+				treasure.state = TreasureState.DROPPED;
 				break;
 		}
 

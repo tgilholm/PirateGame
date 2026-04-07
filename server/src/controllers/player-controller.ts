@@ -3,7 +3,7 @@ import Shop from '../entities/shop';
 import EntityRegistry from '../engine/entity-registry';
 import Player from '../entities/player';
 import UpgradeHandler from '../handlers/upgrade-handler';
-import { InteractData, MoveData, UpgradeData, DigData } from '@shared/socket-protocol';
+import { InteractData, MoveData, UpgradeData } from '@shared/socket-protocol';
 import Interactable from '../entities/interactables/interactable';
 import InteractionHandler from '../handlers/interaction-handler';
 import Entity from '../entities/entity';
@@ -14,6 +14,7 @@ import Bullet from '../entities/projectiles/bullet';
 import TreasureSystem from '../systems/treasure-system';
 import SpawnSystem from 'src/systems/spawn-system';
 import Matter from 'matter-js';
+import Treasure from 'src/entities/interactables/treasure';
 
 /**
  * Handles events affecting the player
@@ -69,7 +70,7 @@ export default class PlayerController {
 
 		if (dist < 50) {
 			const ship = interactable.parent as Ship;
-			if (!ship) return;
+
 			switch (interactable.type) {
 				case 'helm':
 					this.interactionHandler.handleHelmInteraction(player, ship, interactable as Helm);
@@ -80,6 +81,10 @@ export default class PlayerController {
 					break;
 				case 'ladder':
 					this.interactionHandler.handleLadderInteraction(player, ship, interactable as Ladder);
+					break;
+
+				case 'treasure':
+					this.interactionHandler.handleTreasureInteraction(player, interactable as Treasure);
 					break;
 				default:
 					return;
@@ -114,15 +119,12 @@ export default class PlayerController {
 		this.handleRespawn(player);
 		ship.markDirty();
 	}
-
 	handleDeath(player: Player): void {
-		// Start the player's respawn timer
-		if (!player.respawnStarted) {
-			player.respawnStarted = true;
-			player.respawnTimer = player.respawnTime; // reset
-		}
+		if (player.respawnStarted) return;
 
-		// Null player inputs so they can't keep moving
+		player.respawnStarted = true;
+		player.respawnTimer = player.respawnTime;
+
 		player.inputs = {
 			up: false,
 			down: false,
@@ -130,16 +132,15 @@ export default class PlayerController {
 			right: false,
 		};
 
-		player.deathNotified = false;
 		player.markDirty();
 	}
 
 	handleRespawn(player: Player): void {
 		player.respawnStarted = false;
 
-		// Put them back on their ship with full health
-		const ship = player.ship;
+		player.deathNotified = false;
 
+		const ship = player.ship;
 		player.parent = ship;
 		player.x = 0;
 		player.y = 0;
@@ -177,21 +178,13 @@ export default class PlayerController {
 		this.interactionHandler.handleRelease(player, ship, interactable);
 	}
 
-	handleDig(player: Player, data: DigData) {
-		if (data.mode === 'start') {
-			this.treasureSystem.beginDig(player);
-		} else if (data.mode === 'hit') {
-			this.treasureSystem.submitDigHit(player, data.sliderPosition ?? 0);
-		}
-	}
-
-	handleTreasureInteract(player: Player) {
-		this.treasureSystem.interact(player);
+	handleDig(player: Player) {
+		this.treasureSystem.hit(player);
 	}
 
 	handleGunFire(player: Player) {
 		// Wait until reloaded
-		if (!player || player.isCarrying || !player.isReloaded) return;
+		if (!player || player.carrying || !player.isReloaded) return;
 
 		// Reset reload timer
 		player.reloadTimer = player.reloadTime;

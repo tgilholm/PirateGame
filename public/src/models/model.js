@@ -47,7 +47,6 @@ export default class Model extends Phaser.GameObjects.Container {
 	 */
 	sync(data) {
 		if (data.teleport) {
-			console.log(data);
 			this.x = data.x;
 			this.y = data.y;
 			this.target.x = data.x;
@@ -65,6 +64,7 @@ export default class Model extends Phaser.GameObjects.Container {
 		if (data.health !== undefined) this.health = data.health;
 		if (data.maxHealth !== undefined) this.maxHealth = data.maxHealth;
 		if (data.teleport !== undefined) this.teleport = data.teleport;
+		if (!data.teleport) this.teleport = false;
 
 		// Snap on first packet
 		if (!this.initialised) {
@@ -116,7 +116,10 @@ export default class Model extends Phaser.GameObjects.Container {
 	 */
 	interpPosition(deltaTime, lerp) {
 		// Extrapolate expected position using velocity and time
-		if (this.teleport) return;
+		if (this.teleport) {
+			this.x = this.target.x;
+			this.y = this.target.y;
+		}
 		const predictedX = this.target.x + this.velocity.x * deltaTime;
 		const predictedY = this.target.y + this.velocity.y * deltaTime;
 

@@ -64,7 +64,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		const delta = this.scene.game.loop.delta;
 
-		//send diggame packets to server
+		//send dig game packets to server
 		if (this.digMinigame) {
 			this.digMinigame.update(delta / 1000);
 		}
@@ -89,11 +89,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		let nearestDist = Infinity;
 		const now = Date.now();
 		this.models.forEach((entity, id) => {
-			// if (entity.isPredicted && now - entity.spawnTime > 150) {
-			//     entity.destroy();
-			//     this.models.delete(id);
-			// }
-
 			if (entity === this.localPlayer) {
 				entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
 			}
@@ -102,8 +97,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			if (entity.isInteractable && entity instanceof InteractableModel) {
 				const dist = this.getDistanceToInteractable(this.localPlayer, entity);
 				if (dist < nearestDist) {
-					nearestDist = dist;
-					closest = { entity, dist };
+					if (entity.id !== this.localPlayer.carryingId) {
+						nearestDist = dist;
+						closest = { entity, dist };
+					}
 				}
 			}
 
@@ -161,15 +158,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	 * @param {Object} data the data from the server
 	 */
 	onDeltaSync(data) {
-		// Kill old predicted projectiles
-		// const now = Date.now();
-		// this.models.forEach((entity, id) => {
-		//     if (entity.isPredicted && now - entity.spawnTime > 300) {
-		//         entity.destroy();
-		//         this.models.delete(id);
-		//     }
-		// });
-
 		if (data.allPlayers) {
 			this.allPlayers = data.allPlayers;
 			this.playerListDirty = true;
@@ -211,18 +199,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		let model = this.models.get(data.id);
 
 		if (!model) {
-			// if (data.type === 'bullet' || data.type === 'cannonball') {
-			//     const predicted = this.findMatchingPrediction(data.x, data.y);
-			//     if (predicted) {
-			//         this.models.delete(predicted.id);
-			//         predicted.id = data.id;
-			//         predicted.isPredicted = false;
-			//         this.models.set(data.id, predicted);
-			//         predicted.sync(data);
-			//         return;
-			//     }
-			// }
-
 			model = this.modelFactory.create(data);
 			if (!model) return;
 			this.models.set(data.id, model);
@@ -230,24 +206,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		// @ts-ignore reparent the player if they left a ship
 		if (data.type === 'player') this.handleReparent(model, data);
+		if (data.type === 'treasure') this.handleTreasureReparent(model, data);
 		model.sync(data);
 	}
-
-	// findMatchingPrediction(x, y) {
-	//     let closest = null;
-	//     let closestDist = 150; // max snap distance in pixels — tune this
-
-	//     this.models.forEach(model => {
-	//         if (!model.isPredicted) return;
-	//         const dist = Phaser.Math.Distance.Between(model.x, model.y, x, y);
-	//         if (dist < closestDist) {
-	//             closestDist = dist;
-	//             closest = model;
-	//         }
-	//     });
-
-	//     return closest;
-	// }
 
 	/**
 	 * Applies a delta sync to the model specified in the data from the server.
@@ -261,7 +222,15 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.handleReparent(model, delta);
 		}
 
+		if (model.entityType === 'treasure' && delta.parentId !== undefined) {
+			this.handleTreasureReparent(model, delta); // <--
+		}
+
 		model.sync(delta);
+
+		if (delta.id === this.playerId && delta.activeMinigame !== undefined) {
+			this.digMinigame.sync(delta.activeMinigame);
+		}
 
 		if (delta.components !== undefined && delta.id === 'ship_' + this.playerId) {
 			this.emit('localShipUpdated');
@@ -323,13 +292,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.onFullSync(data); // get everything
 		});
 
-		this.network.on(ServerEvent.DIG_MINIGAME_START, (payload) => {
-			console.log('[Client] DIG_MINIGAME_START received', payload);
-			this.digMinigame.start(payload);
-		});
-
-		this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
-			console.log('[Client] DIG_MINIGAME_RESULT received', success);
+		this.network.on(ServerEvent.DIG_MINIGAME_RESULT, () => {
 			this.digMinigame.stop();
 		});
 
@@ -337,13 +300,13 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
 		this.network.on(ServerEvent.DEAD, (id) => {
-			if ((id = this.localPlayer.id)) {
+			if (id === this.localPlayer.id) {
 				this.emit('playerDied');
 			}
 		});
 
 		this.network.on(ServerEvent.SUNK, (id) => {
-			if ((id = this.localPlayer.id)) {
+			if (id === this.localPlayer.id) {
 				this.emit('shipSunk');
 			}
 		});
@@ -353,10 +316,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			if (target?.entity) {
 				const closest = target.entity;
 
-				if (closest.type === 'shop') {
-					this.emit('openShop');
-					return;
-				}
 				this.network.sendInteract({
 					targetId: closest.id,
 					targetType: closest.type,
@@ -365,21 +324,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			}
 		});
 
-		this.input.on('treasureInteract', () => {
-			this.network.sendTreasureInteract();
-		});
-
-		this.input.on('dig', () => {
-			if (this.digMinigame?.active) {
-				this.network.sendDigHit(this.digMinigame.getSliderPosition());
-			} else {
-				this.network.sendDigStart();
-			}
-		});
-		// Send the one-off events directly to the server
 		this.input.on('fire', () => {
+			// the spacebar fires both the dig minigame and the gun
 			this.network.sendFire();
-			//this.spawnPredictedProjectile();
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
@@ -391,59 +338,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.scene.goToStart();
 		});
 	}
-
-	// spawnPredictedProjectile() {
-	//     const player = this.localPlayer;
-	//     if (!player) return;
-
-	//     const cam = this.scene.cameras.main;
-	//     const mouseWorldX = this.scene.input.mousePointer.x / cam.zoom + cam.scrollX;
-	//     const mouseWorldY = this.scene.input.mousePointer.y / cam.zoom + cam.scrollY;
-	//     const playerPos = player.worldPos;
-	//     const freshAimAngle = Math.atan2(mouseWorldY - playerPos.y, mouseWorldX - playerPos.x);
-
-	//     let worldAngle, spawnX, spawnY;
-
-	//     if (player.isUsingCannon) {
-	//         const cannon = [...this.interactables].find(i => i.type === 'cannon' && i.userId === player.id);
-	//         if (!cannon || cannon.reloadTimer > 0) return;
-
-	//         const ship = this.models.get(player.parentId);
-	//         worldAngle = (ship?.target.r ?? 0) + cannon.target.r;
-
-	//         const pos = cannon.worldPos;
-	//         spawnX = pos.x + Math.cos(worldAngle) * 20;
-	//         spawnY = pos.y + Math.sin(worldAngle) * 20;
-	//     } else {
-	//         if (player.reloadTimer > 0) return;
-	//         worldAngle = freshAimAngle;
-	//         spawnX = player.gun.x;
-	//         spawnY = player.gun.y;
-	//     }
-
-	//     const speed = 600;
-	//     const model = this.modelFactory.createProjectile({
-	//         id: `predicted_${Date.now()}`,
-	//         x: spawnX,
-	//         y: spawnY,
-	//         r: worldAngle,
-	//         type: player.isUsingCannon ? 'cannonball' : 'bullet'
-	//     });
-
-	//     model.velocity.x = Math.cos(worldAngle) * speed;
-	//     model.velocity.y = Math.sin(worldAngle) * speed;
-
-	//     if (player.isUsingCannon) {
-	//         const ship = this.models.get(player.parentId);
-	//         model.velocity.x += ship?.velocity.x ?? 0;
-	//         model.velocity.y += ship?.velocity.y ?? 0;
-	//     }
-
-	//     model.isPredicted = true;
-	//     model.initialised = true;
-	//     model.spawnTime = Date.now();
-	//     this.models.set(model.id, model);
-	// }
 
 	/**
 	 * Handle moving a player into a ship object and vice versa
@@ -468,6 +362,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		// Snap interpolation targets so movement feels instant on reparent
 		if (data.x !== undefined) player.target.x = data.x;
 		if (data.y !== undefined) player.target.y = data.y;
+	}
+
+	handleTreasureReparent(treasure, data) {
+		const newParentId = data.parentId ?? null;
+		if (treasure.parentId === newParentId) return;
+
+		const ship = newParentId ? this.models.get(newParentId) : null;
+
+		if (ship) {
+			ship.add(treasure); // local coords
+		} else {
+			this.scene.add.existing(treasure); // back to world space
+		}
+
+		treasure.parentId = newParentId;
 	}
 
 	/**

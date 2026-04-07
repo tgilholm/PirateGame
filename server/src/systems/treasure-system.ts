@@ -1,429 +1,189 @@
 import EntityRegistry from '../engine/entity-registry';
 import TerrainMap from '../engine/terrain-map';
 import EntityFactory from '../entities/entity-factory';
-import Treasure from '../entities/treasure';
+import Treasure from '../entities/interactables/treasure';
 import Player from '../entities/player';
 import Ship from '../entities/ship';
 import { BaseSystem } from './base-system';
-import { EntityConfig } from '../types';
 import Shop from '../entities/shop';
-
-type WorldPoint = { x: number; y: number };
-
-type DigUiPayload = {
-	treasureId: string;
-	digSpeed: number;
-	successZoneStart: number;
-	successZoneSize: number;
-	durationMs: number;
-};
-
-type DigSession = {
-	playerId: string;
-	treasureId: string;
-	startedAt: number;
-	durationMs: number;
-};
-
-type HoleSpawnBlock = {
-	x: number;
-	y: number;
-	expiresAt: number;
-};
-
-export interface TreasureSystemOptions {
-	spawnIntervalMs: number;
-	maxTreasures: number;
-	initialSpawnCount: number;
-	pickupRadius: number;
-	digRadius: number;
-	depositRadius: number;
-	gridSize: number;
-	minGold: number;
-	maxGold: number;
-	spawnPadding: number;
-	holeRespawnBlockMs: number;
-	holeRespawnBlockRadius: number;
-}
-
-const DEFAULTS: TreasureSystemOptions = {
-	spawnIntervalMs: 1000,
-	maxTreasures: 50,
-	initialSpawnCount: 50,
-	pickupRadius: 55,
-	digRadius: 55,
-	depositRadius: 90,
-	gridSize: 128,
-	minGold: 10,
-	maxGold: 75,
-	spawnPadding: 64,
-	holeRespawnBlockMs: 2 * 60 * 1000,
-	holeRespawnBlockRadius: 64,
-};
+import { TreasureState } from '@shared/socket-protocol';
+import Entity from '../entities/entity';
+import SpatialGrid from '../application/spatial-grid';
+import DigMinigame from '../minigames/dig-minigame';
 
 export default class TreasureSystem implements BaseSystem {
-	private readonly options: TreasureSystemOptions;
-	private timeSinceSpawnMs = 0;
+	private spawnTime = 5000; // spawn treasure every 5s
+	private spawnTimer = 0;
 	private nextTreasureId = 1;
-	private activeDigSessions = new Map<string, DigSession>();
-	private recentHoleBlocks: HoleSpawnBlock[] = [];
+	private onResult?: (player: Player, payload: { success: boolean }) => void;
+	private onRemove?: (entity: Entity) => void;
 
-	private onDigMinigameStart?: (playerId: string, payload: DigUiPayload) => void;
+	private minGold: number = 10;
+	private maxGold: number = 75;
+	private maxTreasures: number = 10;
 
-	private onDigMinigameResult?: (playerId: string, payload: { success: boolean }) => void;
+	// maps dig events to players via their id
+	private digSessions = new Map<string, DigMinigame>();
+	private holes: Treasure[] = [];
 
 	constructor(
 		private registry: EntityRegistry,
 		private entityFactory: EntityFactory,
 		private terrainMap: TerrainMap,
-		private entityConfig: EntityConfig,
-		options?: Partial<TreasureSystemOptions>
+		private grid: SpatialGrid,
+		onMinigameResult: (player: Player, result: { success: boolean }) => void,
+		onEntityRemoved: (entity: Entity) => void
 	) {
-		this.options = { ...DEFAULTS, ...options };
-		this.spawnInitialTreasures();
+		this.onResult = onMinigameResult;
+		this.onRemove = onEntityRemoved;
 	}
 
 	update(dt: number): void {
-		this.timeSinceSpawnMs += dt * 1000;
+		this.spawnTimer += dt * 1000;
 
-		this.pruneExpiredHoleBlocks();
-		this.pruneExpiredDigSessions();
-
-		if (this.timeSinceSpawnMs >= this.options.spawnIntervalMs) {
-			this.timeSinceSpawnMs = 0;
-			this.trySpawnTreasure();
-		}
-
+		this.pruneExpired();
+		this.spawnTreasure();
+		this.updateMinigames(dt);
 		this.resolveOpeningTreasures();
 		this.updateCarriedTreasures();
 		this.resolveDeposits();
-		this.resolveExpiredHoles();
 	}
 
-	public bindUiEvents(
-		onStart: (playerId: string, payload: DigUiPayload) => void,
-		onResult: (playerId: string, payload: { success: boolean }) => void
-	) {
-		this.onDigMinigameStart = onStart;
-		this.onDigMinigameResult = onResult;
+	public createSession(player: Player, treasure: Treasure) {
+		// Only allow if non-existent
+		if (!this.digSessions.has(player.id)) {
+			const size = 0.4;
+			const max = 1.0 - size; // don't go off the side
+
+			const randomStart = Math.random() * max;
+			const initialPos = Math.random();
+
+			this.digSessions.set(player.id, new DigMinigame(3000, treasure, size, randomStart, initialPos));
+			treasure.state = TreasureState.DIGGING;
+			player.isDigging = true;
+		}
 	}
 
-	/**
-	 * One-button interaction:
-	 * - carrying chest => drop it
-	 * - near dug-up chest => pick it up
-	 * - otherwise => try to dig buried treasure
-	 */
-	public interact(player: Player): boolean {
-		if (player.isCarrying) {
-			return this.dropTreasure(player);
+	public deleteSession(player: Player) {
+		if (this.digSessions.has(player.id)) {
+			this.digSessions.delete(player.id);
 		}
-
-		if (this.tryPickupTreasure(player)) {
-			return true;
-		}
-
-		return this.beginDig(player);
 	}
 
-	public beginDig(player: Player): boolean {
-		if (player.isCarrying) return false;
-		if (this.activeDigSessions.has(player.id)) return false;
+	public hit(player: Player) {
+		const session = this.digSessions.get(player.id);
+		if (!session) return; // must be actively digging
 
-		const playerPos = this.getWorldPosition(player);
-		const treasures = this.registry.getByType('treasure') as Treasure[];
+		const { sliderPosition, successZoneSize, successZoneStart } = session;
 
-		let nearest: Treasure | null = null;
-		let nearestDistSq = this.options.digRadius * this.options.digRadius;
-
-		for (const treasure of treasures) {
-			if (treasure.state !== 'buried') continue;
-
-			const dx = playerPos.x - treasure.x;
-			const dy = playerPos.y - treasure.y;
-			const distSq = dx * dx + dy * dy;
-
-			if (distSq <= nearestDistSq) {
-				nearest = treasure;
-				nearestDistSq = distSq;
-			}
-		}
-
-		if (!nearest) return false;
-
-		const durationMs = 10000;
-		this.activeDigSessions.set(player.id, {
-			playerId: player.id,
-			treasureId: nearest.id,
-			startedAt: Date.now(),
-			durationMs,
-		});
-
-		const normalized =
-			(nearest.goldValue - this.options.minGold) /
-			Math.max(1, this.options.maxGold - this.options.minGold);
-
-		const digSpeed = 2.5 + normalized * 4.0;
-		const successZoneSize = 0.24 - normalized * 0.1;
-		const successZoneStart = Math.random() * (1 - successZoneSize);
-
-		this.onDigMinigameStart?.(player.id, {
-			treasureId: nearest.id,
-			digSpeed,
-			successZoneStart,
-			successZoneSize,
-			durationMs,
-		});
-
-		(nearest as any).digSpeed = digSpeed;
-		(nearest as any).successZoneStart = successZoneStart;
-		(nearest as any).successZoneSize = successZoneSize;
-		nearest.markDirty();
-
-		return true;
-	}
-
-	public submitDigHit(player: Player, sliderPosition: number): boolean {
-		const session = this.activeDigSessions.get(player.id);
-		if (!session) return false;
-
-		this.activeDigSessions.delete(player.id);
-
-		const treasure = this.registry.get(session.treasureId) as Treasure | null;
-		if (!treasure || treasure.state !== 'buried') {
-			this.onDigMinigameResult?.(player.id, { success: false });
-			return false;
-		}
-
-		const playerPos = this.getWorldPosition(player);
-		const dx = playerPos.x - treasure.x;
-		const dy = playerPos.y - treasure.y;
-		const distSq = dx * dx + dy * dy;
-
-		if (distSq > this.options.digRadius * this.options.digRadius) {
-			this.onDigMinigameResult?.(player.id, { success: false });
-			return false;
-		}
-
-		const zoneStart = (treasure as any).successZoneStart ?? 0.4;
-		const zoneSize = (treasure as any).successZoneSize ?? 0.2;
-		const zoneEnd = zoneStart + zoneSize;
-
-		const success = sliderPosition >= zoneStart && sliderPosition <= zoneEnd;
-
-		if (success) {
-			treasure.state = 'opening';
-			treasure.openedAt = Date.now();
-			treasure.carriedByPendingPlayerId = player.id;
-			treasure.markDirty();
-
-			this.onDigMinigameResult?.(player.id, { success: true });
-			return true;
-		}
-
-		this.onDigMinigameResult?.(player.id, { success: false });
-		return false;
-	}
-
-	public tryPickupTreasure(player: Player): boolean {
-		if (player.isCarrying) return false;
-
-		const playerPos = this.getWorldPosition(player);
-		const treasures = this.registry.getByType('treasure') as Treasure[];
-
-		let nearest: Treasure | null = null;
-		let nearestDistSq = this.options.pickupRadius * this.options.pickupRadius;
-
-		for (const treasure of treasures) {
-			if (treasure.state !== 'dugup' && treasure.state !== 'loose') continue;
-
-			const worldPos = treasure.getChestShipPos();
-			const dx = playerPos.x - worldPos.x;
-			const dy = playerPos.y - worldPos.y;
-			const distSq = dx * dx + dy * dy;
-
-			if (distSq <= nearestDistSq) {
-				nearest = treasure;
-				nearestDistSq = distSq;
-			}
-		}
-
-		if (!nearest) return false;
-
-		if (nearest.state === 'dugup') {
-			const worldPos = nearest.getChestShipPos();
-			const holeId = `treasure_hole_${this.nextTreasureId++}`;
-			this.entityFactory.createTreasure(
-				holeId,
-				worldPos.x,
-				worldPos.y,
-				0,
-				'hole',
-				0,
-				null,
-				0,
-				0,
-				0
-			);
-			const hole = this.registry.get(holeId) as Treasure | null;
-			if (hole) {
-				hole.holeExpiresAt = Date.now() + 5 * 60 * 1000;
-				hole.markDirty();
-			}
-		}
-		nearest.state = 'carried';
-		nearest.carrierId = player.id;
-		nearest.carriedByPendingPlayerId = null;
-		nearest.openedAt = null;
-		nearest.parent = null;
-		nearest.markDirty();
-
-		player.isCarrying = true;
-		player.carryingTreasureId = nearest.id;
+		player.activeMinigame = null;
 		player.markDirty();
-		return true;
-	}
 
-	public dropTreasure(player: Player): boolean {
-		if (!player.isCarrying || !player.carryingTreasureId) return false;
+		if (sliderPosition >= successZoneStart && sliderPosition <= successZoneStart + successZoneSize) {
+			this.onResult?.(player, { success: true });
 
-		const treasure = this.registry.get(player.carryingTreasureId) as Treasure | null;
-		if (!treasure) {
-			player.isCarrying = false;
-			player.carryingTreasureId = null;
-			player.markDirty();
-			return false;
-		}
-
-		const pos = this.getWorldPosition(player);
-		const angle = typeof player.aimAngle === 'number' ? player.aimAngle : 0;
-
-		// Must be larger than playerRadius  chest obstacle radius
-		const playerRadius = this.entityConfig.player.radius ?? 16;
-		const chestRadius = 20;
-		const dropDistance = playerRadius + chestRadius + 8;
-
-		const worldDropX = pos.x + Math.cos(angle) * dropDistance;
-		const worldDropY = pos.y + Math.sin(angle) * dropDistance;
-
-		treasure.state = 'loose';
-		treasure.carrierId = null;
-		treasure.carriedByPendingPlayerId = null;
-		treasure.openedAt = null;
-
-		//handles chest position when dropped on ship
-		if (player.parent instanceof Ship) {
-			// Parent the chest to the ship so it moves with it
-			const ship = player.parent as Ship;
-			const local = ship.worldToLocal(worldDropX, worldDropY);
-			// If aimed position is inside the hull, push outward to the edge
-			treasure.x = local.x;
-			treasure.y = local.y;
-			treasure.parent = ship;
+			session.treasure.state = TreasureState.OPENING;
+			session.treasure.openedAt = Date.now();
+			session.treasure.markDirty();
 		} else {
-			treasure.x = worldDropX;
-			treasure.y = worldDropY;
-			treasure.parent = null;
+			this.onResult?.(player, { success: false });
+			session.treasure.state = TreasureState.BURIED;
 		}
 
-		treasure.markDirty();
-		player.isCarrying = false;
-		player.carryingTreasureId = null;
-		player.markDirty();
-
-		return true;
+		this.digSessions.delete(player.id);
+		player.isDigging = false;
+		session.treasure.user = null;
 	}
 
-	public dropTreasureOnDeath(player: Player): boolean {
-		return this.dropTreasure(player);
-	}
-
-	private spawnInitialTreasures(): void {
-		const target = this.options.initialSpawnCount || 100;
-		let spawned = 0;
-
-		for (let i = 0; i < target; i++) {
-			const success = this.spawnOneTreasure();
-			if (!success) {
-				console.warn(
-					`[TreasureSystem] Only spawned ${spawned}/${target} initial treasures.\nNo more valid spawn positions found.`
-				);
-				break;
-			}
-			spawned++;
-		}
-
-		console.log(`[TreasureSystem] Spawned ${spawned} initial treasures`);
-	}
-
-	private trySpawnTreasure(): void {
-		const activeTreasures = this.registry.getByType('treasure');
-		if (activeTreasures.length >= this.options.maxTreasures) return;
-
-		this.spawnOneTreasure();
-	}
-
-	private pruneExpiredDigSessions(): void {
+	public createHole(treasure: Treasure) {
 		const now = Date.now();
 
-		for (const [playerId, session] of this.activeDigSessions) {
-			if (now - session.startedAt >= session.durationMs) {
-				this.activeDigSessions.delete(playerId);
-				this.onDigMinigameResult?.(playerId, { success: false });
-			}
+		// Treasure has just been collected
+		const hole = this.entityFactory.createTreasure(`treasure_hole_${now}`, treasure.x, treasure.y, 0);
+
+		// Manually set state
+		hole.state = TreasureState.HOLE;
+		hole.expiresAt = now + 60 * 1000; // 1 minute from now
+		this.holes.push(hole);
+		treasure.pendingTeleport = true;
+		hole.markDirty();
+	}
+
+	private spawnTreasure() {
+		const treasureCount = this.registry.getByType('treasure').length;
+
+		// only check if timer expired
+		if (this.spawnTimer < this.spawnTime) return;
+		this.spawnTimer = 0;
+
+		if (treasureCount < this.maxTreasures) {
+			const point = this.findSpawnPoint();
+			const max = this.maxGold;
+			const min = this.minGold;
+			const value = Math.floor(Math.random() * (max - min + 1)) + min;
+			const id = `treasure_${this.nextTreasureId++}`;
+
+			if (!point) return;
+			this.entityFactory.createTreasure(id, point.x, point.y, value);
 		}
 	}
 
-	private spawnOneTreasure(): boolean {
-		const point = this.findSpawnPoint();
-		if (!point) return false;
+	private pruneExpired() {
+		const now = Date.now();
 
-		const goldValue = this.randomInt(this.options.minGold, this.options.maxGold);
-		const id = `treasure_${this.nextTreasureId++}`;
+		for (const [id, session] of this.digSessions) {
+			if (now - session.startedAt >= session.duration) {
+				this.digSessions.delete(id);
 
-		const normalized =
-			(goldValue - this.options.minGold) /
-			Math.max(1, this.options.maxGold - this.options.minGold);
+				const player = this.registry.get<Player>(id);
 
-		const digSpeed = 0.8 + normalized * 2.2;
-		const successZoneSize = 0.22 - normalized * 0.1;
-		const successZoneStart = Math.random() * (1 - successZoneSize);
+				if (player) {
+					this.onResult?.(player, { success: false });
+					player.activeMinigame = null;
+				}
+			}
+		}
 
-		this.entityFactory.createTreasure(
-			id,
-			point.x,
-			point.y,
-			goldValue,
-			'buried',
-			0,
-			null,
-			digSpeed,
-			successZoneStart,
-			successZoneSize
-		);
+		const expired = this.holes.filter((hole) => hole.expiresAt <= now);
+		expired.forEach((hole) => this.onRemove?.(hole));
+		this.holes = this.holes.filter((hole) => hole.expiresAt > now); // remove also from spatial grid via callback
+	}
 
-		return true;
+	private updateMinigames(dt: number) {
+		for (const [playerId, session] of this.digSessions) {
+			session.update(dt);
+
+			const player = this.registry.get<Player>(playerId);
+
+			if (player) {
+				// Add to the player's "personalised packet"
+				player.activeMinigame = session;
+				player.markDirty();
+			}
+		}
 	}
 
 	private resolveOpeningTreasures(): void {
 		const treasures = this.registry.getByType('treasure') as Treasure[];
 
 		for (const treasure of treasures) {
-			if (treasure.state !== 'opening') continue;
+			if (treasure.state !== TreasureState.OPENING) continue;
 			if (!treasure.openedAt) continue;
 			if (Date.now() - treasure.openedAt < 1200) continue;
 
-			treasure.state = 'dugup';
+			treasure.state = TreasureState.DUGUP;
 			treasure.openedAt = null;
-			treasure.carrierId = null;
-			treasure.carriedByPendingPlayerId = null;
+			treasure.user = null;
 			treasure.markDirty();
 
 			// Shove any player standing on the hole outward
-			const players = this.registry.getByType('player') as Player[];
+			const playerIds = this.grid.getNearby(treasure.x, treasure.y);
 			const shoveRadius = 35;
 
-			for (const player of players) {
+			for (const id of playerIds) {
+				const player = this.registry.get<Player>(id);
+				if (!player) continue;
+
 				const pos = this.getWorldPosition(player);
 				const dx = pos.x - treasure.x;
 				const dy = pos.y - treasure.y;
@@ -444,12 +204,12 @@ export default class TreasureSystem implements BaseSystem {
 		const treasures = this.registry.getByType('treasure') as Treasure[];
 
 		for (const treasure of treasures) {
-			if (treasure.state !== 'carried' || !treasure.carrierId) continue;
+			if (treasure.state !== TreasureState.CARRIED || !treasure.user) continue;
 
-			const player = this.registry.get(treasure.carrierId) as Player | null;
+			const player = treasure.user;
 			if (!player) {
-				treasure.state = 'loose';
-				treasure.carrierId = null;
+				treasure.state = TreasureState.DROPPED;
+				treasure.user = null;
 				treasure.markDirty();
 				continue;
 			}
@@ -475,81 +235,64 @@ export default class TreasureSystem implements BaseSystem {
 		const shops = this.registry.getByType('shop') as Shop[];
 
 		for (const player of players) {
-			if (!player.isCarrying || !player.carryingTreasureId) continue;
+			if (!player.carrying) continue;
 			const canDeposit = shops.some((shop) => shop.canInteract(player));
 			if (!canDeposit) continue;
 
-			const treasure = this.registry.get(player.carryingTreasureId) as Treasure | null;
+			const treasure = this.registry.get(player.carrying.id) as Treasure | null;
 
 			if (!treasure) {
-				player.isCarrying = false;
-				player.carryingTreasureId = null;
+				player.carrying = null;
 				player.markDirty();
 				continue;
 			}
 
-			if (treasure.state !== 'carried') {
-				player.isCarrying = false;
-				player.carryingTreasureId = null;
+			if (treasure.state !== TreasureState.CARRIED) {
+				player.carrying = null;
 				player.markDirty();
 				continue;
 			}
 
 			player.gold += treasure.goldValue;
-			player.isCarrying = false;
-			player.carryingTreasureId = null;
+			player.carrying = null;
 			player.markDirty();
 
 			this.registry.delete(treasure.id);
 		}
 	}
 
-	private findSpawnPoint(): WorldPoint | null {
+	private findSpawnPoint(): { x: number; y: number } | undefined {
 		const spawnTiles = this.terrainMap.getTileset('treasure-spawns');
 
 		if (spawnTiles.length === 0) {
 			console.warn('[TreasureSystem] No treasure-spawns tiles found in tilemap!');
-			return null;
+			return undefined;
 		}
 
 		// Shuffle attempts to avoid always picking the same tiles
 		const shuffled = [...spawnTiles].sort(() => Math.random() - 0.5);
 
 		for (const tile of shuffled) {
-			const point: WorldPoint = { x: tile.x, y: tile.y };
+			const point = { x: tile.x, y: tile.y };
 
-			if (this.isInsideShip(point)) continue;
-			if (this.isTooCloseToTreasure(point)) continue;
-			if (this.isBlockedByRecentHole(point)) continue;
+			if (this.isBlocked(point)) continue;
 
 			return point;
 		}
 
-		return null;
+		return undefined;
 	}
 
-	private isInsideShip(point: WorldPoint): boolean {
-		const ships = this.registry.getByType('ship') as Ship[];
+	private isBlocked(point: { x: number; y: number }): boolean {
+		const radius = 50;
 
-		for (const ship of ships) {
-			const local = ship.worldToLocal(point.x, point.y);
-			if (ship.isInside(local.x, local.y, 0)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private isTooCloseToTreasure(point: WorldPoint): boolean {
-		const treasures = this.registry.getByType('treasure') as Treasure[];
-		const minDistance = this.options.gridSize * 0.25;
+		const treasures = this.registry.getByType<Treasure>('treasure');
 
 		for (const treasure of treasures) {
 			const dx = point.x - treasure.x;
 			const dy = point.y - treasure.y;
 
-			if (dx * dx + dy * dy < minDistance * minDistance) {
+			if (dx * dx + dy * dy < radius * radius) {
 				return true;
 			}
 		}
@@ -557,56 +300,12 @@ export default class TreasureSystem implements BaseSystem {
 		return false;
 	}
 
-	private isBlockedByRecentHole(point: WorldPoint): boolean {
-		const radiusSq = this.options.holeRespawnBlockRadius * this.options.holeRespawnBlockRadius;
-
-		for (const block of this.recentHoleBlocks) {
-			const dx = point.x - block.x;
-			const dy = point.y - block.y;
-
-			if (dx * dx + dy * dy < radiusSq) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private pruneExpiredHoleBlocks(): void {
-		const now = Date.now();
-		this.recentHoleBlocks = this.recentHoleBlocks.filter((block) => block.expiresAt > now);
-	}
-
-	private resolveExpiredHoles(): void {
-		const treasures = this.registry.getByType('treasure') as Treasure[];
-		const now = Date.now();
-
-		for (const treasure of treasures) {
-			if (treasure.state !== 'hole') continue;
-			if (!treasure.holeExpiresAt) continue;
-
-			if (now >= treasure.holeExpiresAt) {
-				this.recentHoleBlocks.push({
-					x: treasure.x,
-					y: treasure.y,
-					expiresAt: now + this.options.holeRespawnBlockMs,
-				});
-
-				this.registry.delete(treasure.id);
-			}
-		}
-	}
-
-	private getWorldPosition(player: Player): WorldPoint {
+	private getWorldPosition(player: Player): { x: number; y: number } {
 		if (!player.parent) {
 			return { x: player.x, y: player.y };
 		}
 
 		const ship = player.parent as Ship;
 		return ship.localToWorld(player.x, player.y);
-	}
-
-	private randomInt(min: number, max: number): number {
-		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 }

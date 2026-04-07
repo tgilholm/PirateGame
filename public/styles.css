@@ -101,13 +101,15 @@ input.formElement {
 	left: 0;
 }
 
-/* ---- Interaction prompt ---- */
-#interaction-prompt {
+#prompt-container {
 	position: fixed;
 	top: 16px;
 	left: 50%;
 	transform: translateX(-50%);
 	z-index: 1000;
+}
+
+.prompt {
 	background: rgba(13, 47, 79, 0.85);
 	border: 1px solid #ffffff88;
 	border-radius: 4px;

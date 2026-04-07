@@ -77,10 +77,6 @@ export default class NetworkManager {
 		this.sendAction({ type: ActionType.FIRE });
 	}
 
-	sendTreasureInteract() {
-		this.sendAction({ type: ActionType.TREASURE_INTERACT });
-	}
-
 	/**
 	 * Sends a request to upgrade a ship component
 	 * @param {string} componentKey the component to upgrade (e.g. "sails")
@@ -95,20 +91,6 @@ export default class NetworkManager {
 	 */
 	sendMessage(text) {
 		this.sendAction({ type: ActionType.MESSAGE, data: { text } });
-	}
-
-	sendDigStart() {
-		this.sendAction({
-			type: ActionType.DIG,
-			data: { mode: 'start' },
-		});
-	}
-
-	sendDigHit(sliderPosition) {
-		this.sendAction({
-			type: ActionType.DIG,
-			data: { mode: 'hit', sliderPosition },
-		});
 	}
 
 	sendRespawn() {

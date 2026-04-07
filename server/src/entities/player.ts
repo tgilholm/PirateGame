@@ -1,6 +1,8 @@
+import Minigame from 'src/minigames/minigame';
 import { PlayerConfig } from '../types';
 import Entity from './entity';
 import Cannon from './interactables/cannon';
+import Interactable from './interactables/interactable';
 import Ship from './ship';
 
 /**
@@ -11,8 +13,8 @@ export default class Player extends Entity {
 	username: string;
 	isSteering: boolean;
 	cannon: Cannon | null;
-	isCarrying: boolean;
-	carryingTreasureId: string | null = null;
+	carrying: Interactable | null = null;
+	isDigging: boolean = false;
 	ship: Ship; // the player's own ship
 	gold: number = 0;
 	inputs: {
@@ -24,6 +26,7 @@ export default class Player extends Entity {
 	aimAngle: number;
 	reloadTime: number = 1000;
 	reloadTimer: number = 0;
+	activeMinigame: Minigame | null = null;
 
 	respawnTime: number = 5000;
 	respawnTimer: number = 0;
@@ -48,8 +51,6 @@ export default class Player extends Entity {
 		this.ship = parent as Ship;
 		this.isSteering = false;
 		this.cannon = null; // not using cannon to start
-		this.isCarrying = false;
-		this.carryingTreasureId = null;
 
 		// Where the player is aiming
 		this.aimAngle = 0;
@@ -95,10 +96,10 @@ export default class Player extends Entity {
 			isUsingCannon: !!this.cannon, // convert to true/false
 			reloadTimer: this.reloadTimer,
 			reloadTime: this.reloadTime,
-			isCarrying: this.isCarrying,
-			carryingTreasureId: this.carryingTreasureId,
+			carryingId: this.carrying?.id ?? null, // send ID only, let client do the lifting
 			respawnTimer: this.respawnTimer,
 			shipId: this.ship.id,
+			activeMinigame: this.activeMinigame ? this.activeMinigame.serialise() : null,
 		};
 	}
 }

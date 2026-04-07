@@ -40,7 +40,6 @@ export default class ModelFactory {
 			case 'cannonball':
 				return this.createProjectile(data);
 			case 'treasure':
-				return this.createTreasure(data);
 			case 'cannon': // all interactables "fall through"
 			case 'helm':
 			case 'ladder':
@@ -90,18 +89,6 @@ export default class ModelFactory {
 		return new ProjectileModel(this.scene, data.id, data.x, data.y, data.r ?? 0, data.type);
 	}
 
-	createTreasure(data) {
-		return new TreasureModel(
-			this.scene,
-			data.id,
-			data.x,
-			data.y,
-			data.state ?? 'buried',
-			data.digProgress ?? 0,
-			data.goldValue ?? 0
-		);
-	}
-
 	/**
 	 */
 	createInteractable(data) {
@@ -117,6 +104,9 @@ export default class ModelFactory {
 				break;
 			case 'ladder':
 				model = new LadderModel(this.scene, parent, data.id, data.x, data.y);
+				break;
+			case 'treasure':
+				model = new TreasureModel(this.scene, data.id, data.x, data.y, data.state);
 				break;
 			default:
 				console.warn(`Interactable ${data.id} is not recognised as an interactable type`);
