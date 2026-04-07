@@ -57,7 +57,7 @@ input.formElement {
 
 #minimap-container {
 	position: absolute;
-	display: flex;
+	display: none;
 	top: 16px;
 	left: 16px;
 	z-index: 1000;
@@ -79,6 +79,7 @@ input.formElement {
 	width: 100%;
 	height: 100%;
 	image-rendering: pixelated;
+	opacity: 0.75;
 }
 
 .minimap-canvas {

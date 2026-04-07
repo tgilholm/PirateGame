@@ -86,6 +86,9 @@ export default class PlayerController {
 				case 'treasure':
 					this.interactionHandler.handleTreasureInteraction(player, interactable as Treasure);
 					break;
+
+				case 'shop':
+					break;
 				default:
 					return;
 			}

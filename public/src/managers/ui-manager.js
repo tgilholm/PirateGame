@@ -31,6 +31,7 @@ export default class UIManager {
 		this.positionElement = document.getElementById('position');
 		this.shipPositionElement = document.getElementById('ship-position');
 		this.playerStats = document.getElementById('player-stats');
+		this.minimapContainer = document.getElementById('minimap-container');
 
 		// game
 		this.deathMessage = document.getElementById('death-screen');
@@ -42,7 +43,7 @@ export default class UIManager {
 		this.currentInteractable = null;
 
 		this.shopUI = new ShopUI(gameManager.network, gameManager);
-		gameManager.on('openShop', () => this.shopUI.open());
+		gameManager.on('openShop', () => this.shopUI.open()); // wot
 
 		this.lastGold = null;
 
@@ -63,6 +64,8 @@ export default class UIManager {
 			//@ts-ignore
 			minimapImage.src = mapSrc;
 		}
+
+		this.minimapContainer.style.display = 'flex'; // show
 	}
 
 	/**

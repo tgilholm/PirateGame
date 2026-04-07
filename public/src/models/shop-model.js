@@ -55,7 +55,7 @@ export default class ShopModel extends InteractableModel {
 		// Floating label above the circle
 		this.label = scene.add
 			.text(0, -radius - 6, 'Shop', {
-				fontSize: '12px',
+				fontSize: '16px',
 				fontFamily: 'Arial',
 				color: '#ffffff',
 				stroke: '#000000',

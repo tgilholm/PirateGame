@@ -36,7 +36,7 @@ export default class PlayerModel extends Model {
 		// Name text is not a child of the container- avoids counter-rotation logic
 		this.nameText = scene.add
 			.text(0, -50, '', {
-				fontSize: '12px',
+				fontSize: '16px',
 				fontFamily: 'Consolas',
 				color: '#ffffff',
 				backgroundColor: '#00000088',

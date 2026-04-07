@@ -306,15 +306,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
-		this.network.on(ServerEvent.DEAD, (id) => {
-			if (id === this.localPlayer.id) {
-				this.emit('playerDied');
-			}
-		});
-
 		this.network.on(ServerEvent.SUNK, (id) => {
 			if (id === this.localPlayer.id) {
-				this.emit('shipSunk');
+				this.emit('shipSunk'); // for displaying respawn dialog
 			}
 		});
 
