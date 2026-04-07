@@ -1,27 +1,4 @@
-﻿// MOVE TO SHARED
-const COMPONENTS = [
-	{ key: 'sails', name: 'Sails', description: 'Acceleration and max speed' },
-	{ key: 'cannons', name: 'Cannons', description: 'Damage, range and cannon count' },
-	{ key: 'head', name: 'Head', description: 'Ramming power' },
-	{ key: 'body', name: 'Body', description: 'Max HP and crew capacity' },
-	{ key: 'crowsNest', name: "Crow's Nest", description: 'Minimap range and vision' },
-	{ key: 'anchor', name: 'Anchor', description: 'Stop power and deploy time' },
-	{ key: 'rudder', name: 'Rudder', description: 'Turn speed and responsiveness' },
-	{ key: 'crew', name: 'Crew', description: 'Fire rate and cannon accuracy' },
-];
-
-const level_progression = ['LVL1', 'LVL2', 'LVL3'];
-
-// MOVE TO SHARED
-let componentsData = null;
-fetch('/jsons/components.json')
-	.then((r) => r.json())
-	.then((data) => {
-		componentsData = data.components;
-	})
-	.catch(() => {}); //
-
-export default class ShopUI extends Phaser.Events.EventEmitter {
+﻿export default class ShopUI extends Phaser.Events.EventEmitter {
 	constructor(gameManager) {
 		super();
 		this.gameManager = gameManager;
@@ -34,15 +11,14 @@ export default class ShopUI extends Phaser.Events.EventEmitter {
 		});
 
 		// Only update shop if actually inside it
-		this.gameManager.on('localShipUpdated', () => {});
-
-		//rebuilds the shop grid
 		this.gameManager.on('localShipUpdated', () => {
-			if (this.menuEl.style.display === 'block') {
-				const comps = this.gameManager.getLocalShipComponents();
-				if (comps && JSON.stringify(comps) !== JSON.stringify(this.lastComponents)) {
-					this.build(comps);
-				}
+			if (this.isVisible) this.refresh();
+		});
+
+		this.gameManager.on('localShipUpdated', () => {
+			const comps = this.gameManager.getLocalShipComponents();
+			if (comps && JSON.stringify(comps) !== JSON.stringify(this.lastComponents)) {
+				this.build(comps);
 			}
 		});
 

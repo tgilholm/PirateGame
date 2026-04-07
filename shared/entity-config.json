@@ -4,7 +4,7 @@
 		"runSpeed": 5,
 		"swimSpeed": 3,
 		"radius": 15,
-		"startingGold": 100000
+		"startingGold": 100
 	},
 	"ship": {
 		"maxHealth": 1000,
@@ -65,15 +65,6 @@
 			"weight": 450,
 			"frictionAir": 0.05
 		}
-	},
-	"shop": {
-		"id": "shop",
-		"type": "shop",
-		"usePrompt": "open shop",
-		"releasePrompt": "close shop",
-		"radius": 40,
-		"interactRange": 100,
-		"texture": "shop"
 	},
 	"npcShip": {
 		"maxHealth": 10000,
