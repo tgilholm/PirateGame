@@ -61,8 +61,6 @@
 					<img id="minimap" />
 					<canvas id="minimap-canvas"></canvas>
 				</div>
-				<div id="gold-counter" style="display: flex">Gold: 0</div>
-
 				<div class="game-stats" style="display: none">
 					<p id="fps-counter" style="color: green">FPS:</p>
 					<p id="model-counter" style="color: green">Nearby Models:</p>
@@ -73,14 +71,17 @@
 				</div>
 			</div>
 
+			<div class="right-panel" id="right-panel">
+				<!--Active Player Container-->
+				<div id="players-panel" style="display: none">
+					<div class="players-title">Players Online</div>
+					<ol id="players-list"></ol>
+				</div>
+				<div id="gold-counter">Gold: 0</div>
+			</div>
+
 			<!-- Shop overlay -->
 			<div id="shop-menu" style="display: none"></div>
-
-			<!--Active Player Container-->
-			<div id="players-panel" style="display: none">
-				<div class="players-title">Players Online</div>
-				<ol id="players-list"></ol>
-			</div>
 
 			<!-- Dig minigame UI -->
 			<div id="dig-minigame" style="display: none">

@@ -30,8 +30,13 @@ const config = {
 	},
 };
 
+const showDebug = false;
+
 // Get any files from the shared directory
 const entityConfig = await fetch('/shared/entity-config.json').then((r) => r.json());
-// @ts-ignore
+// @ts-ignore cheesing here
 window.entityConfig = entityConfig;
+
+//@ts-ignore more cheesing
+window.showDebug = showDebug;
 const game = new Phaser.Game(config);

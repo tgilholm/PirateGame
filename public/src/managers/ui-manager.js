@@ -14,8 +14,9 @@ export default class UIManager {
 	 * @param {GameManager} gameManager to access the state of the game
 	 * @param {Minimap} minimap
 	 * @param {Phaser.Tilemaps.Tilemap} map
+	 * @param {boolean} showDebug whether or not to show the fps counter, model count etc
 	 */
-	constructor(scene, gameManager, minimap, map) {
+	constructor(scene, gameManager, minimap, map, showDebug = false) {
 		this.scene = scene;
 		this.gameManager = gameManager;
 		this.minimap = minimap;
@@ -25,20 +26,30 @@ export default class UIManager {
 		this.releaseElement = document.getElementById('release-prompt');
 
 		// debug
+		this.gameStats = document.querySelector('.game-stats');
+		const display = showDebug ? 'block' : 'none';
+
+		if (this.gameStats instanceof HTMLElement) {
+			this.gameStats.style.display = display;
+		}
+
 		this.fpsCounter = document.getElementById('fps-counter');
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
 		this.positionElement = document.getElementById('position');
 		this.shipPositionElement = document.getElementById('ship-position');
 		this.playerStats = document.getElementById('player-stats');
-		this.minimapContainer = document.getElementById('minimap-container');
 
 		// game
 		this.deathMessage = document.getElementById('death-screen');
 		this.deathMessage.style.display = 'none';
 
 		// left panel
+		this.minimapContainer = document.getElementById('minimap-container');
+
+		// right panel
 		this.goldCounter = document.getElementById('gold-counter');
+		this.goldCounter.style.display = 'flex';
 
 		this.currentInteractable = null;
 
@@ -182,6 +193,26 @@ export default class UIManager {
 		}
 	}
 
+	/**
+	 * Takes a list of players and refreshes the "active player" list
+	 * @param {Object} allPlayers the list of players
+	 */
+	updatePlayersPanelDom(allPlayers) {
+		const panel = document.getElementById('players-panel');
+		const list = document.getElementById('players-list');
+		if (!panel || !list) return;
+		panel.style.display = 'block';
+		const sorted = [...allPlayers].sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+		list.innerHTML = sorted.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`).join('');
+	}
+
+	updateGoldCounter(amount) {
+		if (!this.goldCounter) return;
+		if (this.lastGold === amount) return;
+		this.goldCounter.textContent = `Gold: ${amount}`;
+		this.lastGold = amount;
+	}
+
 	showShipSunkMessage() {
 		this.deathMessage.style.display = 'flex';
 	}
@@ -209,25 +240,5 @@ export default class UIManager {
 		if (htmlElement.style.display !== 'block') {
 			htmlElement.style.display = 'block';
 		}
-	}
-
-	/**
-	 * Takes a list of players and refreshes the "active player" list
-	 * @param {Object} allPlayers the list of players
-	 */
-	updatePlayersPanelDom(allPlayers) {
-		const panel = document.getElementById('players-panel');
-		const list = document.getElementById('players-list');
-		if (!panel || !list) return;
-		panel.style.display = 'block';
-		const sorted = [...allPlayers].sort((a, b) => (a.username || '').localeCompare(b.username || ''));
-		list.innerHTML = sorted.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`).join('');
-	}
-
-	updateGoldCounter(amount) {
-		// if (!this.goldElement) return;
-		// if (this.lastGold === amount) return;
-		// this.goldElement.textContent = `Gold: ${amount}`;
-		// this.lastGold = amount;
 	}
 }

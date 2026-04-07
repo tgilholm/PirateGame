@@ -17,6 +17,11 @@ export class StartScene extends Phaser.Scene {
 			e.preventDefault();
 			this.goToMain();
 		});
+
+		// Resize the game if the window changes size
+		window.addEventListener('resize', () => {
+			this.scale.resize(window.innerWidth, window.innerHeight);
+		});
 	}
 
 	/**
@@ -66,10 +71,32 @@ export class StartScene extends Phaser.Scene {
 		});
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
 
-		// Resize the game if the window changes size
-		window.addEventListener('resize', () => {
-			this.scale.resize(window.innerWidth, window.innerHeight);
-		});
+		// Placeholder player sprite
+		const circle = this.make.graphics();
+		circle.fillStyle(0xff0000, 1);
+		circle.fillCircle(15, 15, 15);
+		circle.generateTexture('player_circle', 30, 30);
+		circle.destroy();
+
+		// Placeholder cannonball sprite
+		const ball = this.make.graphics();
+		ball.fillStyle(0x222222, 1);
+		ball.fillCircle(8, 8, 8);
+		ball.generateTexture('cannonball', 16, 16);
+		ball.destroy();
+
+		const proj = this.make.graphics();
+		proj.fillStyle(0x222222, 1);
+		proj.fillCircle(4, 4, 4);
+		proj.generateTexture('bullet', 8, 8);
+		proj.destroy();
+
+		// Placeholder NPC sprite
+		const square = this.make.graphics();
+		square.fillStyle(0x0000dd);
+		square.fillRect(0, 0, 30, 30);
+		square.generateTexture('npc_sprite', 30, 30);
+		square.destroy();
 	}
 
 	/**
