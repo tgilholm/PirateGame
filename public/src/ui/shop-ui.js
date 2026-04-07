@@ -61,7 +61,7 @@ export default class ShopUI {
 		this.gridEl = DomFactory.createElement('div', ['shop-grid']);
 		this.menuEl.appendChild(this.gridEl);
 
-		this.menuEl.appendChild(DomFactory.createButton('Close', () => this.close(), ['shop-close-btn']));
+		this.menuEl.appendChild(DomFactory.createButton('Close', () => this.close(), ['shop-close-button']));
 	}
 
 	//makes the shop overlay visible

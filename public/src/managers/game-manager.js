@@ -317,6 +317,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			if (target?.entity) {
 				const closest = target.entity;
 
+				// Shortcut interact, just open shop if close enough
+				// only upgrade packets are checked authoritatively
+				if (closest.type === 'shop') {
+					this.emit('openShop');
+				}
+
 				this.network.sendInteract({
 					targetId: closest.id,
 					targetType: closest.type,

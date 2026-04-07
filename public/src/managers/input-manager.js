@@ -40,7 +40,6 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 		scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			this.emit('zoom', deltaY);
 		});
-
 		const respawnButton = document.getElementById('restart-button');
 		const quitButton = document.getElementById('quit-button');
 		const visible = respawnButton.style.display !== 'none' && quitButton.style.display !== 'none';

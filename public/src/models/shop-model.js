@@ -44,6 +44,7 @@ export default class ShopModel extends InteractableModel {
 
 		// Shop body sprite
 		this.bodySprite = scene.add.sprite(0, 0, textureKey);
+		this.bodySprite.setDepth(999);
 		this.add(this.bodySprite);
 
 		// Interaction range marker (semi-transparent ring)

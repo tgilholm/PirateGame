@@ -1,5 +1,4 @@
 import GameManager from './game-manager.js';
-import ShopUI from '../ui/shop-ui.js';
 import ShipModel from '../models/ship-model.js';
 import Minimap from '../ui/minimap.js';
 
@@ -43,6 +42,8 @@ export default class UIManager {
 		// game
 		this.deathMessage = document.getElementById('death-screen');
 		this.deathMessage.style.display = 'none';
+		this.shopMenu = document.getElementById('shop-menu');
+		gameManager.on('openShop', () => (this.shopMenu.style.display = 'flex'));
 
 		// left panel
 		this.minimapContainer = document.getElementById('minimap-container');
@@ -53,8 +54,7 @@ export default class UIManager {
 
 		this.currentInteractable = null;
 
-		this.shopUI = new ShopUI(gameManager.network, gameManager);
-		gameManager.on('openShop', () => this.shopUI.open()); // wot
+		//this.shopUI = new ShopUI(gameManager.network, gameManager);
 
 		this.lastGold = null;
 
@@ -90,12 +90,11 @@ export default class UIManager {
 		this.updateGoldCounter(player.gold ?? 0);
 		this.updateInteractionPrompts(player, target);
 		this.updateDebugStats(player, target);
-		this.updateMinimap();
+		this.updateMinimap(player);
 	}
 
-	updateMinimap() {
-		if (!this.minimap || !this.gameManager.localPlayer) return;
-		const localPlayer = this.gameManager.localPlayer;
+	updateMinimap(localPlayer) {
+		if (!this.minimap) return;
 
 		this.minimap.clear();
 

@@ -24,7 +24,7 @@ export default class DomFactory {
 	/**
 	 * Creates styled button element
 	 * @param {string} label - Button text content
-	 * @param {Function} onClick - Click event handler
+	 * @param {PointerEvent} onClick - Click event handler
 	 * @param {string[]} [extraClasses] - Additional CSS classes to add
 	 * @returns {HTMLButtonElement}
 	 */
@@ -33,25 +33,6 @@ export default class DomFactory {
 		btn.textContent = label;
 		btn.addEventListener('click', onClick);
 		return btn;
-	}
-
-	/**
-	 * creates and appends minimap and marker canvas into container element, returns references to both
-	 * @param {HTMLElement} containerEl - The element to populate (e.g. #minimap-container)
-	 * @param {string} imgSrc - src attribute for the map image
-	 * @returns {{ img: HTMLImageElement, canvas: HTMLCanvasElement }}
-	 */
-	static createMinimapContent(containerEl, imgSrc) {
-		containerEl.innerHTML = '';
-
-		const img = /** @type {HTMLImageElement} */ (DomFactory.createElement('img', ['minimap-img']));
-		img.src = imgSrc;
-		containerEl.appendChild(img);
-
-		const canvas = /** @type {HTMLCanvasElement} */ (DomFactory.createElement('canvas', ['minimap-marker-canvas']));
-		containerEl.appendChild(canvas);
-
-		return { img, canvas };
 	}
 
 	/**

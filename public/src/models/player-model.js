@@ -80,6 +80,7 @@ export default class PlayerModel extends Model {
 		if (data.shipId !== undefined) this.shipId = data.shipId;
 		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
 		if (data.activeMinigame !== undefined) this.activeMinigame = data.activeMinigame;
+		if (data.isUsingShop !== undefined) this.isUsingShop = data.isUsingShop;
 
 		if ('carryingId' in data) {
 			this.carryingId = data.carryingId;
