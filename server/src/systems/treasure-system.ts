@@ -20,7 +20,7 @@ export default class TreasureSystem implements BaseSystem {
 
 	private minGold: number = 10;
 	private maxGold: number = 75;
-	private maxTreasures: number = 1;
+	private maxTreasures: number = 10;
 
 	// maps dig events to players via their id
 	private digSessions = new Map<string, DigMinigame>();
@@ -47,12 +47,6 @@ export default class TreasureSystem implements BaseSystem {
 		this.resolveOpeningTreasures();
 		this.updateCarriedTreasures();
 		this.resolveDeposits();
-
-		const treasures = this.registry.getByType<Treasure>('treasure');
-
-		treasures.forEach((treasure) => {
-			console.log(`Treasure: ${treasure.id}, x: ${treasure.x}, y: ${treasure.y}, parent: ${treasure.parent}`);
-		});
 	}
 
 	public createSession(player: Player, treasure: Treasure) {
@@ -281,7 +275,7 @@ export default class TreasureSystem implements BaseSystem {
 		for (const tile of shuffled) {
 			const point = { x: tile.x, y: tile.y };
 
-			if (this.isBlockedByRecentHole(point)) continue;
+			if (this.isBlocked(point)) continue;
 
 			return point;
 		}
@@ -289,12 +283,14 @@ export default class TreasureSystem implements BaseSystem {
 		return undefined;
 	}
 
-	private isBlockedByRecentHole(point: { x: number; y: number }): boolean {
+	private isBlocked(point: { x: number; y: number }): boolean {
 		const radius = 50;
 
-		for (const hole of this.holes) {
-			const dx = point.x - hole.x;
-			const dy = point.y - hole.y;
+		const treasures = this.registry.getByType<Treasure>('treasure');
+
+		for (const treasure of treasures) {
+			const dx = point.x - treasure.x;
+			const dy = point.y - treasure.y;
 
 			if (dx * dx + dy * dy < radius * radius) {
 				return true;

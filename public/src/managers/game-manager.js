@@ -292,8 +292,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.onFullSync(data); // get everything
 		});
 
-		this.network.on(ServerEvent.DIG_MINIGAME_RESULT, ({ success }) => {
-			console.log('[Client] DIG_MINIGAME_RESULT received', success);
+		this.network.on(ServerEvent.DIG_MINIGAME_RESULT, () => {
 			this.digMinigame.stop();
 		});
 

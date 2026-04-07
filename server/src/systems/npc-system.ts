@@ -43,8 +43,6 @@ export default class NPCSystem implements BaseSystem {
 			} else {
 				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
 				this.getTarget(npc, nearby);
-
-				if (npc.target) this.attackTarget(npc, npc.target);
 			}
 		}
 	}
@@ -102,15 +100,17 @@ export default class NPCSystem implements BaseSystem {
 
 			// Get distance to player
 			const dist = Math.hypot(npc.x - entity.x, npc.y - entity.y);
-			if (dist < npc.detectionRadius) npc.target = entity;
+			if (dist < npc.detectionRadius && !entity.isDead) npc.target = entity;
 			else npc.target = null;
 
-			if (npc.target && dist < 20) this.attackTarget(npc, npc.target);
+			if (npc.target && dist < 25) this.attackTarget(npc, npc.target);
 		});
 	}
 
 	attackTarget(npc: NPC, target: Entity) {
-		target.health -= npc.attackDamage;
+		if (!target.isDead) {
+			target.health -= npc.attackDamage;
+		}
 	}
 
 	generateNPCs(npcs: NPC[]) {

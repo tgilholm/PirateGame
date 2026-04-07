@@ -119,15 +119,12 @@ export default class PlayerController {
 		this.handleRespawn(player);
 		ship.markDirty();
 	}
-
 	handleDeath(player: Player): void {
-		// Start the player's respawn timer
-		if (!player.respawnStarted) {
-			player.respawnStarted = true;
-			player.respawnTimer = player.respawnTime; // reset
-		}
+		if (player.respawnStarted) return;
 
-		// Null player inputs so they can't keep moving
+		player.respawnStarted = true;
+		player.respawnTimer = player.respawnTime;
+
 		player.inputs = {
 			up: false,
 			down: false,
@@ -135,16 +132,15 @@ export default class PlayerController {
 			right: false,
 		};
 
-		player.deathNotified = false;
 		player.markDirty();
 	}
 
 	handleRespawn(player: Player): void {
 		player.respawnStarted = false;
 
-		// Put them back on their ship with full health
-		const ship = player.ship;
+		player.deathNotified = false;
 
+		const ship = player.ship;
 		player.parent = ship;
 		player.x = 0;
 		player.y = 0;
