@@ -79,6 +79,12 @@ export class StartScene extends Phaser.Scene {
 		this.resetUI();
 		this.input.keyboard.disableGlobalCapture(); // stop key events going to the game instead of the form
 
+		// shortcut the start scene
+		let inputText = document.getElementById('input-text');
+		// @ts-ignore
+		inputText.value = 'abc';
+		this.goToMain();
+
 		// width & height are given in game config
 		const centerX = this.scale.width / 2;
 		const centerY = this.scale.height / 2;

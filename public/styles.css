@@ -49,36 +49,44 @@ input.formElement {
 	cursor: text;
 }
 
-/* ---- Stats overlay ---- */
-#stats-overlay {
-	display: none;
-	position: fixed;
-	right: 16px;
-	top: 16px;
-	z-index: 1000;
-	background: rgba(13, 47, 79, 0.92);
-	border: 1px solid #fff;
-	border-radius: 4px;
-	padding: 12px 16px;
-	min-width: 200px;
-	max-height: 80vh;
-	overflow-y: auto;
-}
-
-.stat-row {
+/* Left Panel */
+.left-panel {
 	display: flex;
-	justify-content: space-between;
-	gap: 12px;
-	padding: 2px 0;
-	font-size: 13px;
+	flex-direction: column;
 }
 
-.stat-label {
-	color: #aad4ff;
+#minimap-container {
+	position: fixed;
+	display: none;
+	top: 16px;
+	left: 16px;
+	z-index: 1000;
+	overflow: hidden;
+	border: 1px solid #fff;
+	pointer-events: none;
 }
 
-.stat-value {
+/* ---- Gold counter ---- */
+#gold-counter {
+	position: fixed;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	background: rgba(13, 47, 79, 0.85);
+	border: 1px solid #ffd700;
+	border-radius: 4px;
+	padding: 6px 12px;
+	pointer-events: none;
+}
+
+.gold-counter-amount {
+	font-size: 15px;
 	font-weight: bold;
+	margin-bottom: 8px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+	padding-bottom: 6px;
+	text-align: center;
 }
 
 .minimap-img,
@@ -101,6 +109,7 @@ input.formElement {
 	left: 0;
 }
 
+/* Interaction Prompts */
 #prompt-container {
 	position: fixed;
 	top: 16px;
@@ -119,11 +128,7 @@ input.formElement {
 	white-space: nowrap;
 }
 
-/* Active Players Panel */
-.vt323-regular {
-	font-family: 'VT323', monospace;
-}
-
+/* Death Screen */
 #death-screen {
 	width: 100vw;
 	height: 100vh;
@@ -163,6 +168,12 @@ h2 {
 	height: 2em;
 }
 
+/* Active Players Panel */
+.vt323-regular {
+	font-family: 'VT323', monospace;
+}
+
+/* Player List */
 #players-panel {
 	position: fixed;
 	top: 20px;
@@ -178,7 +189,6 @@ h2 {
 	padding: 10px 12px;
 	color: white;
 	font-family: 'VT323', monospace;
-	/* match your UI */
 	font-size: 22px;
 	pointer-events: none;
 	/* won't block game input */
@@ -193,15 +203,12 @@ h2 {
 	text-align: center;
 }
 
-/* Use an ordered list for the numbering */
 #players-list {
 	margin: 0;
 	padding-left: 22px;
-	/* spacing for 1. 2. 3. */
 	list-style-position: outside;
 	max-height: 170px;
 	overflow: auto;
-	/* or auto if you want scroll */
 }
 
 #players-list li {
@@ -211,42 +218,7 @@ h2 {
 	text-overflow: ellipsis;
 }
 
-.left-panel {
-	display: flex;
-	flex-direction: column;
-}
-
-#minimap-container {
-	position: fixed;
-	display: none;
-	top: 16px;
-	left: 16px;
-	z-index: 1000;
-	overflow: hidden;
-	border: 1px solid #fff;
-	pointer-events: none;
-}
-
-#gold-counter {
-	display: hidden;
-	position: relative;
-	top: 20px;
-	left: 20px;
-	right: auto;
-	z-index: 1300;
-	min-width: 140px;
-	max-width: 150px;
-	padding: 10px 14px;
-	background: rgba(0, 0, 0, 0.45);
-	border: 2px solid rgba(255, 255, 255, 0.65);
-	border-radius: 8px;
-	color: #ffd54a;
-	font-family: 'VT323', monospace;
-	font-size: 28px;
-	text-align: center;
-	pointer-events: none;
-}
-
+/* Dig Minigame */
 #dig-minigame {
 	position: fixed;
 	left: 50%;
@@ -389,43 +361,4 @@ h2 {
 .shop-card-buy:hover,
 .shop-close-btn:hover {
 	background: deepskyblue;
-}
-
-/* ---- Gold counter ---- */
-#gold-counter {
-	position: fixed;
-	z-index: 1000;
-	display: none;
-	align-items: center;
-	gap: 6px;
-	background: rgba(13, 47, 79, 0.85);
-	border: 1px solid #ffd700;
-	border-radius: 4px;
-	padding: 6px 12px;
-	pointer-events: none;
-}
-
-.gold-counter-amount {
-	font-size: 15px;
-	font-weight: bold;
-	margin-bottom: 8px;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.35);
-	padding-bottom: 6px;
-	text-align: center;
-}
-
-/* Use an ordered list for the numbering */
-#players-list {
-	margin: 0;
-	padding-left: 22px; /* spacing for 1. 2. 3. */
-	list-style-position: outside;
-	max-height: 170px;
-	overflow: auto; /* or auto if you want scroll */
-}
-
-#players-list li {
-	line-height: 18px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
