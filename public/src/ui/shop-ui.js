@@ -61,9 +61,7 @@ export default class ShopUI {
 		this.gridEl = DomFactory.createElement('div', ['shop-grid']);
 		this.menuEl.appendChild(this.gridEl);
 
-		this.menuEl.appendChild(
-			DomFactory.createButton('Close', () => this.close(), ['shop-close-btn'])
-		);
+		this.menuEl.appendChild(DomFactory.createButton('Close', () => this.close(), ['shop-close-btn']));
 	}
 
 	//makes the shop overlay visible
@@ -111,17 +109,12 @@ export default class ShopUI {
 			const bottomRow = DomFactory.createElement('div', ['shop-card-bottom-row']); //container for cost and buy button
 
 			if (isMax) {
-				const maxBtn = DomFactory.createButton('MAX', () => {}, [
-					'shop-card-buy',
-					'shop-card-max',
-				]); //disables when lvl = max
+				const maxBtn = DomFactory.createButton('MAX', () => {}, ['shop-card-buy', 'shop-card-max']); //disables when lvl = max
 				maxBtn.disabled = true;
 				bottomRow.appendChild(maxBtn);
 			} else {
 				//cost label
-				const cost = nextLevel
-					? componentsData?.[comp.key]?.variants?.[nextLevel]?.cost
-					: null;
+				const cost = nextLevel ? componentsData?.[comp.key]?.variants?.[nextLevel]?.cost : null;
 				const costEl = DomFactory.createElement('span', ['shop-card-cost']);
 				costEl.textContent = cost != null ? cost.toLocaleString() + 'g' : '';
 				bottomRow.appendChild(costEl);

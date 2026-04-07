@@ -43,12 +43,8 @@ export function createPlot({
 
 		python.on('error', reject);
 
-		python.stdout.on('data', (data: Buffer) =>
-			process.stdout.write(`[Python] ${data.toString()}`)
-		);
-		python.stderr.on('data', (data: Buffer) =>
-			process.stderr.write(`[Python] ${data.toString()}`)
-		);
+		python.stdout.on('data', (data: Buffer) => process.stdout.write(`[Python] ${data.toString()}`));
+		python.stderr.on('data', (data: Buffer) => process.stderr.write(`[Python] ${data.toString()}`));
 		python.stdin.write(payload);
 		python.stdin.end();
 	});

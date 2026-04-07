@@ -12,9 +12,7 @@ files.forEach((f) => {
 
 	if (!regex.test(fname)) {
 		console.error(`Error: "${fname}" is not kebab-case.`);
-		console.error(
-			`   Rename to: ${fname.toLowerCase().replace(/_/g, '-').replace(/\s+/g, '-')}`
-		);
+		console.error(`   Rename to: ${fname.toLowerCase().replace(/_/g, '-').replace(/\s+/g, '-')}`);
 		code = 1;
 	}
 });

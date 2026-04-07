@@ -26,10 +26,7 @@ export default class UpgradeHandler {
 				' component=' +
 				componentKey
 		);
-		const components = componentsData.components as Record<
-			string,
-			{ variants: Record<string, { cost: number }> }
-		>;
+		const components = componentsData.components as Record<string, { variants: Record<string, { cost: number }> }>;
 
 		if (!components[componentKey]) return false;
 
@@ -73,9 +70,7 @@ export default class UpgradeHandler {
 			}
 		}
 
-		console.log(
-			'[UpgradeHandler] ' + ship.id + ' ' + componentKey + ': ' + current + ' : ' + nextLevel
-		);
+		console.log('[UpgradeHandler] ' + ship.id + ' ' + componentKey + ': ' + current + ' : ' + nextLevel);
 		return true;
 	}
 }

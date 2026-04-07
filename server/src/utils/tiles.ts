@@ -6,10 +6,7 @@ import { WorldMap } from '../types';
  * @param layerName the name of the layer to get, e.g. "islands"
  * @returns an array of x and y coordinates for the tiles in that layer
  */
-export function getTilesetFromLayer(
-	mapData: WorldMap,
-	layerName: string
-): Array<{ x: number; y: number }> {
+export function getTilesetFromLayer(mapData: WorldMap, layerName: string): Array<{ x: number; y: number }> {
 	// Get the requested layer
 	const layer = mapData.layers.find((l: any) => l.name === layerName);
 	const tileSize = mapData.tilewidth;

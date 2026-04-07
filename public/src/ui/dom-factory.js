@@ -29,9 +29,7 @@ export default class DomFactory {
 	 * @returns {HTMLButtonElement}
 	 */
 	static createButton(label, onClick, extraClasses = []) {
-		const btn = /** @type {HTMLButtonElement} */ (
-			DomFactory.createElement('button', extraClasses)
-		);
+		const btn = /** @type {HTMLButtonElement} */ (DomFactory.createElement('button', extraClasses));
 		btn.textContent = label;
 		btn.addEventListener('click', onClick);
 		return btn;
@@ -46,15 +44,11 @@ export default class DomFactory {
 	static createMinimapContent(containerEl, imgSrc) {
 		containerEl.innerHTML = '';
 
-		const img = /** @type {HTMLImageElement} */ (
-			DomFactory.createElement('img', ['minimap-img'])
-		);
+		const img = /** @type {HTMLImageElement} */ (DomFactory.createElement('img', ['minimap-img']));
 		img.src = imgSrc;
 		containerEl.appendChild(img);
 
-		const canvas = /** @type {HTMLCanvasElement} */ (
-			DomFactory.createElement('canvas', ['minimap-marker-canvas'])
-		);
+		const canvas = /** @type {HTMLCanvasElement} */ (DomFactory.createElement('canvas', ['minimap-marker-canvas']));
 		containerEl.appendChild(canvas);
 
 		return { img, canvas };

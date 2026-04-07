@@ -83,8 +83,7 @@ export default class ProjectileSystem implements BaseSystem {
 				entity.health -= proj.damage;
 				entity.markDirty();
 
-				const splashType: SplashType =
-					proj.type === 'cannonball' ? 'cannon-blood' : 'bullet-blood';
+				const splashType: SplashType = proj.type === 'cannonball' ? 'cannon-blood' : 'bullet-blood';
 				this.pendingSplashes.push({ x: proj.x, y: proj.y, splashType });
 				proj.ttl = -1;
 				this.destroyEntity(proj);
