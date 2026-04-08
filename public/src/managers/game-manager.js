@@ -239,7 +239,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.digMinigame.sync(delta.activeMinigame);
 		}
 
-		if (delta.components !== undefined && delta.id === 'ship_' + this.playerId) {
+		if (delta.upgrades !== undefined && delta.id === this.localPlayer.shipId) {
 			this.emit('localShipUpdated');
 		}
 	}
@@ -409,15 +409,19 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.localPlayer = null;
 	}
 
+	buyUpgrade(name) {
+		this.network.sendUpgrade(name);
+	}
+
 	/**
 	 *
-	 * @returns {Record<string, string> | null}
+	 * @returns {Record<string, number> | null}
 	 */
 	getLocalShipUpgrades() {
 		if (!this.localPlayer) return null;
 		const ship = this.models.get(this.localPlayer.shipId);
 
 		if (!(ship instanceof ShipModel)) return null;
-		return ship?.components ?? null;
+		return ship?.upgrades ?? null;
 	}
 }

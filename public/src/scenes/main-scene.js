@@ -62,8 +62,10 @@ export class MainScene extends Phaser.Scene {
 		this.animationManager = new AnimationManager(this);
 
 		const minimap = new Minimap(this.map, canvas);
-		this.shopUI = new ShopUI(this.gameManager, upgradeConfig);
-		this.uiManager = new UIManager(this, this.gameManager, minimap, this.map, showDebug);
+		this.shopUI = new ShopUI(this.gameManager, upgradeConfig, (name) => {
+			this.gameManager.buyUpgrade(name);
+		});
+		this.uiManager = new UIManager(this, this.gameManager, minimap, this.map, this.shopUI, showDebug);
 
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
 		const camera = this.cameras.main;

@@ -29,9 +29,13 @@ const InteractSchema = z.object({
 	parentId: z.string().nullable().optional(),
 });
 
+const UpgradeSchema = z.object({
+	name: z.string(),
+});
+
 // Uses zod to require data/no data for each action type
 const ActionSchema = z.discriminatedUnion('type', [
-	z.object({ type: z.literal(ActionType.UPGRADE), data: z.object({ itemId: z.string() }) }).strict(),
+	z.object({ type: z.literal(ActionType.UPGRADE), data: UpgradeSchema }).strict(),
 	z.object({ type: z.literal(ActionType.INTERACT), data: InteractSchema }).strict(),
 	z.object({ type: z.literal(ActionType.MESSAGE), data: z.object({ text: z.string() }) }).strict(),
 	z.object({ type: z.literal(ActionType.DIG) }).strict(),
@@ -50,9 +54,7 @@ export default class SocketService {
 	constructor(
 		private io: Server,
 		private world: GameWorld
-	) {
-		console.log('launched');
-	}
+	) {}
 
 	/**
 	 * Starts the listeners

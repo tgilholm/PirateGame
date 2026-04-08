@@ -21,7 +21,7 @@ export default class Ship extends Entity {
 	private _sailState: number = 0; // not moving
 
 	private upgradeConfig: UpgradeConfig;
-	private upgrades: Record<string, number> = {
+	public upgrades: Record<string, number> = {
 		cannonDamage: 1,
 		cannonballSpeed: 1,
 		reloadTime: 1,
@@ -88,6 +88,7 @@ export default class Ship extends Entity {
 			pilotId: this.pilot?.id, // For client side messages
 			sailState: this.sailState,
 			anchored: this.anchored,
+			upgrades: this.upgrades,
 			turnAngle: this.turnAngle,
 		};
 	}

@@ -283,7 +283,7 @@ h2 {
 	z-index: 2000;
 	background: rgba(13, 47, 79, 0.97);
 	border: 1px solid #fff;
-	border-radius: 4px;
+	border-radius: 8px;
 	padding: 20px;
 	min-width: 640px;
 	max-width: 90vw;
@@ -301,7 +301,7 @@ h2 {
 
 .shop-grid {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(3, 1fr);
 	gap: 8px;
 	margin-bottom: 12px;
 }
@@ -329,7 +329,7 @@ h2 {
 }
 
 .shop-card-buy,
-.shop-close-btn {
+#shop-close-button {
 	background: royalblue;
 	color: #fff;
 	border: 1px solid #fff;
@@ -351,7 +351,8 @@ h2 {
 	align-items: center;
 }
 
-.shop-card-cost {
+.shop-card-cost,
+.shop-card-benefit {
 	font-size: 11px;
 	color: #ffd700;
 }
@@ -363,12 +364,12 @@ h2 {
 	cursor: default;
 }
 
-.shop-close-btn {
+#shop-close-button {
 	width: 100%;
 	margin-top: 4px;
 }
 
 .shop-card-buy:hover,
-.shop-close-btn:hover {
+.shop-close-button:hover {
 	background: deepskyblue;
 }

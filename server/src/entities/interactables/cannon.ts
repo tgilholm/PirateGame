@@ -6,7 +6,7 @@ export default class Cannon extends Interactable {
 	targetAngle: number; // where the cannon is moving to
 	#baseReloadTime: number = 3000;
 	#baseCannonDamage: number = 100;
-	#baseCannonballSpeed: number = 10;
+	#baseCannonballSpeed: number = 300;
 
 	reloadTimer: number = 0;
 

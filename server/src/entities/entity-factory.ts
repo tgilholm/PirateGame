@@ -116,7 +116,7 @@ export default class EntityFactory {
 	}
 
 	public createNPCShip(id: string, x: number, y: number): NPCShip {
-		const npcShip = new NPCShip(id, x, y, this.npcShipConfig);
+		const npcShip = new NPCShip(id, x, y, this.npcShipConfig, this.upgradeConfig);
 		this.entityRegistry.create(npcShip);
 
 		this.npcShipConfig.interactables.forEach((item, index) => {
