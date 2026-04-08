@@ -10,6 +10,7 @@ import Cannon from '../entities/interactables/cannon';
 import NPC from '../entities/npcs/npc';
 import { TreasureState } from '@shared/socket-protocol';
 import Treasure from '../entities/interactables/treasure';
+import Shop from 'src/entities/shop';
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -177,10 +178,13 @@ export default class MovementSystem implements BaseSystem {
 				.getByType<Treasure>('treasure')
 				.filter((t) => t.id !== player.carrying?.id);
 
+			const shops = this.registry.getByType<Shop>('shop');
+
 			// Collide with the exterior of ships
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
-				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius);
+				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
+				this.checkShopObstacles(x, y, shops, playerConfig.radius);
 
 			// Move freely if not colliding
 			if (!isColliding(nextWorldX, nextWorldY)) {
@@ -267,6 +271,18 @@ export default class MovementSystem implements BaseSystem {
 				const ry = HOLE_OBSTACLE_RADIUS_Y + playerRadius;
 				if ((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry) < 1) return true;
 			}
+		}
+		return false;
+	}
+
+	private checkShopObstacles(x: number, y: number, shops: Shop[], playerRadius: number): boolean {
+		for (const s of shops) {
+			const dx = x - s.x;
+			const dy = y - s.y;
+			const distanceSquared = dx * dx + dy * dy;
+			const radiusSum = playerRadius + s.radius;
+
+			if (distanceSquared < radiusSum * radiusSum) return true;
 		}
 		return false;
 	}

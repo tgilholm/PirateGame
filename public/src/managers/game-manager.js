@@ -111,7 +111,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		// Determine if the player "should" send the interact packet
-		if (closest && closest.dist < 50) {
+		if (closest && closest.dist < 75) {
 			if (closest.entity.type === 'ladder' || this.localPlayer.parentId == closest.entity.parentId) {
 				// handles both === null
 				this.closestInteractable = closest;
