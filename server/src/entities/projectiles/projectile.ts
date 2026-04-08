@@ -18,4 +18,11 @@ export default class Projectile extends Entity {
 		this.vx = Math.cos(r) * speed;
 		this.vy = Math.sin(r) * speed; // calculate velocity from speed scalar
 	}
+
+	toState() {
+		return {
+			...super.toState(),
+			firedBy: this.firedBy ? this.firedBy.id : null,
+		};
+	}
 }

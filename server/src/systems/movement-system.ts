@@ -51,6 +51,21 @@ export default class MovementSystem implements BaseSystem {
 		npcs.forEach((npc) => this.updateNPC(npc, dt));
 	}
 
+	updateReloadTimer(player: Player, dt: number) {
+		if (player.reloadTimer > 0) {
+			player.reloadTimer = Math.max(0, player.reloadTimer - dt * 1000);
+			player.markDirty();
+		}
+	}
+
+	updateRespawnTimer(player: Player, dt: number) {
+		// move to own system
+		if (player.respawnTimer > 0 && player.respawnStarted) {
+			player.respawnTimer = Math.max(0, player.respawnTimer - dt * 1000);
+			player.markDirty();
+		}
+	}
+
 	/**
 	 * Applies movement for a given player, accounting for on-ship conditions,
 	 * different movement speed for on-land vs in-sea, collision with inner/outer
@@ -59,19 +74,12 @@ export default class MovementSystem implements BaseSystem {
 	 * @param dt the difference in time from the last update
 	 */
 	updatePlayer(player: Player, dt: number, ships: Ship[]): void {
-		if (player.reloadTimer > 0) {
-			player.reloadTimer = Math.max(0, player.reloadTimer - dt * 1000);
-			player.markDirty();
-		}
-
-		// move to own system
-		if (player.respawnTimer > 0 && player.respawnStarted) {
-			player.respawnTimer = Math.max(0, player.respawnTimer - dt * 1000);
-			player.markDirty();
-		}
+		this.updateReloadTimer(player, dt);
+		this.updateRespawnTimer(player, dt);
 
 		// Keep track of aim angle- don't send for static players
 		const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
+
 		if (Math.abs(player.aimAngle - prevAimAngle) > 0.01) {
 			player.markDirty();
 		}
@@ -111,14 +119,16 @@ export default class MovementSystem implements BaseSystem {
 		if (left) dx -= 1;
 		if (right) dx += 1;
 
-		const aimChanged = Math.abs(player.aimAngle - prevAimAngle) > 0.01;
-		(player as any).prevAimAngle = player.aimAngle;
-
 		const prevX = player.x; // to calculate velocity difference for client-side extrapolation
 		const prevY = player.y;
 
 		// If no inputs, do nothing
-		if (dx === 0 && dy === 0) return;
+		if (dx === 0 && dy === 0) {
+			// reset velocity
+			player.vx = 0;
+			player.vy = 0;
+			return;
+		}
 
 		// Normalize diagonal movement- players move the same speed in all directions
 		const length = Math.sqrt(dx * dx + dy * dy);
@@ -194,8 +204,7 @@ export default class MovementSystem implements BaseSystem {
 		player.vy = (player.y - prevY) / dt;
 
 		// Mark dirty if position changed enough
-		const moved =
-			Math.abs(player.x - prevX) > POS_THRESHOLD || Math.abs(player.y - prevY) > POS_THRESHOLD || aimChanged;
+		const moved = Math.abs(player.x - prevX) > POS_THRESHOLD || Math.abs(player.y - prevY) > POS_THRESHOLD;
 
 		if (moved) player.markDirty();
 	}
@@ -283,6 +292,23 @@ export default class MovementSystem implements BaseSystem {
 		};
 
 		Body.applyForce(body, body.position, force);
+
+		// update entity from physics body
+		const prevR = ship.r;
+		const prevX = ship.x;
+		const prevY = ship.y;
+
+		ship.x = body.position.x;
+		ship.y = body.position.y;
+		ship.r = body.angle;
+
+		// sent in delta if changed substantially
+		const rotationChanged = Math.abs(ship.r - prevR) > 0.001;
+		const positionChanged = Math.abs(ship.x - prevX) > 0.1 || Math.abs(ship.y - prevY) > 0.1;
+
+		if (rotationChanged || positionChanged) {
+			ship.markDirty();
+		}
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {

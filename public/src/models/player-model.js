@@ -33,7 +33,6 @@ export default class PlayerModel extends Model {
 		this.healthBar = new HealthBar(scene, 40, 20);
 		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
 
-		// Name text is not a child of the container- avoids counter-rotation logic
 		this.nameText = scene.add
 			.text(0, -50, '', {
 				fontSize: '16px',
@@ -45,10 +44,14 @@ export default class PlayerModel extends Model {
 			.setOrigin(0.5, 1)
 			.setDepth(100)
 			.setPosition(0, -25);
+		this.add(this.nameText);
+
 		this.bodySprite = scene.add.sprite(0, 0, 'player_circle');
 		this.add(this.bodySprite);
 
 		this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
+		this.add(this.gun);
+
 		this.carrySprite = scene.add.sprite(0, -22, 'treasure-chest');
 		this.carrySprite.setDisplaySize(44, 44);
 		this.carrySprite.setDepth(101);
@@ -100,6 +103,10 @@ export default class PlayerModel extends Model {
 		const isBusy = this.isSteering || this.isUsingCannon || this.isDead; // busy dyin'
 		const showCarry = !!this.carryingId;
 
+		if (this.parentContainer) {
+			this.rotation = -this.parentContainer.rotation;
+		}
+
 		let bob = 0; // hi bob
 		if (this.parentContainer instanceof ShipModel) {
 			bob = this.parentContainer.hullSprite.y;
@@ -109,17 +116,15 @@ export default class PlayerModel extends Model {
 		}
 
 		// Gun is drawn at edge of player sprite
-		gun.setPosition(pos.x + Math.cos(this.aimAngle) * 15, pos.y + Math.sin(this.aimAngle) * 15);
+		gun.setPosition(Math.cos(this.aimAngle) * 15, Math.sin(this.aimAngle) * 15);
 		gun.setRotation(this.aimAngle);
+		gun.setVisible(!isBusy && !showCarry);
 
 		this.carrySprite.setPosition(Math.cos(this.aimAngle) * 18, Math.sin(this.aimAngle) * 18 + bob);
 
 		// manually update position for non-container objects
 		this.carrySprite.setRotation(this.aimAngle);
-		this.nameText.setPosition(pos.x, pos.y - 25);
 		this.respawnIndicator.text.setPosition(pos.x, pos.y);
-
-		this.gun.setVisible(!isBusy && !showCarry);
 		this.carrySprite.setVisible(showCarry);
 		this.setAlpha(isBusy ? 0.6 : 1.0); // visual feedback if using cannon/helm etc
 

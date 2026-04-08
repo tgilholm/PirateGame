@@ -92,8 +92,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		let closest = null;
 		let nearestDist = Infinity;
 		this.models.forEach((entity, id) => {
-			if (entity === this.localPlayer) {
-				entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
+			if (entity === this.localPlayer && entity instanceof PlayerModel) {
+				this.localPlayer.aimAngle = inputs.aimAngle; // shortcut the aim angle for local player
 			}
 
 			// This replaces the getClosestInteractable function, avoiding another for loop
@@ -210,7 +210,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			if (!model) return;
 			this.models.set(data.id, model);
 		}
-
 		// @ts-ignore reparent the player if they left a ship
 		if (data.type === 'player') this.handleReparent(model, data);
 		if (data.type === 'treasure') this.handleTreasureReparent(model, data);
@@ -365,6 +364,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		player.setPosition(data.x ?? player.x, data.y ?? player.y);
 		player.parentId = data.parentId ?? null;
+		player.rotation = 0;
 
 		// Snap interpolation targets so movement feels instant on reparent
 		if (data.x !== undefined) player.target.x = data.x;

@@ -24,7 +24,7 @@ export default class Player extends Entity {
 		right: boolean;
 	};
 	aimAngle: number;
-	reloadTime: number = 1000;
+	reloadTime: number = 500;
 	reloadTimer: number = 0;
 	activeMinigame: Minigame | null = null;
 

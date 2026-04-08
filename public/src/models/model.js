@@ -85,7 +85,7 @@ export default class Model extends Phaser.GameObjects.Container {
 		const lerp = 1 - Math.pow(1 - responseFactor, delta / 16.6667); // at 60fps
 		const deltaTime = delta / 1000;
 
-		// Don't move static objects
+		// Don't lerp static objects
 		if (!this.isStatic) {
 			this.interpPosition(deltaTime, lerp);
 			this.interpRotation(deltaTime, lerp);

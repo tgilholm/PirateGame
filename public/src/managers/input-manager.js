@@ -63,13 +63,12 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 	getInputs(scene, player) {
 		/** @type {any} */
 		const keys = this.moveKeys;
-		const cam = scene.cameras.main;
 
-		// Manually convert screen pos to world pos using current camera state
-		const mouseWorldX = scene.input.mousePointer.x / cam.zoom + cam.scrollX;
-		const mouseWorldY = scene.input.mousePointer.y / cam.zoom + cam.scrollY;
-
+		scene.input.mousePointer.updateWorldPoint(scene.cameras.main);
+		const mouseWorldX = scene.input.mousePointer.worldX;
+		const mouseWorldY = scene.input.mousePointer.worldY;
 		const worldPos = player.getWorldTransformMatrix();
+
 		const aimAngle = Math.atan2(mouseWorldY - worldPos.ty, mouseWorldX - worldPos.tx);
 
 		return {
