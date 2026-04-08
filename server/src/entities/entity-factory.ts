@@ -11,6 +11,7 @@ import Helm from './interactables/helm';
 import NPC from './npcs/npc';
 import NPCShip from './npcs/npc-ship';
 import Treasure from './interactables/treasure';
+import Money from './interactables/money';
 
 /**
  * Aggregates entity creation, applying domain-specific default values from
@@ -78,7 +79,7 @@ export default class EntityFactory {
 		return treasure;
 	}
 
-	public createInteractable(parent: Ship | null, instance: InteractableInstance, index: number) {
+	public createInteractable(parent: Ship | null, instance: InteractableInstance, index: number | string) {
 		const { type, x, y } = instance;
 		const prefix = parent ? parent.id : 'map'; // parent id or map if null
 		const id = `${prefix}_${type}_${index}`;
@@ -98,6 +99,9 @@ export default class EntityFactory {
 			case 'shop':
 				item = new Shop(id, x, y);
 				break;
+			case 'money':
+				item = new Money(id, x, y, parent);
+				break;
 
 			default:
 				item = new Interactable(id, x, y, parent);
@@ -107,6 +111,7 @@ export default class EntityFactory {
 			parent.interactables.push(item);
 		}
 		this.entityRegistry.create(item);
+		return item;
 	}
 
 	public createNPC(id: string, x: number, y: number): NPC {

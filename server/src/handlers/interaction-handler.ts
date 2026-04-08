@@ -8,6 +8,8 @@ import Ship from '../entities/ship';
 import TreasureSystem from '../systems/treasure-system';
 import { TreasureState } from '@shared/socket-protocol';
 import EntityRegistry from '../engine/entity-registry';
+import Money from 'src/entities/interactables/money';
+import Entity from 'src/entities/entity';
 
 /**
  * Handler class- provides methods for each type of player interaction with interactable entities,
@@ -16,7 +18,8 @@ import EntityRegistry from '../engine/entity-registry';
 export default class InteractionHandler {
 	constructor(
 		private treasureSystem: TreasureSystem,
-		private registry: EntityRegistry
+		private registry: EntityRegistry,
+		private destroyEntity: (entity: Entity) => void
 	) {}
 
 	/**
@@ -97,6 +100,13 @@ export default class InteractionHandler {
 
 		player.markDirty();
 		ship.markDirty();
+	}
+
+	handleMoneyInteraction(player: Player, money: Money) {
+		if (player.parent === money.parent) {
+			player.gold += money.value;
+			this.destroyEntity(money);
+		}
 	}
 
 	/**

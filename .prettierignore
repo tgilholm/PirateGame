@@ -4,3 +4,4 @@ build
 .husky
 .prettierignore
 .gitignore
+*.png

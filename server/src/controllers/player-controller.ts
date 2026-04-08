@@ -14,7 +14,9 @@ import SpawnSystem from '../systems/spawn-system';
 import Matter from 'matter-js';
 import Treasure from '../entities/interactables/treasure';
 import UpgradeHandler from '../handlers/upgrade-handler';
-import Shop from 'src/entities/shop';
+import Shop from '../entities/shop';
+import EntityFactory from 'src/entities/entity-factory';
+import Money from 'src/entities/interactables/money';
 
 /**
  * Handles events affecting the player
@@ -24,6 +26,7 @@ export default class PlayerController {
 	 */
 	constructor(
 		private entityRegistry: EntityRegistry,
+		private factory: EntityFactory,
 		private interactionHandler: InteractionHandler,
 		private upgradeHandler: UpgradeHandler,
 		private treasureSystem: TreasureSystem,
@@ -86,6 +89,10 @@ export default class PlayerController {
 				case 'treasure':
 					this.interactionHandler.handleTreasureInteraction(player, interactable as Treasure);
 					break;
+
+				case 'money':
+					this.interactionHandler.handleMoneyInteraction(player, interactable as Money);
+					break;
 				default:
 					return;
 			}
@@ -119,6 +126,7 @@ export default class PlayerController {
 		this.handleRespawn(player);
 		ship.markDirty();
 	}
+
 	handleDeath(player: Player): void {
 		if (player.respawnStarted) return;
 
@@ -131,6 +139,16 @@ export default class PlayerController {
 			left: false,
 			right: false,
 		};
+
+		// Spawn money stack at the death point
+		const money = this.factory.createInteractable(
+			player.parent as Ship | null,
+			{ type: 'money', x: player.x, y: player.y },
+			player.id
+		) as Money;
+
+		money.value = player.gold;
+		player.gold = 0;
 
 		player.markDirty();
 	}
