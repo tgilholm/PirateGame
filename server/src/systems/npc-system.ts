@@ -43,13 +43,17 @@ export default class NPCSystem implements BaseSystem {
 			} else {
 				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
 				this.getTarget(npc, nearby);
+				this.updateTimer(npc, dt);
 			}
 		}
 	}
 
 	updateTimer(npc: NPC, dt: number) {
+		console.log(npc.attackTimer, npc.attackTime);
+
+		// npcs can only attack when the timer hits 0
 		if (npc.attackTimer > 0) {
-			npc.attackTimer = Math.max(0, npc.attackTimer - dt);
+			npc.attackTimer = Math.max(0, npc.attackTimer - dt * 1000);
 			npc.markDirty();
 		}
 	}
@@ -112,7 +116,7 @@ export default class NPCSystem implements BaseSystem {
 
 			if (npc.target && dist < 25 && npc.canAttack) {
 				this.attackTarget(npc, npc.target);
-				npc.attackTime = npc.attackTimer; // reset cooldown
+				npc.attackTimer = npc.attackTime; // reset cooldown
 			}
 		});
 	}
