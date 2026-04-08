@@ -111,6 +111,7 @@ export default class PlayerModel extends Model {
 		// Gun is drawn at edge of player sprite
 		gun.setPosition(pos.x + Math.cos(this.aimAngle) * 15, pos.y + Math.sin(this.aimAngle) * 15);
 		gun.setRotation(this.aimAngle);
+		gun.setVisible(!isBusy && !showCarry);
 
 		this.carrySprite.setPosition(Math.cos(this.aimAngle) * 18, Math.sin(this.aimAngle) * 18 + bob);
 
@@ -119,7 +120,6 @@ export default class PlayerModel extends Model {
 		this.nameText.setPosition(pos.x, pos.y - 25);
 		this.respawnIndicator.text.setPosition(pos.x, pos.y);
 
-		this.gun.setVisible(!isBusy && !showCarry);
 		this.carrySprite.setVisible(showCarry);
 		this.setAlpha(isBusy ? 0.6 : 1.0); // visual feedback if using cannon/helm etc
 

@@ -92,8 +92,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		let closest = null;
 		let nearestDist = Infinity;
 		this.models.forEach((entity, id) => {
-			if (entity === this.localPlayer) {
-				entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
+			if (entity === this.localPlayer && entity instanceof PlayerModel) {
+				this.localPlayer.aimAngle = inputs.aimAngle; // shortcut the aim angle for local player
 			}
 
 			// This replaces the getClosestInteractable function, avoiding another for loop
