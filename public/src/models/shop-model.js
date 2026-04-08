@@ -10,15 +10,13 @@ export default class ShopModel extends InteractableModel {
 	 * @param {string} id
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {import("shared/entity-config.json")["shop"]} config
 	 */
-	constructor(scene, id, x, y, config) {
+	constructor(scene, id, x, y) {
 		super(scene, null, id, 'shop', x, y, 'shop', 'Use Shop', '');
 		this.isInteractable = true;
 		this.type = 'shop';
-		this.interactRange = config.interactRange;
-
-		const radius = config.radius;
+		this.interactRange = 100;
+		const radius = 50;
 
 		// Generates temp shop body texture and reuses across all shops
 		const textureKey = 'shop_' + radius;
@@ -44,18 +42,13 @@ export default class ShopModel extends InteractableModel {
 
 		// Shop body sprite
 		this.bodySprite = scene.add.sprite(0, 0, textureKey);
+		this.bodySprite.setDepth(999);
 		this.add(this.bodySprite);
-
-		// Interaction range marker (semi-transparent ring)
-		this.rangeGfx = scene.add.graphics();
-		this.rangeGfx.lineStyle(1, 0xffffff, 0.18);
-		this.rangeGfx.strokeCircle(0, 0, config.interactRange);
-		this.add(this.rangeGfx);
 
 		// Floating label above the circle
 		this.label = scene.add
 			.text(0, -radius - 6, 'Shop', {
-				fontSize: '12px',
+				fontSize: '16px',
 				fontFamily: 'Arial',
 				color: '#ffffff',
 				stroke: '#000000',
@@ -69,7 +62,6 @@ export default class ShopModel extends InteractableModel {
 
 	destroy() {
 		this.label?.destroy();
-		this.rangeGfx?.destroy();
 		super.destroy();
 	}
 }

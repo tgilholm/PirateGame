@@ -57,12 +57,11 @@
 			</div>
 
 			<div class="left-panel" id="left-panel">
-				<!-- Minimap -->
-				<div id="minimap-container" style="display: none"></div>
-				<!-- Gold counter -->
-				<div id="gold-counter" style="display: none">Gold: 0</div>
-
-				<div class="game-stats">
+				<div id="minimap-container">
+					<img id="minimap" />
+					<canvas id="minimap-canvas"></canvas>
+				</div>
+				<div class="game-stats" style="display: none">
 					<p id="fps-counter" style="color: green">FPS:</p>
 					<p id="model-counter" style="color: green">Nearby Models:</p>
 					<p id="ship-stats" style="color: green">Player Ship:</p>
@@ -72,16 +71,20 @@
 				</div>
 			</div>
 
-			<!-- Shop overlay -->
-			<div id="shop-menu" style="display: none"></div>
-
-			<!--Active Player Container-->
-			<div id="players-panel" style="display: none">
-				<div class="players-title">Players Online</div>
-				<ol id="players-list"></ol>
+			<div class="right-panel" id="right-panel">
+				<!--Active Player Container-->
+				<div id="players-panel" style="display: none">
+					<div class="players-title">Players Online</div>
+					<ol id="players-list"></ol>
+				</div>
+				<div id="gold-counter">Gold: 0</div>
 			</div>
 
-			<!-- Dig minigame UI -->
+			<div id="shop-menu" style="display: none">
+				<h2>Ship Upgrades</h2>
+				<div class="shop-grid"></div>
+				<button id="shop-close-button">Close</button>
+			</div>
 			<div id="dig-minigame" style="display: none">
 				<div id="dig-bar">
 					<div id="dig-success-zone"></div>
@@ -96,5 +99,19 @@
 				<button id="quit-button">Quit</button>
 			</div>
 		</div>
+
+		<!-- Reusable templates for shop items -->
+		<template class="shop-card-template">
+			<div class="shop-card">
+				<span class="shop-card-name"></span>
+				<p class="shop-card-description"></p>
+				<span class="shop-card-level"></span>
+				<span class="shop-card-benefit"></span>
+				<div class="shop-card-bottom-row">
+					<span class="shop-card-cost"></span>
+					<button class="shop-card-buy">Buy</button>
+				</div>
+			</div>
+		</template>
 	</body>
 </html>

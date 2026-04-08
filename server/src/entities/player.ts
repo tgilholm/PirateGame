@@ -16,7 +16,7 @@ export default class Player extends Entity {
 	carrying: Interactable | null = null;
 	isDigging: boolean = false;
 	ship: Ship; // the player's own ship
-	gold: number = 0;
+	gold: number = 500;
 	inputs: {
 		up: boolean;
 		down: boolean;
@@ -45,7 +45,6 @@ export default class Player extends Entity {
 	constructor(id: string, x: number, y: number, parent: Entity | null, username: string, config: PlayerConfig) {
 		super(id, 'player', x, y, config.maxHealth, parent);
 		this.username = username || ''; // default to no uname
-		this.gold = config.startingGold || 0; // default to 0 gold
 
 		// Player-specific detail
 		this.ship = parent as Ship;
@@ -68,6 +67,17 @@ export default class Player extends Entity {
 
 	get isReloaded(): boolean {
 		return this.reloadTimer <= 0;
+	}
+
+	get worldPos(): { x: number; y: number } {
+		if (this.parent) {
+			const ship = this.parent as Ship;
+			const { x, y } = ship.localToWorld(this.x, this.y);
+
+			return { x: x, y: y };
+		} else {
+			return { x: this.x, y: this.y };
+		}
 	}
 
 	/**

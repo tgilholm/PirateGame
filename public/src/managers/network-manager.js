@@ -79,10 +79,10 @@ export default class NetworkManager {
 
 	/**
 	 * Sends a request to upgrade a ship component
-	 * @param {string} componentKey the component to upgrade (e.g. "sails")
+	 * @param {string} name the component to upgrade (e.g. "sails")
 	 */
-	sendUpgrade(componentKey) {
-		this.sendAction({ type: ActionType.UPGRADE, data: { itemId: componentKey } });
+	sendUpgrade(name) {
+		this.sendAction({ type: ActionType.UPGRADE, data: { name: name } });
 	}
 
 	/**

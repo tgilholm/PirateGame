@@ -1,5 +1,5 @@
 import EntityRegistry from '../engine/entity-registry';
-import { EntityConfig, NPCShipConfig, PlayerConfig, ShipConfig, ShopConfig } from '../types';
+import { EntityConfig, InteractableInstance, NPCShipConfig, PlayerConfig, ShipConfig, UpgradeConfig } from '../types';
 import Entity from './entity';
 import Player from './player';
 import Ship from './ship';
@@ -12,12 +12,6 @@ import NPC from './npcs/npc';
 import NPCShip from './npcs/npc-ship';
 import Treasure from './interactables/treasure';
 
-export interface InteractableInstance {
-	type: string;
-	x: number;
-	y: number;
-}
-
 /**
  * Aggregates entity creation, applying domain-specific default values from
  * the entity-config.json.
@@ -25,7 +19,7 @@ export interface InteractableInstance {
 export default class EntityFactory {
 	playerConfig: PlayerConfig;
 	shipConfig: ShipConfig;
-	shopConfig: ShopConfig;
+	upgradeConfig: UpgradeConfig;
 	npcShipConfig: NPCShipConfig;
 
 	/**
@@ -35,12 +29,13 @@ export default class EntityFactory {
 	 */
 	constructor(
 		entityConfig: EntityConfig,
+		upgradeConfig: UpgradeConfig,
 		private entityRegistry: EntityRegistry
 	) {
 		this.playerConfig = entityConfig.player;
-		this.shopConfig = entityConfig.shop;
 		this.shipConfig = entityConfig.ship; // destructure
 		this.npcShipConfig = entityConfig.npcShip;
+		this.upgradeConfig = upgradeConfig;
 	}
 
 	/**
@@ -67,7 +62,7 @@ export default class EntityFactory {
 	 * @returns the ship
 	 */
 	public createShip(id: string, x: number, y: number): Ship {
-		const ship = new Ship(id, 'ship', x, y, this.shipConfig);
+		const ship = new Ship(id, 'ship', x, y, this.shipConfig, this.upgradeConfig);
 		this.entityRegistry.create(ship);
 
 		this.shipConfig.interactables.forEach((item, index) => {
@@ -100,6 +95,9 @@ export default class EntityFactory {
 			case 'helm':
 				item = new Helm(id, x, y, parent);
 				break;
+			case 'shop':
+				item = new Shop(id, x, y);
+				break;
 
 			default:
 				item = new Interactable(id, x, y, parent);
@@ -111,12 +109,6 @@ export default class EntityFactory {
 		this.entityRegistry.create(item);
 	}
 
-	public createShop(id: string, x: number, y: number): Shop {
-		const shop = new Shop(id, x, y, this.shopConfig);
-		this.entityRegistry.create(shop);
-		return shop;
-	}
-
 	public createNPC(id: string, x: number, y: number): NPC {
 		const npc = new NPC(id, 'npc', x, y);
 		this.entityRegistry.create(npc);
@@ -124,7 +116,7 @@ export default class EntityFactory {
 	}
 
 	public createNPCShip(id: string, x: number, y: number): NPCShip {
-		const npcShip = new NPCShip(id, x, y, this.npcShipConfig);
+		const npcShip = new NPCShip(id, x, y, this.npcShipConfig, this.upgradeConfig);
 		this.entityRegistry.create(npcShip);
 
 		this.npcShipConfig.interactables.forEach((item, index) => {

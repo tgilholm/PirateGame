@@ -1,8 +1,7 @@
 import GameManager from './game-manager.js';
+import ShipModel from '../models/ship-model.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
-import GoldCounter from '../ui/gold-counter.js';
-import ShipModel from '../models/ship-model.js';
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -13,43 +12,73 @@ export default class UIManager {
 	 * Constructs the UI manager for the specified Scene
 	 * @param {Phaser.Scene} scene the scene to provide UI for
 	 * @param {GameManager} gameManager to access the state of the game
+	 * @param {Minimap} minimap
+	 * @param {Phaser.Tilemaps.Tilemap} map
+	 * @param {ShopUI} shopUI
+	 * @param {boolean} showDebug whether or not to show the fps counter, model count etc
 	 */
-	constructor(scene, gameManager) {
+	constructor(scene, gameManager, minimap, map, shopUI, showDebug = false) {
 		this.scene = scene;
 		this.gameManager = gameManager;
+		this.minimap = minimap;
+		this.shopUI = shopUI;
 
+		// interaction
 		this.promptElement = document.getElementById('interaction-prompt');
 		this.releaseElement = document.getElementById('release-prompt');
+
+		// debug
+		this.gameStats = document.querySelector('.game-stats');
+		const display = showDebug ? 'block' : 'none';
+
+		if (this.gameStats instanceof HTMLElement) {
+			this.gameStats.style.display = display;
+		}
+
 		this.fpsCounter = document.getElementById('fps-counter');
 		this.modelCounter = document.getElementById('model-counter');
 		this.shipStats = document.getElementById('ship-stats');
-		this.menu = document.getElementById('left-panel');
-		this.deathMessage = document.getElementById('death-screen');
 		this.positionElement = document.getElementById('position');
 		this.shipPositionElement = document.getElementById('ship-position');
 		this.playerStats = document.getElementById('player-stats');
 
+		// game
+		this.deathMessage = document.getElementById('death-screen');
 		this.deathMessage.style.display = 'none';
-		this.menu.style.display = 'block';
+
+		// shop
+		gameManager.on('openShop', () => this.shopUI.show());
+
+		// left panel
+		this.minimapContainer = document.getElementById('minimap-container');
+
+		// right panel
+		this.goldCounter = document.getElementById('gold-counter');
+		this.goldCounter.style.display = 'flex';
+
 		this.currentInteractable = null;
 
-		this.minimap = new Minimap(document.getElementById('minimap-container'));
-		this.minimapReady = false;
-
-		this.shopUI = new ShopUI(gameManager.network, gameManager);
-		gameManager.on('openShop', () => this.shopUI.open());
-
-		this.goldCounter = new GoldCounter(document.getElementById('gold-counter'));
-
-		gameManager.on('localPlayerReady', (player) => {
-			const pos = player.worldPos;
-			this.minimap.placeMarker(pos.x, pos.y, gameManager.mapWidth, gameManager.mapHeight);
-			this.minimap.placeShops(gameManager.mapWidth, gameManager.mapHeight, gameManager.shopSpawns);
-			this.minimapReady = true;
-			this.goldCounter.show();
-		});
-		this.goldElement = document.getElementById('gold-counter');
 		this.lastGold = null;
+
+		const layers = [
+			{ name: 'sea', colour: 0x83c8de }, // darker blue
+			{ name: 'shallows', colour: 0xabe3f5 }, // light blue
+			{ name: 'islands', colour: 0x29bb65 }, // green
+		];
+
+		this.setupMinimap(map, scene, layers);
+	}
+
+	async setupMinimap(map, scene, layers) {
+		const mapSrc = await this.minimap.createMinimapImage(map, scene, layers);
+		const minimapImage = document.getElementById('minimap');
+
+		if (minimapImage) {
+			//@ts-ignore
+			minimapImage.src = mapSrc;
+		}
+
+		this.minimapContainer.style.display = 'flex'; // show
 	}
 
 	/**
@@ -58,12 +87,76 @@ export default class UIManager {
 	update() {
 		const target = this.gameManager.closestInteractable;
 		const player = this.gameManager.localPlayer;
-
 		if (!player) return;
 
-		this.goldCounter.update(player);
 		this.updateGoldCounter(player.gold ?? 0);
+		this.updateInteractionPrompts(player, target);
+		this.updateDebugStats(player, target);
+		this.updateMinimap(player);
+	}
 
+	updateMinimap(localPlayer) {
+		if (!this.minimap) return;
+
+		this.minimap.clear();
+
+		// Draw shops
+		this.gameManager.shopSpawns?.forEach((shop) => {
+			this.minimap.drawCircle(shop.x, shop.y, '#f1c40f', 5);
+		});
+
+		// Draw ships
+		this.gameManager.minimalShips.forEach((ship) => {
+			this.minimap.drawAngledRect(ship.x, ship.y, 750, 250, ship.r, 'brown');
+		});
+
+		// Draw NPCs
+		this.gameManager.minimalNPCs.forEach((npc) => {
+			this.minimap.drawCircle(npc.x, npc.y, 'blue', 2);
+		});
+
+		// Draw players
+		this.gameManager.minimalPlayers.forEach((player) => {
+			const colour = player === localPlayer ? 'green' : 'red';
+
+			this.minimap.drawCircle(player.x, player.y, colour, 3);
+		});
+	}
+
+	updateDebugStats(player, target) {
+		this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
+		this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
+
+		const ship = this.gameManager.models.get(player.parentId);
+
+		this.shipStats.style.display = 'flex';
+		if (ship && ship instanceof ShipModel) {
+			this.shipStats.innerText = `Local Ship: ${ship.id};
+			Sail State: ${ship.sailState}
+			Turn Angle: ${ship.turnAngle}
+			Anchored: ${ship.anchored}
+			`;
+		}
+
+		const playerShip = this.gameManager.models.get(player.shipId);
+
+		if (playerShip && !playerShip.isDead) {
+			this.deathMessage.style.display = 'none';
+		}
+
+		this.positionElement.innerText = `Pos: x=${player.x}, y=${player.y}`;
+		this.shipPositionElement.innerText = `Ship Pos: x=${playerShip.x}, y=${playerShip.y}`;
+		this.playerStats.innerText = `
+		Player Stats: gold=${player.gold}
+		vx=${player.velocity.x}, vy=${player.velocity.y}, targetX=${player.target.x}, targetY=${player.target.y}, \n
+		carrying? ${player.carryingId}, cannon? ${player.isUsingCannon}, steering? ${player.isSteering}, nearest entity: ${target?.entity.type}
+
+		Ship Stats:
+		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
+		`;
+	}
+
+	updateInteractionPrompts(player, target) {
 		let useText = null;
 		let releaseText = null;
 		const isInteracting = player.isSteering || player.isUsingCannon;
@@ -84,7 +177,7 @@ export default class UIManager {
 		}
 
 		if (this.gameManager.playerListDirty) {
-			this.updatePlayersPanelDom(this.gameManager.allPlayers);
+			this.updatePlayersPanelDom(this.gameManager.minimalPlayers);
 			this.gameManager.playerListDirty = false;
 		}
 
@@ -99,49 +192,26 @@ export default class UIManager {
 		} else {
 			this.hidePrompt(this.releaseElement);
 		}
+	}
 
-		if (this.minimapReady) {
-			const pos = this.gameManager.localPlayer.worldPos;
-			this.minimap.updateMarker(pos.x, pos.y);
-		}
-		this.fpsCounter.innerText = `FPS: ${Math.floor(this.scene.game.loop.actualFps)}`;
-		this.modelCounter.innerText = `Nearby Models: ${this.gameManager.models.size}`;
+	/**
+	 * Takes a list of players and refreshes the "active player" list
+	 * @param {Object} allPlayers the list of players
+	 */
+	updatePlayersPanelDom(allPlayers) {
+		const panel = document.getElementById('players-panel');
+		const list = document.getElementById('players-list');
+		if (!panel || !list) return;
+		panel.style.display = 'block';
+		const sorted = [...allPlayers].sort((a, b) => (a.username || '').localeCompare(b.username || ''));
+		list.innerHTML = sorted.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`).join('');
+	}
 
-		const ship = this.gameManager.models.get(player.parentId);
-
-		this.shipStats.style.display = 'flex';
-		if (ship && ship instanceof ShipModel) {
-			this.shipStats.innerText = `Local Ship: ${ship.id};
-			Sail State: ${ship.sailState}
-			Turn Angle: ${ship.turnAngle}
-			Anchored: ${ship.anchored}
-			`;
-
-			// Smoothly update zoom to new value
-			const targetZoom = 0.8 - ship.sailState * (0.8 - 0.6);
-			const cam = this.scene.cameras.main;
-			cam.zoom += (targetZoom - cam.zoom) * 0.05;
-		} else {
-			this.shipStats.innerText = `Not on a ship`;
-			this.scene.cameras.main.zoomTo(0.8); // default off ship
-		}
-
-		const playerShip = this.gameManager.models.get(player.shipId);
-
-		if (playerShip && !playerShip.isDead) {
-			this.deathMessage.style.display = 'none';
-		}
-
-		this.positionElement.innerText = `Pos: x=${player.x}, y=${player.y}`;
-		this.shipPositionElement.innerText = `Ship Pos: x=${playerShip.x}, y=${playerShip.y}`;
-		this.playerStats.innerText = `
-		Player Stats: gold=${player.gold}
-		vx=${player.velocity.x}, vy=${player.velocity.y}, targetX=${player.target.x}, targetY=${player.target.y}, \n
-		carrying? ${player.carryingId}, cannon? ${player.isUsingCannon}, steering? ${player.isSteering}, nearest entity: ${target?.entity.type}
-
-		Ship Stats:
-		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
-		`;
+	updateGoldCounter(amount) {
+		if (!this.goldCounter) return;
+		if (this.lastGold === amount) return;
+		this.goldCounter.textContent = `Gold: ${amount}`;
+		this.lastGold = amount;
 	}
 
 	showShipSunkMessage() {
@@ -171,26 +241,5 @@ export default class UIManager {
 		if (htmlElement.style.display !== 'block') {
 			htmlElement.style.display = 'block';
 		}
-	}
-
-	/**
-	 * Takes a list of players and refreshes the "active player" list
-	 * @param {Object} allPlayers the list of players
-	 */
-	updatePlayersPanelDom(allPlayers) {
-		const panel = document.getElementById('players-panel');
-		const list = document.getElementById('players-list');
-		if (!panel || !list) return;
-		panel.style.display = 'block';
-		const sorted = [...allPlayers].sort((a, b) => (a.username || '').localeCompare(b.username || ''));
-		list.innerHTML = sorted.map((p, i) => `<li>${i + 1}. ${p.username || 'Anonymous'}</li>`).join('');
-	}
-
-	updateGoldCounter(amount) {
-		if (!this.goldElement) return;
-		if (this.lastGold === amount) return;
-
-		this.goldElement.textContent = `Gold: ${amount}`;
-		this.lastGold = amount;
 	}
 }

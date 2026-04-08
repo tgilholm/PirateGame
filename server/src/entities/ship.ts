@@ -1,5 +1,5 @@
 import { Bodies, Body } from 'matter-js';
-import { ShipConfig } from '../types';
+import { ShipConfig, UpgradeConfig } from '../types';
 import Entity from './entity';
 import Interactable from './interactables/interactable';
 import Player from './player';
@@ -19,7 +19,16 @@ export default class Ship extends Entity {
 	anchored: boolean;
 	private _turnAngle: number = 0;
 	private _sailState: number = 0; // not moving
-	components: Record<string, string>;
+
+	private upgradeConfig: UpgradeConfig;
+	public upgrades: Record<string, number> = {
+		cannonDamage: 1,
+		cannonballSpeed: 1,
+		reloadTime: 1,
+		acceleration: 1,
+		maxSpeed: 1,
+		maxHealth: 1,
+	};
 	sunkNotified: boolean = false;
 
 	/**
@@ -29,27 +38,30 @@ export default class Ship extends Entity {
 	 * @param y the (always absolute) y coordinate
 	 * @param config the ship's dimensions/physics/interactables from entityConfig
 	 */
-	constructor(id: string, type: string = 'ship', x: number, y: number, config: ShipConfig) {
+	constructor(
+		id: string,
+		type: string = 'ship',
+		x: number,
+		y: number,
+		config: ShipConfig,
+		upgradeConfig: UpgradeConfig
+	) {
 		super(id, type, x, y, config.maxHealth, null); // ships have no parents
+		this.upgradeConfig = upgradeConfig;
 		this.supertypes = ['ship'];
 		this.pilot = null; // Nobody piloting at startup
 		this.dimensions = config.dimensions;
 		this.physics = config.physics;
 		this.interactables = [];
 		this.anchored = true; // anchored at startup
-		this.components = {
-			body: 'LVL1',
-			sails: 'LVL1',
-			cannons: 'LVL1',
-			head: 'LVL1',
-			crowsNest: 'LVL1',
-			anchor: 'LVL1',
-			rudder: 'LVL1',
-			crew: 'LVL1',
-		};
 
 		// For adding to the matter-js world
 		this.body = this.createPhysicsBody(x, y);
+	}
+
+	getMultiplier(key: keyof typeof this.upgradeConfig): number {
+		const level = this.upgrades[key] || 1;
+		return this.upgradeConfig[key].multipliers[level - 1];
 	}
 
 	/**
@@ -74,9 +86,9 @@ export default class Ship extends Entity {
 		return {
 			...super.toState(),
 			pilotId: this.pilot?.id, // For client side messages
-			components: this.components,
 			sailState: this.sailState,
 			anchored: this.anchored,
+			upgrades: this.upgrades,
 			turnAngle: this.turnAngle,
 		};
 	}
@@ -95,6 +107,16 @@ export default class Ship extends Entity {
 
 	public get sailState() {
 		return this._sailState;
+	}
+
+	public get acceleration() {
+		const multiplier = this.getMultiplier('acceleration');
+		return this.physics.thrust * multiplier;
+	}
+
+	public override get maxHealth() {
+		const multiplier = this.getMultiplier('maxHealth');
+		return this._maxHealth * multiplier;
 	}
 
 	/**
@@ -179,21 +201,21 @@ export default class Ship extends Entity {
 
 		const sternBody = Bodies.circle(x - middleWidth / 2, y, sternRadius * 0.9, {
 			label: 'ship-stern',
-			friction: 0.5,
+			friction: 0.05,
 			restitution: 0.2,
 			mass: 50,
 		});
 
 		const middleBody = Bodies.rectangle(x, y, middleWidth, middleHeight, {
 			label: 'ship-middle',
-			friction: 0.5,
+			friction: 0.05,
 			restitution: 0.2,
 			mass: 100,
 		});
 
 		const bowBody = Bodies.trapezoid(x + middleWidth / 2, y, bowLength, middleHeight, 0.65, {
 			label: 'ship-bow',
-			friction: 0.5,
+			friction: 0.05,
 			restitution: 0.2,
 			mass: 50,
 		});

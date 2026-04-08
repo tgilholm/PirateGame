@@ -8,9 +8,11 @@ import { EventEmitter } from 'events';
 import { CONFIG } from '../config';
 import ProjectileSystem from '../systems/projectile-system';
 import SpatialGrid from './spatial-grid';
-import TerrainMap from 'src/engine/terrain-map';
-import Entity from 'src/entities/entity';
-import SessionHandler from 'src/handlers/session-handler';
+import TerrainMap from '../engine/terrain-map';
+import Entity from '../entities/entity';
+import SessionHandler from '../handlers/session-handler';
+import NPC from '../entities/npcs/npc';
+import NPCShip from '../entities/npcs/npc-ship';
 
 /**
  * Communication contract between this game world and the socket service
@@ -30,6 +32,11 @@ export default class GameWorld extends EventEmitter {
 	private tickRate = CONFIG.TICK_RATE;
 	private tickInterval?: NodeJS.Timeout;
 	private lastTime: number = 0;
+
+	private minimalPlayers: any[] = [];
+	private minimalShips: any[] = [];
+	private minimalNPCs: any[] = [];
+	private minimalInteractables: any[] = [];
 
 	/**
 	 * Creates a game world with the provided dependencies
@@ -78,11 +85,41 @@ export default class GameWorld extends EventEmitter {
 		this.lastTime = now;
 		this.engine.tick(dt);
 		this.broadcastGameState();
+		this.updateMinimalLists();
 
 		// correct delays instead of using setInterval
 		const elapsed = Date.now() - now;
 		const delay = Math.max(0, 1000 / this.tickRate - elapsed);
 		this.tickInterval = setTimeout(() => this.tick(), delay) as any;
+	}
+
+	private updateMinimalLists() {
+		// Recalculate lightweight entity lists once per tick
+
+		// minimal entity lists for minimaps
+		this.minimalPlayers = this.registry.getByType<Player>('player').map((p) => ({
+			id: p.id,
+			username: p.username,
+			x: p.worldPos.x,
+			y: p.worldPos.y,
+		}));
+
+		this.minimalShips = this.registry.getByType('ship').map((s) => ({
+			x: s.x,
+			y: s.y,
+			r: s.r, // todo width/height
+		}));
+
+		// npc ships are included in minimal ships- no need to send them twice
+		this.minimalNPCs = this.registry
+			.getByType<NPC>('npc')
+			.filter((n) => !(n instanceof NPCShip))
+			.map((n) => ({
+				x: n.x,
+				y: n.y,
+			}));
+
+		this.minimalInteractables = []; //todo
 	}
 
 	/**
@@ -203,17 +240,22 @@ export default class GameWorld extends EventEmitter {
 
 			// Only send splashes that are within this player's view distance
 			const splashEvents = splashes.filter((s) => Math.hypot(s.x - wx, s.y - wy) <= this.grid['viewDistance']);
-			const allPlayers = this.registry.getByType<Player>('player').map((p) => ({
-				id: p.id,
-				username: p.username,
-			}));
 
 			// If nothing has changed, skip it altogether
 			if (!newEntities.length && !deltaEntities.length && !removedIds.length && !splashEvents.length) {
 				return null;
 			}
 			// Send to client via socket service
-			return { newEntities, deltaEntities, removedIds, splashEvents, allPlayers };
+			return {
+				newEntities,
+				deltaEntities,
+				removedIds,
+				splashEvents,
+				minimalPlayers: this.minimalPlayers,
+				minimalInteractables: this.minimalInteractables,
+				minimalShips: this.minimalShips,
+				minimalNPCs: this.minimalNPCs,
+			};
 		});
 
 		// Drain splashes — they have been broadcast this tick
@@ -230,7 +272,10 @@ export default class GameWorld extends EventEmitter {
 			mapWidth: this.terrain.widthInPixels,
 			mapHeight: this.terrain.heightInPixels,
 			shopSpawns: this.registry.getByType<Entity>('shop').map((s) => ({ X: s.x, Y: s.y })),
-			allPlayers: this.registry.getByType<Player>('player').map((p) => ({ id: p.id, username: p.username })),
+			minimalPlayers: this.minimalPlayers,
+			minimalInteractables: this.minimalInteractables,
+			minimalShips: this.minimalShips,
+			minimalNPCs: this.minimalNPCs,
 		};
 	}
 
@@ -240,7 +285,7 @@ export default class GameWorld extends EventEmitter {
 	private createShops() {
 		const shops = this.terrain.getTileset('shop-spawns');
 		shops.forEach((shop, index) => {
-			this.entityFactory.createShop(`shop_${index}`, shop.x, shop.y);
+			this.entityFactory.createInteractable(null, { type: 'shop', x: shop.x, y: shop.y }, index);
 		});
 	}
 }

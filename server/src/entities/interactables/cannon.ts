@@ -1,14 +1,14 @@
 import Entity from '../entity';
 import Interactable from './interactable';
-import entityConfig from '../../../../shared/entity-config.json';
+import Ship from '../ship';
 
 export default class Cannon extends Interactable {
 	targetAngle: number; // where the cannon is moving to
-	reloadTime: number = entityConfig.ship.defaultStats.reloadTime;
+	#baseReloadTime: number = 3000;
+	#baseCannonDamage: number = 100;
+	#baseCannonballSpeed: number = 400;
+
 	reloadTimer: number = 0;
-	cannonDamage: number = entityConfig.ship.defaultStats.cannonDamage;
-	cannonRange: number = entityConfig.ship.defaultStats.cannonRange;
-	cannonBallSpeed: number = entityConfig.ship.defaultStats.cannonBallSpeed;
 
 	constructor(id: string, x: number, y: number, parent: Entity | null) {
 		super(id, x, y, parent, 'cannon');
@@ -18,6 +18,36 @@ export default class Cannon extends Interactable {
 		if (parent) {
 			this.r = y < 0 ? -Math.PI / 2 : Math.PI / 2; // always face outward to start
 		}
+	}
+
+	get reloadTime(): number {
+		if (this.parent && this.parent instanceof Ship) {
+			const multiplier = this.parent.getMultiplier('reloadTime');
+			return this.#baseReloadTime * multiplier;
+		}
+
+		// for non-parented cannons
+		return this.#baseReloadTime;
+	}
+
+	get cannonDamage(): number {
+		if (this.parent && this.parent instanceof Ship) {
+			const multiplier = this.parent.getMultiplier('cannonDamage');
+			return this.#baseCannonDamage * multiplier;
+		}
+
+		// for non-parented cannons
+		return this.#baseCannonDamage;
+	}
+
+	get cannonballSpeed(): number {
+		if (this.parent && this.parent instanceof Ship) {
+			const multiplier = this.parent.getMultiplier('cannonballSpeed');
+			return this.#baseCannonballSpeed * multiplier;
+		}
+
+		// for non-parented cannons
+		return this.#baseCannonballSpeed;
 	}
 
 	get isReloaded(): boolean {

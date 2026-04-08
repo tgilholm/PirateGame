@@ -104,7 +104,7 @@ export default class ShipModel extends Model {
 		super.sync(data);
 
 		// Snap if distance has changed a lot
-		if (!this.initialised || Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 150) {
+		if (!this.initialised || Phaser.Math.Distance.Between(this.x, this.y, data.x, data.y) > 1500) {
 			this.x = data.x;
 			this.y = data.y;
 			this.rotation = data.r;
@@ -113,7 +113,7 @@ export default class ShipModel extends Model {
 
 		if (data.av !== undefined) this.angularVelocity = data.av;
 		if (data.pilotId !== undefined) this.pilotId = data.pilotId;
-		if (data.components !== undefined) this.components = data.components;
+		if (data.upgrades !== undefined) this.upgrades = data.upgrades;
 		if (data.sailState !== undefined) this.sailState = data.sailState;
 		if (data.anchored !== undefined) this.anchored = data.anchored;
 		if (data.turnAngle !== undefined) this.turnAngle = data.turnAngle;

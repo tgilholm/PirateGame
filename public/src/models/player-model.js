@@ -36,7 +36,7 @@ export default class PlayerModel extends Model {
 		// Name text is not a child of the container- avoids counter-rotation logic
 		this.nameText = scene.add
 			.text(0, -50, '', {
-				fontSize: '12px',
+				fontSize: '16px',
 				fontFamily: 'Consolas',
 				color: '#ffffff',
 				backgroundColor: '#00000088',
@@ -80,6 +80,7 @@ export default class PlayerModel extends Model {
 		if (data.shipId !== undefined) this.shipId = data.shipId;
 		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
 		if (data.activeMinigame !== undefined) this.activeMinigame = data.activeMinigame;
+		if (data.isUsingShop !== undefined) this.isUsingShop = data.isUsingShop;
 
 		if ('carryingId' in data) {
 			this.carryingId = data.carryingId;

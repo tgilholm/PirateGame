@@ -51,7 +51,7 @@ export interface MoveData {
 }
 
 export interface UpgradeData {
-	itemId: string;
+	name: string;
 }
 
 export interface InteractData {

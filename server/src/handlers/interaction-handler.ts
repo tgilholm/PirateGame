@@ -7,7 +7,7 @@ import Player from '../entities/player';
 import Ship from '../entities/ship';
 import TreasureSystem from '../systems/treasure-system';
 import { TreasureState } from '@shared/socket-protocol';
-import EntityRegistry from 'src/engine/entity-registry';
+import EntityRegistry from '../engine/entity-registry';
 
 /**
  * Handler class- provides methods for each type of player interaction with interactable entities,

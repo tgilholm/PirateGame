@@ -33,7 +33,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.#playerListCache = null;
 		this.digMinigame = new DigMinigame();
 		this.moveTimer = 0;
-		this.allPlayers = [];
 		this.playerListDirty = true;
 		/** @type {PlayerModel} */
 		this.localPlayer = null;
@@ -43,6 +42,11 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.models = new Map(); // generic entity list
 
 		this.closestInteractable = null;
+
+		this.minimalPlayers = [];
+		this.minimalNPCs = [];
+		this.minimalShips = [];
+		this.minimalInteractables = [];
 
 		this.startListeners();
 	}
@@ -87,7 +91,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		/** @type {Object} */
 		let closest = null;
 		let nearestDist = Infinity;
-		const now = Date.now();
 		this.models.forEach((entity, id) => {
 			if (entity === this.localPlayer) {
 				entity.target.r = inputs.aimAngle; // shortcut the aim angle for local player
@@ -158,10 +161,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	 * @param {Object} data the data from the server
 	 */
 	onDeltaSync(data) {
-		if (data.allPlayers) {
-			this.allPlayers = data.allPlayers;
+		if (data.minimalPlayers) {
+			this.minimalPlayers = data.minimalPlayers;
 			this.playerListDirty = true;
 		}
+
+		if (data.minimalShips) this.minimalShips = data.minimalShips;
+		if (data.minimalNPCs) this.minimalNPCs = data.minimalNPCs;
+		if (data.minimalInteractables) this.minimalInteractables = data.minimalInteractables;
 
 		data.newEntities?.forEach((entityData) => {
 			this.applyFull(entityData);
@@ -232,7 +239,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.digMinigame.sync(delta.activeMinigame);
 		}
 
-		if (delta.components !== undefined && delta.id === 'ship_' + this.playerId) {
+		if (delta.upgrades !== undefined && delta.id === this.localPlayer.shipId) {
 			this.emit('localShipUpdated');
 		}
 	}
@@ -299,15 +306,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
-		this.network.on(ServerEvent.DEAD, (id) => {
-			if (id === this.localPlayer.id) {
-				this.emit('playerDied');
-			}
-		});
-
 		this.network.on(ServerEvent.SUNK, (id) => {
 			if (id === this.localPlayer.id) {
-				this.emit('shipSunk');
+				this.emit('shipSunk'); // for displaying respawn dialog
 			}
 		});
 
@@ -315,6 +316,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			const target = this.closestInteractable;
 			if (target?.entity) {
 				const closest = target.entity;
+
+				// Shortcut interact, just open shop if close enough
+				// only upgrade packets are checked authoritatively
+				if (closest.type === 'shop') {
+					this.emit('openShop');
+				}
 
 				this.network.sendInteract({
 					targetId: closest.id,
@@ -402,15 +409,19 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.localPlayer = null;
 	}
 
+	buyUpgrade(name) {
+		this.network.sendUpgrade(name);
+	}
+
 	/**
-	 * Returns the component variants for the local player's ship, or null if unavailable.
-	 * @returns {Record<string, string> | null}
+	 *
+	 * @returns {Record<string, number> | null}
 	 */
-	getLocalShipComponents() {
-		if (!this.playerId) return null;
-		const ship = this.models.get('ship_' + this.playerId);
+	getLocalShipUpgrades() {
+		if (!this.localPlayer) return null;
+		const ship = this.models.get(this.localPlayer.shipId);
 
 		if (!(ship instanceof ShipModel)) return null;
-		return ship?.components ?? null;
+		return ship?.upgrades ?? null;
 	}
 }
