@@ -130,6 +130,6 @@ export default class ModelFactory {
 	 * @returns the shop model
 	 */
 	createShop(data) {
-		return new ShopModel(this.scene, data.id, data.x, data.y, this.config.shop);
+		return new ShopModel(this.scene, data.id, data.x, data.y);
 	}
 }
