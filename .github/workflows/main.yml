@@ -1,4 +1,6 @@
 name: Deploy Poopdeck Pirates
+permissions:
+  contents: read
 
 on:
   release:
