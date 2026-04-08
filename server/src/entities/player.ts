@@ -16,7 +16,7 @@ export default class Player extends Entity {
 	carrying: Interactable | null = null;
 	isDigging: boolean = false;
 	ship: Ship; // the player's own ship
-	gold: number = 1000000;
+	gold: number = 500;
 	inputs: {
 		up: boolean;
 		down: boolean;

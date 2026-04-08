@@ -109,6 +109,16 @@ export default class Ship extends Entity {
 		return this._sailState;
 	}
 
+	public get acceleration() {
+		const multiplier = this.getMultiplier('acceleration');
+		return this.physics.thrust * multiplier;
+	}
+
+	public override get maxHealth() {
+		const multiplier = this.getMultiplier('maxHealth');
+		return this._maxHealth * multiplier;
+	}
+
 	/**
 	 * Helper method to convert the position of this object from local scope (on this ship)
 	 * to world scope (absolute coordinates)
@@ -191,21 +201,21 @@ export default class Ship extends Entity {
 
 		const sternBody = Bodies.circle(x - middleWidth / 2, y, sternRadius * 0.9, {
 			label: 'ship-stern',
-			friction: 0.5,
+			friction: 0.05,
 			restitution: 0.2,
 			mass: 50,
 		});
 
 		const middleBody = Bodies.rectangle(x, y, middleWidth, middleHeight, {
 			label: 'ship-middle',
-			friction: 0.5,
+			friction: 0.05,
 			restitution: 0.2,
 			mass: 100,
 		});
 
 		const bowBody = Bodies.trapezoid(x + middleWidth / 2, y, bowLength, middleHeight, 0.65, {
 			label: 'ship-bow',
-			friction: 0.5,
+			friction: 0.05,
 			restitution: 0.2,
 			mass: 50,
 		});

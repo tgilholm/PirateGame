@@ -11,7 +11,7 @@ export default abstract class Entity {
 	public r: number; // rotation
 	public av: number; // angular velocity
 	public health: number;
-	public maxHealth: number;
+	protected _maxHealth: number;
 	public parent: Entity | null; // all entities can "technically" have parents
 	public supertypes: string[] = []; // all "memberships"
 
@@ -43,7 +43,7 @@ export default abstract class Entity {
 
 		// All entities have health and can be destroyed
 		this.parent = parent;
-		this.maxHealth = maxHealth;
+		this._maxHealth = maxHealth;
 		this.health = maxHealth; // Start at maximum
 	}
 
@@ -53,6 +53,10 @@ export default abstract class Entity {
 	 */
 	public markDirty(): void {
 		this.dirty = true;
+	}
+
+	public get maxHealth() {
+		return this._maxHealth;
 	}
 
 	/**

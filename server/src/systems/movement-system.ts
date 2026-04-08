@@ -271,18 +271,15 @@ export default class MovementSystem implements BaseSystem {
 		const body = ship.body;
 		const sailState = ship.sailState;
 		const turnAngle = ship.turnAngle;
-		const { turnSpeed, thrust } = ship.physics;
-		const speed = ship.body.speed;
-		const maxSpeed = 5;
-		const speedRatio = Math.min(speed / maxSpeed, 1);
-		const turnScale = 1 - speedRatio * 0.6; // linear
+		const acceleration = ship.acceleration; // using get method for auto-applied modifier
+		const { turnSpeed } = ship.physics;
 
 		// Turning
-		Body.setAngularVelocity(body, turnSpeed * turnAngle * turnScale);
+		Body.setAngularVelocity(body, turnSpeed * turnAngle);
 
 		const force = {
-			x: Math.cos(body.angle) * thrust * sailState,
-			y: Math.sin(body.angle) * thrust * sailState,
+			x: Math.cos(body.angle) * acceleration * sailState,
+			y: Math.sin(body.angle) * acceleration * sailState,
 		};
 
 		Body.applyForce(body, body.position, force);
