@@ -2,6 +2,8 @@ import GameManager from './game-manager.js';
 import ShipModel from '../models/ship-model.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
+import ShopModel from '../models/shop-model.js';
+import PlayerModel from '../models/player-model.js';
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -93,6 +95,24 @@ export default class UIManager {
 		this.updateInteractionPrompts(player, target);
 		this.updateDebugStats(player, target);
 		this.updateMinimap(player);
+		this.updateShopMenu(player);
+	}
+
+	/**
+	 *
+	 * @param {PlayerModel} player
+	 */
+	updateShopMenu(player) {
+		// only hide if using
+		if (!this.shopUI.isVisible) return;
+
+		const closeToShop = Array.from(this.gameManager.interactables)
+			.filter((item) => item instanceof ShopModel)
+			.some((shop) => {
+				return this.gameManager.getDistanceToInteractable(player, shop) < shop.interactRange;
+			});
+
+		if (!closeToShop) this.shopUI.hide();
 	}
 
 	updateMinimap(localPlayer) {

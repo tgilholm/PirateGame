@@ -37,6 +37,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		/** @type {PlayerModel} */
 		this.localPlayer = null;
 		this.playerId = null;
+		this.interactables = new Set();
 
 		/** @type {Map<string, Model>} */
 		this.models = new Map(); // generic entity list
@@ -97,7 +98,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			}
 
 			// This replaces the getClosestInteractable function, avoiding another for loop
-			if (entity.isInteractable && entity instanceof InteractableModel) {
+			if (entity instanceof InteractableModel) {
 				const dist = this.getDistanceToInteractable(this.localPlayer, entity);
 				if (dist < nearestDist) {
 					if (entity.id !== this.localPlayer.carryingId) {
@@ -105,6 +106,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 						closest = { entity, dist };
 					}
 				}
+
+				this.interactables.add(entity);
 			}
 
 			entity.update(delta);
