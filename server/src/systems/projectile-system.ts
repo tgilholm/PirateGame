@@ -2,10 +2,10 @@ import Projectile from '../entities/projectiles/projectile';
 import EntityRegistry from '../engine/entity-registry';
 import { BaseSystem } from './base-system';
 import SpatialGrid from '../application/spatial-grid';
-import Player from 'src/entities/player';
-import Ship from 'src/entities/ship';
-import Entity from 'src/entities/entity';
-import Shop from 'src/entities/shop';
+import Player from '../entities/player';
+import Ship from '../entities/ship';
+import Entity from '../entities/entity';
+import Shop from '../entities/shop';
 import { SplashEvent, SplashType } from '@shared/socket-protocol';
 import TerrainMap from '../engine/terrain-map';
 
@@ -96,9 +96,8 @@ export default class ProjectileSystem implements BaseSystem {
 		if (proj.type !== 'cannonball') return; // bullets don't damage ships
 
 		for (const id of nearby) {
-			const entity = this.entityRegistry.get(id);
-			if (entity?.type !== 'ship' || proj.firedBy?.parent === entity) continue;
-			const ship = entity as Ship;
+			const ship = this.entityRegistry.get(id);
+			if (!(ship instanceof Ship) || proj.firedBy?.parent === ship) continue;
 
 			const local = ship.worldToLocal(proj.x, proj.y);
 			if (ship.isInside(local.x, local.y, -proj.radius)) {

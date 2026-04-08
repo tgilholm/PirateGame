@@ -9,13 +9,14 @@ const config = {
 	type: Phaser.AUTO,
 	width: window.innerWidth, // doesn't account for resize yet
 	height: window.innerHeight,
+	roundPixels: true,
 	pixelArt: true,
 	backgroundColor: '#b0e9fc', // same colour as the sea
 	parent: parent,
 	scene: [StartScene, MainScene], // Add all scenes in
 
 	render: {
-		mipmapFilter: 'LINEAR',
+		mipmapFilter: 'NEAREST',
 		antialias: true,
 		premultipliedAlpha: false,
 	},

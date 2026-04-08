@@ -8,6 +8,7 @@ import Entity from '../entities/entity';
 import NPCShip from '../entities/npcs/npc-ship';
 import Money from 'src/entities/interactables/money';
 import Ship from 'src/entities/ship';
+import { Body } from 'matter-js';
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -22,7 +23,8 @@ export default class NPCSystem implements BaseSystem {
 		private terrainMap: TerrainMap,
 		private entityFactory: EntityFactory,
 		private entityRegistry: EntityRegistry,
-		private spatialGrid: SpatialGrid
+		private spatialGrid: SpatialGrid,
+		private addPhysicsBody: (body: Matter.Body) => void
 	) {}
 
 	update(dt: number): void {
@@ -67,8 +69,9 @@ export default class NPCSystem implements BaseSystem {
 		const dy = next.y - current.y;
 		const segLength = Math.hypot(dx, dy);
 
-		// prevent dividing by 0
-		if (segLength === 0) {
+		// prevent dividing by 0 with a 20px threshold
+		if (segLength < 20) {
+			//
 			ship.pathIndex = nextIndex;
 			return;
 		}
@@ -79,20 +82,25 @@ export default class NPCSystem implements BaseSystem {
 		const deltaT = moveDistance / segLength;
 		ship.segmentT += deltaT;
 
+		let x, y;
+
 		// If close enough, jump to the next segment
 		if (ship.segmentT >= 1) {
 			ship.segmentT = 0;
 			ship.pathIndex = nextIndex;
 
-			ship.x = next.x;
-			ship.y = next.y;
+			x = next.x;
+			y = next.y;
 		} else {
 			// Otherwise move smoothly
-			ship.x = current.x + dx * ship.segmentT;
-			ship.y = current.y + dy * ship.segmentT;
+			x = current.x + dx * ship.segmentT;
+			y = current.y + dy * ship.segmentT;
 		}
 
-		ship.r = Math.atan2(dy, dx);
+		// Update physics body, not the actual ship
+		// physicsSystem handles that separately
+		Body.setPosition(ship.body, { x: x, y: y });
+		Body.setAngle(ship.body, Math.atan2(dy, dx));
 	}
 
 	reap(npc: NPC) {
@@ -148,8 +156,9 @@ export default class NPCSystem implements BaseSystem {
 	generateNPCShips(ships: NPCShip[], path: Array<{ x: number; y: number }>): void {
 		if (ships.length >= this.npcShipLimit || path.length === 0) return;
 
-		const spawn = path[0];
-		this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
+		const spawn = path[Math.floor(Math.random() * path.length - 1)]; // so it's not the same every time
+		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
+		this.addPhysicsBody(ship.body);
 	}
 
 	getSpawnPoint() {

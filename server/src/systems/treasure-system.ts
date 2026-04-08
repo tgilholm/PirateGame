@@ -7,7 +7,6 @@ import Ship from '../entities/ship';
 import { BaseSystem } from './base-system';
 import Shop from '../entities/shop';
 import { TreasureState } from '@shared/socket-protocol';
-import Entity from '../entities/entity';
 import SpatialGrid from '../application/spatial-grid';
 import DigMinigame from '../minigames/dig-minigame';
 
@@ -15,9 +14,6 @@ export default class TreasureSystem implements BaseSystem {
 	private spawnTime = 5000; // spawn treasure every 5s
 	private spawnTimer = 0;
 	private nextTreasureId = 1;
-	private onResult?: (player: Player, payload: { success: boolean }) => void;
-	private onRemove?: (entity: Entity) => void;
-
 	private minGold: number = 10;
 	private maxGold: number = 75;
 	private maxTreasures: number = 10;
@@ -31,12 +27,9 @@ export default class TreasureSystem implements BaseSystem {
 		private entityFactory: EntityFactory,
 		private terrainMap: TerrainMap,
 		private grid: SpatialGrid,
-		onMinigameResult: (player: Player, result: { success: boolean }) => void,
-		onEntityRemoved: (entity: Entity) => void
-	) {
-		this.onResult = onMinigameResult;
-		this.onRemove = onEntityRemoved;
-	}
+		private onResult: (player: Player, payload: { success: boolean }) => void,
+		private onRemove: (id: string) => void
+	) {}
 
 	update(dt: number): void {
 		this.spawnTimer += dt * 1000;
@@ -145,7 +138,7 @@ export default class TreasureSystem implements BaseSystem {
 		}
 
 		const expired = this.holes.filter((hole) => hole.expiresAt <= now);
-		expired.forEach((hole) => this.onRemove?.(hole));
+		expired.forEach((hole) => this.onRemove?.(hole.id));
 		this.holes = this.holes.filter((hole) => hole.expiresAt > now); // remove also from spatial grid via callback
 	}
 

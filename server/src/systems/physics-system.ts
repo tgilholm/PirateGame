@@ -86,7 +86,9 @@ export default class PhysicsSystem implements BaseSystem {
 		Matter.Engine.update(this.engine, dt * 1000);
 
 		// Sync matter body state back to ship entities, marking dirty if changed
-		this.registry.getByType<Ship>('ship').forEach((ship) => {
+		this.registry.getByType('ship').forEach((ship) => {
+			if (!(ship instanceof Ship)) return;
+
 			const newX = ship.body.position.x;
 			const newY = ship.body.position.y;
 			const newR = ship.body.angle;
