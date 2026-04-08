@@ -97,6 +97,8 @@ export default class NPCSystem implements BaseSystem {
 			y = current.y + dy * ship.segmentT;
 		}
 
+		// Update physics body, not the actual ship
+		// physicsSystem handles that separately
 		Body.setPosition(ship.body, { x: x, y: y });
 		Body.setAngle(ship.body, Math.atan2(dy, dx));
 	}
