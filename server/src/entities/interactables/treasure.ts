@@ -7,11 +7,7 @@ export default class Treasure extends Interactable {
 	public spawnedAt: number;
 	public state: TreasureState = TreasureState.BURIED;
 	public carried: boolean = false;
-	public digSpeed: number = 1;
-	public digProgress: number = 0;
 	public openedAt: number | null;
-	public successZoneSize: number = 0.2;
-	public successZoneStart: number = 0;
 	public expiresAt: number = 0;
 
 	constructor(id: string, x: number, y: number, goldValue: number) {
@@ -37,9 +33,7 @@ export default class Treasure extends Interactable {
 			y: this.y,
 			goldValue: this.goldValue,
 			state: this.state,
-			digProgress: this.digProgress,
 			openedAt: this.openedAt,
-			successZoneSize: this.successZoneSize,
 		};
 	}
 }

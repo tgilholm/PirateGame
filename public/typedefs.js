@@ -3,6 +3,8 @@
 /** @typedef {import("shared/entity-config.json")["player"]} PlayerConfig */ // just players
 /** @typedef {import("shared/entity-config.json")["npcShip"]} NPCShipConfig */
 
+/** @typedef {import("shared/upgrade-config.json")} UpgradeConfig */
+
 /**
  *
  * @typedef {Object} InteractableInstance

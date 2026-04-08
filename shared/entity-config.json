@@ -3,8 +3,7 @@
 		"maxHealth": 100,
 		"runSpeed": 5,
 		"swimSpeed": 3,
-		"radius": 15,
-		"startingGold": 100
+		"radius": 15
 	},
 	"ship": {
 		"maxHealth": 1000,
@@ -15,7 +14,7 @@
 			"sternRadius": 80
 		},
 		"physics": {
-			"turnSpeed": 0.003,
+			"turnSpeed": 0.008,
 			"mass": 600,
 			"frictionAir": 0.00001,
 			"restitution": 0.2,
@@ -47,24 +46,7 @@
 				"x": -80,
 				"y": -75
 			}
-		],
-		"defaultStats": {
-			"maxHealth": 450,
-			"acceleration": 0.15,
-			"maxSpeed": 10,
-			"cannonDamage": 5,
-			"cannonRange": 500,
-			"cannonBallSpeed": 300,
-			"rammingPower": 10,
-			"minimapRange": 100,
-			"visionRange": 10,
-			"turnSpeed": 50,
-			"responseTime": 5,
-			"reloadTime": 3000,
-			"accuracy": 20,
-			"weight": 450,
-			"frictionAir": 0.05
-		}
+		]
 	},
 	"npcShip": {
 		"maxHealth": 10000,
@@ -127,28 +109,6 @@
 				"x": -150,
 				"y": -110
 			}
-		],
-		"defaultStats": {
-			"maxHealth": 450,
-			"crewCapacity": 10,
-			"acceleration": 0.15,
-			"maxSpeed": 10,
-			"cannonDamage": 5,
-			"cannonRange": 500,
-			"cannonBallSpeed": 300,
-			"cannonCount": 6,
-			"rammingPower": 10,
-			"minimapRange": 100,
-			"visionRange": 10,
-			"stopPower": 20,
-			"deployTime": 5,
-			"retrieveTime": 5,
-			"turnSpeed": 50,
-			"responseTime": 5,
-			"reloadTime": 3000,
-			"accuracy": 20,
-			"weight": 450,
-			"frictionAir": 0.05
-		}
+		]
 	}
 }

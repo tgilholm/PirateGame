@@ -45,7 +45,6 @@ export default class Player extends Entity {
 	constructor(id: string, x: number, y: number, parent: Entity | null, username: string, config: PlayerConfig) {
 		super(id, 'player', x, y, config.maxHealth, parent);
 		this.username = username || ''; // default to no uname
-		this.gold = config.startingGold || 0; // default to 0 gold
 
 		// Player-specific detail
 		this.ship = parent as Ship;

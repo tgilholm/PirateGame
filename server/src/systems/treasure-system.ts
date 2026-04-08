@@ -236,7 +236,7 @@ export default class TreasureSystem implements BaseSystem {
 
 		for (const player of players) {
 			if (!player.carrying) continue;
-			const canDeposit = shops.some((shop) => shop.canInteract(player));
+			const canDeposit = true; //shops.some((shop) => shop.canInteract(player));
 			if (!canDeposit) continue;
 
 			const treasure = this.registry.get(player.carrying.id) as Treasure | null;

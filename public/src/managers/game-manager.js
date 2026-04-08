@@ -410,12 +410,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	}
 
 	/**
-	 * Returns the component variants for the local player's ship, or null if unavailable.
+	 *
 	 * @returns {Record<string, string> | null}
 	 */
-	getLocalShipComponents() {
-		if (!this.playerId) return null;
-		const ship = this.models.get('ship_' + this.playerId);
+	getLocalShipUpgrades() {
+		if (!this.localPlayer) return null;
+		const ship = this.models.get(this.localPlayer.shipId);
 
 		if (!(ship instanceof ShipModel)) return null;
 		return ship?.components ?? null;

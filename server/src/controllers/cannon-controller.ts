@@ -33,24 +33,13 @@ export default class CannonController {
 			spawnPos.x,
 			spawnPos.y,
 			worldAngle,
-			cannon.cannonBallSpeed
+			cannon.cannonballSpeed,
+			cannon.cannonDamage
 		);
 		ball.vx += worldVel.x;
 		ball.vy += worldVel.y;
 		ball.firedBy = cannon; // avoid hitting own ship
 		ball.damage = cannon.cannonDamage;
-		ball.ttl = cannon.cannonRange;
-		console.log(
-			'[CannonFire] damage=' +
-				ball.damage +
-				' range(ttl)=' +
-				ball.ttl +
-				'ms (~' +
-				Math.round(((ball.ttl / 1000) * cannon.cannonBallSpeed) / 64) +
-				' grids) speed=' +
-				cannon.cannonBallSpeed
-		);
-
 		this.entityRegistry.create(ball);
 	}
 

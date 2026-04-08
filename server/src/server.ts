@@ -13,6 +13,7 @@ import GameWorld from './application/game-world';
 import EntityRegistry from './engine/entity-registry';
 import EntityFactory from './entities/entity-factory';
 import entityConfig from '../../shared/entity-config.json';
+import upgradeConfig from '../../shared/upgrade-config.json';
 import GameEngine from './engine/game-engine';
 import PhysicsSystem from './systems/physics-system';
 import MovementSystem from './systems/movement-system';
@@ -22,21 +23,19 @@ import { Engine } from 'matter-js';
 import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
 import PlayerController from './controllers/player-controller';
-import UpgradeHandler from './handlers/upgrade-handler';
-import StatsHandler from './handlers/stats-handler';
 import ShipController from './controllers/ship-controller';
 import MessageController from './controllers/message-controller';
 import InteractionHandler from './handlers/interaction-handler';
 import SpatialGrid from './application/spatial-grid';
 import CannonController from './controllers/cannon-controller';
 import NPCSystem from './systems/npc-system';
-import GoldHandler from './handlers/gold-handler';
 import { ServerEvent } from '@shared/socket-protocol';
 import TreasureSystem from './systems/treasure-system';
 import SpawnSystem from './systems/spawn-system';
 import SessionHandler from './handlers/session-handler';
 import Player from './entities/player';
 import Entity from './entities/entity';
+import UpgradeHandler from './handlers/upgrade-handler';
 
 // Create the express app & server
 const app = express();
@@ -61,7 +60,7 @@ const spatialGrid = new SpatialGrid(512, 2048);
 const terrainMap = new TerrainMap('demo-map.json');
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid, terrainMap);
-const entityFactory = new EntityFactory(entityConfig, registry);
+const entityFactory = new EntityFactory(entityConfig, upgradeConfig, registry);
 const treasureSystem = new TreasureSystem(
 	registry,
 	entityFactory,
@@ -82,7 +81,7 @@ const engine = new GameEngine({
 	treasureSystem,
 });
 
-const upgradeHandler = new UpgradeHandler(new GoldHandler(), new StatsHandler());
+const upgradeHandler = new UpgradeHandler(upgradeConfig, registry);
 const interactionHandler = new InteractionHandler(treasureSystem, registry);
 const sessionHandler = new SessionHandler(registry, entityFactory, engine, spatialGrid);
 

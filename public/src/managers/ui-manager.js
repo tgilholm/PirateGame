@@ -1,7 +1,6 @@
 import GameManager from './game-manager.js';
 import ShipModel from '../models/ship-model.js';
 import Minimap from '../ui/minimap.js';
-import ShopUI from '../ui/shop-ui.js';
 
 /**
  * Owns all user interface concerns. All HTML/DOM logic should be routed
@@ -16,10 +15,11 @@ export default class UIManager {
 	 * @param {Phaser.Tilemaps.Tilemap} map
 	 * @param {boolean} showDebug whether or not to show the fps counter, model count etc
 	 */
-	constructor(scene, gameManager, minimap, map, showDebug = false) {
+	constructor(scene, gameManager, minimap, map, shopUI, showDebug = false) {
 		this.scene = scene;
 		this.gameManager = gameManager;
 		this.minimap = minimap;
+		this.shopUI = shopUI;
 
 		// interaction
 		this.promptElement = document.getElementById('interaction-prompt');
@@ -45,7 +45,6 @@ export default class UIManager {
 		this.deathMessage.style.display = 'none';
 
 		// shop
-		this.shopUI = new ShopUI(gameManager);
 		this.shopMenu = document.getElementById('shop-menu');
 		gameManager.on('openShop', () => this.shopUI.show());
 

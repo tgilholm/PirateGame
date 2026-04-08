@@ -37,6 +37,11 @@ const entityConfig = await fetch('/shared/entity-config.json').then((r) => r.jso
 // @ts-ignore cheesing here
 window.entityConfig = entityConfig;
 
+const upgradeConfig = await fetch('/shared/upgrade-config.json').then((r) => r.json());
+
+//@ts-ignore
+window.upgradeConfig = upgradeConfig;
+
 //@ts-ignore more cheesing
 window.showDebug = showDebug;
 const game = new Phaser.Game(config);

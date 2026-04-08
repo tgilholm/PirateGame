@@ -24,7 +24,6 @@ export default class TreasureModel extends InteractableModel {
 		}
 
 		if (data.state !== undefined) this.state = data.state;
-		if (data.digProgress !== undefined) this.digProgress = data.digProgress;
 		if (data.carrierId !== undefined) this.carrierId = data.carrierId;
 		if (data.goldValue !== undefined) this.goldValue = data.goldValue;
 

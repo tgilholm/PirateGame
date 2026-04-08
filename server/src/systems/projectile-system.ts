@@ -113,16 +113,16 @@ export default class ProjectileSystem implements BaseSystem {
 	}
 
 	collideShop(proj: Projectile, nearby: Set<string>) {
-		nearby.forEach((id) => {
-			const entity = this.entityRegistry.get(id);
-			if (entity?.type !== 'shop') return;
-
-			const shop = entity as Shop;
-			const dist = Math.hypot(proj.x - shop.x, proj.y - shop.y);
-			if (dist < proj.radius + shop.radius) {
-				this.destroyEntity(proj);
-			}
-		});
+		// replace with interactable collide
+		// nearby.forEach((id) => {
+		// 	const entity = this.entityRegistry.get(id);
+		// 	if (entity?.type !== 'shop') return;
+		// 	const shop = entity as Shop;
+		// 	const dist = Math.hypot(proj.x - shop.x, proj.y - shop.y);
+		// 	if (dist < proj.radius + shop.radius) {
+		// 		this.destroyEntity(proj);
+		// 	}
+		// });
 	}
 
 	/**

@@ -7,6 +7,7 @@ import InputManager from '../managers/input-manager.js';
 import ModelFactory from '../managers/model-factory.js';
 import AnimationManager from '../managers/animation-manager.js';
 import Minimap from '../ui/minimap.js';
+import ShopUI from '../ui/shop-ui.js';
 
 /**
  * The main scene of the Phaser game. This class should act as the "orchestrator"
@@ -49,6 +50,9 @@ export class MainScene extends Phaser.Scene {
 
 		//@ts-ignore cheesed into this window
 		const entityConfig = window.entityConfig;
+
+		//@ts-ignore
+		const upgradeConfig = window.upgradeConfig;
 		//@ts-ignore more cheese
 		const showDebug = window.showDebug;
 
@@ -58,6 +62,7 @@ export class MainScene extends Phaser.Scene {
 		this.animationManager = new AnimationManager(this);
 
 		const minimap = new Minimap(this.map, canvas);
+		this.shopUI = new ShopUI(this.gameManager, upgradeConfig);
 		this.uiManager = new UIManager(this, this.gameManager, minimap, this.map, showDebug);
 
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
