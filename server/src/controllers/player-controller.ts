@@ -185,20 +185,18 @@ export default class PlayerController {
 	handleGunFire(player: Player) {
 		// Wait until reloaded
 		if (!player || player.carrying || !player.isReloaded) return;
-
-		// Reset reload timer
 		player.reloadTimer = player.reloadTime;
-
-		// Get player world pos
 		const worldPos = this.getWorldPosition(player);
 
 		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
-		bullet.vx += player.vx;
-		bullet.vy += player.vy;
+
+		// Apply parent velocity only if on ship
+		if (player.parent && player.parent instanceof Ship) {
+			bullet.vx += player.parent.vx;
+			bullet.vy += player.parent.vy;
+		}
 
 		bullet.firedBy = player;
-
-		// Add to the entity registry
 		this.entityRegistry.create(bullet);
 	}
 

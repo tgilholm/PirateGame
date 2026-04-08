@@ -203,8 +203,6 @@ export default class MovementSystem implements BaseSystem {
 		player.vx = (player.x - prevX) / dt;
 		player.vy = (player.y - prevY) / dt;
 
-		console.log(player.vx, player.vy, player.x, player.y, prevX, prevY);
-
 		// Mark dirty if position changed enough
 		const moved = Math.abs(player.x - prevX) > POS_THRESHOLD || Math.abs(player.y - prevY) > POS_THRESHOLD;
 
