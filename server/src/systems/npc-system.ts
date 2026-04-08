@@ -6,6 +6,8 @@ import EntityFactory from '../entities/entity-factory';
 import SpatialGrid from '../application/spatial-grid';
 import Entity from '../entities/entity';
 import NPCShip from '../entities/npcs/npc-ship';
+import Money from 'src/entities/interactables/money';
+import Ship from 'src/entities/ship';
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -36,14 +38,23 @@ export default class NPCSystem implements BaseSystem {
 		this.generateNPCShips(ships, path);
 
 		for (const npc of allNpcs) {
-			this.removeDead(npc);
+			this.reap(npc);
 
 			if (npc instanceof NPCShip) {
 				this.patrol(npc, path, dt);
 			} else {
 				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
 				this.getTarget(npc, nearby);
+				this.updateTimer(npc, dt);
 			}
+		}
+	}
+
+	updateTimer(npc: NPC, dt: number) {
+		// npcs can only attack when the timer hits 0
+		if (npc.attackTimer > 0) {
+			npc.attackTimer = Math.max(0, npc.attackTimer - dt * 1000);
+			npc.markDirty();
 		}
 	}
 
@@ -84,10 +95,19 @@ export default class NPCSystem implements BaseSystem {
 		ship.r = Math.atan2(dy, dx);
 	}
 
-	removeDead(npc: NPC) {
+	reap(npc: NPC) {
 		if (npc.health <= 0) {
 			this.spatialGrid.remove(npc.id);
 			this.entityRegistry.delete(npc.id);
+
+			// Spawn money stack at the death point
+			const money = this.entityFactory.createInteractable(
+				npc.parent as Ship | null,
+				{ type: 'money', x: npc.x, y: npc.y },
+				npc.id
+			) as Money;
+
+			money.value = Math.floor(Math.random() * 100) + 50; // avoid floating point money
 		}
 	}
 
@@ -103,7 +123,10 @@ export default class NPCSystem implements BaseSystem {
 			if (dist < npc.detectionRadius && !entity.isDead) npc.target = entity;
 			else npc.target = null;
 
-			if (npc.target && dist < 25) this.attackTarget(npc, npc.target);
+			if (npc.target && dist < 25 && npc.canAttack) {
+				this.attackTarget(npc, npc.target);
+				npc.attackTimer = npc.attackTime; // reset cooldown
+			}
 		});
 	}
 
