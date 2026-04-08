@@ -9,7 +9,6 @@ import TreasureSystem from '../systems/treasure-system';
 import { TreasureState } from '@shared/socket-protocol';
 import EntityRegistry from '../engine/entity-registry';
 import Money from 'src/entities/interactables/money';
-import Entity from 'src/entities/entity';
 
 /**
  * Handler class- provides methods for each type of player interaction with interactable entities,
@@ -19,7 +18,7 @@ export default class InteractionHandler {
 	constructor(
 		private treasureSystem: TreasureSystem,
 		private registry: EntityRegistry,
-		private destroyEntity: (entity: Entity) => void
+		private destroyEntity: (id: string) => void
 	) {}
 
 	/**
@@ -105,7 +104,7 @@ export default class InteractionHandler {
 	handleMoneyInteraction(player: Player, money: Money) {
 		if (player.parent === money.parent) {
 			player.gold += money.value;
-			this.destroyEntity(money);
+			this.destroyEntity(money.id);
 		}
 	}
 

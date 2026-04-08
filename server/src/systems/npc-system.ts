@@ -22,7 +22,8 @@ export default class NPCSystem implements BaseSystem {
 		private terrainMap: TerrainMap,
 		private entityFactory: EntityFactory,
 		private entityRegistry: EntityRegistry,
-		private spatialGrid: SpatialGrid
+		private spatialGrid: SpatialGrid,
+		private addPhysicsBody: (body: Matter.Body) => void
 	) {}
 
 	update(dt: number): void {
@@ -148,8 +149,9 @@ export default class NPCSystem implements BaseSystem {
 	generateNPCShips(ships: NPCShip[], path: Array<{ x: number; y: number }>): void {
 		if (ships.length >= this.npcShipLimit || path.length === 0) return;
 
-		const spawn = path[0];
-		this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
+		const spawn = path[Math.floor(Math.random() * path.length - 1)]; // so it's not the same every time
+		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
+		this.addPhysicsBody(ship.body);
 	}
 
 	getSpawnPoint() {

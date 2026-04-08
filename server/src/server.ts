@@ -34,7 +34,6 @@ import TreasureSystem from './systems/treasure-system';
 import SpawnSystem from './systems/spawn-system';
 import SessionHandler from './handlers/session-handler';
 import Player from './entities/player';
-import Entity from './entities/entity';
 import UpgradeHandler from './handlers/upgrade-handler';
 
 // Create the express app & server
@@ -77,13 +76,20 @@ const engine = new GameEngine({
 	spawnSystem,
 	projectileSystem,
 	messageSystem: new MessageSystem(),
-	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid),
+	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, addPhysicsBody),
 	treasureSystem,
 });
 
 const upgradeHandler = new UpgradeHandler(upgradeConfig, registry);
 const interactionHandler = new InteractionHandler(treasureSystem, registry, onEntityRemoved);
-const sessionHandler = new SessionHandler(registry, entityFactory, engine, spatialGrid);
+const sessionHandler = new SessionHandler(
+	registry,
+	entityFactory,
+	spawnSystem,
+	addPhysicsBody,
+	removePhysicsBody,
+	onEntityRemoved
+);
 
 const worldController = new WorldController(registry, sessionHandler, {
 	playerController: new PlayerController(
@@ -120,11 +126,19 @@ server.listen(PORT, () => {
 	console.log(`[Server] Server launched on port: ${PORT}`);
 });
 
-function onEntityRemoved(entity: Entity) {
-	registry.delete(entity.id);
-	spatialGrid.remove(entity.id);
+function onEntityRemoved(id: string) {
+	registry.delete(id);
+	spatialGrid.remove(id);
 }
 
 function onMinigameResult(player: Player, payload: any) {
 	io.to(player.id).emit(ServerEvent.DIG_MINIGAME_RESULT, { success: payload.success });
+}
+
+function addPhysicsBody(body: Matter.Body) {
+	physicsSystem.addBody(body);
+}
+
+function removePhysicsBody(body: Matter.Body) {
+	physicsSystem.removeBody(body);
 }

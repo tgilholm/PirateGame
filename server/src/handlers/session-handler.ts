@@ -1,9 +1,6 @@
-import SpatialGrid from 'src/application/spatial-grid';
 import EntityRegistry from 'src/engine/entity-registry';
-import GameEngine from 'src/engine/game-engine';
 import EntityFactory from 'src/entities/entity-factory';
 import Ship from 'src/entities/ship';
-import PhysicsSystem from 'src/systems/physics-system';
 import SpawnSystem from 'src/systems/spawn-system';
 
 /**
@@ -20,24 +17,21 @@ export default class SessionHandler {
 	constructor(
 		private registry: EntityRegistry,
 		private factory: EntityFactory,
-		private engine: GameEngine,
-		private grid: SpatialGrid
+		private spawnSystem: SpawnSystem,
+		private addPhysicsBody: (body: Matter.Body) => void,
+		private removePhysicsBody: (body: Matter.Body) => void,
+		private removeEntity: (id: string) => void
 	) {}
 
 	/**
 	 * Called by SocketService when a player says they are READY
 	 */
 	public addPlayer(socketId: string, username: string) {
-		// Spawn the player on their own ship
-		const spawnSystem = this.engine.systems.get('spawns') as SpawnSystem;
-
-		const { x, y } = spawnSystem.getSpawnPoint();
+		const { x, y } = this.spawnSystem.getSpawnPoint();
 		const newShip = this.factory.createShip(`ship_${socketId}`, x, y);
 
 		// "hacky" way of adding to the physics world
-		const physics = this.engine.systems.get('physics') as PhysicsSystem;
-		physics.addBody(newShip.body);
-
+		this.addPhysicsBody(newShip.body);
 		this.factory.createPlayer(socketId, 0, 0, newShip, username);
 
 		// No known entities for new players
@@ -47,24 +41,18 @@ export default class SessionHandler {
 		});
 	}
 
-	/**
+	/**d
 	 * Called by SocketService on disconnect
 	 */
 	public removePlayer(socketId: string) {
-		this.registry.delete(socketId);
-
 		// remove the matter body
-		const physics = this.engine.systems.get('physics') as PhysicsSystem;
 		const ship = this.registry.get<Ship>(`ship_${socketId}`);
-
 		if (ship) {
-			physics.removeBody(ship.body); // remove the ship's physics body
-			this.registry.delete(`ship_${socketId}`); // remove their ship
+			this.removePhysicsBody(ship.body);
+			this.removeEntity(ship.id); // remove ship before player
+			this.removeEntity(socketId);
 		}
 
-		// Remove them from the spatial grid and the session list
-		this.grid.remove(socketId);
-		this.grid.remove(`ship_${socketId}`);
 		this.sessions.delete(socketId);
 	}
 
