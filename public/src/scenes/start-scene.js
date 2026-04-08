@@ -65,6 +65,7 @@ export class StartScene extends Phaser.Scene {
 		this.load.image('x-mark', '/assets/redcross.png');
 		this.load.image('shovel', '/assets/shovel.png');
 		this.load.image('hole', '/assets/hole.png');
+		this.load.image('money-stack', '/assets/money-stack.png');
 		this.load.spritesheet('chest_open', '/assets/chestopen.png', {
 			frameWidth: 48,
 			frameHeight: 48,

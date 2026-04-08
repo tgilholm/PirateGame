@@ -82,11 +82,18 @@ const engine = new GameEngine({
 });
 
 const upgradeHandler = new UpgradeHandler(upgradeConfig, registry);
-const interactionHandler = new InteractionHandler(treasureSystem, registry);
+const interactionHandler = new InteractionHandler(treasureSystem, registry, onEntityRemoved);
 const sessionHandler = new SessionHandler(registry, entityFactory, engine, spatialGrid);
 
 const worldController = new WorldController(registry, sessionHandler, {
-	playerController: new PlayerController(registry, interactionHandler, upgradeHandler, treasureSystem, spawnSystem),
+	playerController: new PlayerController(
+		registry,
+		entityFactory,
+		interactionHandler,
+		upgradeHandler,
+		treasureSystem,
+		spawnSystem
+	),
 	shipController: new ShipController(registry),
 	messageController: new MessageController(),
 	cannonController: new CannonController(registry),

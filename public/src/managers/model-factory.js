@@ -1,6 +1,7 @@
 import CannonModel from '../models/cannon-model.js';
 import HelmModel from '../models/helm-model.js';
 import LadderModel from '../models/ladder-model.js';
+import MoneyModel from '../models/money-model.js';
 import NPCModel from '../models/npc-model.js';
 import NPCShipModel from '../models/npc-ship-model.js';
 import PlayerModel from '../models/player-model.js';
@@ -43,11 +44,11 @@ export default class ModelFactory {
 			case 'cannon': // all interactables "fall through"
 			case 'helm':
 			case 'ladder':
+			case 'shop':
+			case 'money':
 				return this.createInteractable(data);
 			case 'npc':
 				return this.createNPC(data);
-			case 'shop':
-				return this.createShop(data);
 			case 'npc-ship':
 				return this.createNPCShip(data);
 			default:
@@ -108,6 +109,12 @@ export default class ModelFactory {
 			case 'treasure':
 				model = new TreasureModel(this.scene, data.id, data.x, data.y, data.state);
 				break;
+			case 'money':
+				model = new MoneyModel(this.scene, parent, data.id, data.x, data.y);
+				break;
+			case 'shop':
+				model = new ShopModel(this.scene, data.id, data.x, data.y);
+				break;
 			default:
 				console.warn(`Interactable ${data.id} is not recognised as an interactable type`);
 				return;
@@ -122,14 +129,5 @@ export default class ModelFactory {
 
 	createNPC(data) {
 		return new NPCModel(this.scene, data.id, data.x, data.y);
-	}
-
-	/**
-	 * Creates a shop model from the provided server data
-	 * @param {object} data the data from the server
-	 * @returns the shop model
-	 */
-	createShop(data) {
-		return new ShopModel(this.scene, data.id, data.x, data.y);
 	}
 }
