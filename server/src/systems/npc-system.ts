@@ -47,6 +47,13 @@ export default class NPCSystem implements BaseSystem {
 		}
 	}
 
+	updateTimer(npc: NPC, dt: number) {
+		if (npc.attackTimer > 0) {
+			npc.attackTimer = Math.max(0, npc.attackTimer - dt);
+			npc.markDirty();
+		}
+	}
+
 	patrol(ship: NPCShip, path: Array<{ x: number; y: number }>, dt: number): void {
 		const current = path[ship.pathIndex];
 		const nextIndex = (ship.pathIndex + 1) % path.length;
@@ -103,7 +110,10 @@ export default class NPCSystem implements BaseSystem {
 			if (dist < npc.detectionRadius && !entity.isDead) npc.target = entity;
 			else npc.target = null;
 
-			if (npc.target && dist < 25) this.attackTarget(npc, npc.target);
+			if (npc.target && dist < 25 && npc.canAttack) {
+				this.attackTarget(npc, npc.target);
+				npc.attackTime = npc.attackTimer; // reset cooldown
+			}
 		});
 	}
 

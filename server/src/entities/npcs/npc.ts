@@ -13,4 +13,8 @@ export default class NPC extends Entity {
 
 		this.detectionRadius = detectionRadius;
 	}
+
+	get canAttack(): boolean {
+		return this.attackTimer <= 0;
+	}
 }
