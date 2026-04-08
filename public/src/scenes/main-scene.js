@@ -70,7 +70,7 @@ export class MainScene extends Phaser.Scene {
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
 		const camera = this.cameras.main;
 
-		camera.startFollow(this.cameraTarget);
+		camera.startFollow(this.cameraTarget, true);
 		camera.zoom = this.targetZoom;
 
 		this.inputManager.on('zoom', (deltaY) => {
