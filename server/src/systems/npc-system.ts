@@ -107,7 +107,7 @@ export default class NPCSystem implements BaseSystem {
 				npc.id
 			) as Money;
 
-			money.value = Math.random() * 100;
+			money.value = Math.floor(Math.random() * 100); // avoid floating point money
 		}
 	}
 
