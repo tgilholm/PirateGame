@@ -182,19 +182,32 @@ export default class PlayerController {
 		this.treasureSystem.hit(player);
 	}
 
-	handleGunFire(player: Player) {
+	handleGunFire(player: Player, lastActionTime: number) {
 		// Wait until reloaded
-		if (!player || player.carrying || !player.isReloaded) return;
+		if (!player || player.carrying || !player.isReloaded || player.isSteering) return;
 		player.reloadTimer = player.reloadTime;
+
+		// Calculate time between this event and the last packet
+		const now = Date.now();
+		const latency = (now - lastActionTime) / 1000;
+
 		const worldPos = this.getWorldPosition(player);
 
-		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
+		// Spawn the bullet at the client's next visual position, not their interp target
+		let spawnX = worldPos.x - player.vx * latency;
+		let spawnY = worldPos.y - player.vy * latency;
+
+		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, spawnX, spawnY, player.aimAngle);
 
 		// Apply parent velocity only if on ship
 		if (player.parent && player.parent instanceof Ship) {
 			bullet.vx += player.parent.vx;
 			bullet.vy += player.parent.vy;
 		}
+
+		// catch up to where the bullet should originally have been fired
+		bullet.x += bullet.vx * latency;
+		bullet.y += bullet.vy * latency;
 
 		bullet.firedBy = player;
 		this.entityRegistry.create(bullet);

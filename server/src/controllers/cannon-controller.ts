@@ -13,7 +13,7 @@ export default class CannonController {
 		cannon.targetAngle = data.aimAngle;
 	}
 
-	handleFire(cannon: Cannon): void {
+	handleFire(cannon: Cannon, lastActionTime: number): void {
 		if (!cannon || !cannon.isReloaded) return;
 		cannon.reloadTimer = cannon.reloadTime; // reset the reload timer
 		const ship = cannon.parent as Ship | null;

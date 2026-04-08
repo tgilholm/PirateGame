@@ -292,6 +292,23 @@ export default class MovementSystem implements BaseSystem {
 		};
 
 		Body.applyForce(body, body.position, force);
+
+		// update entity from physics body
+		const prevR = ship.r;
+		const prevX = ship.x;
+		const prevY = ship.y;
+
+		ship.x = body.position.x;
+		ship.y = body.position.y;
+		ship.r = body.angle;
+
+		// sent in delta if changed substantially
+		const rotationChanged = Math.abs(ship.r - prevR) > 0.001;
+		const positionChanged = Math.abs(ship.x - prevX) > 0.1 || Math.abs(ship.y - prevY) > 0.1;
+
+		if (rotationChanged || positionChanged) {
+			ship.markDirty();
+		}
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {

@@ -28,6 +28,8 @@ export default class WorldController {
 	messageController: MessageController;
 	cannonController: CannonController;
 
+	timestamps: Map<string, number> = new Map();
+
 	/**
 	 * Constructs a WorldController with the provided sub-controllers
 	 * @param entityRegistry to reference the entities in the game
@@ -50,6 +52,9 @@ export default class WorldController {
 	 * @param action the action, matching the schema PlayerAction, sent by the user
 	 */
 	public handle(playerId: string, action: PlayerAction) {
+		// keep track of the time the player last sent an action
+		const lastActionTime = this.timestamps.get(playerId) || Date.now(); // if not seen before
+
 		const player = this.entityRegistry.get<Player>(playerId);
 		if (!player) return;
 
@@ -81,6 +86,8 @@ export default class WorldController {
 		switch (action.type) {
 			// Send move inputs based on player context
 			case ActionType.MOVE:
+				this.timestamps.set(playerId, Date.now()); // overwrite
+
 				if (player.cannon) {
 					this.cannonController.handleMove(player.cannon, action.data);
 
@@ -105,10 +112,10 @@ export default class WorldController {
 				}
 
 				if (player.cannon) {
-					this.cannonController.handleFire(player.cannon);
+					this.cannonController.handleFire(player.cannon, lastActionTime);
 				} else {
 					// If not controlling a cannon, fire the player's personal gun
-					this.playerController.handleGunFire(player);
+					this.playerController.handleGunFire(player, lastActionTime);
 				}
 				break;
 			case ActionType.INTERACT:
