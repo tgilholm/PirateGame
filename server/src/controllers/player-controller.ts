@@ -195,6 +195,7 @@ export default class PlayerController {
 		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
 		bullet.vx += player.vx;
 		bullet.vy += player.vy;
+
 		bullet.firedBy = player;
 
 		// Add to the entity registry
