@@ -83,6 +83,7 @@ export default class WorldController {
 			return; // don't handle actions if dead, just respawn
 		}
 
+		const ship = player.parent as Ship;
 		switch (action.type) {
 			// Send move inputs based on player context
 			case ActionType.MOVE:
@@ -93,8 +94,6 @@ export default class WorldController {
 
 					// If player is at the helm, move the ship
 				} else if (player.parent && player.isSteering) {
-					const ship = player.parent as Ship;
-
 					this.shipController.handleMove(ship, action.data);
 				} else {
 					// Otherwise move the player
@@ -109,10 +108,10 @@ export default class WorldController {
 			case ActionType.FIRE:
 				if (player.isDigging) {
 					this.playerController.handleDig(player);
-				}
-
-				if (player.cannon) {
+				} else if (player.cannon) {
 					this.cannonController.handleFire(player.cannon, lastActionTime);
+				} else if (player.isSteering) {
+					this.shipController.handleFire(ship);
 				} else {
 					// If not controlling a cannon, fire the player's personal gun
 					this.playerController.handleGunFire(player, lastActionTime);

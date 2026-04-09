@@ -15,10 +15,8 @@ export default class Interactable extends Entity {
 	}
 
 	public canInteract(player: Player) {
-		if (player.parent !== this.parent) return; // must be on same body
-
-		const dx = this.x - player.x;
-		const dy = this.y - player.y;
+		const dx = this.worldPos.x - player.worldPos.x;
+		const dy = this.worldPos.y - player.worldPos.y;
 
 		return Math.sqrt(dx * dx + dy * dy) <= this.interactRange;
 	}

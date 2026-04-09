@@ -294,36 +294,21 @@ export default class MovementSystem implements BaseSystem {
 	 */
 	updateShip(ship: Ship, dt: number) {
 		const body = ship.body;
-		const sailState = ship.sailState;
-		const turnAngle = ship.turnAngle;
 		const acceleration = ship.acceleration; // using get method for auto-applied modifier
+		const { up, left, right } = ship.inputs;
 		const { turnSpeed } = ship.physics;
 
 		// Turning
-		Body.setAngularVelocity(body, turnSpeed * turnAngle);
+		if (right) Body.setAngularVelocity(body, turnSpeed);
+		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
-		const force = {
-			x: Math.cos(body.angle) * acceleration * sailState,
-			y: Math.sin(body.angle) * acceleration * sailState,
-		};
+		if (up) {
+			const force = {
+				x: Math.cos(body.angle) * acceleration,
+				y: Math.sin(body.angle) * acceleration,
+			};
 
-		Body.applyForce(body, body.position, force);
-
-		// update entity from physics body
-		const prevR = ship.r;
-		const prevX = ship.x;
-		const prevY = ship.y;
-
-		ship.x = body.position.x;
-		ship.y = body.position.y;
-		ship.r = body.angle;
-
-		// sent in delta if changed substantially
-		const rotationChanged = Math.abs(ship.r - prevR) > 0.001;
-		const positionChanged = Math.abs(ship.x - prevX) > 0.1 || Math.abs(ship.y - prevY) > 0.1;
-
-		if (rotationChanged || positionChanged) {
-			ship.markDirty();
+			Body.applyForce(body, body.position, force);
 		}
 	}
 

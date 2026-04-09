@@ -161,9 +161,11 @@ export default abstract class Entity {
 			const rotatedX = this.x * cos - this.y * sin;
 			const rotatedY = this.x * sin + this.y * cos;
 
+			const parentPos = parent.worldPos; // cheeky bit of recursion
+
 			return {
-				x: this.x + rotatedX,
-				y: this.y + rotatedY,
+				x: parentPos.x + rotatedX,
+				y: parentPos.y + rotatedY,
 			};
 		} else {
 			return { x: this.x, y: this.y };

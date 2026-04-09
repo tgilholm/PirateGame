@@ -18,8 +18,8 @@ export default class CombatHandler {
 			y: worldPos.y + Math.sin(worldAngle) * cannonEndOffset,
 		};
 
-		const worldVel = ship ? { x: ship.vx, y: ship.vx } : { x: 0, y: 0 };
-		this.factory.createCannonball(
+		const worldVel = ship ? { x: ship.vx, y: ship.vy } : { x: 0, y: 0 };
+		const cannonball = this.factory.createCannonball(
 			spawnPos.x,
 			spawnPos.y,
 			worldAngle,
@@ -28,5 +28,8 @@ export default class CombatHandler {
 			worldVel,
 			cannon
 		);
+		cannonball.markDirty();
+
+		console.log(cannonball.x, cannonball.y, worldAngle, worldVel);
 	}
 }

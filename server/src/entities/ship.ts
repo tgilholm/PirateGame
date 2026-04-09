@@ -16,7 +16,6 @@ export default class Ship extends Entity {
 	physics: ShipConfig['physics'];
 	interactables: Interactable[];
 	body: Matter.Body;
-	private _turnAngle: number = 0;
 
 	private upgradeConfig: UpgradeConfig;
 	public upgrades: Record<string, number> = {
@@ -91,16 +90,7 @@ export default class Ship extends Entity {
 			...super.toState(),
 			pilotId: this.pilot?.id, // For client side messages
 			upgrades: this.upgrades,
-			turnAngle: this.turnAngle,
 		};
-	}
-
-	public set turnAngle(newAngle: number) {
-		this._turnAngle = Math.min(Math.max(-1, newAngle), 1);
-	}
-
-	public get turnAngle() {
-		return this._turnAngle;
 	}
 
 	public get acceleration() {

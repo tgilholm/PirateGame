@@ -2,7 +2,7 @@ import CombatHandler from '../handlers/combat-handler';
 import EntityRegistry from '../engine/entity-registry';
 import Ship from '../entities/ship';
 import { MoveData } from '@shared/socket-protocol';
-import Cannon from 'src/entities/interactables/cannon';
+import Cannon from '../entities/interactables/cannon';
 
 /**
  * Handles ship events
