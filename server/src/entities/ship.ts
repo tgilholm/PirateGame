@@ -16,9 +16,6 @@ export default class Ship extends Entity {
 	physics: ShipConfig['physics'];
 	interactables: Interactable[];
 	body: Matter.Body;
-	anchored: boolean;
-	private _turnAngle: number = 0;
-	private _sailState: number = 0; // not moving
 
 	private upgradeConfig: UpgradeConfig;
 	public upgrades: Record<string, number> = {
@@ -30,6 +27,13 @@ export default class Ship extends Entity {
 		maxHealth: 1,
 	};
 	sunkNotified: boolean = false;
+
+	public inputs = {
+		up: false,
+		down: false,
+		left: false,
+		right: false,
+	};
 
 	/**
 	 * Creates a ship with the provided data
@@ -53,7 +57,6 @@ export default class Ship extends Entity {
 		this.dimensions = config.dimensions;
 		this.physics = config.physics;
 		this.interactables = [];
-		this.anchored = true; // anchored at startup
 
 		// For adding to the matter-js world
 		this.body = this.createPhysicsBody(x, y);
@@ -86,27 +89,8 @@ export default class Ship extends Entity {
 		return {
 			...super.toState(),
 			pilotId: this.pilot?.id, // For client side messages
-			sailState: this.sailState,
-			anchored: this.anchored,
 			upgrades: this.upgrades,
-			turnAngle: this.turnAngle,
 		};
-	}
-
-	public set turnAngle(newAngle: number) {
-		this._turnAngle = Math.min(Math.max(-1, newAngle), 1);
-	}
-
-	public get turnAngle() {
-		return this._turnAngle;
-	}
-
-	public set sailState(newSail: number) {
-		this._sailState = Math.max(Math.min(1, newSail), 0);
-	}
-
-	public get sailState() {
-		return this._sailState;
 	}
 
 	public get acceleration() {

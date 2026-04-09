@@ -35,6 +35,7 @@ import SpawnSystem from './systems/spawn-system';
 import SessionHandler from './handlers/session-handler';
 import Player from './entities/player';
 import UpgradeHandler from './handlers/upgrade-handler';
+import CombatHandler from './handlers/combat-handler';
 
 // Create the express app & server
 const app = express();
@@ -90,6 +91,7 @@ const sessionHandler = new SessionHandler(
 	removePhysicsBody,
 	onEntityRemoved
 );
+const combatHandler = new CombatHandler(entityFactory);
 
 const worldController = new WorldController(registry, sessionHandler, {
 	playerController: new PlayerController(
@@ -100,9 +102,9 @@ const worldController = new WorldController(registry, sessionHandler, {
 		treasureSystem,
 		spawnSystem
 	),
-	shipController: new ShipController(registry),
+	shipController: new ShipController(registry, combatHandler),
 	messageController: new MessageController(),
-	cannonController: new CannonController(registry),
+	cannonController: new CannonController(registry, combatHandler),
 });
 
 const gameWorld = new GameWorld(

@@ -20,8 +20,8 @@ export default class InteractableModel extends Model {
 	 */
 	constructor(scene, parent, id, type, x, y, texture = '', usePrompt = '', releasePrompt = '') {
 		super(scene, id, x, y, type, 0, true); // is static
-		this.isInteractable = true;
 		this.type = type;
+		this.isInteractable = true;
 		this.usePrompt = usePrompt || `Use ${this.type}`;
 		this.releasePrompt = releasePrompt || '';
 		this.textureKey = texture || 'interactable'; // default
