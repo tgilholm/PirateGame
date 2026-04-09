@@ -147,4 +147,26 @@ export default abstract class Entity {
 		}
 		return null;
 	}
+
+	/**
+	 * Returns the absolute x and y coordinates of this entity. Translates coordinates
+	 * to world space if a parent exists, otherwise returns x and y.
+	 */
+	public get worldPos(): { x: number; y: number } {
+		if (this.parent) {
+			const parent = this.parent;
+			const cos = Math.cos(parent.r);
+			const sin = Math.sin(parent.r);
+
+			const rotatedX = this.x * cos - this.y * sin;
+			const rotatedY = this.x * sin + this.y * cos;
+
+			return {
+				x: this.x + rotatedX,
+				y: this.y + rotatedY,
+			};
+		} else {
+			return { x: this.x, y: this.y };
+		}
+	}
 }

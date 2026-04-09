@@ -66,12 +66,9 @@ export default class PlayerController {
 		}
 
 		// Distance between player and interactable
-		const dist = Math.sqrt(
-			Math.pow(playerWorldPos.x - interactableWorldPos?.x, 2) +
-				Math.pow(playerWorldPos.y - interactableWorldPos?.y, 2)
-		);
+		const canInteract = interactable.canInteract(player);
 
-		if (dist < 50) {
+		if (canInteract) {
 			const ship = interactable.parent as Ship;
 
 			switch (interactable.type) {
@@ -80,8 +77,10 @@ export default class PlayerController {
 					break;
 
 				case 'cannon':
+					// only if off-ship
 					this.interactionHandler.handleCannonInteraction(player, interactable as Cannon);
 					break;
+
 				case 'ladder':
 					this.interactionHandler.handleLadderInteraction(player, ship, interactable as Ladder);
 					break;

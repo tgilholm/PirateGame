@@ -12,6 +12,7 @@ import NPC from './npcs/npc';
 import NPCShip from './npcs/npc-ship';
 import Treasure from './interactables/treasure';
 import Money from './interactables/money';
+import Cannonball from './projectiles/cannonball';
 
 /**
  * Aggregates entity creation, applying domain-specific default values from
@@ -128,5 +129,24 @@ export default class EntityFactory {
 			this.createInteractable(npcShip, item, index);
 		});
 		return npcShip;
+	}
+
+	public createCannonball(
+		x: number,
+		y: number,
+		r: number,
+		speed: number,
+		damage: number,
+		parentV: { x: number; y: number },
+		origin: Cannon
+	): Cannonball {
+		const ball = new Cannonball(`cannonball_${Date.now()}`, x, y, r, speed, damage);
+
+		ball.vx += parentV.x;
+		ball.vy += parentV.y;
+		ball.firedBy = origin;
+
+		this.entityRegistry.create(ball);
+		return ball;
 	}
 }

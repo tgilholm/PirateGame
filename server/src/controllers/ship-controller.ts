@@ -1,12 +1,17 @@
+import CombatHandler from '../handlers/combat-handler';
 import EntityRegistry from '../engine/entity-registry';
 import Ship from '../entities/ship';
 import { MoveData } from '@shared/socket-protocol';
+import Cannon from 'src/entities/interactables/cannon';
 
 /**
  * Handles ship events
  */
 export default class ShipController {
-	constructor(entityRegistry: EntityRegistry) {}
+	constructor(
+		private entityRegistry: EntityRegistry,
+		private combatHandler: CombatHandler
+	) {}
 
 	/**
 	 * Provides movement inputs to the specified ship. Note that this method will only
@@ -16,27 +21,23 @@ export default class ShipController {
 	 * @param data the movement data to provide to the ship
 	 */
 	handleMove(ship: Ship, data: MoveData): void {
-		// Accel/decel
-		if (data.up) {
-			ship.sailState += 0.03;
-		} else if (data.down) {
-			ship.sailState -= 0.05;
-		}
-		// Steer ship
-		if (data.left) {
-			ship.turnAngle -= 0.03;
-		} else if (data.right) {
-			ship.turnAngle += 0.03;
-		}
+		ship.inputs.up = data.up;
+		ship.inputs.down = data.down;
+		ship.inputs.left = data.left;
+		ship.inputs.right = data.right;
+	}
 
-		// Turning deadzone
-		if (ship.body.isSleeping) {
-			ship.turnAngle = 0; // don't keep spinning
-		}
+	/**
+	 * Fires all the cannons on this ship
+	 * @param ship
+	 */
+	handleFire(ship: Ship) {
+		const cannons = ship.interactables.filter((item) => item.type === 'cannon');
 
-		// Avoid weird division
-		if (-0.001 < ship.turnAngle && ship.turnAngle < 0.001) {
-			ship.turnAngle = 0;
-		}
+		cannons.forEach((cannon) => {
+			if (!(cannon instanceof Cannon)) return;
+
+			this.combatHandler.handleCannonFire(cannon, ship);
+		});
 	}
 }
