@@ -158,7 +158,7 @@ export default class Model extends Phaser.GameObjects.Container {
 	 * excessive getWorldTransformMatrix() calls.
 	 */
 	get worldPos() {
-		if (this.scene.game) {
+		if (this.scene && this.scene.game) {
 			const currentFrame = this.scene.game.loop.frame;
 			if (this.#cachedFrame === currentFrame) {
 				return this.#worldPos;

@@ -16,8 +16,6 @@ export default class CannonController {
 	}
 
 	handleFire(cannon: Cannon, lastActionTime: number): void {
-		if (!cannon || !cannon.isReloaded) return;
-		cannon.reloadTimer = cannon.reloadTime; // reset the reload timer
 		const ship = cannon.parent as Ship | null;
 
 		this.combatHandler.handleCannonFire(cannon, ship);

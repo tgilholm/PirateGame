@@ -318,23 +318,34 @@ export default class MovementSystem implements BaseSystem {
 			cannon.markDirty();
 		}
 
-		if (!cannon.user) return;
-
 		const ship = cannon.parent as Ship | null;
+		const facingAngle = cannon.y < 0 ? -Math.PI / 2 : Math.PI / 2; // start angle
+		let localTarget: number; // where to aim towards
 
-		let localTarget = ship ? cannon.targetAngle - ship.r : cannon.targetAngle;
-		while (localTarget > Math.PI) localTarget -= 2 * Math.PI;
-		while (localTarget < -Math.PI) localTarget += 2 * Math.PI;
+		if (!cannon.user) {
+			localTarget = facingAngle;
+		} else {
+			localTarget = ship ? cannon.targetAngle - ship.r : cannon.targetAngle;
 
-		const facingAngle = cannon.y < 0 ? -Math.PI / 2 : Math.PI / 2;
-		const clampedTarget = Math.max(facingAngle - CANNON_ARC, Math.min(facingAngle + CANNON_ARC, localTarget));
+			while (localTarget > Math.PI) localTarget -= 2 * Math.PI;
+			while (localTarget < -Math.PI) localTarget += 2 * Math.PI;
 
-		let diff = clampedTarget - cannon.r;
+			// clamp to aim cone
+			localTarget = Math.max(facingAngle - CANNON_ARC, Math.min(facingAngle + CANNON_ARC, localTarget));
+		}
+
+		// move towards whatever target
+		let diff = localTarget - cannon.r;
 		while (diff > Math.PI) diff -= 2 * Math.PI;
 		while (diff < -Math.PI) diff += 2 * Math.PI;
 
 		const maxStep = MAX_CANNON_SPEED * dt;
-		cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
+
+		// only update if sizable difference
+		if (Math.abs(diff) > 0.001) {
+			cannon.r += Math.max(-maxStep, Math.min(maxStep, diff));
+			cannon.markDirty();
+		}
 	}
 
 	updateNPC(npc: NPC, dt: number) {

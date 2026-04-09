@@ -34,10 +34,10 @@ export default class ShipController {
 	handleFire(ship: Ship) {
 		const cannons = ship.interactables.filter((item) => item.type === 'cannon');
 
-		cannons.forEach((cannon) => {
+		cannons.forEach((cannon, index) => {
 			if (!(cannon instanceof Cannon)) return;
 
-			this.combatHandler.handleCannonFire(cannon, ship);
+			this.combatHandler.handleCannonFire(cannon, ship, index);
 		});
 	}
 }

@@ -68,8 +68,6 @@ export default class PlayerController {
 		// Distance between player and interactable
 		const canInteract = interactable.canInteract(player);
 
-		console.log(canInteract, interactable.type);
-
 		if (canInteract) {
 			const ship = interactable.parent as Ship;
 

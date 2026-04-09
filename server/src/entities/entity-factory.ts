@@ -138,9 +138,10 @@ export default class EntityFactory {
 		speed: number,
 		damage: number,
 		parentV: { x: number; y: number },
-		origin: Cannon
+		origin: Cannon,
+		index: number // so each cannonball doesn't have the same ID
 	): Cannonball {
-		const ball = new Cannonball(`cannonball_${Date.now()}`, x, y, r, speed, damage);
+		const ball = new Cannonball(`cannonball_${Date.now()}_${index}`, x, y, r, speed, damage);
 
 		ball.vx += parentV.x;
 		ball.vy += parentV.y;
