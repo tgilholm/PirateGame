@@ -4,7 +4,7 @@ import Ship from '../ship';
 
 export default class Cannon extends Interactable {
 	targetAngle: number; // where the cannon is moving to
-	#baseReloadTime: number = 3000;
+	#baseReloadTime: number = 1500;
 	#baseCannonDamage: number = 100;
 	#baseCannonballSpeed: number = 400;
 
