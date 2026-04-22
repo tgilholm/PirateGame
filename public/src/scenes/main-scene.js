@@ -57,8 +57,10 @@ export class MainScene extends Phaser.Scene {
 		const showDebug = window.showDebug;
 
 		const modelFactory = new ModelFactory(this, entityConfig, (id) => this.gameManager.models.get(id));
+
+		this.networkManager = new NetworkManager(socket);
 		this.inputManager = new InputManager(this);
-		this.gameManager = new GameManager(this, new NetworkManager(socket), this.inputManager, modelFactory);
+		this.gameManager = new GameManager(this, this.networkManager, this.inputManager, modelFactory);
 		this.animationManager = new AnimationManager(this);
 
 		const minimap = new Minimap(this.map, canvas);
@@ -90,6 +92,18 @@ export class MainScene extends Phaser.Scene {
 			this.uiManager.showShipSunkMessage();
 		});
 
+		socket.on('disconnect', (x) => {
+			console.log('disconnect' + x);
+		});
+
+		socket.on('connect', (x) => {
+			console.log('connect' + x);
+		});
+
+		socket.on('reconnect', () => {
+			console.log('reconnect');
+		});
+
 		this.events.on('shutdown', () => {
 			this.gameManager.destroy();
 		});
@@ -115,6 +129,7 @@ export class MainScene extends Phaser.Scene {
 	 * Generates the tilemap for this world from the provided tilesheet
 	 */
 	setupWorld() {
+		if (!this.map) return;
 		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
 
 		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);

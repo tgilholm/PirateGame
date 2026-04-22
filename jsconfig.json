@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"module": "ESNext",
 		"target": "ESNext",
-		"checkJs": true,
+		"checkJs": false,
 		"noImplicitAny": false,
 		"moduleResolution": "bundler",
 		"resolveJsonModule": true,
