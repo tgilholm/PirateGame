@@ -1,6 +1,6 @@
 import * as path from 'path';
 import fs from 'fs';
-import { buildPathSpline, sortByNearestNeighbour } from '../server/src/utils/splines';
+import { buildPathSpline, sortByNearestNeighbour } from '../server/src/utils/catmull-rom';
 import { createPlot } from './plot';
 import { getTilesetFromLayer } from '../server/src/utils/tiles';
 

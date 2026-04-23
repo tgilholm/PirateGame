@@ -70,17 +70,7 @@ const treasureSystem = new TreasureSystem(
 	onEntityRemoved
 );
 const spawnSystem = new SpawnSystem(terrainMap);
-
-const engine = new GameEngine({
-	physicsSystem,
-	movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
-	spawnSystem,
-	projectileSystem,
-	messageSystem: new MessageSystem(),
-	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, addPhysicsBody),
-	treasureSystem,
-});
-
+const combatHandler = new CombatHandler(entityFactory);
 const upgradeHandler = new UpgradeHandler(upgradeConfig, registry);
 const interactionHandler = new InteractionHandler(treasureSystem, registry, onEntityRemoved);
 const sessionHandler = new SessionHandler(
@@ -91,7 +81,15 @@ const sessionHandler = new SessionHandler(
 	removePhysicsBody,
 	onEntityRemoved
 );
-const combatHandler = new CombatHandler(entityFactory);
+const engine = new GameEngine({
+	physicsSystem,
+	movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
+	spawnSystem,
+	projectileSystem,
+	messageSystem: new MessageSystem(),
+	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
+	treasureSystem,
+});
 
 const worldController = new WorldController(registry, sessionHandler, {
 	playerController: new PlayerController(
