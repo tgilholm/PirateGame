@@ -133,6 +133,11 @@ export default class TreasureSystem implements BaseSystem {
 				if (player) {
 					this.onResult?.(player, { success: false });
 					player.activeMinigame = null;
+					player.isDigging = false;
+					session.treasure.user = null;
+					session.treasure.state = TreasureState.BURIED;
+					player.markDirty();
+					session.treasure.markDirty();
 				}
 			}
 		}
