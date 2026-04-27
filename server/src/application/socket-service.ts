@@ -43,6 +43,8 @@ const ActionSchema = z.discriminatedUnion('type', [
 	z.object({ type: z.literal(ActionType.RELEASE) }).strict(),
 	z.object({ type: z.literal(ActionType.RESPAWN_SHIP) }).strict(),
 	z.object({ type: z.literal(ActionType.QUIT) }).strict(),
+	z.object({ type: z.literal(ActionType.DASH) }).strict(),
+	z.object({ type: z.literal(ActionType.BOOST) }).strict(),
 ]);
 
 /**

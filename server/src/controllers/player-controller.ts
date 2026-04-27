@@ -98,6 +98,44 @@ export default class PlayerController {
 		}
 	}
 
+	handleDash(player: Player): void {
+		if (
+			!player.canDash ||
+			player.isSteering ||
+			player.cannon ||
+			player.carrying || //can change if need to
+			player.isDead
+		)
+			return;
+
+		const dx = (player.inputs.right ? 1 : 0) - (player.inputs.left ? 1 : 0);
+		const dy = (player.inputs.down ? 1 : 0) - (player.inputs.up ? 1 : 0);
+
+		if (dx === 0 && dy === 0) return;
+
+		const length = Math.sqrt(dx * dx + dy * dy);
+		const normX = dx / length;
+		const normY = dy / length;
+
+		const dashSpeed = 1200;
+		player.isDashing = true;
+		player.dashTimer = player.dashDuration;
+		player.dashCooldown = player.dashCooldownTime;
+		player.dashVx = normX * dashSpeed;
+		player.dashVy = normY * dashSpeed;
+		player.markDirty();
+	}
+
+	handleBoost(player: Player): void {
+		const ship = player.parent as Ship | null;
+		if (!ship || !player.isSteering || !ship.canBoost) return;
+
+		ship.isBoosting = true;
+		ship.boostTimer = ship.boostDuration;
+		ship.boostCooldown = ship.boostCooldownTime;
+		ship.markDirty();
+	}
+
 	handleRespawnShip(player: Player): void {
 		// Respawn ship & player at a new location
 		// TODO: Ensure player is a set distance from their death point

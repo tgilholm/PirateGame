@@ -5,6 +5,7 @@ import Model from './model.js';
 import ShipModel from './ship-model.js';
 import ReloadIndicator from '../ui/reload-indicator.js';
 import RespawnIndicator from '../ui/respawn-indicator.js';
+import DashCooldown from '../ui/dash-bar.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -30,6 +31,9 @@ export default class PlayerModel extends Model {
 		this.reloadTimer = 0;
 		this.respawnTimer = 0;
 		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
+		this.dashCooldown = new DashCooldown(scene, this, 28); // slightly outside reload ring
+		this.dashCooldownTime = 3000;
+		this.dashCooldownVal = 0;
 		this.healthBar = new HealthBar(scene, 40, 20);
 		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
 
@@ -78,6 +82,8 @@ export default class PlayerModel extends Model {
 		if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
 		if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
 		if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
+		if (data.dashCooldown !== undefined) this.dashCooldownVal = data.dashCooldown;
+		if (data.dashCooldownTime !== undefined) this.dashCooldownTime = data.dashCooldownTime;
 		if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
 		if (data.gold !== undefined) this.gold = data.gold;
 		if (data.shipId !== undefined) this.shipId = data.shipId;
@@ -129,6 +135,7 @@ export default class PlayerModel extends Model {
 		this.setAlpha(isBusy ? 0.6 : 1.0); // visual feedback if using cannon/helm etc
 
 		this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
+		this.dashCooldown.update(this.dashCooldownVal, this.dashCooldownTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
 
@@ -158,6 +165,7 @@ export default class PlayerModel extends Model {
 		if (this.carrySprite) this.carrySprite.destroy();
 		this.healthBar?.destroy();
 		this.reloadIndicator?.destroy();
+		this.dashCooldown?.destroy();
 
 		super.destroy();
 	}

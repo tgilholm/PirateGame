@@ -30,6 +30,8 @@ export enum ActionType {
 	RELEASE = 'RELEASE',
 	RESPAWN_SHIP = 'RESPAWN',
 	QUIT = 'QUIT',
+	BOOST = 'BOOST',
+	DASH = 'DASH',
 }
 
 export enum TreasureState {
@@ -69,7 +71,9 @@ export type PlayerAction =
 	| { type: ActionType.FIRE; data?: never }
 	| { type: ActionType.RELEASE; data?: never }
 	| { type: ActionType.QUIT; data?: never }
-	| { type: ActionType.RESPAWN_SHIP; data?: never };
+	| { type: ActionType.RESPAWN_SHIP; data?: never }
+	| { type: ActionType.DASH; data?: never }
+	| { type: ActionType.BOOST; data?: never };
 
 //types of splash animations -- ui concern only, doesn't need to be sent over the network
 export type SplashType =

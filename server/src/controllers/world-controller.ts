@@ -126,6 +126,12 @@ export default class WorldController {
 			case ActionType.MESSAGE:
 				this.messageController.handleMessage(player, action.data);
 				break;
+			case ActionType.DASH:
+				this.playerController.handleDash(player);
+				break;
+			case ActionType.BOOST:
+				this.playerController.handleBoost(player);
+				break;
 		}
 	}
 }

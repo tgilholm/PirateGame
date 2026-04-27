@@ -373,3 +373,25 @@ h2 {
 .shop-close-button:hover {
 	background: deepskyblue;
 }
+
+#boost-bar-container {
+	position: fixed;
+	bottom: 120px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 200px;
+	height: 12px;
+	background: rgba(0, 0, 0, 0.6);
+	border: 1px solid #fff;
+	border-radius: 6px;
+	overflow: hidden;
+	z-index: 1500;
+}
+
+#boost-bar-fill {
+	height: 100%;
+	width: 100%;
+	background: #00aaff;
+	border-radius: 6px;
+	transition: width 0.1s;
+}

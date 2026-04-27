@@ -17,6 +17,18 @@ export default class Ship extends Entity {
 	interactables: Interactable[];
 	body: Matter.Body;
 
+	//variables for shift boost
+	boostCooldown: number = 0;
+	boostCooldownTime: number = 8000;
+	boostTimer: number = 0;
+	isBoosting: boolean = false;
+	readonly boostDuration: number = 2000;
+	readonly boostMultiplier: number = 3;
+
+	get canBoost(): boolean {
+		return this.boostCooldown <= 0 && !this.isBoosting;
+	}
+
 	private upgradeConfig: UpgradeConfig;
 	public upgrades: Record<string, number> = {
 		cannonDamage: 1,
@@ -90,6 +102,9 @@ export default class Ship extends Entity {
 			...super.toState(),
 			pilotId: this.pilot?.id, // For client side messages
 			upgrades: this.upgrades,
+			boostCooldown: this.boostCooldown,
+			boostCooldownTime: this.boostCooldownTime,
+			isBoosting: this.isBoosting,
 		};
 	}
 
