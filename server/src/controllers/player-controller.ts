@@ -17,6 +17,8 @@ import UpgradeHandler from '../handlers/upgrade-handler';
 import Shop from '../entities/shop';
 import EntityFactory from 'src/entities/entity-factory';
 import Money from 'src/entities/interactables/money';
+import Coconut from '../entities/interactables/coconut';
+import Bandage from '../entities/interactables/bandage';
 
 /**
  * Handles events affecting the player
@@ -83,6 +85,12 @@ export default class PlayerController {
 
 				case 'ladder':
 					this.interactionHandler.handleLadderInteraction(player, ship, interactable as Ladder);
+					break;
+				case 'coconut':
+					this.interactionHandler.handleCoconutInteraction(player, interactable as Coconut);
+					break;
+				case 'bandage':
+					this.interactionHandler.handleBandageInteraction(player, interactable as Bandage);
 					break;
 
 				case 'treasure':

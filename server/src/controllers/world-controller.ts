@@ -7,6 +7,7 @@ import Ship from '../entities/ship';
 import MessageController from './message-controller';
 import CannonController from './cannon-controller';
 import SessionHandler from 'src/handlers/session-handler';
+import SwordSystem from '../systems/sword-atk-system';
 
 /**
  * Defines the controllers that must be passed to this one
@@ -38,7 +39,10 @@ export default class WorldController {
 	constructor(
 		private entityRegistry: EntityRegistry,
 		private sessionHandler: SessionHandler,
+		private swordSystem: SwordSystem,
 		controllers: GameControllers
+
+		// In constructor, add swordSystem as parameter and store it
 	) {
 		this.shipController = controllers.shipController;
 		this.playerController = controllers.playerController;
@@ -122,6 +126,9 @@ export default class WorldController {
 				break;
 			case ActionType.RELEASE:
 				this.playerController.handleRelease(player);
+				break;
+			case ActionType.SWING:
+				this.swordSystem.handleSwing(player);
 				break;
 			case ActionType.MESSAGE:
 				this.messageController.handleMessage(player, action.data);

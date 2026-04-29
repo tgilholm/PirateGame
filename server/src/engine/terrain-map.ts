@@ -45,6 +45,7 @@ export default class TerrainMap {
 		this.mapLayers.set('treasure-spawns', getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
 		this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
 		this.mapLayers.set('shop-spawns', getTilesetFromLayer(mapData, 'shop-spawns') || new Set());
+		this.mapLayers.set('palm-trees', getTilesetFromLayer(mapData, 'palm-trees') || new Set());
 
 		// Create the patrol path
 		this.getNPCPathNodes();

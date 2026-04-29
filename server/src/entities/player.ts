@@ -4,6 +4,7 @@ import Entity from './entity';
 import Cannon from './interactables/cannon';
 import Interactable from './interactables/interactable';
 import Ship from './ship';
+import Sword from './sword';
 
 /**
  * The server-side representation of an individual player's state, acting as the "source of truth"
@@ -43,10 +44,9 @@ export default class Player extends Entity {
 	isDashing: boolean = false;
 	dashVx: number = 0;
 	dashVy: number = 0;
-
-	get canDash(): boolean {
-		return this.dashCooldown <= 0 && !this.isDashing;
-	}
+	swingCooldown: number = 0;
+	swingTimer: number = 0;
+	isSwinging: boolean = false;
 
 	/**
 	 * Builds a player with the specified data
@@ -87,6 +87,14 @@ export default class Player extends Entity {
 
 			// Specify any other player inputs here
 		};
+	}
+
+	get canDash(): boolean {
+		return this.dashCooldown <= 0 && !this.isDashing;
+	}
+
+	get canSwing(): boolean {
+		return this.swingCooldown <= 0 && !this.isSwinging;
 	}
 
 	get isReloaded(): boolean {
@@ -137,6 +145,9 @@ export default class Player extends Entity {
 			activeMinigame: this.activeMinigame ? this.activeMinigame.serialise() : null,
 			dashCooldown: this.dashCooldown,
 			dashCooldownTime: this.dashCooldownTime,
+			swingCooldown: this.swingCooldown,
+			swingCooldownTime: Sword.COOLDOWN,
+			isSwinging: this.isSwinging,
 			isSwimming: this.isSwimming,
 		};
 	}

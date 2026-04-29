@@ -83,6 +83,10 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 48,
 		});
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
+		this.load.image('coconut', '/assets/coconut.png');
+		this.load.image('bandage', '/assets/bandage.png');
+		this.load.image('palm-tree', '/assets/palm-tree.png');
+		this.load.image('barrel', '/assets/barrel.png');
 
 		// Placeholder player sprite
 		const circle = this.make.graphics();

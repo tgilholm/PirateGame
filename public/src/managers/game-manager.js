@@ -315,6 +315,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			}
 		});
 
+		this.input.on('swing', () => {
+			this.network.sendSwing();
+		});
+
 		this.input.on('dash', () => {
 			if (this.localPlayer?.isSteering) {
 				this.network.sendBoost();
@@ -343,7 +347,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('fire', () => {
-			// the spacebar fires both the dig minigame and the gun
 			this.network.sendFire();
 		});
 

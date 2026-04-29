@@ -9,6 +9,10 @@ import ProjectileModel from '../models/projectile-model.js';
 import ShipModel from '../models/ship-model.js';
 import ShopModel from '../models/shop-model.js';
 import TreasureModel from '../models/treasure-model.js';
+import PalmTreeModel from '../models/palmtree-model.js';
+import CoconutModel from '../models/coconut-model.js';
+import BandageModel from '../models/bandage-model.js';
+import BarrelModel from '../models/barrel-model.js';
 
 /**
  * Client side factory class for creating models
@@ -40,6 +44,11 @@ export default class ModelFactory {
 			case 'bullet':
 			case 'cannonball':
 				return this.createProjectile(data);
+			case 'coconut':
+			case 'bandage':
+			case 'palm-tree':
+			case 'barrel':
+				return this.createInteractable(data);
 			case 'treasure':
 			case 'cannon': // all interactables "fall through"
 			case 'helm':
@@ -108,6 +117,18 @@ export default class ModelFactory {
 				break;
 			case 'treasure':
 				model = new TreasureModel(this.scene, data.id, data.x, data.y, data.state);
+				break;
+			case 'palm-tree':
+				model = new PalmTreeModel(this.scene, data.id, data.x, data.y);
+				break;
+			case 'coconut':
+				model = new CoconutModel(this.scene, data.id, data.x, data.y);
+				break;
+			case 'bandage':
+				model = new BandageModel(this.scene, data.id, data.x, data.y);
+				break;
+			case 'barrel':
+				model = new BarrelModel(this.scene, data.id, data.x, data.y);
 				break;
 			case 'money':
 				model = new MoneyModel(this.scene, parent, data.id, data.x, data.y);

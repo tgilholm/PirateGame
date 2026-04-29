@@ -55,6 +55,10 @@ export default class NetworkManager {
 		this.sendAction({ type: ActionType.MOVE, data: inputs });
 	}
 
+	sendSwing() {
+		this.sendAction({ type: ActionType.SWING });
+	}
+
 	/**
 	 * Sends Dash and Boost from client to server
 	 */

@@ -17,4 +17,5 @@ export interface InteractableInstance {
 	type: string;
 	x: number;
 	y: number;
+	treeId?: string; //may need to move or try something else
 }

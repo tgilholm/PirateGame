@@ -6,6 +6,7 @@ import ShipModel from './ship-model.js';
 import ReloadIndicator from '../ui/reload-indicator.js';
 import RespawnIndicator from '../ui/respawn-indicator.js';
 import DashCooldown from '../ui/dash-bar.js';
+import SwordSwing from '../ui/sword-swing.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -36,6 +37,10 @@ export default class PlayerModel extends Model {
 		this.dashCooldownVal = 0;
 		this.healthBar = new HealthBar(scene, 40, 20);
 		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
+		this.swordSwing = new SwordSwing(scene, this);
+		this.swingCooldown = 0;
+		this.swingCooldownTime = 600;
+		this.wasSwinging = false;
 		this.isSwimming = false;
 
 		this.nameText = scene.add
@@ -107,6 +112,14 @@ export default class PlayerModel extends Model {
 			this.pirateColour = data.pirateColour;
 		}
 
+		if (data.swingCooldown !== undefined) this.swingCooldown = data.swingCooldown;
+		if (data.swingCooldownTime !== undefined) this.swingCooldownTime = data.swingCooldownTime;
+		if (data.isSwinging !== undefined) {
+			if (data.isSwinging && !this.wasSwinging) {
+				this.swordSwing.trigger();
+			}
+			this.wasSwinging = data.isSwinging;
+		}
 		if ('carryingId' in data) {
 			this.carryingId = data.carryingId;
 		}
@@ -152,6 +165,7 @@ export default class PlayerModel extends Model {
 		this.setAlpha(isBusy ? 0.6 : 1.0); // visual feedback if using cannon/helm etc
 
 		this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
+		this.swordSwing.update(this.aimAngle, delta);
 		this.dashCooldown.update(this.dashCooldownVal, this.dashCooldownTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
@@ -237,6 +251,7 @@ export default class PlayerModel extends Model {
 		if (this.carrySprite) this.carrySprite.destroy();
 		this.healthBar?.destroy();
 		this.reloadIndicator?.destroy();
+		this.swordSwing?.destroy();
 		this.dashCooldown?.destroy();
 
 		super.destroy();
