@@ -8,6 +8,7 @@ export class StartScene extends Phaser.Scene {
 		this.background = null;
 		this.ui = document.getElementById('ui-container');
 		this.form = document.getElementById('input-form');
+		this.logo = document.getElementById('repo-link');
 
 		// Get the username from the textinput
 		let startBtn = document.getElementById('start-btn');
@@ -165,6 +166,7 @@ export class StartScene extends Phaser.Scene {
 	resetUI() {
 		this.ui.style.display = 'none';
 		this.form.style.display = 'flex';
+		this.logo.style.display = 'flex';
 	}
 
 	goToMain() {
@@ -175,6 +177,7 @@ export class StartScene extends Phaser.Scene {
 		{
 			// Hide the form before continuing
 			this.form.style.display = 'none';
+			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
 			this.scene.start('MainScene', { username }); // Pass the username to the main scene
 		}
