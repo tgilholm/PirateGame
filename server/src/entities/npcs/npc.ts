@@ -8,8 +8,15 @@ export default class NPC extends Entity {
 	attackTime: number = 500; // ms
 	attackDamage: number = 20; // roughly 5-hit a player
 
-	constructor(id: string, type: string = 'npc', x: number, y: number, detectionRadius: number = 250) {
-		super(id, type, x, y, 75, null);
+	constructor(
+		id: string,
+		type: string = 'npc',
+		x: number,
+		y: number,
+		parent: Entity | null,
+		detectionRadius: number = 250
+	) {
+		super(id, type, x, y, 75, parent);
 
 		this.detectionRadius = detectionRadius;
 	}

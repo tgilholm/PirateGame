@@ -1,6 +1,7 @@
 import { NPCShipConfig, UpgradeConfig } from '../../types';
 import Entity from '../entity';
 import Ship from '../ship';
+import NPC from './npc';
 
 export default class NPCShip extends Ship {
 	pathIndex: number = 0; // how far along the path
@@ -8,6 +9,7 @@ export default class NPCShip extends Ship {
 	detectionRadius: number = 1000;
 	target: Entity | null = null;
 	segmentT: number = 0;
+	npcs: NPC[] = [];
 
 	constructor(id: string, x: number, y: number, config: NPCShipConfig, upgradeConfig: UpgradeConfig) {
 		super(id, 'npc-ship', x, y, config, upgradeConfig); // larger detection radius

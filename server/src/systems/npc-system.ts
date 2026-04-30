@@ -216,7 +216,7 @@ export default class NPCSystem implements BaseSystem {
 		const regularNpcs = npcs.filter((n) => !(n instanceof NPCShip));
 		if (regularNpcs.length < this.npcLimit) {
 			const { x, y } = this.getSpawnPoint();
-			this.entityFactory.createNPC(`npc_${Date.now()}`, x, y);
+			this.entityFactory.createNPC(`npc_${Date.now()}`, x, y, null);
 		}
 	}
 

@@ -13,6 +13,7 @@ import NPCShip from './npcs/npc-ship';
 import Treasure from './interactables/treasure';
 import Money from './interactables/money';
 import Cannonball from './projectiles/cannonball';
+import { TreasureState } from '@shared/socket-protocol';
 
 /**
  * Aggregates entity creation, applying domain-specific default values from
@@ -74,8 +75,8 @@ export default class EntityFactory {
 		return ship;
 	}
 
-	public createTreasure(id: string, x: number, y: number, goldValue: number): Treasure {
-		const treasure = new Treasure(id, x, y, goldValue);
+	public createTreasure(id: string, x: number, y: number, goldValue: number, index: number = 0): Treasure {
+		const treasure = new Treasure(`${id}${index}`, x, y, goldValue);
 		this.entityRegistry.create(treasure);
 		return treasure;
 	}
@@ -115,8 +116,8 @@ export default class EntityFactory {
 		return item;
 	}
 
-	public createNPC(id: string, x: number, y: number): NPC {
-		const npc = new NPC(id, 'npc', x, y);
+	public createNPC(id: string, x: number, y: number, parent: Entity | null): NPC {
+		const npc = new NPC(id, 'npc', x, y, parent);
 		this.entityRegistry.create(npc);
 		return npc;
 	}
@@ -126,8 +127,21 @@ export default class EntityFactory {
 		this.entityRegistry.create(npcShip);
 
 		this.npcShipConfig.interactables.forEach((item, index) => {
-			this.createInteractable(npcShip, item, index);
+			if (item.type === 'treasure') {
+				const treasure = this.createTreasure(`${npcShip.id}_treasure`, item.x, item.y, 1000, index);
+				treasure.parent = npcShip;
+				treasure.state = TreasureState.DROPPED;
+			} else {
+				this.createInteractable(npcShip, item, index);
+			}
 		});
+
+		this.npcShipConfig.npcs.forEach((item, index) => {
+			const npc = this.createNPC(`${npcShip.id}_npc${index}`, item.x, item.y, npcShip);
+
+			console.log(`npc ${npc.id}  created at ${npc.x}, ${npc.y}`);
+		});
+
 		return npcShip;
 	}
 
