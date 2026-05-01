@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { getTilesetFromLayer } from '../utils/tiles';
-import { buildPathSpline } from '../utils/splines';
+import { getTilesetFromLayer, getObjectsFromLayer } from '../utils/tiles';
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods
@@ -11,7 +10,9 @@ import { buildPathSpline } from '../utils/splines';
  */
 export default class TerrainMap {
 	private mapLayers: Map<string, Array<{ x: number; y: number }>> = new Map();
-	public npcPath: Array<{ x: number; y: number }> = [];
+	private objectLayers: Map<string, Array<{ x: number; y: number; type: string }>> = new Map();
+
+	public npcPaths: Map<string, Array<{ x: number; y: number }>> = new Map();
 	public readonly tileWidth: number;
 	public readonly tileHeight: number;
 	public readonly mapWidth: number;
@@ -40,14 +41,26 @@ export default class TerrainMap {
 
 		// Add all the layers you need here
 		this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
-		this.mapLayers.set('npc-spawns', getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
-		this.mapLayers.set('player-spawns', getTilesetFromLayer(mapData, 'player-spawns') || new Set());
-		this.mapLayers.set('treasure-spawns', getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
-		this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
-		this.mapLayers.set('shop-spawns', getTilesetFromLayer(mapData, 'shop-spawns') || new Set());
 
-		// Create the patrol path
-		this.getNPCPathNodes();
+		this.objectLayers.set('npc-spawns', getObjectsFromLayer(mapData, 'npc-spawns'));
+		this.objectLayers.set('player-spawns', getObjectsFromLayer(mapData, 'player-spawns'));
+		this.objectLayers.set('treasure-spawns', getObjectsFromLayer(mapData, 'treasure-spawns') || new Set());
+		this.objectLayers.set('path-nodes', getObjectsFromLayer(mapData, 'path-nodes') || new Set());
+		this.objectLayers.set('shop-spawns', getObjectsFromLayer(mapData, 'shop-spawns') || new Set());
+
+		// Create the patrol paths for NPC ships
+		// Separates the data out into the path nodes for each ship
+		// Then adds this array to the map with the key of that ship
+
+		const nodes = this.objectLayers.get('path-nodes');
+		nodes?.forEach((node: { x: number; y: number; type: string }) => {
+			// add if not already
+			if (!this.npcPaths.has(node.type)) {
+				this.npcPaths.set(node.type, [{ x: node.x, y: node.y }]);
+			} else {
+				this.npcPaths.get(node.type)?.push({ x: node.x, y: node.y });
+			}
+		});
 	}
 
 	/**
@@ -69,26 +82,24 @@ export default class TerrainMap {
 		return islandTiles.includes({ x: tileX, y: tileY });
 	}
 
-	getNPCPathNodes() {
-		const nodes = this.getTileset('npc-ship-path');
-		this.npcPath = buildPathSpline(nodes, 0.5, 25, true);
-		console.log(`[TerrainMap] Generated ${this.npcPath.length} path nodes`);
-	}
-
 	/**
-	 * Gets the array of x and y coordinates for the corresponding layer in the map
-	 * @param layerName the name of the layer for which to find coordinates
-	 * @returns an array of x and y coordinates, or an empty array if not found
+	 * Takes an array of path nodes with ship identifiers, and returns a map grouping nodes
+	 * to ships.
+	 * @param nodes an array of objects with x, y and a type e.g. 'ship1', 'ship2'
+	 * @returns a map of the aforementioned type to their x, y coordinates.
 	 */
-	public getTileset(layerName: string): Array<{ x: number; y: number }> {
-		const layer = this.mapLayers.get(layerName);
+	private getPaths(nodes: { x: number; y: number; type: string }[]): Map<string, Array<{ x: number; y: number }>> {
+		let npcPaths = new Map();
+		nodes?.forEach((node) => {
+			// add if not already
+			if (!npcPaths.has(node.type)) {
+				npcPaths.set(node.type, [{ x: node.x, y: node.y }]);
+			} else {
+				npcPaths.get(node.type)?.push({ x: node.x, y: node.y });
+			}
+		});
 
-		if (!layer) {
-			console.warn(`[TerrainMap] '${layerName}' is not a recognised layer in the tilemap!`);
-			return [];
-		}
-
-		return layer;
+		return npcPaths;
 	}
 
 	/**
