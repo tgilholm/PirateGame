@@ -51,16 +51,8 @@ export default class TerrainMap {
 		// Create the patrol paths for NPC ships
 		// Separates the data out into the path nodes for each ship
 		// Then adds this array to the map with the key of that ship
-
 		const nodes = this.objectLayers.get('path-nodes');
-		nodes?.forEach((node: { x: number; y: number; type: string }) => {
-			// add if not already
-			if (!this.npcPaths.has(node.type)) {
-				this.npcPaths.set(node.type, [{ x: node.x, y: node.y }]);
-			} else {
-				this.npcPaths.get(node.type)?.push({ x: node.x, y: node.y });
-			}
-		});
+		if (nodes) this.npcPaths = this.getPaths(nodes);
 	}
 
 	/**
@@ -100,6 +92,22 @@ export default class TerrainMap {
 		});
 
 		return npcPaths;
+	}
+
+	/**
+	 * Gets the array of x and y coordinates for the corresponding layer in the map
+	 * @param layerName the name of the layer for which to find coordinates
+	 * @returns an array of x and y coordinates, or an empty array if not found
+	 */
+	public getTileset(layerName: string): Array<{ x: number; y: number }> {
+		const layer = this.mapLayers.get(layerName);
+
+		if (!layer) {
+			console.warn(`[TerrainMap] '${layerName}' is not a recognised layer in the tilemap!`);
+			return [];
+		}
+
+		return layer;
 	}
 
 	/**

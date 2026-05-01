@@ -4,6 +4,8 @@ import Ship from '../ship';
 
 export default class NPCShip extends Ship {
 	pathIndex: number = 0; // how far along the path
+	pathName: string = ''; // e.g. "ship1", which path to follow
+
 	patrolSpeed: number = 75; // how fast it moves when circling
 	detectionRadius: number = 1000;
 	target: Entity | null = null;

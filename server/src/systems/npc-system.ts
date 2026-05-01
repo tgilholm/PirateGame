@@ -17,7 +17,7 @@ import { Body } from 'matter-js';
  */
 export default class NPCSystem implements BaseSystem {
 	npcLimit: number = 12;
-	npcShipLimit: number = 1;
+	npcShipPaths: Map<string, NPCShip> = new Map(); // maps ships to path ids
 
 	constructor(
 		private terrainMap: TerrainMap,
@@ -27,23 +27,49 @@ export default class NPCSystem implements BaseSystem {
 		private addPhysicsBody: (body: Matter.Body) => void
 	) {}
 
+	generateNPCShip(path: Array<{ x: number; y: number }>): NPCShip | null {
+		if (path.length === 0) return null;
+
+		const spawn = path[Math.floor(Math.random() * path.length - 1)]; // so it's not the same every time
+		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
+		this.addPhysicsBody(ship.body);
+
+		return ship;
+	}
+
 	update(dt: number): void {
-		// Get patrol path for ships
-		const path = this.terrainMap.npcPath;
-		if (path.length === 0) return;
+		const paths = this.terrainMap.npcPaths; // map of ship name to coordinates
+
+		// if no other ship is on a path, create the ship and add it at a random node on that path
+		this.npcShipPaths.forEach((value, key) => {
+			if (!value) {
+				const path = paths.get(key); // get the coordinates
+
+				if (!path) {
+					console.warn(`[NPCSystem] Failed to get path for ${key}`);
+					return;
+				}
+
+				const ship = this.generateNPCShip(path); // set the ship on those coords
+				if (!ship) {
+					console.warn(`[NPCSystem] Failed to generate NPC ship`);
+					return;
+				}
+
+				this.npcShipPaths.set(key, ship); // so we don't add it again
+			}
+		});
 
 		const allNpcs = this.entityRegistry.getByType<NPC>('npc'); // npc ships included
-		const ships = this.entityRegistry.getByType<NPCShip>('npc-ship'); // just ships
 
 		// Generate if disappeared
 		this.generateNPCs(allNpcs);
-		this.generateNPCShips(ships, path);
 
 		for (const npc of allNpcs) {
 			this.reap(npc);
 
 			if (npc instanceof NPCShip) {
-				this.patrol(npc, path, dt);
+				this.patrol(npc, paths.get(npc.pathName), dt);
 			} else {
 				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
 				this.getTarget(npc, nearby);
@@ -60,7 +86,9 @@ export default class NPCSystem implements BaseSystem {
 		}
 	}
 
-	patrol(ship: NPCShip, path: Array<{ x: number; y: number }>, dt: number): void {
+	patrol(ship: NPCShip, path: Array<{ x: number; y: number }> | undefined, dt: number): void {
+		if (!path) return;
+
 		const current = path[ship.pathIndex];
 		const nextIndex = (ship.pathIndex + 1) % path.length;
 		const next = path[nextIndex];
@@ -151,14 +179,6 @@ export default class NPCSystem implements BaseSystem {
 			const { x, y } = this.getSpawnPoint();
 			this.entityFactory.createNPC(`npc_${Date.now()}`, x, y);
 		}
-	}
-
-	generateNPCShips(ships: NPCShip[], path: Array<{ x: number; y: number }>): void {
-		if (ships.length >= this.npcShipLimit || path.length === 0) return;
-
-		const spawn = path[Math.floor(Math.random() * path.length - 1)]; // so it's not the same every time
-		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
-		this.addPhysicsBody(ship.body);
 	}
 
 	getSpawnPoint() {
