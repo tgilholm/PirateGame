@@ -5,3 +5,4 @@ build
 .prettierignore
 .gitignore
 *.png
+*.mp3

@@ -6,6 +6,7 @@ import UIManager from '../managers/ui-manager.js';
 import InputManager from '../managers/input-manager.js';
 import ModelFactory from '../managers/model-factory.js';
 import AnimationManager from '../managers/animation-manager.js';
+import SoundManager from '../managers/sound-manager.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
 
@@ -60,6 +61,8 @@ export class MainScene extends Phaser.Scene {
 		this.inputManager = new InputManager(this);
 		this.gameManager = new GameManager(this, new NetworkManager(socket), this.inputManager, modelFactory);
 		this.animationManager = new AnimationManager(this);
+		this.soundManager = new SoundManager(this);
+		this.soundManager.playMusic('music-main');
 
 		const minimap = new Minimap(this.map, canvas);
 		this.shopUI = new ShopUI(this.gameManager, upgradeConfig, (name) => {
