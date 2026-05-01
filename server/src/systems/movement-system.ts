@@ -67,6 +67,23 @@ export default class MovementSystem implements BaseSystem {
 		}
 	}
 
+	updateDashTimer(player: Player, dt: number) {
+		if (player.dashTimer > 0) {
+			player.dashTimer = Math.max(0, player.dashTimer - dt * 1000);
+			if (player.dashTimer <= 0) {
+				player.isDashing = false;
+				player.dashVx = 0;
+				player.dashVy = 0;
+			}
+			player.markDirty();
+		}
+
+		if (player.dashCooldown > 0) {
+			player.dashCooldown = Math.max(0, player.dashCooldown - dt * 1000);
+			player.markDirty();
+		}
+	}
+
 	/**
 	 * Applies movement for a given player, accounting for on-ship conditions,
 	 * different movement speed for on-land vs in-sea, collision with inner/outer
@@ -77,6 +94,7 @@ export default class MovementSystem implements BaseSystem {
 	updatePlayer(player: Player, dt: number, ships: Ship[]): void {
 		this.updateReloadTimer(player, dt);
 		this.updateRespawnTimer(player, dt);
+		this.updateDashTimer(player, dt);
 
 		// Keep track of aim angle- don't send for static players
 		const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
@@ -123,6 +141,43 @@ export default class MovementSystem implements BaseSystem {
 		const prevX = player.x; // to calculate velocity difference for client-side extrapolation
 		const prevY = player.y;
 
+		// Dash overrides normal movement
+		if (player.isDashing) {
+			const nextX = player.x + player.dashVx * dt;
+			const nextY = player.y + player.dashVy * dt;
+
+			const groundTreasures = this.registry
+				.getByType<Treasure>('treasure')
+				.filter((t) => t.id !== player.carrying?.id);
+			const shops = this.registry.getByType<Shop>('shop');
+			const collisionPadding = -playerConfig.radius;
+
+			const isColliding = (x: number, y: number) =>
+				this.checkShipCollisions(x, y, ships, collisionPadding) ||
+				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
+				this.checkShopObstacles(x, y, shops, playerConfig.radius);
+
+			if (!isColliding(nextX, nextY)) {
+				player.x = nextX;
+				player.y = nextY;
+			} else if (!isColliding(nextX, player.y)) {
+				player.x = nextX;
+			} else if (!isColliding(player.x, nextY)) {
+				player.y = nextY;
+			} else {
+				// Fully blocked — kill the dash
+				player.isDashing = false;
+				player.dashVx = 0;
+				player.dashVy = 0;
+			}
+
+			this.constrainToWorld(player, playerConfig.radius);
+			player.vx = player.dashVx;
+			player.vy = player.dashVy;
+			player.markDirty();
+			return;
+		}
+
 		// If no inputs, do nothing
 		if (dx === 0 && dy === 0) {
 			// reset velocity
@@ -138,6 +193,7 @@ export default class MovementSystem implements BaseSystem {
 
 		// Different speed if on land/a ship vs in the sea
 		const onLand = this.terrainMap.isOnIsland(player.x, player.y);
+
 		let runSpeed = playerConfig.runSpeed;
 		let swimSpeed = playerConfig.swimSpeed;
 		if (player.carrying) {
@@ -201,6 +257,16 @@ export default class MovementSystem implements BaseSystem {
 
 			// Keep the player on the map
 			this.constrainToWorld(player, playerConfig.radius);
+		}
+
+		// determine swimming AFTER movement is finalized
+		const isOnLandNow = this.terrainMap.isOnIsland(player.x, player.y);
+
+		const swimmingNow = !parent && !isOnLandNow;
+
+		if (player.isSwimming !== swimmingNow) {
+			player.isSwimming = swimmingNow;
+			player.markDirty();
 		}
 
 		// Calculate the player's velocity from their new pos vs the old
@@ -293,6 +359,17 @@ export default class MovementSystem implements BaseSystem {
 	 * @param dt the difference in time from the last update
 	 */
 	updateShip(ship: Ship, dt: number) {
+		// Update boost timer
+		if (ship.boostTimer > 0) {
+			ship.boostTimer = Math.max(0, ship.boostTimer - dt * 1000);
+			if (ship.boostTimer <= 0) ship.isBoosting = false;
+			ship.markDirty();
+		}
+
+		if (ship.boostCooldown > 0) {
+			ship.boostCooldown = Math.max(0, ship.boostCooldown - dt * 1000);
+			ship.markDirty();
+		}
 		const body = ship.body;
 		const acceleration = ship.acceleration; // using get method for auto-applied modifier
 		const { up, left, right } = ship.inputs;
@@ -302,13 +379,21 @@ export default class MovementSystem implements BaseSystem {
 		if (right) Body.setAngularVelocity(body, turnSpeed);
 		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
-		if (up) {
-			const force = {
-				x: Math.cos(body.angle) * acceleration,
-				y: Math.sin(body.angle) * acceleration,
-			};
+		if (up || ship.isBoosting) {
+			const boostFactor = ship.isBoosting ? ship.boostMultiplier : 1;
+			const forceX = Math.cos(body.angle) * acceleration * boostFactor;
+			const forceY = Math.sin(body.angle) * acceleration * boostFactor;
 
-			Body.applyForce(body, body.position, force);
+			// If boosting from a near-standstill, apply a one-time impulse
+			const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
+			if (ship.isBoosting && speed < 1) {
+				Body.setVelocity(body, {
+					x: Math.cos(body.angle) * 2,
+					y: Math.sin(body.angle) * 2,
+				});
+			}
+
+			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
 	}
 

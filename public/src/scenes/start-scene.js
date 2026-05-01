@@ -57,6 +57,11 @@ export class StartScene extends Phaser.Scene {
 			frameWidth: 25,
 			frameHeight: 25,
 		});
+		this.load.spritesheet('pirate', 'assets/pirate.png', {
+			frameWidth: 16,
+			frameHeight: 16,
+		});
+
 		this.load.image('tiles', '/assets/terrain-tilesheet.png');
 		this.load.image('cannon', '/assets/cannon.png');
 		this.load.image('helm', '/assets/helm.png');

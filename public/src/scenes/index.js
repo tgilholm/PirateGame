@@ -45,3 +45,7 @@ window.upgradeConfig = upgradeConfig;
 //@ts-ignore more cheesing
 window.showDebug = showDebug;
 const game = new Phaser.Game(config);
+
+window.addEventListener('contextmenu', (event) => {
+	event.preventDefault();
+});

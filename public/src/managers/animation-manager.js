@@ -8,6 +8,7 @@ export default class AnimationManager {
 	constructor(scene) {
 		this.scene = scene;
 		this.registerAnimations();
+		this.registerPlayerAnimations();
 	}
 
 	/**
@@ -37,6 +38,81 @@ export default class AnimationManager {
 					repeat: 0,
 				});
 			}
+		});
+	}
+
+	registerPlayerAnimations() {
+		this.scene.anims.create({
+			key: 'pirate-idle-down',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 0, end: 2 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-idle-up',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 4, end: 6 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-idle-right',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 8, end: 10 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-idle-left',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 12, end: 14 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-walk-down',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 16, end: 18 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-walk-up',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 20, end: 22 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-walk-right',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 24, end: 26 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-walk-left',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 28, end: 30 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-death',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 72, end: 75 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-swim',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 76, end: 78 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-dig-right',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 64, end: 66 }),
+			frameRate: 8,
+			repeat: -1,
+		});
+		this.scene.anims.create({
+			key: 'pirate-dig-left',
+			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 68, end: 70 }),
+			frameRate: 8,
+			repeat: -1,
 		});
 	}
 

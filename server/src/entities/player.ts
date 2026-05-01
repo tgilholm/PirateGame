@@ -11,6 +11,7 @@ import Ship from './ship';
  */
 export default class Player extends Entity {
 	username: string;
+	isSwimming = false;
 	isSteering: boolean;
 	cannon: Cannon | null;
 	carrying: Interactable | null = null;
@@ -32,6 +33,19 @@ export default class Player extends Entity {
 	respawnTimer: number = 0;
 	respawnStarted: boolean = false;
 	deathNotified: boolean = false;
+
+	//dash variables
+	dashCooldown: number = 0;
+	dashCooldownTime: number = 3000; // ms
+	dashDuration: number = 150; // ms
+	dashTimer: number = 0;
+	isDashing: boolean = false;
+	dashVx: number = 0;
+	dashVy: number = 0;
+
+	get canDash(): boolean {
+		return this.dashCooldown <= 0 && !this.isDashing;
+	}
 
 	/**
 	 * Builds a player with the specified data
@@ -110,6 +124,9 @@ export default class Player extends Entity {
 			respawnTimer: this.respawnTimer,
 			shipId: this.ship.id,
 			activeMinigame: this.activeMinigame ? this.activeMinigame.serialise() : null,
+			dashCooldown: this.dashCooldown,
+			dashCooldownTime: this.dashCooldownTime,
+			isSwimming: this.isSwimming,
 		};
 	}
 }

@@ -314,6 +314,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			}
 		});
 
+		this.input.on('dash', () => {
+			if (this.localPlayer?.isSteering) {
+				this.network.sendBoost();
+			} else {
+				this.network.sendDash();
+			}
+		});
+
 		this.input.on('interact', () => {
 			const target = this.closestInteractable;
 			if (target?.entity) {

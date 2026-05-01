@@ -5,6 +5,7 @@ import Model from './model.js';
 import ShipModel from './ship-model.js';
 import ReloadIndicator from '../ui/reload-indicator.js';
 import RespawnIndicator from '../ui/respawn-indicator.js';
+import DashCooldown from '../ui/dash-bar.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -30,8 +31,12 @@ export default class PlayerModel extends Model {
 		this.reloadTimer = 0;
 		this.respawnTimer = 0;
 		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
+		this.dashCooldown = new DashCooldown(scene, this, 28); // slightly outside reload ring
+		this.dashCooldownTime = 3000;
+		this.dashCooldownVal = 0;
 		this.healthBar = new HealthBar(scene, 40, 20);
 		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
+		this.isSwimming = false;
 
 		this.nameText = scene.add
 			.text(0, -50, '', {
@@ -46,7 +51,8 @@ export default class PlayerModel extends Model {
 			.setPosition(0, -25);
 		this.add(this.nameText);
 
-		this.bodySprite = scene.add.sprite(0, 0, 'player_circle');
+		this.bodySprite = scene.add.sprite(0, 0, 'pirate');
+		this.bodySprite.setScale(3);
 		this.add(this.bodySprite);
 
 		this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
@@ -58,6 +64,13 @@ export default class PlayerModel extends Model {
 		this.carrySprite.setVisible(false);
 		this.carrySprite.setRotation(Math.PI / 2);
 		this.add(this.carrySprite);
+
+		//for player animations
+		this.lastAnim = '';
+		this.lastDirection = 'down';
+
+		this.prevX = x;
+		this.prevY = y;
 	}
 
 	/**
@@ -72,12 +85,14 @@ export default class PlayerModel extends Model {
 			this.nameText.setText(data.username);
 			this.username = data.username;
 		}
-
+		if (data.isSwimming !== undefined) this.isSwimming = data.isSwimming;
 		if (data.gold !== undefined) this.gold = data.gold;
 		if (data.isSteering !== undefined) this.isSteering = data.isSteering;
 		if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
 		if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
 		if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
+		if (data.dashCooldown !== undefined) this.dashCooldownVal = data.dashCooldown;
+		if (data.dashCooldownTime !== undefined) this.dashCooldownTime = data.dashCooldownTime;
 		if (data.aimAngle !== undefined) this.target.r = data.aimAngle;
 		if (data.gold !== undefined) this.gold = data.gold;
 		if (data.shipId !== undefined) this.shipId = data.shipId;
@@ -98,6 +113,7 @@ export default class PlayerModel extends Model {
 	 * @param {number} lerp the lerp factor, calculated from the delta
 	 */
 	postUpdate(delta, deltaTime, lerp) {
+		this.updateAnimations();
 		const gun = this.gun;
 		const pos = this.worldPos;
 		const isBusy = this.isSteering || this.isUsingCannon || this.isDead; // busy dyin'
@@ -129,6 +145,7 @@ export default class PlayerModel extends Model {
 		this.setAlpha(isBusy ? 0.6 : 1.0); // visual feedback if using cannon/helm etc
 
 		this.reloadIndicator.update(this.reloadTimer, this.reloadTime, delta);
+		this.dashCooldown.update(this.dashCooldownVal, this.dashCooldownTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
 
@@ -150,6 +167,61 @@ export default class PlayerModel extends Model {
 	}
 
 	/**
+	 * Handles player animations
+	 */
+	updateAnimations() {
+		const dx = this.x - this.prevX;
+		const dy = this.y - this.prevY;
+		this.prevX = this.x;
+		this.prevY = this.y;
+		const speed = Math.sqrt(dx * dx + dy * dy);
+		if (this.isDead) {
+			this.playAnim('pirate-death');
+			return;
+		}
+		// don't animate while steering/cannon
+		if (this.isSteering || this.isUsingCannon) {
+			this.playAnim('pirate-idle-down');
+			return;
+		}
+		// idle threshold
+		if (speed < 0.1) {
+			this.playAnim(`pirate-idle-${this.lastDirection}`);
+			return;
+		}
+		if (this.isSwimming) {
+			this.playAnim('pirate-swim');
+			return;
+		}
+		// determine movement direction
+		if (Math.abs(dx) > Math.abs(dy)) {
+			if (dx > 0) {
+				this.lastDirection = 'right';
+				this.playAnim('pirate-walk-right');
+			} else {
+				this.lastDirection = 'left';
+				this.playAnim('pirate-walk-left');
+			}
+		} else {
+			if (dy > 0) {
+				this.lastDirection = 'down';
+				this.playAnim('pirate-walk-down');
+			} else {
+				this.lastDirection = 'up';
+				this.playAnim('pirate-walk-up');
+			}
+		}
+	}
+
+	playAnim(key) {
+		if (this.lastAnim === key) {
+			return;
+		}
+		this.lastAnim = key;
+		this.bodySprite.play(key, true);
+	}
+
+	/**
 	 * Removes this player from the game and destroys all connected sprites
 	 */
 	destroy() {
@@ -158,6 +230,7 @@ export default class PlayerModel extends Model {
 		if (this.carrySprite) this.carrySprite.destroy();
 		this.healthBar?.destroy();
 		this.reloadIndicator?.destroy();
+		this.dashCooldown?.destroy();
 
 		super.destroy();
 	}
