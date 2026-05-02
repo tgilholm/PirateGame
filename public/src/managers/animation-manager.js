@@ -42,77 +42,35 @@ export default class AnimationManager {
 	}
 
 	registerPlayerAnimations() {
-		this.scene.anims.create({
-			key: 'pirate-idle-down',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 0, end: 2 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-idle-up',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 4, end: 6 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-idle-right',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 8, end: 10 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-idle-left',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 12, end: 14 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-walk-down',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 16, end: 18 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-walk-up',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 20, end: 22 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-walk-right',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 24, end: 26 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-walk-left',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 28, end: 30 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-death',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 72, end: 75 }),
-			frameRate: 24,
-			repeat: 0,
-		});
-		this.scene.anims.create({
-			key: 'pirate-swim',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 76, end: 78 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-dig-right',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 64, end: 66 }),
-			frameRate: 8,
-			repeat: -1,
-		});
-		this.scene.anims.create({
-			key: 'pirate-dig-left',
-			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 68, end: 70 }),
-			frameRate: 8,
-			repeat: -1,
+		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
+		const animDefs = [
+			{ suffix: 'idle-down', start: 0, end: 2, repeat: -1 },
+			{ suffix: 'idle-up', start: 4, end: 6, repeat: -1 },
+			{ suffix: 'idle-right', start: 8, end: 10, repeat: -1 },
+			{ suffix: 'idle-left', start: 12, end: 14, repeat: -1 },
+			{ suffix: 'walk-down', start: 16, end: 18, repeat: -1 },
+			{ suffix: 'walk-up', start: 20, end: 22, repeat: -1 },
+			{ suffix: 'walk-right', start: 24, end: 26, repeat: -1 },
+			{ suffix: 'walk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'death', start: 72, end: 75, repeat: 0 },
+			{ suffix: 'swim', start: 76, end: 78, repeat: -1 },
+			{ suffix: 'dig-right', start: 64, end: 66, repeat: -1 },
+			{ suffix: 'dig-left', start: 68, end: 70, repeat: -1 },
+		];
+
+		COLOURS.forEach((colour) => {
+			const textureKey = `pirate_${colour}`;
+			animDefs.forEach(({ suffix, start, end, repeat }) => {
+				const key = `pirate-${colour}-${suffix}`;
+				if (!this.scene.anims.exists(key)) {
+					this.scene.anims.create({
+						key,
+						frames: this.scene.anims.generateFrameNumbers(textureKey, { start, end }),
+						frameRate: 8,
+						repeat,
+					});
+				}
+			});
 		});
 	}
 

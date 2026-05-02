@@ -51,7 +51,7 @@ export default class PlayerModel extends Model {
 			.setPosition(0, -25);
 		this.add(this.nameText);
 
-		this.bodySprite = scene.add.sprite(0, 0, 'pirate');
+		this.bodySprite = scene.add.sprite(0, 0, 'default');
 		this.bodySprite.setScale(3);
 		this.add(this.bodySprite);
 
@@ -99,6 +99,13 @@ export default class PlayerModel extends Model {
 		if (data.respawnTimer !== undefined) this.respawnTimer = data.respawnTimer;
 		if (data.activeMinigame !== undefined) this.activeMinigame = data.activeMinigame;
 		if (data.isUsingShop !== undefined) this.isUsingShop = data.isUsingShop;
+		if (data.pirateColour !== undefined) {
+			const newKey = `pirate_${data.pirateColour}`;
+			if (this.bodySprite.texture.key !== newKey) {
+				this.bodySprite.setTexture(newKey);
+			}
+			this.pirateColour = data.pirateColour;
+		}
 
 		if ('carryingId' in data) {
 			this.carryingId = data.carryingId;
@@ -213,11 +220,12 @@ export default class PlayerModel extends Model {
 	}
 
 	playAnim(key) {
-		if (this.lastAnim === key) {
-			return;
-		}
-		this.lastAnim = key;
-		this.bodySprite.play(key, true);
+		// key arrives as e.g. 'pirate-idle-down'; inject colour
+		const colour = this.pirateColour ?? 'default';
+		const colouredKey = key.replace('pirate-', `pirate-${colour}-`);
+		if (this.lastAnim === colouredKey) return;
+		this.lastAnim = colouredKey;
+		this.bodySprite.play(colouredKey, true);
 	}
 
 	/**

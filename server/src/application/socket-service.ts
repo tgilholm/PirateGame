@@ -86,8 +86,11 @@ export default class SocketService {
 			console.log(`[SocketService] Client connected: ${socket.id}`);
 
 			// Client has fully loaded in- send them the full sync
+			// Change the READY handler:
 			socket.on(ClientEvent.READY, (data) => {
-				this.world.addPlayer(socket.id, data.username);
+				const username = data?.username ?? '';
+				const pirateColour = data?.pirateColour ?? 'default';
+				this.world.addPlayer(socket.id, username, pirateColour);
 				socket.emit(ServerEvent.INIT_GAME, { ...this.world.getFullState(), id: socket.id });
 			});
 

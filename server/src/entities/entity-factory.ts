@@ -49,8 +49,15 @@ export default class EntityFactory {
 	 * @param username the username chosen by the player
 	 * @returns the player
 	 */
-	public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
-		const player = new Player(id, x, y, parent, username, this.playerConfig);
+	public createPlayer(
+		id: string,
+		x: number,
+		y: number,
+		parent: Entity | null,
+		username: string,
+		pirateColour: string = 'default'
+	): Player {
+		const player = new Player(id, x, y, parent, username, this.playerConfig, pirateColour);
 		this.entityRegistry.create(player);
 		return player;
 	}

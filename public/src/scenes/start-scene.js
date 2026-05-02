@@ -57,10 +57,16 @@ export class StartScene extends Phaser.Scene {
 			frameWidth: 25,
 			frameHeight: 25,
 		});
-		this.load.spritesheet('pirate', 'assets/pirate.png', {
+		this.load.spritesheet('default', 'assets/pirate.png', {
 			frameWidth: 16,
 			frameHeight: 16,
 		});
+		this.load.spritesheet('pirate_red', 'assets/pirate_red.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_blue', 'assets/pirate_blue.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_green', 'assets/pirate_green.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_yellow', 'assets/pirate_yellow.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_white', 'assets/pirate_white.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_grey', 'assets/pirate_grey.png', { frameWidth: 16, frameHeight: 16 });
 
 		this.load.image('tiles', '/assets/terrain-tilesheet.png');
 		this.load.image('cannon', '/assets/cannon.png');
@@ -163,6 +169,22 @@ export class StartScene extends Phaser.Scene {
 			yoyo: true,
 			loop: -1,
 		});
+		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
+		this.selectedColour = COLOURS[0];
+
+		const pickerEl = document.getElementById('colour-picker');
+		pickerEl.style.display = 'flex';
+
+		COLOURS.forEach((colour) => {
+			const btn = document.getElementById(`colour-btn-${colour}`);
+			btn.addEventListener('click', () => {
+				this.selectedColour = colour;
+				document.querySelectorAll('.colour-btn').forEach((b) => b.classList.remove('selected'));
+				btn.classList.add('selected');
+			});
+		});
+
+		document.getElementById('colour-btn-default').classList.add('selected');
 	}
 
 	/**
@@ -172,6 +194,7 @@ export class StartScene extends Phaser.Scene {
 		this.ui.style.display = 'none';
 		this.form.style.display = 'flex';
 		this.logo.style.display = 'flex';
+		document.getElementById('colour-picker').style.display = 'none';
 	}
 
 	goToMain() {
@@ -184,7 +207,7 @@ export class StartScene extends Phaser.Scene {
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
-			this.scene.start('MainScene', { username }); // Pass the username to the main scene
+			this.scene.start('MainScene', { username, pirateColour: this.selectedColour });
 		}
 	}
 

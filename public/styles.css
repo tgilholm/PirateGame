@@ -407,3 +407,9 @@ h2 {
 	border-radius: 6px;
 	transition: width 0.1s;
 }
+
+.colour-btn.selected {
+	border-color: #ffd700 !important;
+	transform: scale(1.2);
+	box-shadow: 0 0 8px #ffd700;
+}

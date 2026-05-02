@@ -58,8 +58,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	 * prevents the client from missing the setup data.
 	 * @param {string} username
 	 */
-	start(username) {
-		this.network.emit(ClientEvent.READY, { username });
+	start(username, pirateColour = 'default') {
+		this.pirateColour = pirateColour;
+		this.network.emit(ClientEvent.READY, { username, pirateColour });
 	}
 	/**
 	 * Refreshes all client-side objects.

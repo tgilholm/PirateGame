@@ -11,6 +11,7 @@ import Ship from './ship';
  */
 export default class Player extends Entity {
 	username: string;
+	pirateColour: string;
 	isSwimming = false;
 	isSteering: boolean;
 	cannon: Cannon | null;
@@ -56,9 +57,18 @@ export default class Player extends Entity {
 	 * @param username chosen by the player
 	 * @param config config data read from entityConfig
 	 */
-	constructor(id: string, x: number, y: number, parent: Entity | null, username: string, config: PlayerConfig) {
+	constructor(
+		id: string,
+		x: number,
+		y: number,
+		parent: Entity | null,
+		username: string,
+		config: PlayerConfig,
+		pirateColour: string = 'default'
+	) {
 		super(id, 'player', x, y, config.maxHealth, parent);
 		this.username = username || ''; // default to no uname
+		this.pirateColour = pirateColour;
 
 		// Player-specific detail
 		this.ship = parent as Ship;
@@ -114,6 +124,7 @@ export default class Player extends Entity {
 		return {
 			...super.toState(),
 			username: this.username,
+			pirateColour: this.pirateColour,
 			gold: this.gold,
 			isSteering: this.isSteering,
 			aimAngle: this.aimAngle,
