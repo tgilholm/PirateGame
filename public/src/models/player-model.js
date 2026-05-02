@@ -175,25 +175,24 @@ export default class PlayerModel extends Model {
 		this.prevX = this.x;
 		this.prevY = this.y;
 		const speed = Math.sqrt(dx * dx + dy * dy);
+
 		if (this.isDead) {
 			this.playAnim('pirate-death');
 			return;
 		}
-		// don't animate while steering/cannon
 		if (this.isSteering || this.isUsingCannon) {
 			this.playAnim('pirate-idle-down');
 			return;
 		}
-		// idle threshold
 		if (speed < 0.1) {
 			this.playAnim(`pirate-idle-${this.lastDirection}`);
 			return;
 		}
+		// Swimming idle is handled above via pirate-idle-* — only override movement anims
 		if (this.isSwimming) {
 			this.playAnim('pirate-swim');
 			return;
 		}
-		// determine movement direction
 		if (Math.abs(dx) > Math.abs(dy)) {
 			if (dx > 0) {
 				this.lastDirection = 'right';

@@ -93,8 +93,8 @@ export default class AnimationManager {
 		this.scene.anims.create({
 			key: 'pirate-death',
 			frames: this.scene.anims.generateFrameNumbers('pirate', { start: 72, end: 75 }),
-			frameRate: 8,
-			repeat: -1,
+			frameRate: 24,
+			repeat: 0,
 		});
 		this.scene.anims.create({
 			key: 'pirate-swim',

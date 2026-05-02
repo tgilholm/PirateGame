@@ -104,9 +104,17 @@ export default class MovementSystem implements BaseSystem {
 		}
 		(player as any).prevAimAngle = player.aimAngle; // store temporarily
 
+		const parent = (player.parent as Ship) || null;
+
 		if (player.isSteering || player.cannon) return;
 
-		const parent = (player.parent as Ship) || null;
+		const currentWorldPos = player.worldPos;
+		const swimmingNow = !parent && !this.terrainMap.isOnIsland(currentWorldPos.x, currentWorldPos.y);
+		if (player.isSwimming !== swimmingNow) {
+			player.isSwimming = swimmingNow;
+			player.markDirty();
+		}
+
 		const { up, down, left, right } = player.inputs;
 		const playerConfig = this.entityConfig.player;
 
@@ -178,16 +186,6 @@ export default class MovementSystem implements BaseSystem {
 			return;
 		}
 
-		// determine swimming state even while idle
-		const worldPos = player.worldPos;
-		const isOnLandNow = this.terrainMap.isOnIsland(worldPos.x, worldPos.y);
-		const swimmingNow = !parent && !isOnLandNow;
-
-		if (player.isSwimming !== swimmingNow) {
-			player.isSwimming = swimmingNow;
-			player.markDirty();
-		}
-
 		// If no inputs, do nothing
 		if (dx === 0 && dy === 0) {
 			player.vx = 0;
@@ -201,7 +199,7 @@ export default class MovementSystem implements BaseSystem {
 		dy /= length;
 
 		// Different speed if on land/a ship vs in the sea
-		const onLand = this.terrainMap.isOnIsland(worldPos.x, worldPos.y);
+		const onLand = this.terrainMap.isOnIsland(player.worldPos.x, player.worldPos.y);
 		let runSpeed = playerConfig.runSpeed;
 		let swimSpeed = playerConfig.swimSpeed;
 		if (player.carrying) {
@@ -368,12 +366,16 @@ export default class MovementSystem implements BaseSystem {
 			ship.boostCooldown = Math.max(0, ship.boostCooldown - dt * 1000);
 			ship.markDirty();
 		}
+
 		const body = ship.body;
-		const acceleration = ship.acceleration; // using get method for auto-applied modifier
+		const acceleration = ship.acceleration;
 		const { up, left, right } = ship.inputs;
 		const { turnSpeed } = ship.physics;
 
-		// Turning
+		const DRIFT_FRICTION = 0.015;
+		const BASE_FRICTION = ship.physics.frictionAir;
+		body.frictionAir = ship.pilot ? BASE_FRICTION : DRIFT_FRICTION;
+
 		if (right) Body.setAngularVelocity(body, turnSpeed);
 		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
@@ -382,7 +384,6 @@ export default class MovementSystem implements BaseSystem {
 			const forceX = Math.cos(body.angle) * acceleration * boostFactor;
 			const forceY = Math.sin(body.angle) * acceleration * boostFactor;
 
-			// If boosting from a near-standstill, apply a one-time impulse
 			const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
 			if (ship.isBoosting && speed < 1) {
 				Body.setVelocity(body, {

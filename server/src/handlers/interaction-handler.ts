@@ -165,7 +165,13 @@ export default class InteractionHandler {
 			case 'helm':
 				if (!ship) return;
 				player.isSteering = false;
-				ship.pilot = null; // reset pilot
+				ship.pilot = null;
+				// Reset inputs so the ship stops accelerating
+				ship.inputs.up = false;
+				ship.inputs.down = false;
+				ship.inputs.left = false;
+				ship.inputs.right = false;
+				ship.markDirty();
 				break;
 
 			case 'cannon':
