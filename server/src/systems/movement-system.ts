@@ -178,9 +178,18 @@ export default class MovementSystem implements BaseSystem {
 			return;
 		}
 
+		// determine swimming state even while idle
+		const worldPos = player.worldPos;
+		const isOnLandNow = this.terrainMap.isOnIsland(worldPos.x, worldPos.y);
+		const swimmingNow = !parent && !isOnLandNow;
+
+		if (player.isSwimming !== swimmingNow) {
+			player.isSwimming = swimmingNow;
+			player.markDirty();
+		}
+
 		// If no inputs, do nothing
 		if (dx === 0 && dy === 0) {
-			// reset velocity
 			player.vx = 0;
 			player.vy = 0;
 			return;
@@ -192,8 +201,7 @@ export default class MovementSystem implements BaseSystem {
 		dy /= length;
 
 		// Different speed if on land/a ship vs in the sea
-		const onLand = this.terrainMap.isOnIsland(player.x, player.y);
-
+		const onLand = this.terrainMap.isOnIsland(worldPos.x, worldPos.y);
 		let runSpeed = playerConfig.runSpeed;
 		let swimSpeed = playerConfig.swimSpeed;
 		if (player.carrying) {
@@ -257,16 +265,6 @@ export default class MovementSystem implements BaseSystem {
 
 			// Keep the player on the map
 			this.constrainToWorld(player, playerConfig.radius);
-		}
-
-		// determine swimming AFTER movement is finalized
-		const isOnLandNow = this.terrainMap.isOnIsland(player.x, player.y);
-
-		const swimmingNow = !parent && !isOnLandNow;
-
-		if (player.isSwimming !== swimmingNow) {
-			player.isSwimming = swimmingNow;
-			player.markDirty();
 		}
 
 		// Calculate the player's velocity from their new pos vs the old
