@@ -157,7 +157,7 @@ export default class NPCSystem implements BaseSystem {
 			if (dist < npc.detectionRadius && !entity.isDead) npc.target = entity;
 			else npc.target = null;
 
-			if (npc.target && dist < 25 && npc.canAttack) {
+			if (npc.target && dist < 4 && npc.canAttack) {
 				this.attackTarget(npc, npc.target);
 				npc.attackTimer = npc.attackTime; // reset cooldown
 			}

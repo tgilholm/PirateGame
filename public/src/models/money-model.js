@@ -10,11 +10,9 @@ export default class MoneyModel extends InteractableModel {
 	constructor(scene, parent, id, x, y) {
 		super(scene, parent, id, 'money', x, y, 'money-stack', 'Pick up Gold');
 
-		this.sprite.setDisplaySize(48, 48);
-
 		this.valueText = scene.add
 			.text(0, -50, '', {
-				fontSize: '16px',
+				fontSize: '8px',
 				fontFamily: 'Consolas',
 				color: '#ffffff',
 				backgroundColor: '#00000088',
@@ -22,7 +20,7 @@ export default class MoneyModel extends InteractableModel {
 			})
 			.setOrigin(0.5, 1)
 			.setDepth(100)
-			.setPosition(0, -25);
+			.setPosition(0, -8);
 		this.add(this.valueText);
 	}
 

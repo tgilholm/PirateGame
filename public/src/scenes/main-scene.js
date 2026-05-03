@@ -83,7 +83,7 @@ export class MainScene extends Phaser.Scene {
 		this.inputManager.on('zoom', (deltaY) => {
 			const step = deltaY > 0 ? -0.1 : 0.1;
 
-			const minZoom = 1.8;
+			const minZoom = 1.4;
 			const maxZoom = 2.5;
 
 			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom);

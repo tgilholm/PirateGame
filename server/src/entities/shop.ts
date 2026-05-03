@@ -16,6 +16,6 @@ export default class Shop extends Interactable {
 	 */
 	constructor(id: string, x: number, y: number) {
 		super(id, x, y, null, 'shop'); // shops have no parents and are indestructible
-		this.interactRange = 200;
+		this.interactRange = 32;
 	}
 }

@@ -9,7 +9,7 @@ export default class CombatHandler {
 		if (!cannon || !cannon.isReloaded) return;
 
 		cannon.reloadTimer = cannon.reloadTime;
-		const cannonEndOffset = 20;
+		const cannonEndOffset = 4;
 		const worldAngle = ship ? cannon.r + ship.r : cannon.r;
 
 		const worldPos = cannon.worldPos;

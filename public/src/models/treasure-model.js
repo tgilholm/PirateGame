@@ -7,7 +7,6 @@ export default class TreasureModel extends InteractableModel {
 		super(scene, null, id, 'treasure', x, y, 'x-mark', 'Dig up treasure');
 
 		this.state = state;
-		this.sprite.setDisplaySize(48, 48);
 		this.add(this.sprite);
 		this.setDepth(15);
 
@@ -42,16 +41,13 @@ export default class TreasureModel extends InteractableModel {
 	applyVisuals() {
 		if (this.state === TreasureState.BURIED) {
 			this.sprite.setTexture('x-mark');
-			this.sprite.setDisplaySize(48, 48);
 			this.isInteractable = true;
 		} else if (this.state === TreasureState.OPENING) {
 			this.sprite.setTexture('chest_open');
-			this.sprite.setDisplaySize(80, 80);
 			this.isInteractable = false;
 		} else if (this.state === TreasureState.DUGUP) {
 			this.usePrompt = 'Pick up treasure';
 			this.sprite.setTexture('chest-in-hole');
-			this.sprite.setDisplaySize(80, 80);
 			this.isInteractable = true;
 		} else if (this.state === TreasureState.CARRIED) {
 			this.sprite.setVisible(false);
@@ -60,11 +56,9 @@ export default class TreasureModel extends InteractableModel {
 			this.sprite.setVisible(true);
 			this.usePrompt = 'Pick up treasure';
 			this.sprite.setTexture('treasure-chest');
-			this.sprite.setDisplaySize(64, 64);
 			this.isInteractable = true;
 		} else if (this.state === TreasureState.HOLE) {
 			this.sprite.setTexture('hole');
-			this.sprite.setDisplaySize(64, 64);
 			this.isInteractable = false;
 		}
 
@@ -75,7 +69,6 @@ export default class TreasureModel extends InteractableModel {
 	playChestReveal() {
 		this.sprite.setVisible(true);
 		this.sprite.setTexture('chest_open');
-		this.sprite.setDisplaySize(80, 80);
 
 		if (this.sprite.anims) {
 			this.sprite.play('chest-open');
@@ -92,10 +85,10 @@ export default class TreasureModel extends InteractableModel {
 
 		const text = this.scene.add.text(this.x, this.y - 40, `+${this.goldValue} gold`, {
 			fontFamily: 'VT323',
-			fontSize: '28px',
+			fontSize: '12px',
 			color: '#ffd54a',
 			stroke: '#000000',
-			strokeThickness: 4,
+			strokeThickness: 2,
 		});
 
 		text.setOrigin(0.5);

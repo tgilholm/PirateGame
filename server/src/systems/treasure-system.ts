@@ -280,7 +280,7 @@ export default class TreasureSystem implements BaseSystem {
 
 			let state;
 			if (tile.type === 'dugup') {
-				state = TreasureState.DUGUP;
+				state = TreasureState.DROPPED;
 			} else {
 				state = TreasureState.BURIED;
 			}

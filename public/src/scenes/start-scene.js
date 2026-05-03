@@ -94,13 +94,11 @@ export class StartScene extends Phaser.Scene {
 			spacing: 4,
 		});
 
-		this.load.image('cannon', '/assets/cannon.png');
 		this.load.image('helm', '/assets/helm.png');
 		this.load.image('ladder', '/assets/ladder.png');
 		this.load.tilemapTiledJSON('map', '/shared/map.json');
 		this.load.image('treasure-chest', '/assets/chest.png');
 		this.load.image('x-mark', '/assets/redcross.png');
-		this.load.image('shovel', '/assets/shovel.png');
 		this.load.image('hole', '/assets/hole.png');
 		this.load.image('money-stack', '/assets/money-stack.png');
 		this.load.spritesheet('chest_open', '/assets/chestopen.png', {
@@ -112,21 +110,21 @@ export class StartScene extends Phaser.Scene {
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();
 		ball.fillStyle(0x222222, 1);
-		ball.fillCircle(8, 8, 8);
-		ball.generateTexture('cannonball', 16, 16);
+		ball.fillCircle(4, 4, 4);
+		ball.generateTexture('cannonball', 8, 8);
 		ball.destroy();
 
 		const proj = this.make.graphics();
 		proj.fillStyle(0x222222, 1);
-		proj.fillCircle(4, 4, 4);
-		proj.generateTexture('bullet', 8, 8);
+		proj.fillCircle(2, 2, 2);
+		proj.generateTexture('bullet', 4, 4);
 		proj.destroy();
 
 		// Placeholder NPC sprite
 		const square = this.make.graphics();
 		square.fillStyle(0x0000dd);
-		square.fillRect(0, 0, 30, 30);
-		square.generateTexture('npc_sprite', 30, 30);
+		square.fillRect(0, 0, 12, 12);
+		square.generateTexture('npc_sprite', 12, 12);
 		square.destroy();
 	}
 

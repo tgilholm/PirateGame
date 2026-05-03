@@ -34,23 +34,22 @@ export default class PlayerModel extends Model {
 		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
 
 		this.nameText = scene.add
-			.text(0, -50, '', {
-				fontSize: '16px',
+			.text(0, -16, '', {
+				fontSize: '12px',
 				fontFamily: 'Consolas',
 				color: '#ffffff',
 				backgroundColor: '#00000088',
-				padding: { x: 6, y: 4 },
+				padding: { x: 3, y: 1 },
 			})
 			.setOrigin(0.5, 1)
 			.setDepth(100)
-			.setPosition(0, -25);
+			.setPosition(0, -8);
 		this.add(this.nameText);
 
 		this.bodySprite = scene.add.sprite(0, 0, 'player-sprites', 0);
 		this.add(this.bodySprite);
 
 		this.carrySprite = scene.add.sprite(0, -22, 'treasure-chest');
-		this.carrySprite.setDisplaySize(44, 44);
 		this.carrySprite.setDepth(101);
 		this.carrySprite.setVisible(false);
 		this.carrySprite.setRotation(Math.PI / 2);

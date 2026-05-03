@@ -178,8 +178,8 @@ export default class InteractionHandler {
 				player.carrying = null;
 
 				const angle = player.aimAngle;
-				const dropWorldX = treasure.x + 20 * Math.cos(angle);
-				const dropWorldY = treasure.y + 20 * Math.sin(angle);
+				const dropWorldX = treasure.x + 8 * Math.cos(angle);
+				const dropWorldY = treasure.y + 8 * Math.sin(angle);
 
 				treasure.parent = null;
 				for (const ship of ships) {
