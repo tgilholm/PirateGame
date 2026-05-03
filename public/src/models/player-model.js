@@ -51,7 +51,7 @@ export default class PlayerModel extends Model {
 			.setPosition(0, -25);
 		this.add(this.nameText);
 
-		this.bodySprite = scene.add.sprite(0, 0, 'default');
+		this.bodySprite = scene.add.sprite(0, 0, 'pirate_default');
 		this.bodySprite.setScale(3);
 		this.add(this.bodySprite);
 

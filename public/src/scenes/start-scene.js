@@ -57,16 +57,16 @@ export class StartScene extends Phaser.Scene {
 			frameWidth: 25,
 			frameHeight: 25,
 		});
-		this.load.spritesheet('default', 'assets/pirate.png', {
+		this.load.spritesheet('pirate_default', 'assets/pirate.png', {
 			frameWidth: 16,
 			frameHeight: 16,
 		});
-		this.load.spritesheet('pirate_red', 'assets/pirate_red.png', { frameWidth: 16, frameHeight: 16 });
-		this.load.spritesheet('pirate_blue', 'assets/pirate_blue.png', { frameWidth: 16, frameHeight: 16 });
-		this.load.spritesheet('pirate_green', 'assets/pirate_green.png', { frameWidth: 16, frameHeight: 16 });
-		this.load.spritesheet('pirate_yellow', 'assets/pirate_yellow.png', { frameWidth: 16, frameHeight: 16 });
-		this.load.spritesheet('pirate_white', 'assets/pirate_white.png', { frameWidth: 16, frameHeight: 16 });
-		this.load.spritesheet('pirate_grey', 'assets/pirate_grey.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_red', 'assets/pirate-red.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_blue', 'assets/pirate-blue.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_green', 'assets/pirate-green.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_yellow', 'assets/pirate-yellow.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_white', 'assets/pirate-white.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_grey', 'assets/pirate-grey.png', { frameWidth: 16, frameHeight: 16 });
 
 		this.load.image('tiles', '/assets/terrain-tilesheet.png');
 		this.load.image('cannon', '/assets/cannon.png');
