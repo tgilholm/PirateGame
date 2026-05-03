@@ -283,7 +283,7 @@ export default class GameWorld extends EventEmitter {
 	 *
 	 */
 	private createShops() {
-		const shops = this.terrain.getTileset('shop-spawns');
+		const shops = this.terrain.getObjectLayer('shop-spawns');
 		shops.forEach((shop, index) => {
 			this.entityFactory.createInteractable(null, { type: 'shop', x: shop.x, y: shop.y }, index);
 		});

@@ -44,10 +44,14 @@ export function getObjectsFromLayer(
 ): Array<{ x: number; y: number; type: string }> {
 	// all object layers are grouped under "spawns"
 	const spawns = mapData.layers.find((l: any) => l.name === 'spawns'); // all spawn layers
-	const objectLayer = spawns.find((ol: any) => ol.name === objectLayerName);
+
+	const objectLayer = spawns.layers.find((ol: any) => ol.name === objectLayerName);
 
 	// object layers are uncompressed
-	return objectLayer.objects.map((object: any) => {
+	const output = objectLayer.objects.map((object: any) => {
 		return { x: object.x, y: object.y, type: object.type }; // type is present if a class is specified
 	});
+
+	console.log(`[Tiles] Loaded ${output.length} tiles from layer: ${objectLayerName}`);
+	return output;
 }

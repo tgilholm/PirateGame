@@ -23,7 +23,7 @@ export class MainScene extends Phaser.Scene {
 		this.debugGraphics = null;
 		this.cameraTarget = null;
 		this.projectiles = new Map();
-		this.targetZoom = 0.8;
+		this.targetZoom = 3;
 
 		window.addEventListener('resize', () => {
 			this.scale.resize(window.innerWidth, window.innerHeight);
@@ -70,14 +70,14 @@ export class MainScene extends Phaser.Scene {
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
 		const camera = this.cameras.main;
 
-		camera.startFollow(this.cameraTarget, true);
+		camera.startFollow(this.cameraTarget, true, 0.1, 0.1);
 		camera.zoom = this.targetZoom;
 
 		this.inputManager.on('zoom', (deltaY) => {
 			const step = deltaY > 0 ? -0.1 : 0.1;
 
-			const minZoom = 0.4;
-			const maxZoom = 1.25;
+			const minZoom = 1.8;
+			const maxZoom = 2.5;
 
 			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom); // between 30%-150% zoom
 		});
@@ -115,12 +115,19 @@ export class MainScene extends Phaser.Scene {
 	 * Generates the tilemap for this world from the provided tilesheet
 	 */
 	setupWorld() {
-		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
+		const island = this.map.addTilesetImage('terrain', 'island-tiles');
+		const fort = this.map.addTilesetImage('fort', 'fort-tiles');
+		const water = this.map.addTilesetImage('water', 'water-tiles');
+		const ship = this.map.addTilesetImage('ships', 'ship-tiles');
 
-		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
-		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
-		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
+		this.map.createLayer('sea', water, 0, 0);
+		this.map.createLayer('oversea', water, 0, 0);
+		this.map.createLayer('oversea2', water, 0, 0);
+		this.map.createLayer('oversea3', water, 0, 0);
+		this.map.createLayer('shallows', island, 0, 0);
+		this.map.createLayer('islands', island, 0, 0);
+		this.map.createLayer('buildings', fort, 0, 0);
 
-		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
+		//[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
 	}
 }

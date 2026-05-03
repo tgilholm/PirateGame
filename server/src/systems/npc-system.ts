@@ -34,23 +34,20 @@ export default class NPCSystem implements BaseSystem {
 		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
 		this.addPhysicsBody(ship.body);
 
+		console.log(`[NPCSystem] Creating NPC Ship`);
+
 		return ship;
 	}
 
 	update(dt: number): void {
 		const paths = this.terrainMap.npcPaths; // map of ship name to coordinates
 
-		// if no other ship is on a path, create the ship and add it at a random node on that path
-		this.npcShipPaths.forEach((value, key) => {
-			if (!value) {
-				const path = paths.get(key); // get the coordinates
+		paths.forEach((value, key) => {
+			const current = this.npcShipPaths.get(key);
 
-				if (!path) {
-					console.warn(`[NPCSystem] Failed to get path for ${key}`);
-					return;
-				}
+			if (!current) {
+				const ship = this.generateNPCShip(value); // set the ship on those coords
 
-				const ship = this.generateNPCShip(path); // set the ship on those coords
 				if (!ship) {
 					console.warn(`[NPCSystem] Failed to generate NPC ship`);
 					return;
@@ -58,6 +55,8 @@ export default class NPCSystem implements BaseSystem {
 
 				this.npcShipPaths.set(key, ship); // so we don't add it again
 			}
+
+			// no need to create anything new
 		});
 
 		const allNpcs = this.entityRegistry.getByType<NPC>('npc'); // npc ships included
@@ -183,7 +182,7 @@ export default class NPCSystem implements BaseSystem {
 
 	getSpawnPoint() {
 		// Choose a spawn point for the npc
-		const spawnPoints = this.terrainMap.getTileset('npc-spawns');
+		const spawnPoints = this.terrainMap.getObjectLayer('npc-spawns');
 
 		// Choose randomly from the list
 		return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];

@@ -31,7 +31,6 @@ export class StartScene extends Phaser.Scene {
 	preload() {
 		this.load.image('background', 'assets/water.png');
 		this.load.image('title', 'assets/title.png');
-		//this.load.image('cannonball','assets/cannonball.png') // yoohoooo
 		this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
 		this.load.spritesheet('cannon-water-splash', 'assets/cannon-water-splash.png', {
 			frameWidth: 25,
@@ -57,11 +56,35 @@ export class StartScene extends Phaser.Scene {
 			frameWidth: 25,
 			frameHeight: 25,
 		});
-		this.load.image('tiles', '/assets/terrain-tilesheet.png');
+
+		// Tilesheets
+		this.load.image('island-tiles', '/assets/island-tiles.png');
+		this.load.image('fort-tiles', '/assets/fort-tiles.png');
+		this.load.image('water-tiles', '/assets/water-tiles.png');
+		this.load.image('ship-tiles', '/assets/ship-tiles.png');
+
+		this.load.spritesheet('ship-sprites', '/assets/ship-sprites.png', {
+			frameWidth: 128,
+			frameHeight: 48,
+			spacing: 2,
+		});
+
+		this.load.spritesheet('cannon-sprites', '/assets/cannon-sprites.png', {
+			frameWidth: 12,
+			frameHeight: 10,
+		});
+
+		this.load.spritesheet('player-sprites', '/assets/pirate-sprites.png', {
+			frameWidth: 12,
+			frameHeight: 14,
+			margin: 3,
+			spacing: 4,
+		});
+
 		this.load.image('cannon', '/assets/cannon.png');
 		this.load.image('helm', '/assets/helm.png');
 		this.load.image('ladder', '/assets/ladder.png');
-		this.load.tilemapTiledJSON('map', '/shared/demo-map.json');
+		this.load.tilemapTiledJSON('map', '/shared/map.json');
 		this.load.image('treasure-chest', '/assets/chest.png');
 		this.load.image('x-mark', '/assets/redcross.png');
 		this.load.image('shovel', '/assets/shovel.png');
@@ -76,7 +99,7 @@ export class StartScene extends Phaser.Scene {
 		// Placeholder player sprite
 		const circle = this.make.graphics();
 		circle.fillStyle(0xff0000, 1);
-		circle.fillCircle(15, 15, 15);
+		circle.fillCircle(15, 15, 8);
 		circle.generateTexture('player_circle', 30, 30);
 		circle.destroy();
 

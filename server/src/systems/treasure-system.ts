@@ -260,7 +260,7 @@ export default class TreasureSystem implements BaseSystem {
 	}
 
 	private findSpawnPoint(): { x: number; y: number } | undefined {
-		const spawnTiles = this.terrainMap.getTileset('treasure-spawns');
+		const spawnTiles = this.terrainMap.getObjectLayer('treasure-spawns');
 
 		if (spawnTiles.length === 0) {
 			console.warn('[TreasureSystem] No treasure-spawns tiles found in tilemap!');

@@ -29,7 +29,7 @@ export default class PlayerModel extends Model {
 		this.reloadTime = 0;
 		this.reloadTimer = 0;
 		this.respawnTimer = 0;
-		this.reloadIndicator = new ReloadIndicator(scene, this, 22);
+		this.reloadIndicator = new ReloadIndicator(scene, this, 12);
 		this.healthBar = new HealthBar(scene, 40, 20);
 		this.respawnIndicator = new RespawnIndicator(scene, 100, 100);
 
@@ -46,11 +46,8 @@ export default class PlayerModel extends Model {
 			.setPosition(0, -25);
 		this.add(this.nameText);
 
-		this.bodySprite = scene.add.sprite(0, 0, 'player_circle');
+		this.bodySprite = scene.add.sprite(0, 0, 'player-sprites', 0);
 		this.add(this.bodySprite);
-
-		this.gun = scene.add.rectangle(x + 15, y, 15, 5, 0x000000).setDepth(100);
-		this.add(this.gun);
 
 		this.carrySprite = scene.add.sprite(0, -22, 'treasure-chest');
 		this.carrySprite.setDisplaySize(44, 44);
@@ -98,7 +95,6 @@ export default class PlayerModel extends Model {
 	 * @param {number} lerp the lerp factor, calculated from the delta
 	 */
 	postUpdate(delta, deltaTime, lerp) {
-		const gun = this.gun;
 		const pos = this.worldPos;
 		const isBusy = this.isSteering || this.isUsingCannon || this.isDead; // busy dyin'
 		const showCarry = !!this.carryingId;
@@ -114,11 +110,6 @@ export default class PlayerModel extends Model {
 		} else {
 			this.bodySprite.y = 0;
 		}
-
-		// Gun is drawn at edge of player sprite
-		gun.setPosition(Math.cos(this.aimAngle) * 15, Math.sin(this.aimAngle) * 15);
-		gun.setRotation(this.aimAngle);
-		gun.setVisible(!isBusy && !showCarry);
 
 		this.carrySprite.setPosition(Math.cos(this.aimAngle) * 18, Math.sin(this.aimAngle) * 18 + bob);
 
@@ -154,7 +145,6 @@ export default class PlayerModel extends Model {
 	 */
 	destroy() {
 		if (this.nameText) this.nameText.destroy();
-		if (this.gun) this.gun.destroy();
 		if (this.carrySprite) this.carrySprite.destroy();
 		this.healthBar?.destroy();
 		this.reloadIndicator?.destroy();

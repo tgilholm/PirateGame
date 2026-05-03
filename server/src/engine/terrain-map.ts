@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getTilesetFromLayer, getObjectsFromLayer } from '../utils/tiles';
+import { buildPathSpline } from '../utils/splines';
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods
@@ -53,6 +54,16 @@ export default class TerrainMap {
 		// Then adds this array to the map with the key of that ship
 		const nodes = this.objectLayers.get('path-nodes');
 		if (nodes) this.npcPaths = this.getPaths(nodes);
+
+		let total = 0;
+		this.npcPaths.forEach((value, key) => {
+			const splinedPath = buildPathSpline(value, 0.5, 25, true);
+
+			this.npcPaths.set(key, splinedPath);
+			total += splinedPath.length;
+		});
+
+		console.log(`[TerrainMap] Loaded ${this.npcPaths.size} ship paths. Total nodes: ${total}`);
 	}
 
 	/**
@@ -104,6 +115,18 @@ export default class TerrainMap {
 
 		if (!layer) {
 			console.warn(`[TerrainMap] '${layerName}' is not a recognised layer in the tilemap!`);
+			return [];
+		}
+
+		return layer;
+	}
+
+	public getObjectLayer(objectLayerName: string): Array<{ x: number; y: number; type: string }> {
+		const layer = this.objectLayers.get(objectLayerName);
+
+		if (!layer) {
+			console.warn(`[TerrainMap] '${objectLayerName}' is not a recognised object layer!`);
+
 			return [];
 		}
 

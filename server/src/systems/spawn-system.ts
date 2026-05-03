@@ -9,7 +9,7 @@ export default class SpawnSystem implements BaseSystem {
 	}
 
 	getSpawnPoint() {
-		const spawnPoints = this.terrain.getTileset('player-spawns');
+		const spawnPoints = this.terrain.getObjectLayer('player-spawns');
 
 		// let dist = 1000;
 		// let spawnPoint = { x: 0, y: 0 };
