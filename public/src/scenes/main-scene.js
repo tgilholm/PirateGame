@@ -120,13 +120,16 @@ export class MainScene extends Phaser.Scene {
 		const water = this.map.addTilesetImage('water', 'water-tiles');
 		const ship = this.map.addTilesetImage('ships', 'ship-tiles');
 
+		//if (!island || !fort || !water || !ship) return;
+
 		this.map.createLayer('sea', water, 0, 0);
 		this.map.createLayer('oversea', water, 0, 0);
 		this.map.createLayer('oversea2', water, 0, 0);
 		this.map.createLayer('oversea3', water, 0, 0);
 		this.map.createLayer('shallows', island, 0, 0);
-		this.map.createLayer('islands', island, 0, 0);
+		this.map.createLayer('islands', [island, fort], 0, 0);
 		this.map.createLayer('buildings', fort, 0, 0);
+		this.map.createLayer('debris', [island, fort, water, ship], 0, 0);
 
 		//[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
 	}
