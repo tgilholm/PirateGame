@@ -29,6 +29,19 @@ export class StartScene extends Phaser.Scene {
 	 * Preload all the assets for the game before the player presses "join".
 	 */
 	preload() {
+		const bar = document.getElementById('loading-bar');
+		const text = document.getElementById('loading-text');
+
+		this.load.on('progress', (progress) => {
+			bar.style.width = `${Math.round(progress * 100)}%`;
+			text.textContent = `Loading... ${Math.round(progress * 100)}%`;
+		});
+
+		this.load.on('complete', () => {
+			document.getElementById('loading-screen').style.display = 'none';
+			this.form.style.display = 'flex';
+		});
+
 		this.load.image('background', 'assets/water.png');
 		this.load.image('title', 'assets/title.png');
 		this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
@@ -95,13 +108,6 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 48,
 		});
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
-
-		// Placeholder player sprite
-		const circle = this.make.graphics();
-		circle.fillStyle(0xff0000, 1);
-		circle.fillCircle(15, 15, 8);
-		circle.generateTexture('player_circle', 30, 30);
-		circle.destroy();
 
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();

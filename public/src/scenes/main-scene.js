@@ -1,4 +1,4 @@
-/* global Phaser, io */
+/* global Phaser, io, pako */
 
 import NetworkManager from '../managers/network-manager.js';
 import GameManager from '../managers/game-manager.js';
@@ -34,11 +34,18 @@ export class MainScene extends Phaser.Scene {
 	 * Executed once at runtime- set up all game objects here, such
 	 * as setting up user input and socket listeners.
 	 */
-	create(data) {
-		// Create the socket here so it only connects when the scene actually starts,
-		// not at module load time before GameManager exists to receive INIT_GAME
+	async create(data) {
 		const socket = globalThis.io();
 		this.map = this.make.tilemap({ key: 'map' });
+		this.input.keyboard.enableGlobalCapture();
+
+		// Show loading bar again for tilemap setup
+		const loadingScreen = document.getElementById('loading-screen');
+		loadingScreen.style.display = 'flex';
+
+		await this.setupWorld();
+
+		loadingScreen.style.display = 'none';
 
 		// Allow key inputs again
 		this.input.keyboard.enableGlobalCapture();
@@ -79,7 +86,7 @@ export class MainScene extends Phaser.Scene {
 			const minZoom = 1.8;
 			const maxZoom = 2.5;
 
-			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom); // between 30%-150% zoom
+			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom);
 		});
 
 		// Contain the camera in the map
@@ -104,8 +111,8 @@ export class MainScene extends Phaser.Scene {
 	 * The update loop of the game. Updates all dependent classes
 	 */
 	update() {
-		this.gameManager.update();
-		this.uiManager.update();
+		if (this.gameManager) this.gameManager.update();
+		if (this.uiManager) this.uiManager.update();
 
 		const camera = this.cameras.main;
 		camera.zoom += (this.targetZoom - camera.zoom) * 0.1;
@@ -114,23 +121,40 @@ export class MainScene extends Phaser.Scene {
 	/**
 	 * Generates the tilemap for this world from the provided tilesheet
 	 */
-	setupWorld() {
+	async setupWorld() {
+		if (!this.map) return;
+
 		const island = this.map.addTilesetImage('terrain', 'island-tiles');
 		const fort = this.map.addTilesetImage('fort', 'fort-tiles');
 		const water = this.map.addTilesetImage('water', 'water-tiles');
 		const ship = this.map.addTilesetImage('ships', 'ship-tiles');
 
-		//if (!island || !fort || !water || !ship) return;
+		if (!island || !fort || !water || !ship) return;
 
-		this.map.createLayer('sea', water, 0, 0);
-		this.map.createLayer('oversea', water, 0, 0);
-		this.map.createLayer('oversea2', water, 0, 0);
-		this.map.createLayer('oversea3', water, 0, 0);
-		this.map.createLayer('shallows', island, 0, 0);
-		this.map.createLayer('islands', [island, fort], 0, 0);
-		this.map.createLayer('buildings', fort, 0, 0);
-		this.map.createLayer('debris', [island, fort, water, ship], 0, 0);
+		const layers = [
+			['sea', water],
+			['shallows', island],
+			['islands', [island, fort]],
+			['oversea', water],
+			['oversea2', water],
+			['oversea3', water],
+			['buildings', fort],
+			['debris', [island, fort, water, ship]],
+		];
 
-		//[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
+		// show the loading bar again
+		const bar = document.getElementById('loading-bar');
+		const text = document.getElementById('loading-text');
+
+		for (let i = 0; i < layers.length; i++) {
+			const [name, tileset] = layers[i];
+			this.map.createLayer(name, tileset, 0, 0);
+
+			const percentage = Math.round(((i + 1) / layers.length) * 100);
+			bar.style.width = `${percentage}%`;
+			text.textContent = `Preparing world... ${percentage}%`;
+
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		}
 	}
 }

@@ -17,8 +17,9 @@
 	"scripts": {
 		"clean": "shx rm -rf server/built shared/built shared/browser",
 		"copy-assets": "shx mkdir -p server/built shared/built shared/browser && shx cp shared/*.json shared/built/ && shx cp shared/*.json shared/browser/",
+		"compress-map": "node scripts/compress-map.mjs",
 		"build:server": "tsc -b server/tsconfig.json",
-		"build:shared-browser": "tsc -b shared/tsconfig.browser.json  && npm run copy-assets",
+		"build:shared-browser": "tsc -b shared/tsconfig.browser.json  && npm run copy-assets && npm run compress-map",
 		"build:all": "npm run build:server && npm run build:shared-browser",
 		"start": "npm run build:all && node -r tsconfig-paths/register server/built/server.js",
 		"quickstart": "node -r tsconfig-paths/register server/built/server.js",
