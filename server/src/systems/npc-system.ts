@@ -27,14 +27,14 @@ export default class NPCSystem implements BaseSystem {
 		private addPhysicsBody: (body: Matter.Body) => void
 	) {}
 
-	generateNPCShip(path: Array<{ x: number; y: number }>): NPCShip | null {
+	generateNPCShip(path: Array<{ x: number; y: number }>, index: string = ''): NPCShip | null {
 		if (path.length === 0) return null;
 
-		const spawn = path[Math.floor(Math.random() * path.length - 1)]; // so it's not the same every time
-		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
+		const spawn = path[Math.floor(Math.random() * path.length)]; // so it's not the same every time
+		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}_${index}`, spawn.x, spawn.y);
 		this.addPhysicsBody(ship.body);
 
-		console.log(`[NPCSystem] Creating NPC Ship`);
+		console.log(`[NPCSystem] Creating NPC Ship ${ship.id}`);
 
 		return ship;
 	}
@@ -46,7 +46,7 @@ export default class NPCSystem implements BaseSystem {
 			const current = this.npcShipPaths.get(key);
 
 			if (!current) {
-				const ship = this.generateNPCShip(value); // set the ship on those coords
+				const ship = this.generateNPCShip(value, key); // set the ship on those coords
 
 				if (!ship) {
 					console.warn(`[NPCSystem] Failed to generate NPC ship`);
@@ -54,6 +54,7 @@ export default class NPCSystem implements BaseSystem {
 				}
 
 				this.npcShipPaths.set(key, ship); // so we don't add it again
+				ship.pathName = key;
 			}
 
 			// no need to create anything new
@@ -96,37 +97,31 @@ export default class NPCSystem implements BaseSystem {
 		const dy = next.y - current.y;
 		const segLength = Math.hypot(dx, dy);
 
-		// prevent dividing by 0 with a 20px threshold
-		if (segLength < 20) {
-			//
+		if (segLength < 0.01) {
 			ship.pathIndex = nextIndex;
+			ship.segmentT = 0; // reset so next segment starts clean
 			return;
 		}
 
-		// Move between each segment one at a time
 		const moveDistance = ship.patrolSpeed * dt;
-
-		const deltaT = moveDistance / segLength;
-		ship.segmentT += deltaT;
+		ship.segmentT += moveDistance / segLength;
 
 		let x, y;
 
-		// If close enough, jump to the next segment
 		if (ship.segmentT >= 1) {
-			ship.segmentT = 0;
+			ship.segmentT -= 1; // carry remainder into next segment
 			ship.pathIndex = nextIndex;
 
 			x = next.x;
 			y = next.y;
 		} else {
-			// Otherwise move smoothly
 			x = current.x + dx * ship.segmentT;
 			y = current.y + dy * ship.segmentT;
 		}
 
-		// Update physics body, not the actual ship
-		// physicsSystem handles that separately
-		Body.setPosition(ship.body, { x: x, y: y });
+		console.log(`Path Name ${ship.pathName}, Index: ${ship.pathIndex}, X: ${ship.x}, Y: ${ship.y}`);
+
+		Body.setPosition(ship.body, { x, y });
 		Body.setAngle(ship.body, Math.atan2(dy, dx));
 	}
 
@@ -134,6 +129,10 @@ export default class NPCSystem implements BaseSystem {
 		if (npc.health <= 0) {
 			this.spatialGrid.remove(npc.id);
 			this.entityRegistry.delete(npc.id);
+
+			if (npc instanceof NPCShip) {
+				this.npcShipPaths.delete(npc.pathName);
+			}
 
 			// Spawn money stack at the death point
 			const money = this.entityFactory.createInteractable(
