@@ -25,7 +25,9 @@ export default class NPCSystem implements BaseSystem {
 		private entityRegistry: EntityRegistry,
 		private spatialGrid: SpatialGrid,
 		private addPhysicsBody: (body: Matter.Body) => void
-	) {}
+	) {
+		this.npcLimit = terrainMap.getObjectLayer('npc-spawns').length; // add npc respawn timer
+	}
 
 	generateNPCShip(path: Array<{ x: number; y: number }>, index: string = ''): NPCShip | null {
 		if (path.length === 0) return null;
@@ -118,8 +120,6 @@ export default class NPCSystem implements BaseSystem {
 			x = current.x + dx * ship.segmentT;
 			y = current.y + dy * ship.segmentT;
 		}
-
-		console.log(`Path Name ${ship.pathName}, Index: ${ship.pathIndex}, X: ${ship.x}, Y: ${ship.y}`);
 
 		Body.setPosition(ship.body, { x, y });
 		Body.setAngle(ship.body, Math.atan2(dy, dx));

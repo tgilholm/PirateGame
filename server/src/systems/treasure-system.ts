@@ -29,7 +29,9 @@ export default class TreasureSystem implements BaseSystem {
 		private grid: SpatialGrid,
 		private onResult: (player: Player, payload: { success: boolean }) => void,
 		private onRemove: (id: string) => void
-	) {}
+	) {
+		this.maxTreasures = terrainMap.getObjectLayer('treasure-spawns').length;
+	}
 
 	update(dt: number): void {
 		this.spawnTimer += dt * 1000;
@@ -117,7 +119,8 @@ export default class TreasureSystem implements BaseSystem {
 			const id = `treasure_${this.nextTreasureId++}`;
 
 			if (!point) return;
-			this.entityFactory.createTreasure(id, point.x, point.y, value);
+			const treasure = this.entityFactory.createTreasure(id, point.x, point.y, value);
+			treasure.state = point.state; // from tilemap
 		}
 	}
 
@@ -259,7 +262,7 @@ export default class TreasureSystem implements BaseSystem {
 		}
 	}
 
-	private findSpawnPoint(): { x: number; y: number } | undefined {
+	private findSpawnPoint(): { x: number; y: number; state: TreasureState } | undefined {
 		const spawnTiles = this.terrainMap.getObjectLayer('treasure-spawns');
 
 		if (spawnTiles.length === 0) {
@@ -275,7 +278,14 @@ export default class TreasureSystem implements BaseSystem {
 
 			if (this.isBlocked(point)) continue;
 
-			return point;
+			let state;
+			if (tile.type === 'dugup') {
+				state = TreasureState.DUGUP;
+			} else {
+				state = TreasureState.BURIED;
+			}
+
+			return { x: point.x, y: point.y, state: state };
 		}
 
 		return undefined;
