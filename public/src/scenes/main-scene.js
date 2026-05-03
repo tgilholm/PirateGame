@@ -121,40 +121,23 @@ export class MainScene extends Phaser.Scene {
 	/**
 	 * Generates the tilemap for this world from the provided tilesheet
 	 */
-	async setupWorld() {
-		if (!this.map) return;
-
+	setupWorld() {
 		const island = this.map.addTilesetImage('terrain', 'island-tiles');
 		const fort = this.map.addTilesetImage('fort', 'fort-tiles');
 		const water = this.map.addTilesetImage('water', 'water-tiles');
 		const ship = this.map.addTilesetImage('ships', 'ship-tiles');
 
-		if (!island || !fort || !water || !ship) return;
+		//if (!island || !fort || !water || !ship) return;
 
-		const layers = [
-			['sea', water],
-			['shallows', island],
-			['islands', [island, fort]],
-			['oversea', water],
-			['oversea2', water],
-			['oversea3', water],
-			['buildings', fort],
-			['debris', [island, fort, water, ship]],
-		];
+		this.map.createLayer('sea', water, 0, 0);
+		this.map.createLayer('oversea', water, 0, 0);
+		this.map.createLayer('oversea2', water, 0, 0);
+		this.map.createLayer('oversea3', water, 0, 0);
+		this.map.createLayer('shallows', island, 0, 0);
+		this.map.createLayer('islands', [island, fort], 0, 0);
+		this.map.createLayer('buildings', fort, 0, 0);
+		this.map.createLayer('debris', [island, fort, water, ship], 0, 0);
 
-		// show the loading bar again
-		const bar = document.getElementById('loading-bar');
-		const text = document.getElementById('loading-text');
-
-		for (let i = 0; i < layers.length; i++) {
-			const [name, tileset] = layers[i];
-			this.map.createLayer(name, tileset, 0, 0);
-
-			const percentage = Math.round(((i + 1) / layers.length) * 100);
-			bar.style.width = `${percentage}%`;
-			text.textContent = `Preparing world... ${percentage}%`;
-
-			await new Promise((resolve) => setTimeout(resolve, 0));
-		}
+		//[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
 	}
 }

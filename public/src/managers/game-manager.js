@@ -47,7 +47,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.minimalPlayers = [];
 		this.minimalNPCs = [];
 		this.minimalShips = [];
-		this.minimalInteractables = [];
+		this.minimalShops = [];
 
 		this.startListeners();
 	}
@@ -171,7 +171,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		if (data.minimalShips) this.minimalShips = data.minimalShips;
 		if (data.minimalNPCs) this.minimalNPCs = data.minimalNPCs;
-		if (data.minimalInteractables) this.minimalInteractables = data.minimalInteractables;
+		if (data.minimalShops) this.minimalShops = data.minimalShops;
 
 		data.newEntities?.forEach((entityData) => {
 			this.applyFull(entityData);

@@ -53,8 +53,8 @@
 		"dimensions": {
 			"height": 48,
 			"middleWidth": 48,
-			"bowLength": 16,
-			"sternRadius": 48
+			"bowLength": 48,
+			"sternRadius": 28
 		},
 		"physics": {
 			"turnSpeed": 0.003,
