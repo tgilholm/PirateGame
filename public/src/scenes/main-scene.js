@@ -123,7 +123,17 @@ export class MainScene extends Phaser.Scene {
 		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
 		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
 		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
+		this.debrisLayer = this.map.createLayer('debris', tileset, 0, 0);
+		this.rocksLayer = this.map.createLayer('rocks', tileset, 0, 0);
+		this.treesLayer = this.map.createLayer('trees', tileset, 0, 0);
 
-		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
+		[
+			this.seaLayer,
+			this.shallowsLayer,
+			this.islandsLayer,
+			this.debrisLayer,
+			this.rocksLayer,
+			this.treesLayer,
+		].forEach((l) => l.setCullPadding(2, 2));
 	}
 }

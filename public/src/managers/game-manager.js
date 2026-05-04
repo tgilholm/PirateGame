@@ -238,6 +238,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		model.sync(delta);
 
 		if (delta.id === this.playerId && delta.activeMinigame !== undefined) {
+			if (delta.activeMinigame) this.scene.soundManager?.playSfx('sound-dig');
 			this.digMinigame.sync(delta.activeMinigame);
 		}
 
@@ -336,9 +337,8 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.input.on('fire', () => {
 			// the spacebar fires both the dig minigame and the gun
 			this.network.sendFire();
-			const sfx = this.localPlayer?.parentId ? 'sound-cannon' : 'sound-gun'; //cannon shound if on ship, gun sound if not
-			const vol = this.localPlayer?.parentId ? 0.75 : 1; // cannon sound too loud
-			this.scene.soundManager?.playSfx(sfx, vol);
+			const sfx = this.localPlayer?.parentId ? 'sound-cannon' : 'sound-gun'; //cannon sound if on ship, gun sound if not
+			this.scene.soundManager?.playSfx(sfx);
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
@@ -359,6 +359,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	handleReparent(player, data) {
 		if (player.parentId === data.parentId) return;
 		this.closestInteractable = null; // reset closest interactable
+		if (player.id === this.playerId) this.scene.soundManager?.playSfx('sound-climb');
 
 		const ship = data.parentId ? this.models.get(data.parentId) : null;
 
@@ -403,7 +404,19 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			// @ts-ignore
 			this.localPlayer = mine;
 			this.emit('localPlayerReady', this.localPlayer);
+			this.scheduleYell();
 		}
+	}
+
+	/**
+	 * schedules a random yell sfx to play every 5-30 seconds
+	 */
+	scheduleYell() {
+		const delay = Phaser.Math.Between(5000, 30000);
+		this.scene.time.delayedCall(delay, () => {
+			this.scene.soundManager?.playSfx('sound-yell');
+			this.scheduleYell();
+		});
 	}
 
 	// destroy game manager
