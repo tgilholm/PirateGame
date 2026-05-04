@@ -78,8 +78,8 @@ export class StartScene extends Phaser.Scene {
 
 		this.load.spritesheet('ship-sprites', '/assets/ship-sprites.png', {
 			frameWidth: 128,
-			frameHeight: 48,
-			spacing: 2,
+			frameHeight: 46,
+			spacing: 1,
 		});
 
 		this.load.spritesheet('cannon-sprites', '/assets/cannon-sprites.png', {

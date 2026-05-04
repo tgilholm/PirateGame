@@ -40,6 +40,14 @@ export default class ShipModel extends Model {
 		this.add(this.hullSprite);
 		this.sendToBack(this.hullSprite);
 
+		// scene.anims.create({
+		// 	key: 'eee',
+		// 	frames: scene.anims.generateFrameNumbers('ship-sprites', {start: 0, end: 2}),
+		// 	frameRate: 1,
+		// 	repeat: -1,
+		// });
+		//this.hullSprite.play('eee');
+
 		this.setDepth(10);
 
 		this.healthBar = new HealthBar(scene, 100);
