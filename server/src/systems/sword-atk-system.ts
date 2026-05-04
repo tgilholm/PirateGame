@@ -20,7 +20,7 @@ export default class SwordSystem implements BaseSystem {
 		const players = this.registry.getByType<Player>('player');
 		players.forEach((player) => this.updateSwing(player, dt));
 
-		// Handle barrel respawns
+		// barrel respawns
 		const barrels = this.registry.getByType<Barrel>('barrel');
 		barrels.forEach((barrel) => this.updateBarrel(barrel, dt));
 	}
@@ -82,7 +82,6 @@ export default class SwordSystem implements BaseSystem {
 
 			if (Math.abs(angleDiff) > Sword.ARC / 2) return;
 
-			// Apply effects based on entity type
 			if (entity.type === 'player' || entity.type === 'npc') {
 				this.hitLivingEntity(entity as Player | NPC, player, dx, dy, dist);
 			} else if (entity.type === 'palm-tree') {
@@ -96,15 +95,14 @@ export default class SwordSystem implements BaseSystem {
 	private hitLivingEntity(entity: Player | NPC, attacker: Player, dx: number, dy: number, dist: number): void {
 		entity.health -= Sword.DAMAGE;
 
-		// Knockback — push away from attacker
 		const knockbackX = (dx / dist) * Sword.KNOCKBACK;
 		const knockbackY = (dy / dist) * Sword.KNOCKBACK;
 
-		// Apply knockback as a velocity burst - movement system will decay it
+		// knockback velocity
 		entity.vx += knockbackX * 0.016; // roughly one frame worth
 		entity.vy += knockbackY * 0.016;
 
-		// For players on ships we apply the knockback in local space
+		//knockback on ship
 		if (entity.type === 'player') {
 			const p = entity as Player;
 			if (p.parent instanceof Ship) {
@@ -132,7 +130,7 @@ export default class SwordSystem implements BaseSystem {
 			tree.coconuts--;
 			tree.markDirty();
 
-			// Spawn coconut near tree with slight random offset
+			// Spawn coconut near tree with slight randomness
 			const offsetX = (Math.random() - 0.5) * 60;
 			const offsetY = (Math.random() - 0.5) * 60;
 			this.factory.createCoconut(`coconut_${tree.id}_${Date.now()}`, tree.x + offsetX, tree.y + offsetY, tree.id);
@@ -149,7 +147,7 @@ export default class SwordSystem implements BaseSystem {
 			barrel.respawnTimer = Barrel.RESPAWN_TIME;
 			barrel.markDirty();
 
-			// Spawn bandage near barrel
+			// spawn bandage near barrel
 			const offsetX = (Math.random() - 0.5) * 40;
 			const offsetY = (Math.random() - 0.5) * 40;
 			this.factory.createBandage(`bandage_${barrel.id}_${Date.now()}`, barrel.x + offsetX, barrel.y + offsetY);

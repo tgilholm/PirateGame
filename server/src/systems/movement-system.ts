@@ -146,10 +146,9 @@ export default class MovementSystem implements BaseSystem {
 		if (left) dx -= 1;
 		if (right) dx += 1;
 
-		const prevX = player.x; // to calculate velocity difference for client-side extrapolation
+		const prevX = player.x;
 		const prevY = player.y;
 
-		// Dash overrides normal movement
 		if (player.isDashing) {
 			const nextX = player.x + player.dashVx * dt;
 			const nextY = player.y + player.dashVy * dt;
@@ -173,7 +172,7 @@ export default class MovementSystem implements BaseSystem {
 			} else if (!isColliding(player.x, nextY)) {
 				player.y = nextY;
 			} else {
-				// Fully blocked — kill the dash
+				// blocked = kill dash
 				player.isDashing = false;
 				player.dashVx = 0;
 				player.dashVy = 0;
@@ -193,7 +192,6 @@ export default class MovementSystem implements BaseSystem {
 			return;
 		}
 
-		// Normalize diagonal movement- players move the same speed in all directions
 		const length = Math.sqrt(dx * dx + dy * dy);
 		dx /= length;
 		dy /= length;
@@ -209,7 +207,6 @@ export default class MovementSystem implements BaseSystem {
 		const speedMultiplier = parent || onLand ? runSpeed : swimSpeed;
 		const speed = speedMultiplier * dt * 60;
 
-		// Contain the player inside a ship- slide them along the hull if they collide
 		if (parent) {
 			const cos = Math.cos(-parent.r);
 			const sin = Math.sin(-parent.r);
@@ -230,7 +227,6 @@ export default class MovementSystem implements BaseSystem {
 				player.y = nextY;
 			}
 		} else {
-			// Move in absolute scope
 			const nextWorldX = player.x + dx * speed;
 			const nextWorldY = player.y + dy * speed;
 
@@ -242,18 +238,16 @@ export default class MovementSystem implements BaseSystem {
 
 			const shops = this.registry.getByType<Shop>('shop');
 
-			// Collide with the exterior of ships
+			// Collide with exterior of ships
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
 				this.checkShopObstacles(x, y, shops, playerConfig.radius);
 
-			// Move freely if not colliding
 			if (!isColliding(nextWorldX, nextWorldY)) {
 				player.x = nextWorldX;
 				player.y = nextWorldY;
 			} else {
-				// Slide along the hull
 				const canMoveX = !isColliding(nextWorldX, player.y);
 				const canMoveY = !isColliding(player.x, nextWorldY);
 
@@ -261,7 +255,6 @@ export default class MovementSystem implements BaseSystem {
 				else if (canMoveY) player.y = nextWorldY;
 			}
 
-			// Keep the player on the map
 			this.constrainToWorld(player, playerConfig.radius);
 		}
 
