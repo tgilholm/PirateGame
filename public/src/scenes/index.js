@@ -11,7 +11,7 @@ const config = {
 	height: window.innerHeight,
 	roundPixels: true,
 	pixelArt: true,
-	backgroundColor: '#b0e9fc', // same colour as the sea
+	backgroundColor: '#3a3f5e', // same colour as the sea
 	parent: parent,
 	scene: [StartScene, MainScene], // Add all scenes in
 

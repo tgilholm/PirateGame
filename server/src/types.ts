@@ -1,6 +1,6 @@
 import entityConfig from '../../shared/entity-config.json';
 import upgradeConfig from '../../shared/upgrade-config.json';
-import map from '../../shared/demo-map.json';
+import map from '../../shared/map.json';
 
 // Provides type hinting to TS files using the entity config
 // This makes it easier to use the entity config without needing to import it directly into the file being used
