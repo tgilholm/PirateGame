@@ -74,6 +74,24 @@ export default class AnimationManager {
 		});
 	}
 
+	registerSkeletonAnimations() {
+		const animDefs = [
+			{ suffix: 'idle-down', start: 0, end: 2, repeat: -1 },
+			{ suffix: 'idle-up', start: 4, end: 6, repeat: -1 },
+			{ suffix: 'idle-right', start: 8, end: 10, repeat: -1 },
+			{ suffix: 'idle-left', start: 12, end: 14, repeat: -1 },
+			{ suffix: 'walk-down', start: 16, end: 18, repeat: -1 },
+			{ suffix: 'walk-up', start: 20, end: 22, repeat: -1 },
+			{ suffix: 'walk-right', start: 24, end: 26, repeat: -1 },
+			{ suffix: 'walk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-right', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-down', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-up', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'death', start: 72, end: 75, repeat: 0 },
+		];
+	}
+
 	/**
 	 * plays splash animation at the given coordinates and destroys sprite once the animation is complete
 	 *
