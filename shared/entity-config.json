@@ -1,60 +1,60 @@
 {
 	"player": {
 		"maxHealth": 100,
-		"runSpeed": 5,
-		"swimSpeed": 3,
-		"radius": 15
+		"runSpeed": 3,
+		"swimSpeed": 1.5,
+		"radius": 8
 	},
 	"ship": {
 		"maxHealth": 1000,
 		"dimensions": {
-			"height": 160,
-			"middleWidth": 200,
-			"bowLength": 100,
-			"sternRadius": 80
+			"height": 48,
+			"middleWidth": 48,
+			"bowLength": 48,
+			"sternRadius": 28
 		},
 		"physics": {
 			"turnSpeed": 0.008,
 			"mass": 600,
-			"frictionAir": 0.015,
+			"frictionAir": 0.001,
 			"restitution": 0.2,
-			"thrust": 0.15
+			"thrust": 0.075
 		},
 		"interactables": [
 			{
 				"type": "helm",
-				"x": -100,
+				"x": -26,
 				"y": 0
 			},
 			{
 				"type": "cannon",
-				"x": 30,
-				"y": -55
+				"x": 0,
+				"y": -16
 			},
 			{
 				"type": "cannon",
-				"x": 30,
-				"y": 55
+				"x": 0,
+				"y": 16
 			},
 			{
 				"type": "ladder",
-				"x": -80,
-				"y": 75
+				"x": -26,
+				"y": 20
 			},
 			{
 				"type": "ladder",
-				"x": -80,
-				"y": -75
+				"x": -26,
+				"y": -20
 			}
 		]
 	},
 	"npcShip": {
 		"maxHealth": 2500,
 		"dimensions": {
-			"height": 240,
-			"middleWidth": 360,
-			"bowLength": 180,
-			"sternRadius": 120
+			"height": 48,
+			"middleWidth": 48,
+			"bowLength": 48,
+			"sternRadius": 28
 		},
 		"physics": {
 			"turnSpeed": 0.003,
@@ -66,48 +66,48 @@
 		"interactables": [
 			{
 				"type": "helm",
-				"x": -200,
+				"x": -26,
 				"y": 0
 			},
 			{
 				"type": "cannon",
-				"x": -50,
-				"y": -100
+				"x": 0,
+				"y": -16
 			},
 			{
 				"type": "cannon",
-				"x": -50,
-				"y": 100
+				"x": -16,
+				"y": -16
 			},
 			{
 				"type": "cannon",
-				"x": 50,
-				"y": -100
+				"x": 16,
+				"y": -16
 			},
 			{
 				"type": "cannon",
-				"x": 50,
-				"y": 100
+				"x": 0,
+				"y": 16
 			},
 			{
 				"type": "cannon",
-				"x": 150,
-				"y": -100
+				"x": 16,
+				"y": 16
 			},
 			{
 				"type": "cannon",
-				"x": 150,
-				"y": 100
+				"x": -16,
+				"y": 16
 			},
 			{
 				"type": "ladder",
-				"x": -150,
-				"y": 110
+				"x": -26,
+				"y": 20
 			},
 			{
 				"type": "ladder",
-				"x": -150,
-				"y": -110
+				"x": -26,
+				"y": -20
 			}
 		]
 	}

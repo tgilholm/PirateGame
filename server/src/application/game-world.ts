@@ -13,6 +13,7 @@ import Entity from '../entities/entity';
 import SessionHandler from '../handlers/session-handler';
 import NPC from '../entities/npcs/npc';
 import NPCShip from '../entities/npcs/npc-ship';
+import Shop from 'src/entities/shop';
 
 /**
  * Communication contract between this game world and the socket service
@@ -36,7 +37,7 @@ export default class GameWorld extends EventEmitter {
 	private minimalPlayers: any[] = [];
 	private minimalShips: any[] = [];
 	private minimalNPCs: any[] = [];
-	private minimalInteractables: any[] = [];
+	private minimalShops: any[] = [];
 
 	/**
 	 * Creates a game world with the provided dependencies
@@ -119,7 +120,10 @@ export default class GameWorld extends EventEmitter {
 				y: n.y,
 			}));
 
-		this.minimalInteractables = []; //todo
+		this.minimalShops = this.registry.getByType<Shop>('shop').map((s) => ({
+			x: s.x,
+			y: s.y,
+		}));
 	}
 
 	/**
@@ -252,7 +256,7 @@ export default class GameWorld extends EventEmitter {
 				removedIds,
 				splashEvents,
 				minimalPlayers: this.minimalPlayers,
-				minimalInteractables: this.minimalInteractables,
+				minimalShops: this.minimalShops,
 				minimalShips: this.minimalShips,
 				minimalNPCs: this.minimalNPCs,
 			};
@@ -273,7 +277,7 @@ export default class GameWorld extends EventEmitter {
 			mapHeight: this.terrain.heightInPixels,
 			shopSpawns: this.registry.getByType<Entity>('shop').map((s) => ({ X: s.x, Y: s.y })),
 			minimalPlayers: this.minimalPlayers,
-			minimalInteractables: this.minimalInteractables,
+			minimalShops: this.minimalShops,
 			minimalShips: this.minimalShips,
 			minimalNPCs: this.minimalNPCs,
 		};
@@ -283,7 +287,7 @@ export default class GameWorld extends EventEmitter {
 	 *
 	 */
 	private createShops() {
-		const shops = this.terrain.getTileset('shop-spawns');
+		const shops = this.terrain.getObjectLayer('shop-spawns');
 		shops.forEach((shop, index) => {
 			this.entityFactory.createInteractable(null, { type: 'shop', x: shop.x, y: shop.y }, index);
 		});

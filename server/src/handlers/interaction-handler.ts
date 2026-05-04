@@ -40,7 +40,7 @@ export default class InteractionHandler {
 		player.isSteering = true;
 
 		// Move player just behind the helm
-		player.x = helm.x - 25;
+		player.x = helm.x - 5;
 		player.y = helm.y;
 
 		player.markDirty();
@@ -62,7 +62,7 @@ export default class InteractionHandler {
 		player.x = cannon.x;
 		cannon.user = player;
 		player.cannon = cannon;
-		player.y = cannon.y + cannonYdir * 25; // move the player behind the cannon
+		player.y = cannon.y + cannonYdir * 5; // move the player behind the cannon
 
 		player.markDirty();
 		cannon.markDirty();
@@ -81,7 +81,7 @@ export default class InteractionHandler {
 			const enterYdir = ladder.y > 0 ? -1 : 1;
 
 			player.x = ladder.x;
-			player.y = ladder.y + enterYdir * 20;
+			player.y = ladder.y + enterYdir * 12;
 
 			player.parent = ship;
 		} else {
@@ -89,7 +89,7 @@ export default class InteractionHandler {
 			const dirX = ladder.x / dist;
 			const dirY = ladder.y / dist;
 
-			const exitPadding = 40;
+			const exitPadding = 16;
 			const shuntLocalX = ladder.x + dirX * exitPadding;
 			const shuntLocalY = ladder.y + dirY * exitPadding;
 			const shuntGlobal = ship.localToWorld(shuntLocalX, shuntLocalY);
@@ -186,8 +186,8 @@ export default class InteractionHandler {
 				player.carrying = null;
 
 				const angle = player.aimAngle;
-				const dropWorldX = treasure.x + 20 * Math.cos(angle);
-				const dropWorldY = treasure.y + 20 * Math.sin(angle);
+				const dropWorldX = treasure.x + 8 * Math.cos(angle);
+				const dropWorldY = treasure.y + 8 * Math.sin(angle);
 
 				treasure.parent = null;
 				for (const ship of ships) {

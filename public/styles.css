@@ -24,7 +24,7 @@ body {
 	top: 45%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	display: flex;
+	display: none;
 	flex-direction: column;
 	align-items: center;
 	gap: 12px;
@@ -47,6 +47,31 @@ body {
 
 input.formElement {
 	cursor: text;
+}
+
+#loading-screen {
+	position: fixed;
+	inset: 0;
+	background: #1a1a2e;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+}
+#loading-bar-bg {
+	width: 300px;
+	height: 20px;
+	background: #333;
+	border-radius: 10px;
+	overflow: hidden;
+}
+#loading-bar {
+	height: 100%;
+	width: 0%;
+	background: #c8a84b;
+	border-radius: 10px;
+	transition: width 0.1s ease;
 }
 
 #repo-link {

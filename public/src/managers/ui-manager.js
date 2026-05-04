@@ -128,7 +128,7 @@ export default class UIManager {
 
 		// Draw ships
 		this.gameManager.minimalShips.forEach((ship) => {
-			this.minimap.drawAngledRect(ship.x, ship.y, 750, 250, ship.r, 'brown');
+			this.minimap.drawAngledRect(ship.x, ship.y, 300, 60, ship.r, 'brown');
 		});
 
 		// Draw NPCs
@@ -141,6 +141,10 @@ export default class UIManager {
 			const colour = player === localPlayer ? 'green' : 'red';
 
 			this.minimap.drawCircle(player.x, player.y, colour, 3);
+		});
+
+		this.gameManager.minimalShops.forEach((shop) => {
+			this.minimap.drawCircle(shop.x, shop.y, 'gold', 6);
 		});
 	}
 

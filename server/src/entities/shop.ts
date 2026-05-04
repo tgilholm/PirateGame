@@ -5,7 +5,7 @@ import Interactable from './interactables/interactable';
  * interactable points on the map that players can approach to buy upgrades.
  */
 export default class Shop extends Interactable {
-	public radius: number = 50;
+	public radius: number = 16;
 
 	/**
 	 * Creates a shop with the provided data
@@ -16,6 +16,6 @@ export default class Shop extends Interactable {
 	 */
 	constructor(id: string, x: number, y: number) {
 		super(id, x, y, null, 'shop'); // shops have no parents and are indestructible
-		this.interactRange = 200;
+		this.interactRange = 32;
 	}
 }

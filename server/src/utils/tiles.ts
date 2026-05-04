@@ -1,12 +1,10 @@
-import { WorldMap } from '../types';
-
 /**
  * Gets an array of x, y coordinates extracted from the map data.
  * @param mapData an object read in from the map .json
  * @param layerName the name of the layer to get, e.g. "islands"
  * @returns an array of x and y coordinates for the tiles in that layer
  */
-export function getTilesetFromLayer(mapData: WorldMap, layerName: string): Array<{ x: number; y: number }> {
+export function getTilesetFromLayer(mapData: any, layerName: string): Array<{ x: number; y: number }> {
 	// Get the requested layer
 	const layer = mapData.layers.find((l: any) => l.name === layerName);
 	const tileSize = mapData.tilewidth;
@@ -37,5 +35,23 @@ export function getTilesetFromLayer(mapData: WorldMap, layerName: string): Array
 
 	// Output the loaded tileset
 	console.log(`[Tiles] Loaded ${output.length} tiles from layer: ${layerName}`);
+	return output;
+}
+
+export function getObjectsFromLayer(
+	mapData: any,
+	objectLayerName: string
+): Array<{ x: number; y: number; type: string }> {
+	// all object layers are grouped under "spawns"
+	const spawns = mapData.layers.find((l: any) => l.name === 'spawns'); // all spawn layers
+
+	const objectLayer = spawns.layers.find((ol: any) => ol.name === objectLayerName);
+
+	// object layers are uncompressed
+	const output = objectLayer.objects.map((object: any) => {
+		return { x: object.x, y: object.y, type: object.type }; // type is present if a class is specified
+	});
+
+	console.log(`[Tiles] Loaded ${output.length} tiles from layer: ${objectLayerName}`);
 	return output;
 }
