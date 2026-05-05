@@ -82,6 +82,9 @@ export default class NPCSystem implements BaseSystem {
 		// npcs can only attack when the timer hits 0
 		if (npc.attackTimer > 0) {
 			npc.attackTimer = Math.max(0, npc.attackTimer - dt * 1000);
+			if (npc.attackTimer <= 0) {
+				npc.isAttacking = false;
+			}
 			npc.markDirty();
 		}
 	}
@@ -165,6 +168,8 @@ export default class NPCSystem implements BaseSystem {
 	attackTarget(npc: NPC, target: Entity) {
 		if (!target.isDead) {
 			target.health -= npc.attackDamage;
+			npc.isAttacking = true;
+			npc.markDirty();
 		}
 	}
 

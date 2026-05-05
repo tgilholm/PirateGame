@@ -3,7 +3,7 @@ import InteractableModel from './interactable-model.js';
 export default class BarrelModel extends InteractableModel {
 	constructor(scene, id, x, y) {
 		super(scene, null, id, 'barrel', x, y, 'barrel', '', '');
-		this.sprite.setDisplaySize(48, 48);
+		this.sprite.setDisplaySize(24, 24);
 		this.isInteractable = false;
 		this.hasItem = true;
 	}

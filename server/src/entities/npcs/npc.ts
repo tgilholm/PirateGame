@@ -7,6 +7,7 @@ export default class NPC extends Entity {
 	attackTimer: number = 0;
 	attackTime: number = 500; // ms
 	attackDamage: number = 20; // roughly 5-hit a player
+	isAttacking: boolean = false;
 
 	constructor(id: string, type: string = 'npc', x: number, y: number, detectionRadius: number = 64) {
 		super(id, type, x, y, 75, null);
@@ -16,5 +17,12 @@ export default class NPC extends Entity {
 
 	get canAttack(): boolean {
 		return this.attackTimer <= 0;
+	}
+
+	toState() {
+		return {
+			...super.toState(),
+			isAttacking: this.isAttacking,
+		};
 	}
 }

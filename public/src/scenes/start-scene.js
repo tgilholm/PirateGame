@@ -97,6 +97,11 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 10,
 		});
 
+		this.load.spritesheet('skelly_front', '/assets/skellyfront.png', { frameWidth: 48, frameHeight: 48 });
+		this.load.spritesheet('skelly_back', '/assets/skellyback.png', { frameWidth: 48, frameHeight: 48 });
+		this.load.spritesheet('skelly_right', '/assets/skellyright.png', { frameWidth: 48, frameHeight: 48 });
+		this.load.spritesheet('skelly_left', '/assets/skellyleft.png', { frameWidth: 48, frameHeight: 48 });
+
 		this.load.image('helm', '/assets/helm.png');
 		this.load.image('ladder', '/assets/ladder.png');
 		this.load.tilemapTiledJSON('map', '/shared/map.json');
