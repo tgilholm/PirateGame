@@ -131,27 +131,6 @@ server.listen(PORT, () => {
 	console.log(`[Server] Server launched on port: ${PORT}`);
 });
 
-function createPalmTrees() {
-	const nodes = terrainMap.getTileset('palm-trees'); // tilemap layer name
-	nodes.forEach((node, index) => {
-		entityFactory.createPalmTree(`palm-tree_${index}`, node.x, node.y);
-	});
-	console.log(`[Server] Spawned ${nodes.length} palm trees`);
-}
-
-function spawnBarrels() {
-	const islandTiles = terrainMap.getTileset('islands');
-	const count = 15; // how many barrels to spawn
-	const shuffled = [...islandTiles].sort(() => Math.random() - 0.5);
-	shuffled.slice(0, count).forEach((tile, index) => {
-		entityFactory.createBarrel(`barrel_${index}`, tile.x, tile.y);
-	});
-	console.log(`[Server] Spawned ${count} barrels`);
-}
-
-createPalmTrees();
-spawnBarrels();
-
 function onEntityRemoved(id: string) {
 	registry.delete(id);
 	spatialGrid.remove(id);

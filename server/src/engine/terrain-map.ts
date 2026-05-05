@@ -42,13 +42,9 @@ export default class TerrainMap {
 
 		// Add all the layers you need here
 		this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
-		this.mapLayers.set('npc-spawns', getTilesetFromLayer(mapData, 'npc-spawns') || new Set());
-		this.mapLayers.set('player-spawns', getTilesetFromLayer(mapData, 'player-spawns') || new Set());
-		this.mapLayers.set('treasure-spawns', getTilesetFromLayer(mapData, 'treasure-spawns') || new Set());
-		this.mapLayers.set('npc-ship-path', getTilesetFromLayer(mapData, 'npc-ship-path') || new Set());
-		this.mapLayers.set('shop-spawns', getTilesetFromLayer(mapData, 'shop-spawns') || new Set());
-		this.mapLayers.set('palm-trees', getTilesetFromLayer(mapData, 'palm-trees') || new Set());
 
+		this.objectLayers.set('barrel-spawns', getObjectsFromLayer(mapData, 'barrel-spawns'));
+		this.objectLayers.set('palm-spawns', getObjectsFromLayer(mapData, 'palm-spawns'));
 		this.objectLayers.set('npc-spawns', getObjectsFromLayer(mapData, 'npc-spawns'));
 		this.objectLayers.set('player-spawns', getObjectsFromLayer(mapData, 'player-spawns'));
 		this.objectLayers.set('treasure-spawns', getObjectsFromLayer(mapData, 'treasure-spawns') || new Set());

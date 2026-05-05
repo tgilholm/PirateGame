@@ -36,8 +36,6 @@ export default class NPCSystem implements BaseSystem {
 		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}_${index}`, spawn.x, spawn.y);
 		this.addPhysicsBody(ship.body);
 
-		console.log(`[NPCSystem] Creating NPC Ship ${ship.id}`);
-
 		return ship;
 	}
 

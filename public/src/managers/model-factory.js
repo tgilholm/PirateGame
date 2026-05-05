@@ -48,7 +48,6 @@ export default class ModelFactory {
 			case 'bandage':
 			case 'palm-tree':
 			case 'barrel':
-				return this.createInteractable(data);
 			case 'treasure':
 			case 'cannon': // all interactables "fall through"
 			case 'helm':
