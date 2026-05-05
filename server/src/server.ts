@@ -36,6 +36,7 @@ import SessionHandler from './handlers/session-handler';
 import Player from './entities/player';
 import UpgradeHandler from './handlers/upgrade-handler';
 import CombatHandler from './handlers/combat-handler';
+import SwordSystem from './systems/sword-atk-system';
 
 // Create the express app & server
 const app = express();
@@ -70,6 +71,7 @@ const treasureSystem = new TreasureSystem(
 	onEntityRemoved
 );
 const spawnSystem = new SpawnSystem(terrainMap);
+const swordSystem = new SwordSystem(registry, spatialGrid, entityFactory);
 
 const engine = new GameEngine({
 	physicsSystem,
@@ -79,6 +81,7 @@ const engine = new GameEngine({
 	messageSystem: new MessageSystem(),
 	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, addPhysicsBody),
 	treasureSystem,
+	swordSystem,
 });
 
 const upgradeHandler = new UpgradeHandler(upgradeConfig, registry);
@@ -93,7 +96,7 @@ const sessionHandler = new SessionHandler(
 );
 const combatHandler = new CombatHandler(entityFactory);
 
-const worldController = new WorldController(registry, sessionHandler, {
+const worldController = new WorldController(registry, sessionHandler, swordSystem, {
 	playerController: new PlayerController(
 		registry,
 		entityFactory,

@@ -69,6 +69,16 @@ export class StartScene extends Phaser.Scene {
 			frameWidth: 25,
 			frameHeight: 25,
 		});
+		this.load.spritesheet('pirate_default', 'assets/pirate.png', {
+			frameWidth: 16,
+			frameHeight: 16,
+		});
+		this.load.spritesheet('pirate_red', 'assets/pirate-red.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_blue', 'assets/pirate-blue.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_green', 'assets/pirate-green.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_yellow', 'assets/pirate-yellow.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_white', 'assets/pirate-white.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_grey', 'assets/pirate-grey.png', { frameWidth: 16, frameHeight: 16 });
 
 		// Tilesheets
 		this.load.image('island-tiles', '/assets/island-tiles.png');
@@ -87,13 +97,6 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 10,
 		});
 
-		this.load.spritesheet('player-sprites', '/assets/pirate-sprites.png', {
-			frameWidth: 12,
-			frameHeight: 14,
-			margin: 3,
-			spacing: 4,
-		});
-
 		this.load.image('helm', '/assets/helm.png');
 		this.load.image('ladder', '/assets/ladder.png');
 		this.load.tilemapTiledJSON('map', '/shared/map.json');
@@ -106,6 +109,10 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 48,
 		});
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
+		this.load.image('coconut', '/assets/coconut.png');
+		this.load.image('bandage', '/assets/bandage.png');
+		this.load.image('palm-tree', '/assets/palm-tree.png');
+		this.load.image('barrel', '/assets/barrel.png');
 
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();
@@ -185,6 +192,22 @@ export class StartScene extends Phaser.Scene {
 			yoyo: true,
 			loop: -1,
 		});
+		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
+		this.selectedColour = COLOURS[0];
+
+		const pickerEl = document.getElementById('colour-picker');
+		pickerEl.style.display = 'flex';
+
+		COLOURS.forEach((colour) => {
+			const btn = document.getElementById(`colour-btn-${colour}`);
+			btn.addEventListener('click', () => {
+				this.selectedColour = colour;
+				document.querySelectorAll('.colour-btn').forEach((b) => b.classList.remove('selected'));
+				btn.classList.add('selected');
+			});
+		});
+
+		document.getElementById('colour-btn-default').classList.add('selected');
 	}
 
 	/**
@@ -194,6 +217,7 @@ export class StartScene extends Phaser.Scene {
 		this.ui.style.display = 'none';
 		this.form.style.display = 'flex';
 		this.logo.style.display = 'flex';
+		document.getElementById('colour-picker').style.display = 'none';
 	}
 
 	goToMain() {
@@ -206,7 +230,7 @@ export class StartScene extends Phaser.Scene {
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
-			this.scene.start('MainScene', { username }); // Pass the username to the main scene
+			this.scene.start('MainScene', { username, pirateColour: this.selectedColour });
 		}
 	}
 

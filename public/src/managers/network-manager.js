@@ -55,6 +55,21 @@ export default class NetworkManager {
 		this.sendAction({ type: ActionType.MOVE, data: inputs });
 	}
 
+	sendSwing() {
+		this.sendAction({ type: ActionType.SWING });
+	}
+
+	/**
+	 * Sends Dash and Boost from client to server
+	 */
+	sendDash() {
+		this.sendAction({ type: ActionType.DASH });
+	}
+
+	sendBoost() {
+		this.sendAction({ type: ActionType.BOOST });
+	}
+
 	/**
 	 * Sends an interaction event to the server
 	 * @param {import("shared/socket-protocol.js").InteractData} data

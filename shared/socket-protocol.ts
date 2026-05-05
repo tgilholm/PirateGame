@@ -30,6 +30,9 @@ export enum ActionType {
 	RELEASE = 'RELEASE',
 	RESPAWN_SHIP = 'RESPAWN',
 	QUIT = 'QUIT',
+	BOOST = 'BOOST',
+	DASH = 'DASH',
+	SWING = 'SWING',
 }
 
 export enum TreasureState {
@@ -48,6 +51,7 @@ export interface MoveData {
 	left: boolean;
 	right: boolean;
 	aimAngle: number;
+	isSwimming: boolean;
 }
 
 export interface UpgradeData {
@@ -69,7 +73,10 @@ export type PlayerAction =
 	| { type: ActionType.FIRE; data?: never }
 	| { type: ActionType.RELEASE; data?: never }
 	| { type: ActionType.QUIT; data?: never }
-	| { type: ActionType.RESPAWN_SHIP; data?: never };
+	| { type: ActionType.RESPAWN_SHIP; data?: never }
+	| { type: ActionType.DASH; data?: never }
+	| { type: ActionType.BOOST; data?: never }
+	| { type: ActionType.SWING; data?: never };
 
 //types of splash animations -- ui concern only, doesn't need to be sent over the network
 export type SplashType =
@@ -79,7 +86,7 @@ export type SplashType =
 	| 'bullet-water'
 	| 'bullet-land'
 	| 'bullet-blood';
-
+//| 'sword-blood';
 export interface SplashEvent {
 	x: number;
 	y: number;

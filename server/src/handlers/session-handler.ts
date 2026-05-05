@@ -26,13 +26,13 @@ export default class SessionHandler {
 	/**
 	 * Called by SocketService when a player says they are READY
 	 */
-	public addPlayer(socketId: string, username: string) {
+	public addPlayer(socketId: string, username: string, pirateColour: string = 'default') {
 		const { x, y } = this.spawnSystem.getSpawnPoint();
 		const newShip = this.factory.createShip(`ship_${socketId}`, x, y);
 
 		// "hacky" way of adding to the physics world
 		this.addPhysicsBody(newShip.body);
-		this.factory.createPlayer(socketId, 0, 0, newShip, username);
+		this.factory.createPlayer(socketId, 0, 0, newShip, username, pirateColour);
 
 		// No known entities for new players
 		this.sessions.set(socketId, {

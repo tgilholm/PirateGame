@@ -9,6 +9,8 @@ import TreasureSystem from '../systems/treasure-system';
 import { TreasureState } from '@shared/socket-protocol';
 import EntityRegistry from '../engine/entity-registry';
 import Money from 'src/entities/interactables/money';
+import Coconut from '../entities/interactables/coconut';
+import Bandage from '../entities/interactables/bandage';
 
 /**
  * Handler class- provides methods for each type of player interaction with interactable entities,
@@ -165,7 +167,13 @@ export default class InteractionHandler {
 			case 'helm':
 				if (!ship) return;
 				player.isSteering = false;
-				ship.pilot = null; // reset pilot
+				ship.pilot = null;
+				// Reset inputs so the ship stops accelerating
+				ship.inputs.up = false;
+				ship.inputs.down = false;
+				ship.inputs.left = false;
+				ship.inputs.right = false;
+				ship.markDirty();
 				break;
 
 			case 'cannon':
@@ -205,5 +213,19 @@ export default class InteractionHandler {
 		player.markDirty();
 		ship?.markDirty();
 		interactable.markDirty();
+	}
+
+	handleCoconutInteraction(player: Player, coconut: Coconut): void {
+		const heal = player.maxHealth * Coconut.HEAL_PERCENT;
+		player.health = Math.min(player.maxHealth, player.health + heal);
+		player.markDirty();
+		this.destroyEntity(coconut.id);
+	}
+
+	handleBandageInteraction(player: Player, bandage: Bandage): void {
+		const heal = player.maxHealth * Bandage.HEAL_PERCENT;
+		player.health = Math.min(player.maxHealth, player.health + heal);
+		player.markDirty();
+		this.destroyEntity(bandage.id);
 	}
 }

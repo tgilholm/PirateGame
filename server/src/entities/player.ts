@@ -4,6 +4,7 @@ import Entity from './entity';
 import Cannon from './interactables/cannon';
 import Interactable from './interactables/interactable';
 import Ship from './ship';
+import Sword from './sword';
 
 /**
  * The server-side representation of an individual player's state, acting as the "source of truth"
@@ -11,6 +12,8 @@ import Ship from './ship';
  */
 export default class Player extends Entity {
 	username: string;
+	pirateColour: string;
+	isSwimming = false;
 	isSteering: boolean;
 	cannon: Cannon | null;
 	carrying: Interactable | null = null;
@@ -33,6 +36,18 @@ export default class Player extends Entity {
 	respawnStarted: boolean = false;
 	deathNotified: boolean = false;
 
+	//dash variables
+	dashCooldown: number = 0;
+	dashCooldownTime: number = 3000; // ms
+	dashDuration: number = 150; // ms
+	dashTimer: number = 0;
+	isDashing: boolean = false;
+	dashVx: number = 0;
+	dashVy: number = 0;
+	swingCooldown: number = 0;
+	swingTimer: number = 0;
+	isSwinging: boolean = false;
+
 	/**
 	 * Builds a player with the specified data
 	 * @param id the id of the player
@@ -42,9 +57,18 @@ export default class Player extends Entity {
 	 * @param username chosen by the player
 	 * @param config config data read from entityConfig
 	 */
-	constructor(id: string, x: number, y: number, parent: Entity | null, username: string, config: PlayerConfig) {
+	constructor(
+		id: string,
+		x: number,
+		y: number,
+		parent: Entity | null,
+		username: string,
+		config: PlayerConfig,
+		pirateColour: string = 'default'
+	) {
 		super(id, 'player', x, y, config.maxHealth, parent);
 		this.username = username || ''; // default to no uname
+		this.pirateColour = pirateColour;
 
 		// Player-specific detail
 		this.ship = parent as Ship;
@@ -63,6 +87,14 @@ export default class Player extends Entity {
 
 			// Specify any other player inputs here
 		};
+	}
+
+	get canDash(): boolean {
+		return this.dashCooldown <= 0 && !this.isDashing;
+	}
+
+	get canSwing(): boolean {
+		return this.swingCooldown <= 0 && !this.isSwinging;
 	}
 
 	get isReloaded(): boolean {
@@ -100,6 +132,7 @@ export default class Player extends Entity {
 		return {
 			...super.toState(),
 			username: this.username,
+			pirateColour: this.pirateColour,
 			gold: this.gold,
 			isSteering: this.isSteering,
 			aimAngle: this.aimAngle,
@@ -110,6 +143,12 @@ export default class Player extends Entity {
 			respawnTimer: this.respawnTimer,
 			shipId: this.ship.id,
 			activeMinigame: this.activeMinigame ? this.activeMinigame.serialise() : null,
+			dashCooldown: this.dashCooldown,
+			dashCooldownTime: this.dashCooldownTime,
+			swingCooldown: this.swingCooldown,
+			swingCooldownTime: Sword.COOLDOWN,
+			isSwinging: this.isSwinging,
+			isSwimming: this.isSwimming,
 		};
 	}
 }

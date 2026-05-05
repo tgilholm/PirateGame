@@ -8,6 +8,7 @@ export default class AnimationManager {
 	constructor(scene) {
 		this.scene = scene;
 		this.registerAnimations();
+		this.registerPlayerAnimations();
 	}
 
 	/**
@@ -38,6 +39,57 @@ export default class AnimationManager {
 				});
 			}
 		});
+	}
+
+	registerPlayerAnimations() {
+		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
+		const animDefs = [
+			{ suffix: 'idle-down', start: 0, end: 2, repeat: -1 },
+			{ suffix: 'idle-up', start: 4, end: 6, repeat: -1 },
+			{ suffix: 'idle-right', start: 8, end: 10, repeat: -1 },
+			{ suffix: 'idle-left', start: 12, end: 14, repeat: -1 },
+			{ suffix: 'walk-down', start: 16, end: 18, repeat: -1 },
+			{ suffix: 'walk-up', start: 20, end: 22, repeat: -1 },
+			{ suffix: 'walk-right', start: 24, end: 26, repeat: -1 },
+			{ suffix: 'walk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'death', start: 72, end: 75, repeat: 0 },
+			{ suffix: 'swim', start: 76, end: 78, repeat: -1 },
+			{ suffix: 'dig-right', start: 64, end: 66, repeat: -1 },
+			{ suffix: 'dig-left', start: 68, end: 70, repeat: -1 },
+		];
+
+		COLOURS.forEach((colour) => {
+			const textureKey = `pirate_${colour}`;
+			animDefs.forEach(({ suffix, start, end, repeat }) => {
+				const key = `pirate-${colour}-${suffix}`;
+				if (!this.scene.anims.exists(key)) {
+					this.scene.anims.create({
+						key,
+						frames: this.scene.anims.generateFrameNumbers(textureKey, { start, end }),
+						frameRate: 8,
+						repeat,
+					});
+				}
+			});
+		});
+	}
+
+	registerSkeletonAnimations() {
+		const animDefs = [
+			{ suffix: 'idle-down', start: 0, end: 2, repeat: -1 },
+			{ suffix: 'idle-up', start: 4, end: 6, repeat: -1 },
+			{ suffix: 'idle-right', start: 8, end: 10, repeat: -1 },
+			{ suffix: 'idle-left', start: 12, end: 14, repeat: -1 },
+			{ suffix: 'walk-down', start: 16, end: 18, repeat: -1 },
+			{ suffix: 'walk-up', start: 20, end: 22, repeat: -1 },
+			{ suffix: 'walk-right', start: 24, end: 26, repeat: -1 },
+			{ suffix: 'walk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-right', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-down', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'atk-up', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'death', start: 72, end: 75, repeat: 0 },
+		];
 	}
 
 	/**

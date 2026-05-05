@@ -96,6 +96,7 @@ export default class UIManager {
 		this.updateDebugStats(player, target);
 		this.updateMinimap(player);
 		this.updateShopMenu(player);
+		this.updateBoostBar(player);
 	}
 
 	/**
@@ -178,6 +179,24 @@ export default class UIManager {
 		Ship Stats:
 		vx=${playerShip.velocity.x}, vy=${playerShip.velocity.y}, targetX=${playerShip.target.x}, targetY=${playerShip.target.y}
 		`;
+	}
+
+	updateBoostBar(player) {
+		if (!this.boostBar) {
+			this.boostBar = document.getElementById('boost-bar-container');
+			this.boostFill = document.getElementById('boost-bar-fill');
+		}
+
+		const ship = this.gameManager.models.get(player.shipId);
+		if (!ship || !player.isSteering) {
+			this.boostBar.style.display = 'none';
+			return;
+		}
+
+		this.boostBar.style.display = 'block';
+		const pct = ship.boostCooldownTime > 0 ? 100 * (1 - (ship.boostCooldown ?? 0) / ship.boostCooldownTime) : 100;
+		this.boostFill.style.width = `${pct}%`;
+		this.boostFill.style.background = ship.isBoosting ? '#ffaa00' : '#00aaff';
 	}
 
 	updateInteractionPrompts(player, target) {

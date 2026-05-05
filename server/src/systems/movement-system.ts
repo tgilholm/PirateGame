@@ -67,6 +67,23 @@ export default class MovementSystem implements BaseSystem {
 		}
 	}
 
+	updateDashTimer(player: Player, dt: number) {
+		if (player.dashTimer > 0) {
+			player.dashTimer = Math.max(0, player.dashTimer - dt * 1000);
+			if (player.dashTimer <= 0) {
+				player.isDashing = false;
+				player.dashVx = 0;
+				player.dashVy = 0;
+			}
+			player.markDirty();
+		}
+
+		if (player.dashCooldown > 0) {
+			player.dashCooldown = Math.max(0, player.dashCooldown - dt * 1000);
+			player.markDirty();
+		}
+	}
+
 	/**
 	 * Applies movement for a given player, accounting for on-ship conditions,
 	 * different movement speed for on-land vs in-sea, collision with inner/outer
@@ -77,6 +94,7 @@ export default class MovementSystem implements BaseSystem {
 	updatePlayer(player: Player, dt: number, ships: Ship[]): void {
 		this.updateReloadTimer(player, dt);
 		this.updateRespawnTimer(player, dt);
+		this.updateDashTimer(player, dt);
 
 		// Keep track of aim angle- don't send for static players
 		const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
@@ -86,9 +104,17 @@ export default class MovementSystem implements BaseSystem {
 		}
 		(player as any).prevAimAngle = player.aimAngle; // store temporarily
 
+		const parent = (player.parent as Ship) || null;
+
 		if (player.isSteering || player.cannon) return;
 
-		const parent = (player.parent as Ship) || null;
+		const currentWorldPos = player.worldPos;
+		const swimmingNow = !parent && !this.terrainMap.isOnIsland(currentWorldPos.x, currentWorldPos.y);
+		if (player.isSwimming !== swimmingNow) {
+			player.isSwimming = swimmingNow;
+			player.markDirty();
+		}
+
 		const { up, down, left, right } = player.inputs;
 		const playerConfig = this.entityConfig.player;
 
@@ -120,24 +146,58 @@ export default class MovementSystem implements BaseSystem {
 		if (left) dx -= 1;
 		if (right) dx += 1;
 
-		const prevX = player.x; // to calculate velocity difference for client-side extrapolation
+		const prevX = player.x;
 		const prevY = player.y;
+
+		if (player.isDashing) {
+			const nextX = player.x + player.dashVx * dt;
+			const nextY = player.y + player.dashVy * dt;
+
+			const groundTreasures = this.registry
+				.getByType<Treasure>('treasure')
+				.filter((t) => t.id !== player.carrying?.id);
+			const shops = this.registry.getByType<Shop>('shop');
+			const collisionPadding = -playerConfig.radius;
+
+			const isColliding = (x: number, y: number) =>
+				this.checkShipCollisions(x, y, ships, collisionPadding) ||
+				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
+				this.checkShopObstacles(x, y, shops, playerConfig.radius);
+
+			if (!isColliding(nextX, nextY)) {
+				player.x = nextX;
+				player.y = nextY;
+			} else if (!isColliding(nextX, player.y)) {
+				player.x = nextX;
+			} else if (!isColliding(player.x, nextY)) {
+				player.y = nextY;
+			} else {
+				// blocked = kill dash
+				player.isDashing = false;
+				player.dashVx = 0;
+				player.dashVy = 0;
+			}
+
+			this.constrainToWorld(player, playerConfig.radius);
+			player.vx = player.dashVx;
+			player.vy = player.dashVy;
+			player.markDirty();
+			return;
+		}
 
 		// If no inputs, do nothing
 		if (dx === 0 && dy === 0) {
-			// reset velocity
 			player.vx = 0;
 			player.vy = 0;
 			return;
 		}
 
-		// Normalize diagonal movement- players move the same speed in all directions
 		const length = Math.sqrt(dx * dx + dy * dy);
 		dx /= length;
 		dy /= length;
 
 		// Different speed if on land/a ship vs in the sea
-		const onLand = this.terrainMap.isOnIsland(player.x, player.y);
+		const onLand = this.terrainMap.isOnIsland(player.worldPos.x, player.worldPos.y);
 		let runSpeed = playerConfig.runSpeed;
 		let swimSpeed = playerConfig.swimSpeed;
 		if (player.carrying) {
@@ -147,7 +207,6 @@ export default class MovementSystem implements BaseSystem {
 		const speedMultiplier = parent || onLand ? runSpeed : swimSpeed;
 		const speed = speedMultiplier * dt * 60;
 
-		// Contain the player inside a ship- slide them along the hull if they collide
 		if (parent) {
 			const cos = Math.cos(-parent.r);
 			const sin = Math.sin(-parent.r);
@@ -168,7 +227,6 @@ export default class MovementSystem implements BaseSystem {
 				player.y = nextY;
 			}
 		} else {
-			// Move in absolute scope
 			const nextWorldX = player.x + dx * speed;
 			const nextWorldY = player.y + dy * speed;
 
@@ -180,18 +238,16 @@ export default class MovementSystem implements BaseSystem {
 
 			const shops = this.registry.getByType<Shop>('shop');
 
-			// Collide with the exterior of ships
+			// Collide with exterior of ships
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
 				this.checkShopObstacles(x, y, shops, playerConfig.radius);
 
-			// Move freely if not colliding
 			if (!isColliding(nextWorldX, nextWorldY)) {
 				player.x = nextWorldX;
 				player.y = nextWorldY;
 			} else {
-				// Slide along the hull
 				const canMoveX = !isColliding(nextWorldX, player.y);
 				const canMoveY = !isColliding(player.x, nextWorldY);
 
@@ -199,7 +255,6 @@ export default class MovementSystem implements BaseSystem {
 				else if (canMoveY) player.y = nextWorldY;
 			}
 
-			// Keep the player on the map
 			this.constrainToWorld(player, playerConfig.radius);
 		}
 
@@ -293,22 +348,44 @@ export default class MovementSystem implements BaseSystem {
 	 * @param dt the difference in time from the last update
 	 */
 	updateShip(ship: Ship, dt: number) {
+		// Update boost timer
+		if (ship.boostTimer > 0) {
+			ship.boostTimer = Math.max(0, ship.boostTimer - dt * 1000);
+			if (ship.boostTimer <= 0) ship.isBoosting = false;
+			ship.markDirty();
+		}
+
+		if (ship.boostCooldown > 0) {
+			ship.boostCooldown = Math.max(0, ship.boostCooldown - dt * 1000);
+			ship.markDirty();
+		}
+
 		const body = ship.body;
-		const acceleration = ship.acceleration; // using get method for auto-applied modifier
+		const acceleration = ship.acceleration;
 		const { up, left, right } = ship.inputs;
 		const { turnSpeed } = ship.physics;
 
-		// Turning
+		const DRIFT_FRICTION = 0.015;
+		const BASE_FRICTION = ship.physics.frictionAir;
+		body.frictionAir = ship.pilot ? BASE_FRICTION : DRIFT_FRICTION;
+
 		if (right) Body.setAngularVelocity(body, turnSpeed);
 		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
-		if (up) {
-			const force = {
-				x: Math.cos(body.angle) * acceleration,
-				y: Math.sin(body.angle) * acceleration,
-			};
+		if (up || ship.isBoosting) {
+			const boostFactor = ship.isBoosting ? ship.boostMultiplier : 1;
+			const forceX = Math.cos(body.angle) * acceleration * boostFactor;
+			const forceY = Math.sin(body.angle) * acceleration * boostFactor;
 
-			Body.applyForce(body, body.position, force);
+			const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
+			if (ship.isBoosting && speed < 1) {
+				Body.setVelocity(body, {
+					x: Math.cos(body.angle) * 2,
+					y: Math.sin(body.angle) * 2,
+				});
+			}
+
+			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
 	}
 

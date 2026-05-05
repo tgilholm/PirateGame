@@ -125,6 +125,9 @@ export default class ShipModel extends Model {
 		if (data.sailState !== undefined) this.sailState = data.sailState;
 		if (data.anchored !== undefined) this.anchored = data.anchored;
 		if (data.turnAngle !== undefined) this.turnAngle = data.turnAngle;
+		if (data.boostCooldown !== undefined) this.boostCooldown = data.boostCooldown;
+		if (data.boostCooldownTime !== undefined) this.boostCooldownTime = data.boostCooldownTime;
+		if (data.isBoosting !== undefined) this.isBoosting = data.isBoosting;
 	}
 
 	/**

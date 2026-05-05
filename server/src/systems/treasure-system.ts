@@ -9,6 +9,8 @@ import Shop from '../entities/shop';
 import { TreasureState } from '@shared/socket-protocol';
 import SpatialGrid from '../application/spatial-grid';
 import DigMinigame from '../minigames/dig-minigame';
+import PalmTree from 'src/entities/interactables/palm-tree';
+import Barrel from 'src/entities/interactables/barrel';
 
 export default class TreasureSystem implements BaseSystem {
 	private spawnTime = 5000; // spawn treasure every 5s
@@ -20,6 +22,8 @@ export default class TreasureSystem implements BaseSystem {
 
 	// maps dig events to players via their id
 	private digSessions = new Map<string, DigMinigame>();
+	private barrels: Map<{ x: number; y: number }, Barrel | null> = new Map();
+	private palmTrees: Map<{ x: number; y: number }, PalmTree | null> = new Map(); // maps locations to palm trees
 	private holes: Treasure[] = [];
 
 	constructor(
@@ -31,6 +35,8 @@ export default class TreasureSystem implements BaseSystem {
 		private onRemove: (id: string) => void
 	) {
 		this.maxTreasures = terrainMap.getObjectLayer('treasure-spawns').length;
+		this.spawnInitialPalmTrees();
+		this.spawnInitialBarrels();
 	}
 
 	update(dt: number): void {
@@ -42,6 +48,8 @@ export default class TreasureSystem implements BaseSystem {
 		this.resolveOpeningTreasures();
 		this.updateCarriedTreasures();
 		this.resolveDeposits();
+		this.spawnPalmTrees();
+		this.spawnBarrels();
 	}
 
 	public createSession(player: Player, treasure: Treasure) {
@@ -122,6 +130,46 @@ export default class TreasureSystem implements BaseSystem {
 			const treasure = this.entityFactory.createTreasure(id, point.x, point.y, value);
 			treasure.state = point.state; // from tilemap
 		}
+	}
+
+	private spawnPalmTrees() {
+		this.palmTrees.forEach((value, key) => {
+			if (!value) {
+				const tree = this.entityFactory.createPalmTree(`palm-tree_${Date.now()}`, key.x, key.y);
+				this.palmTrees.set(key, tree);
+			}
+		});
+	}
+
+	private spawnInitialPalmTrees() {
+		// fill every location
+		const nodes = this.terrainMap.getObjectLayer('palm-spawns');
+		nodes.forEach((node, index) => {
+			const tree = this.entityFactory.createPalmTree(`palm-tree_${index}`, node.x, node.y);
+			this.palmTrees.set({ x: node.x, y: node.y }, tree);
+		});
+
+		console.log(`[TreasureSystem] Spawned ${nodes.length} palm trees`);
+	}
+
+	private spawnBarrels() {
+		this.barrels.forEach((value, key) => {
+			if (!value) {
+				const barrel = this.entityFactory.createBarrel(`barrel_${Date.now()}`, key.x, key.y);
+				this.barrels.set(key, barrel);
+			}
+		});
+	}
+
+	private spawnInitialBarrels() {
+		// fill every location
+		const nodes = this.terrainMap.getObjectLayer('barrel-spawns');
+		nodes.forEach((node, index) => {
+			const barrel = this.entityFactory.createBarrel(`barrel_${index}`, node.x, node.y);
+			this.barrels.set({ x: node.x, y: node.y }, barrel);
+		});
+
+		console.log(`[TreasureSystem] Spawned ${nodes.length} barrels`);
 	}
 
 	private pruneExpired() {

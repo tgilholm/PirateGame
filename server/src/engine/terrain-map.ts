@@ -36,13 +36,15 @@ export default class TerrainMap {
 
 		const mapData = JSON.parse(fs.readFileSync(final, 'utf-8'));
 		this.tileWidth = mapData.tilewidth;
-		this.tileHeight = mapData.tileHeight;
+		this.tileHeight = mapData.tileheight ?? mapData.tileHeight;
 		this.mapHeight = mapData.height;
 		this.mapWidth = mapData.width;
 
 		// Add all the layers you need here
 		this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
 
+		this.objectLayers.set('barrel-spawns', getObjectsFromLayer(mapData, 'barrel-spawns'));
+		this.objectLayers.set('palm-spawns', getObjectsFromLayer(mapData, 'palm-spawns'));
 		this.objectLayers.set('npc-spawns', getObjectsFromLayer(mapData, 'npc-spawns'));
 		this.objectLayers.set('player-spawns', getObjectsFromLayer(mapData, 'player-spawns'));
 		this.objectLayers.set('treasure-spawns', getObjectsFromLayer(mapData, 'treasure-spawns') || new Set());
@@ -73,16 +75,17 @@ export default class TerrainMap {
 	 * @returns true if on an island, false otherwise
 	 */
 	public isOnIsland(worldX: number, worldY: number): boolean {
-		const tileX = Math.floor(worldX / this.tileWidth);
-		const tileY = Math.floor(worldY / this.tileWidth);
-
 		const islandTiles = this.mapLayers.get('islands');
 		if (!islandTiles) {
 			console.warn(`[TerrainMap] isOnIsland check failed`);
 			return false;
 		}
 
-		return islandTiles.includes({ x: tileX, y: tileY });
+		// Tiles are stored as world-space centres, so round to nearest tile centre
+		const tileX = Math.floor(worldX / this.tileWidth) * this.tileWidth + this.tileWidth / 2;
+		const tileY = Math.floor(worldY / this.tileHeight) * this.tileHeight + this.tileHeight / 2;
+
+		return islandTiles.some((tile) => tile.x === tileX && tile.y === tileY);
 	}
 
 	/**
