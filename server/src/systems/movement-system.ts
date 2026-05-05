@@ -365,10 +365,6 @@ export default class MovementSystem implements BaseSystem {
 		const { up, left, right } = ship.inputs;
 		const { turnSpeed } = ship.physics;
 
-		const DRIFT_FRICTION = 0.015;
-		const BASE_FRICTION = ship.physics.frictionAir;
-		body.frictionAir = ship.pilot ? BASE_FRICTION : DRIFT_FRICTION;
-
 		if (right) Body.setAngularVelocity(body, turnSpeed);
 		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
@@ -377,14 +373,13 @@ export default class MovementSystem implements BaseSystem {
 			const forceX = Math.cos(body.angle) * acceleration * boostFactor;
 			const forceY = Math.sin(body.angle) * acceleration * boostFactor;
 
-			const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
+			const speed = Math.sqrt(body.velocity.x + body.velocity.y);
 			if (ship.isBoosting && speed < 1) {
 				Body.setVelocity(body, {
 					x: Math.cos(body.angle) * 2,
 					y: Math.sin(body.angle) * 2,
 				});
 			}
-
 			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
 	}
