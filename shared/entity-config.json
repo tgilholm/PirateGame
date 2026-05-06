@@ -16,9 +16,9 @@
 		"physics": {
 			"turnSpeed": 0.008,
 			"mass": 600,
-			"frictionAir": 0.00001,
+			"frictionAir": 0.001,
 			"restitution": 0.2,
-			"thrust": 0.15
+			"thrust": 0.05
 		},
 		"interactables": [
 			{

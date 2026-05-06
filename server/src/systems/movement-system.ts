@@ -373,7 +373,7 @@ export default class MovementSystem implements BaseSystem {
 			const forceX = Math.cos(body.angle) * acceleration * boostFactor;
 			const forceY = Math.sin(body.angle) * acceleration * boostFactor;
 
-			const speed = Math.sqrt(body.velocity.x + body.velocity.y);
+			const speed = Math.sqrt(body.velocity.x ** 2 + body.velocity.y ** 2);
 			if (ship.isBoosting && speed < 1) {
 				Body.setVelocity(body, {
 					x: Math.cos(body.angle) * 2,
