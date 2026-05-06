@@ -438,3 +438,15 @@ h2 {
 	transform: scale(1.2);
 	box-shadow: 0 0 8px #ffd700;
 }
+
+#coconut-tooltip-inner {
+	background: rgba(13, 47, 79, 0.85);
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	border-radius: 4px;
+	padding: 2px 8px;
+	font-family: 'VT323', monospace;
+	font-size: 18px;
+	color: #fff;
+	white-space: nowrap;
+	transform: translate(-50%, -100%);
+}

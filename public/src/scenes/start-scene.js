@@ -97,6 +97,11 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 10,
 		});
 
+		this.load.spritesheet('leaf-ani', 'assets/leaf-ani.png', {
+			frameWidth: 16,
+			frameHeight: 16,
+		});
+
 		this.load.spritesheet('skelly_front', '/assets/skellyfront.png', { frameWidth: 48, frameHeight: 48 });
 		this.load.spritesheet('skelly_back', '/assets/skellyback.png', { frameWidth: 48, frameHeight: 48 });
 		this.load.spritesheet('skelly_right', '/assets/skellyright.png', { frameWidth: 48, frameHeight: 48 });
@@ -116,8 +121,10 @@ export class StartScene extends Phaser.Scene {
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
 		this.load.image('coconut', '/assets/coconut.png');
 		this.load.image('bandage', '/assets/bandage.png');
-		this.load.image('palm-tree', '/assets/palm-tree.png');
-		this.load.image('barrel', '/assets/barrel.png');
+		this.load.image('palm-tree', '/assets/palm-tree-pix.png');
+		this.load.image('barrel', '/assets/barrel-idle.png');
+		this.load.spritesheet('barrel-hit', '/assets/barrel-hit.png', { frameWidth: 32, frameHeight: 32 });
+		this.load.spritesheet('barrel-break', '/assets/barrel-break.png', { frameWidth: 32, frameHeight: 32 });
 
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();

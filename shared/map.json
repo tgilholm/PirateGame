@@ -10687,13 +10687,142 @@
 			"visible": true,
 			"x": 0,
 			"y": 0
+		},
+		{
+			"draworder": "topdown",
+			"id": 29,
+			"name": "dock-spawns",
+			"objects": [
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3449,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4480,
+					"y": 4896
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3450,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4416,
+					"y": 4896
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3453,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4416,
+					"y": 4960
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3454,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4480,
+					"y": 4960
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3455,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4480,
+					"y": 4976
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3456,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4416,
+					"y": 4976
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3458,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4480,
+					"y": 4864
+				},
+				{
+					"gid": 2750,
+					"height": 64,
+					"id": 3459,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 64,
+					"x": 4416,
+					"y": 4864
+				},
+				{
+					"gid": 2750,
+					"height": 32,
+					"id": 3461,
+					"name": "",
+					"opacity": 1,
+					"rotation": 0,
+					"type": "",
+					"visible": true,
+					"width": 32,
+					"x": 4704,
+					"y": 5008
+				}
+			],
+			"opacity": 1,
+			"type": "objectgroup",
+			"visible": true,
+			"x": 0,
+			"y": 0
 		}
 	],
-	"nextlayerid": 25,
-	"nextobjectid": 3449,
+	"nextlayerid": 34,
+	"nextobjectid": 3463,
 	"orientation": "orthogonal",
 	"renderorder": "right-down",
-	"tiledversion": "1.12.1",
+	"tiledversion": "1.12.0",
 	"tileheight": 16,
 	"tilesets": [
 		{
@@ -10839,6 +10968,11 @@
 		{
 			"columns": 4,
 			"firstgid": 2743,
+			"grid": {
+				"height": 16,
+				"orientation": "orthogonal",
+				"width": 16
+			},
 			"image": "..\/public\/assets\/spawn-tiles.png",
 			"imageheight": 256,
 			"imagewidth": 256,
