@@ -82,6 +82,9 @@ export default class NPCSystem implements BaseSystem {
 		// npcs can only attack when the timer hits 0
 		if (npc.attackTimer > 0) {
 			npc.attackTimer = Math.max(0, npc.attackTimer - dt * 1000);
+			if (npc.attackTimer <= 0) {
+				npc.isAttacking = false;
+			}
 			npc.markDirty();
 		}
 	}
@@ -155,7 +158,7 @@ export default class NPCSystem implements BaseSystem {
 			if (dist < npc.detectionRadius && !entity.isDead) npc.target = entity;
 			else npc.target = null;
 
-			if (npc.target && dist < 4 && npc.canAttack) {
+			if (npc.target && dist < npc.attackRange && npc.canAttack) {
 				this.attackTarget(npc, npc.target);
 				npc.attackTimer = npc.attackTime; // reset cooldown
 			}
@@ -165,6 +168,8 @@ export default class NPCSystem implements BaseSystem {
 	attackTarget(npc: NPC, target: Entity) {
 		if (!target.isDead) {
 			target.health -= npc.attackDamage;
+			npc.isAttacking = true;
+			npc.markDirty();
 		}
 	}
 

@@ -9,6 +9,7 @@ export default class AnimationManager {
 		this.scene = scene;
 		this.registerAnimations();
 		this.registerPlayerAnimations();
+		this.registerSkeletonAnimations();
 	}
 
 	/**
@@ -52,6 +53,14 @@ export default class AnimationManager {
 			{ suffix: 'walk-up', start: 20, end: 22, repeat: -1 },
 			{ suffix: 'walk-right', start: 24, end: 26, repeat: -1 },
 			{ suffix: 'walk-left', start: 28, end: 30, repeat: -1 },
+			{ suffix: 'shoot-down', start: 32, end: 34, repeat: 0 },
+			{ suffix: 'shoot-up', start: 36, end: 38, repeat: 0 },
+			{ suffix: 'shoot-right', start: 40, end: 42, repeat: 0 },
+			{ suffix: 'shoot-left', start: 44, end: 46, repeat: 0 },
+			{ suffix: 'atk-down', start: 48, end: 50, repeat: 0 },
+			{ suffix: 'atk-up', start: 52, end: 54, repeat: 0 },
+			{ suffix: 'atk-right', start: 56, end: 58, repeat: 0 },
+			{ suffix: 'atk-left', start: 60, end: 62, repeat: 0 },
 			{ suffix: 'death', start: 72, end: 75, repeat: 0 },
 			{ suffix: 'swim', start: 76, end: 78, repeat: -1 },
 			{ suffix: 'dig-right', start: 64, end: 66, repeat: -1 },
@@ -75,21 +84,81 @@ export default class AnimationManager {
 	}
 
 	registerSkeletonAnimations() {
-		const animDefs = [
-			{ suffix: 'idle-down', start: 0, end: 2, repeat: -1 },
-			{ suffix: 'idle-up', start: 4, end: 6, repeat: -1 },
-			{ suffix: 'idle-right', start: 8, end: 10, repeat: -1 },
-			{ suffix: 'idle-left', start: 12, end: 14, repeat: -1 },
-			{ suffix: 'walk-down', start: 16, end: 18, repeat: -1 },
-			{ suffix: 'walk-up', start: 20, end: 22, repeat: -1 },
-			{ suffix: 'walk-right', start: 24, end: 26, repeat: -1 },
-			{ suffix: 'walk-left', start: 28, end: 30, repeat: -1 },
-			{ suffix: 'atk-left', start: 28, end: 30, repeat: -1 },
-			{ suffix: 'atk-right', start: 28, end: 30, repeat: -1 },
-			{ suffix: 'atk-down', start: 28, end: 30, repeat: -1 },
-			{ suffix: 'atk-up', start: 28, end: 30, repeat: -1 },
-			{ suffix: 'death', start: 72, end: 75, repeat: 0 },
+		const COLS = 23;
+
+		const rowFrames = (row, startCol, endCol) => {
+			const base = row * COLS;
+			const out = [];
+			for (let c = startCol; c <= endCol; c++) out.push(base + c);
+			return out;
+		};
+
+		const defs = [
+			// down (skellyfront)
+			{ key: 'skelly-down-idle', texture: 'skelly_front', frames: rowFrames(0, 0, 4), frameRate: 6, repeat: -1 },
+			{ key: 'skelly-down-walk', texture: 'skelly_front', frames: rowFrames(2, 0, 7), frameRate: 8, repeat: -1 },
+			{ key: 'skelly-down-hurt', texture: 'skelly_front', frames: rowFrames(3, 0, 4), frameRate: 10, repeat: 0 },
+			{
+				key: 'skelly-down-attack',
+				texture: 'skelly_front',
+				frames: rowFrames(6, 0, 12),
+				frameRate: 12,
+				repeat: 0,
+			},
+			{
+				key: 'skelly-down-death',
+				texture: 'skelly_front',
+				frames: rowFrames(8, 0, 22),
+				frameRate: 10,
+				repeat: 0,
+			},
+			// up (skellyback)
+			{ key: 'skelly-up-idle', texture: 'skelly_back', frames: rowFrames(0, 0, 4), frameRate: 6, repeat: -1 },
+			{ key: 'skelly-up-walk', texture: 'skelly_back', frames: rowFrames(2, 0, 7), frameRate: 8, repeat: -1 },
+			{ key: 'skelly-up-hurt', texture: 'skelly_back', frames: rowFrames(3, 0, 4), frameRate: 10, repeat: 0 },
+			{ key: 'skelly-up-attack', texture: 'skelly_back', frames: rowFrames(6, 0, 12), frameRate: 12, repeat: 0 },
+			{ key: 'skelly-up-death', texture: 'skelly_back', frames: rowFrames(8, 0, 22), frameRate: 10, repeat: 0 },
+			// right (skellyright)
+			{ key: 'skelly-right-idle', texture: 'skelly_right', frames: rowFrames(0, 0, 4), frameRate: 6, repeat: -1 },
+			{ key: 'skelly-right-walk', texture: 'skelly_right', frames: rowFrames(2, 0, 7), frameRate: 8, repeat: -1 },
+			{ key: 'skelly-right-hurt', texture: 'skelly_right', frames: rowFrames(3, 0, 4), frameRate: 10, repeat: 0 },
+			{
+				key: 'skelly-right-attack',
+				texture: 'skelly_right',
+				frames: rowFrames(6, 0, 12),
+				frameRate: 12,
+				repeat: 0,
+			},
+			{
+				key: 'skelly-right-death',
+				texture: 'skelly_right',
+				frames: rowFrames(8, 0, 22),
+				frameRate: 10,
+				repeat: 0,
+			},
+			// left (skellyleft) — right to left
+			{ key: 'skelly-left-idle', texture: 'skelly_left', frames: rowFrames(0, 18, 22), frameRate: 6, repeat: -1 },
+			{ key: 'skelly-left-walk', texture: 'skelly_left', frames: rowFrames(2, 15, 22), frameRate: 8, repeat: -1 },
+			{ key: 'skelly-left-hurt', texture: 'skelly_left', frames: rowFrames(3, 18, 22), frameRate: 10, repeat: 0 },
+			{
+				key: 'skelly-left-attack',
+				texture: 'skelly_left',
+				frames: rowFrames(6, 10, 22),
+				frameRate: 12,
+				repeat: 0,
+			},
+			{ key: 'skelly-left-death', texture: 'skelly_left', frames: rowFrames(8, 0, 22), frameRate: 10, repeat: 0 },
 		];
+
+		for (const def of defs) {
+			if (this.scene.anims.exists(def.key)) continue;
+			this.scene.anims.create({
+				key: def.key,
+				frames: def.frames.map((f) => ({ key: def.texture, frame: f })),
+				frameRate: def.frameRate,
+				repeat: def.repeat,
+			});
+		}
 	}
 
 	/**

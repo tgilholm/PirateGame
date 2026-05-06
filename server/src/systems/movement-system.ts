@@ -16,9 +16,9 @@ import Shop from 'src/entities/shop';
 const POS_THRESHOLD = 0.5;
 const MAX_CANNON_SPEED = 20 * (Math.PI / 180); // cannons move towards mouse
 const CANNON_ARC = Math.PI / 4; // 90 deg
-const CHEST_OBSTACLE_RADIUS = 20; // loose + dugup chests
-const HOLE_OBSTACLE_RADIUS = 20; // open holes
-const HOLE_OBSTACLE_RADIUS_Y = 12;
+const CHEST_OBSTACLE_RADIUS = 8; // loose + dugup chests
+const HOLE_OBSTACLE_RADIUS = 8; // open holes
+const HOLE_OBSTACLE_RADIUS_Y = 6;
 
 /**
  * Contains all movement logic for moving entities
