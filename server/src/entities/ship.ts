@@ -22,8 +22,8 @@ export default class Ship extends Entity {
 	boostCooldownTime: number = 8000;
 	boostTimer: number = 0;
 	isBoosting: boolean = false;
-	readonly boostDuration: number = 1000;
-	readonly boostMultiplier: number = 1.5;
+	readonly boostDuration: number = 2000;
+	readonly boostMultiplier: number = 3;
 
 	get canBoost(): boolean {
 		return this.boostCooldown <= 0 && !this.isBoosting;
