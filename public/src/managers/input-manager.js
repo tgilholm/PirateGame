@@ -30,12 +30,19 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 		//that event anywhere on the canvas, so I figured would try and tie that in, and
 		//it appears to work in all of the instances I tested
 		//New Implementation--------------------------------------------------------
-		scene.input.on('pointerdown', () => this.emit('fire'));
+		scene.input.on('pointerdown', (pointer) => {
+			if (pointer.rightButtonDown()) {
+				this.emit('swing');
+			} else {
+				this.emit('fire');
+			}
+		});
 		//--------------------------------------------------------------------------
 
 		scene.input.keyboard.on('keydown-E', () => this.emit('interact'));
 		scene.input.keyboard.on('keydown-Q', () => this.emit('release'));
 		scene.input.keyboard.on('keydown-SPACE', () => this.emit('fire'));
+		scene.input.keyboard.on('keydown-SHIFT', () => this.emit('dash'));
 
 		scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			this.emit('zoom', deltaY);

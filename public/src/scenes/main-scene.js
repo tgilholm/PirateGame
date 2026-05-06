@@ -1,4 +1,4 @@
-/* global Phaser, io */
+/* global Phaser, io, pako */
 
 import NetworkManager from '../managers/network-manager.js';
 import GameManager from '../managers/game-manager.js';
@@ -23,7 +23,7 @@ export class MainScene extends Phaser.Scene {
 		this.debugGraphics = null;
 		this.cameraTarget = null;
 		this.projectiles = new Map();
-		this.targetZoom = 0.8;
+		this.targetZoom = 3;
 
 		window.addEventListener('resize', () => {
 			this.scale.resize(window.innerWidth, window.innerHeight);
@@ -34,11 +34,18 @@ export class MainScene extends Phaser.Scene {
 	 * Executed once at runtime- set up all game objects here, such
 	 * as setting up user input and socket listeners.
 	 */
-	create(data) {
-		// Create the socket here so it only connects when the scene actually starts,
-		// not at module load time before GameManager exists to receive INIT_GAME
+	async create(data) {
 		const socket = globalThis.io();
 		this.map = this.make.tilemap({ key: 'map' });
+		this.input.keyboard.enableGlobalCapture();
+
+		// Show loading bar again for tilemap setup
+		const loadingScreen = document.getElementById('loading-screen');
+		loadingScreen.style.display = 'flex';
+
+		await this.setupWorld();
+
+		loadingScreen.style.display = 'none';
 
 		// Allow key inputs again
 		this.input.keyboard.enableGlobalCapture();
@@ -70,21 +77,21 @@ export class MainScene extends Phaser.Scene {
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
 		const camera = this.cameras.main;
 
-		camera.startFollow(this.cameraTarget, true);
+		camera.startFollow(this.cameraTarget, true, 0.1, 0.1);
 		camera.zoom = this.targetZoom;
 
 		this.inputManager.on('zoom', (deltaY) => {
 			const step = deltaY > 0 ? -0.1 : 0.1;
 
-			const minZoom = 0.4;
-			const maxZoom = 1.25;
+			const minZoom = 1.4;
+			const maxZoom = 2.5;
 
-			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom); // between 30%-150% zoom
+			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom);
 		});
 
 		// Contain the camera in the map
 		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-		this.gameManager.start(data.username);
+		this.gameManager.start(data.username, data.pirateColour ?? 'default');
 
 		this.gameManager.on('shipSunk', () => {
 			this.uiManager.showShipSunkMessage();
@@ -104,8 +111,8 @@ export class MainScene extends Phaser.Scene {
 	 * The update loop of the game. Updates all dependent classes
 	 */
 	update() {
-		this.gameManager.update();
-		this.uiManager.update();
+		if (this.gameManager) this.gameManager.update();
+		if (this.uiManager) this.uiManager.update();
 
 		const camera = this.cameras.main;
 		camera.zoom += (this.targetZoom - camera.zoom) * 0.1;
@@ -115,12 +122,22 @@ export class MainScene extends Phaser.Scene {
 	 * Generates the tilemap for this world from the provided tilesheet
 	 */
 	setupWorld() {
-		const tileset = this.map.addTilesetImage('terrain-tilesheet', 'tiles');
+		const island = this.map.addTilesetImage('terrain', 'island-tiles');
+		const fort = this.map.addTilesetImage('fort', 'fort-tiles');
+		const water = this.map.addTilesetImage('water', 'water-tiles');
+		const ship = this.map.addTilesetImage('ships', 'ship-tiles');
 
-		this.seaLayer = this.map.createLayer('sea', tileset, 0, 0);
-		this.shallowsLayer = this.map.createLayer('shallows', tileset, 0, 0);
-		this.islandsLayer = this.map.createLayer('islands', tileset, 0, 0);
+		//if (!island || !fort || !water || !ship) return;
 
-		[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
+		this.map.createLayer('sea', water, 0, 0);
+		this.map.createLayer('oversea', water, 0, 0);
+		this.map.createLayer('oversea2', water, 0, 0);
+		this.map.createLayer('oversea3', water, 0, 0);
+		this.map.createLayer('shallows', island, 0, 0);
+		this.map.createLayer('islands', [island, fort], 0, 0);
+		this.map.createLayer('buildings', fort, 0, 0);
+		this.map.createLayer('debris', [island, fort, water, ship], 0, 0);
+
+		//[this.seaLayer, this.shallowsLayer, this.islandsLayer].forEach((l) => l.setCullPadding(2, 2));
 	}
 }

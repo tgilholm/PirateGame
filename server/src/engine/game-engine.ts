@@ -6,6 +6,7 @@ import PhysicsSystem from '../systems/physics-system';
 import ProjectileSystem from '../systems/projectile-system';
 import TreasureSystem from '../systems/treasure-system';
 import SpawnSystem from 'src/systems/spawn-system';
+import SwordSystem from '../systems/sword-atk-system';
 
 /**
  * Defines the systems that must be provided into GameEngine instances
@@ -18,6 +19,7 @@ export interface GameSystems {
 	npcSystem: NPCSystem;
 	treasureSystem: TreasureSystem;
 	spawnSystem: SpawnSystem;
+	swordSystem: SwordSystem;
 }
 
 /**
@@ -39,6 +41,7 @@ export default class GameEngine {
 		this.systems.set('npc', systems.npcSystem);
 		this.systems.set('treasure', systems.treasureSystem);
 		this.systems.set('spawns', systems.spawnSystem);
+		this.systems.set('sword', systems.swordSystem);
 
 		this.systemArray = Array.from(this.systems.values()); // cache systems
 	}

@@ -20,8 +20,8 @@ import CombatHandler from '../handlers/combat-handler';
  * inactive npcs with players when they are needed.
  */
 export default class NPCSystem implements BaseSystem {
-	npcLimit: number = 16;
-	npcShipLimit: number = 1;
+	npcLimit: number = 12;
+	npcShipPaths: Map<string, NPCShip> = new Map(); // maps ships to path ids
 
 	constructor(
 		private terrainMap: TerrainMap,
@@ -30,19 +30,45 @@ export default class NPCSystem implements BaseSystem {
 		private spatialGrid: SpatialGrid,
 		private combatHandler: CombatHandler,
 		private addPhysicsBody: (body: Matter.Body) => void
-	) {}
+	) {
+		this.npcLimit = terrainMap.getObjectLayer('npc-spawns').length; // add npc respawn timer
+	}
+
+	generateNPCShip(path: Array<{ x: number; y: number }>, index: string = ''): NPCShip | null {
+		if (path.length === 0) return null;
+
+		const spawn = path[Math.floor(Math.random() * path.length)]; // so it's not the same every time
+		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}_${index}`, spawn.x, spawn.y);
+		this.addPhysicsBody(ship.body);
+
+		return ship;
+	}
 
 	update(dt: number): void {
-		// Get patrol path for ships
-		const path = this.terrainMap.npcPath;
-		if (path.length === 0) return;
+		const paths = this.terrainMap.npcPaths; // map of ship name to coordinates
+
+		paths.forEach((value, key) => {
+			const current = this.npcShipPaths.get(key);
+
+			if (!current) {
+				const ship = this.generateNPCShip(value, key); // set the ship on those coords
+
+				if (!ship) {
+					console.warn(`[NPCSystem] Failed to generate NPC ship`);
+					return;
+				}
+
+				this.npcShipPaths.set(key, ship); // so we don't add it again
+				ship.pathName = key;
+			}
+
+			// no need to create anything new
+		});
 
 		const allNpcs = this.entityRegistry.getByType<NPC>('npc'); // npc ships included
-		const ships = this.entityRegistry.getByType<NPCShip>('npc-ship'); // just ships
 
 		// Generate if disappeared
 		this.generateNPCs(allNpcs);
-		this.generateNPCShips(ships, path);
 
 		for (const npc of allNpcs) {
 			const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
@@ -51,8 +77,8 @@ export default class NPCSystem implements BaseSystem {
 			this.updateTimer(npc, dt);
 
 			if (npc instanceof NPCShip) {
-				this.patrol(npc, path, dt);
 				this.fireCannons(npc, npc.target);
+				this.patrol(npc, paths.get(npc.pathName), dt);
 			} else {
 				// non-ship NPCs
 				this.attackTarget(npc, npc.target);
@@ -64,11 +90,16 @@ export default class NPCSystem implements BaseSystem {
 		// npcs can only attack when the timer hits 0
 		if (npc.attackTimer > 0) {
 			npc.attackTimer = Math.max(0, npc.attackTimer - dt * 1000);
+			if (npc.attackTimer <= 0) {
+				npc.isAttacking = false;
+			}
 			npc.markDirty();
 		}
 	}
 
-	patrol(ship: NPCShip, path: Array<{ x: number; y: number }>, dt: number): void {
+	patrol(ship: NPCShip, path: Array<{ x: number; y: number }> | undefined, dt: number): void {
+		if (!path) return;
+
 		const current = path[ship.pathIndex];
 		const nextIndex = (ship.pathIndex + 1) % path.length;
 		const next = path[nextIndex];
@@ -77,37 +108,29 @@ export default class NPCSystem implements BaseSystem {
 		const dy = next.y - current.y;
 		const segLength = Math.hypot(dx, dy);
 
-		// prevent dividing by 0 with a 20px threshold
-		if (segLength < 20) {
-			//
+		if (segLength < 0.01) {
 			ship.pathIndex = nextIndex;
+			ship.segmentT = 0; // reset so next segment starts clean
 			return;
 		}
 
-		// Move between each segment one at a time
 		const moveDistance = ship.patrolSpeed * dt;
-
-		const deltaT = moveDistance / segLength;
-		ship.segmentT += deltaT;
+		ship.segmentT += moveDistance / segLength;
 
 		let x, y;
 
-		// If close enough, jump to the next segment
 		if (ship.segmentT >= 1) {
-			ship.segmentT = 0;
+			ship.segmentT -= 1; // carry remainder into next segment
 			ship.pathIndex = nextIndex;
 
 			x = next.x;
 			y = next.y;
 		} else {
-			// Otherwise move smoothly
 			x = current.x + dx * ship.segmentT;
 			y = current.y + dy * ship.segmentT;
 		}
 
-		// Update physics body, not the actual ship
-		// physicsSystem handles that separately
-		Body.setPosition(ship.body, { x: x, y: y });
+		Body.setPosition(ship.body, { x, y });
 		Body.setAngle(ship.body, Math.atan2(dy, dx));
 	}
 
@@ -168,6 +191,10 @@ export default class NPCSystem implements BaseSystem {
 			this.spatialGrid.remove(npc.id);
 			this.entityRegistry.delete(npc.id);
 
+			if (npc instanceof NPCShip) {
+				this.npcShipPaths.delete(npc.pathName);
+			}
+
 			// Spawn money stack at the death point
 			const money = this.entityFactory.createInteractable(
 				npc.parent as Ship | null,
@@ -208,6 +235,8 @@ export default class NPCSystem implements BaseSystem {
 		if (target && dist < 25 && npc.canAttack && !target.isDead) {
 			npc.attackTimer = npc.attackTime; // reset cooldown
 			target.health -= npc.attackDamage;
+			npc.isAttacking = true;
+			npc.markDirty();
 		}
 	}
 
@@ -220,17 +249,9 @@ export default class NPCSystem implements BaseSystem {
 		}
 	}
 
-	generateNPCShips(ships: NPCShip[], path: Array<{ x: number; y: number }>): void {
-		if (ships.length >= this.npcShipLimit || path.length === 0) return;
-
-		const spawn = path[Math.floor(Math.random() * path.length - 1)]; // so it's not the same every time
-		const ship = this.entityFactory.createNPCShip(`npc-ship_${Date.now()}`, spawn.x, spawn.y);
-		this.addPhysicsBody(ship.body);
-	}
-
 	getSpawnPoint() {
 		// Choose a spawn point for the npc
-		const spawnPoints = this.terrainMap.getTileset('npc-spawns');
+		const spawnPoints = this.terrainMap.getObjectLayer('npc-spawns');
 
 		// Choose randomly from the list
 		return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];

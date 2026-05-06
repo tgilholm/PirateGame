@@ -5,8 +5,10 @@ import NPC from './npc';
 
 export default class NPCShip extends Ship {
 	pathIndex: number = 0; // how far along the path
-	patrolSpeed: number = 75; // how fast it moves when circling
-	detectionRadius: number = 1000;
+	pathName: string = ''; // e.g. "ship1", which path to follow
+
+	patrolSpeed: number = 16; // how fast it moves when circling
+	detectionRadius: number = 200;
 	target: Entity | null = null;
 	segmentT: number = 0;
 	npcs: NPC[] = [];

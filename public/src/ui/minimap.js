@@ -133,7 +133,7 @@ export default class Minimap {
 		});
 	}
 
-	getCanvasPos(worldX, worldY, tileSize = 64) {
+	getCanvasPos(worldX, worldY, tileSize = 16) {
 		return { x: worldX / tileSize, y: worldY / tileSize };
 	}
 }

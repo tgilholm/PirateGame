@@ -3,12 +3,12 @@ import InteractableModel from './interactable-model.js';
 
 export default class CannonModel extends InteractableModel {
 	constructor(scene, parent, id, x, y) {
-		super(scene, parent, id, 'cannon', x, y, 'cannon', 'Use Cannon', 'Release Cannon');
+		super(scene, parent, id, 'cannon', x, y, 'cannon-sprites', 'Use Cannon', 'Release Cannon');
 		this.isStatic = false; // cannons can move
 		this.reloadTime = 0;
 		this.reloadTimer = 0;
 		this.userId = null;
-		this.reloadIndicator = new ReloadIndicator(scene, this, 28);
+		this.reloadIndicator = new ReloadIndicator(scene, this, 16);
 	}
 
 	sync(data) {

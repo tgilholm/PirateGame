@@ -8,6 +8,7 @@ export class StartScene extends Phaser.Scene {
 		this.background = null;
 		this.ui = document.getElementById('ui-container');
 		this.form = document.getElementById('input-form');
+		this.logo = document.getElementById('repo-link');
 
 		// Get the username from the textinput
 		let startBtn = document.getElementById('start-btn');
@@ -28,9 +29,21 @@ export class StartScene extends Phaser.Scene {
 	 * Preload all the assets for the game before the player presses "join".
 	 */
 	preload() {
+		const bar = document.getElementById('loading-bar');
+		const text = document.getElementById('loading-text');
+
+		this.load.on('progress', (progress) => {
+			bar.style.width = `${Math.round(progress * 100)}%`;
+			text.textContent = `Loading... ${Math.round(progress * 100)}%`;
+		});
+
+		this.load.on('complete', () => {
+			document.getElementById('loading-screen').style.display = 'none';
+			this.form.style.display = 'flex';
+		});
+
 		this.load.image('background', 'assets/water.png');
 		this.load.image('title', 'assets/title.png');
-		//this.load.image('cannonball','assets/cannonball.png') // yoohoooo
 		this.load.spritesheet('ship', 'assets/ship.png', { frameWidth: 320, frameHeight: 320 });
 		this.load.spritesheet('cannon-water-splash', 'assets/cannon-water-splash.png', {
 			frameWidth: 25,
@@ -56,14 +69,44 @@ export class StartScene extends Phaser.Scene {
 			frameWidth: 25,
 			frameHeight: 25,
 		});
-		this.load.image('tiles', '/assets/terrain-tilesheet.png');
-		this.load.image('cannon', '/assets/cannon.png');
+		this.load.spritesheet('pirate_default', 'assets/pirate.png', {
+			frameWidth: 16,
+			frameHeight: 16,
+		});
+		this.load.spritesheet('pirate_red', 'assets/pirate-red.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_blue', 'assets/pirate-blue.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_green', 'assets/pirate-green.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_yellow', 'assets/pirate-yellow.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_white', 'assets/pirate-white.png', { frameWidth: 16, frameHeight: 16 });
+		this.load.spritesheet('pirate_grey', 'assets/pirate-grey.png', { frameWidth: 16, frameHeight: 16 });
+
+		// Tilesheets
+		this.load.image('island-tiles', '/assets/island-tiles.png');
+		this.load.image('fort-tiles', '/assets/fort-tiles.png');
+		this.load.image('water-tiles', '/assets/water-tiles.png');
+		this.load.image('ship-tiles', '/assets/ship-tiles.png');
+
+		this.load.spritesheet('ship-sprites', '/assets/ship-sprites.png', {
+			frameWidth: 128,
+			frameHeight: 46,
+			spacing: 1,
+		});
+
+		this.load.spritesheet('cannon-sprites', '/assets/cannon-sprites.png', {
+			frameWidth: 12,
+			frameHeight: 10,
+		});
+
+		this.load.spritesheet('skelly_front', '/assets/skellyfront.png', { frameWidth: 48, frameHeight: 48 });
+		this.load.spritesheet('skelly_back', '/assets/skellyback.png', { frameWidth: 48, frameHeight: 48 });
+		this.load.spritesheet('skelly_right', '/assets/skellyright.png', { frameWidth: 48, frameHeight: 48 });
+		this.load.spritesheet('skelly_left', '/assets/skellyleft.png', { frameWidth: 48, frameHeight: 48 });
+
 		this.load.image('helm', '/assets/helm.png');
 		this.load.image('ladder', '/assets/ladder.png');
-		this.load.tilemapTiledJSON('map', '/shared/demo-map.json');
+		this.load.tilemapTiledJSON('map', '/shared/map.json');
 		this.load.image('treasure-chest', '/assets/chest.png');
 		this.load.image('x-mark', '/assets/redcross.png');
-		this.load.image('shovel', '/assets/shovel.png');
 		this.load.image('hole', '/assets/hole.png');
 		this.load.image('money-stack', '/assets/money-stack.png');
 		this.load.spritesheet('chest_open', '/assets/chestopen.png', {
@@ -71,32 +114,29 @@ export class StartScene extends Phaser.Scene {
 			frameHeight: 48,
 		});
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
-
-		// Placeholder player sprite
-		const circle = this.make.graphics();
-		circle.fillStyle(0xff0000, 1);
-		circle.fillCircle(15, 15, 15);
-		circle.generateTexture('player_circle', 30, 30);
-		circle.destroy();
+		this.load.image('coconut', '/assets/coconut.png');
+		this.load.image('bandage', '/assets/bandage.png');
+		this.load.image('palm-tree', '/assets/palm-tree.png');
+		this.load.image('barrel', '/assets/barrel.png');
 
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();
 		ball.fillStyle(0x222222, 1);
-		ball.fillCircle(8, 8, 8);
-		ball.generateTexture('cannonball', 16, 16);
+		ball.fillCircle(4, 4, 4);
+		ball.generateTexture('cannonball', 8, 8);
 		ball.destroy();
 
 		const proj = this.make.graphics();
 		proj.fillStyle(0x222222, 1);
-		proj.fillCircle(4, 4, 4);
-		proj.generateTexture('bullet', 8, 8);
+		proj.fillCircle(2, 2, 2);
+		proj.generateTexture('bullet', 4, 4);
 		proj.destroy();
 
 		// Placeholder NPC sprite
 		const square = this.make.graphics();
 		square.fillStyle(0x0000dd);
-		square.fillRect(0, 0, 30, 30);
-		square.generateTexture('npc_sprite', 30, 30);
+		square.fillRect(0, 0, 12, 12);
+		square.generateTexture('npc_sprite', 12, 12);
 		square.destroy();
 	}
 
@@ -157,6 +197,22 @@ export class StartScene extends Phaser.Scene {
 			yoyo: true,
 			loop: -1,
 		});
+		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
+		this.selectedColour = COLOURS[0];
+
+		const pickerEl = document.getElementById('colour-picker');
+		pickerEl.style.display = 'flex';
+
+		COLOURS.forEach((colour) => {
+			const btn = document.getElementById(`colour-btn-${colour}`);
+			btn.addEventListener('click', () => {
+				this.selectedColour = colour;
+				document.querySelectorAll('.colour-btn').forEach((b) => b.classList.remove('selected'));
+				btn.classList.add('selected');
+			});
+		});
+
+		document.getElementById('colour-btn-default').classList.add('selected');
 	}
 
 	/**
@@ -165,6 +221,8 @@ export class StartScene extends Phaser.Scene {
 	resetUI() {
 		this.ui.style.display = 'none';
 		this.form.style.display = 'flex';
+		this.logo.style.display = 'flex';
+		document.getElementById('colour-picker').style.display = 'none';
 	}
 
 	goToMain() {
@@ -175,8 +233,9 @@ export class StartScene extends Phaser.Scene {
 		{
 			// Hide the form before continuing
 			this.form.style.display = 'none';
+			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
-			this.scene.start('MainScene', { username }); // Pass the username to the main scene
+			this.scene.start('MainScene', { username, pirateColour: this.selectedColour });
 		}
 	}
 

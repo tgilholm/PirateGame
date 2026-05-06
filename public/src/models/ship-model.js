@@ -22,10 +22,10 @@ export default class ShipModel extends Model {
 		this.angularVelocity = 0;
 		this.swayTimer = Math.random() * 1000; // For the random sine-wave "bobbing"
 
-		const textureKey = `hull_${this.dimensions.height}_${this.dimensions.middleWidth}`;
-		this.getHullTexture(textureKey);
+		// const textureKey = `hull_${this.dimensions.height}_${this.dimensions.middleWidth}`;
+		// this.getHullTexture(textureKey);
 
-		this.hullSprite = scene.add.sprite(0, 0, textureKey);
+		this.hullSprite = scene.add.sprite(0, 0, 'ship-sprites', 0);
 
 		// Calculate the centre offset
 		const padding = 5;
@@ -39,6 +39,14 @@ export default class ShipModel extends Model {
 		this.hullSprite.setOrigin(offsetX / totalW, offsetY / totalH);
 		this.add(this.hullSprite);
 		this.sendToBack(this.hullSprite);
+
+		// scene.anims.create({
+		// 	key: 'eee',
+		// 	frames: scene.anims.generateFrameNumbers('ship-sprites', {start: 0, end: 2}),
+		// 	frameRate: 1,
+		// 	repeat: -1,
+		// });
+		//this.hullSprite.play('eee');
 
 		this.setDepth(10);
 
@@ -117,6 +125,9 @@ export default class ShipModel extends Model {
 		if (data.sailState !== undefined) this.sailState = data.sailState;
 		if (data.anchored !== undefined) this.anchored = data.anchored;
 		if (data.turnAngle !== undefined) this.turnAngle = data.turnAngle;
+		if (data.boostCooldown !== undefined) this.boostCooldown = data.boostCooldown;
+		if (data.boostCooldownTime !== undefined) this.boostCooldownTime = data.boostCooldownTime;
+		if (data.isBoosting !== undefined) this.isBoosting = data.isBoosting;
 	}
 
 	/**

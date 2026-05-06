@@ -36,6 +36,7 @@ import SessionHandler from './handlers/session-handler';
 import Player from './entities/player';
 import UpgradeHandler from './handlers/upgrade-handler';
 import CombatHandler from './handlers/combat-handler';
+import SwordSystem from './systems/sword-atk-system';
 
 // Create the express app & server
 const app = express();
@@ -57,7 +58,7 @@ const matterEngine = Engine.create({
 });
 const spatialGrid = new SpatialGrid(512, 2048);
 
-const terrainMap = new TerrainMap('demo-map.json');
+const terrainMap = new TerrainMap('map.json');
 const physicsSystem = new PhysicsSystem(registry, matterEngine, terrainMap);
 const projectileSystem = new ProjectileSystem(registry, spatialGrid, terrainMap);
 const entityFactory = new EntityFactory(entityConfig, upgradeConfig, registry);
@@ -71,6 +72,19 @@ const treasureSystem = new TreasureSystem(
 );
 const spawnSystem = new SpawnSystem(terrainMap);
 const combatHandler = new CombatHandler(entityFactory);
+const swordSystem = new SwordSystem(registry, spatialGrid, entityFactory);
+
+const engine = new GameEngine({
+	physicsSystem,
+	movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
+	spawnSystem,
+	projectileSystem,
+	messageSystem: new MessageSystem(),
+	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
+	treasureSystem,
+	swordSystem,
+});
+
 const upgradeHandler = new UpgradeHandler(upgradeConfig, registry);
 const interactionHandler = new InteractionHandler(treasureSystem, registry, onEntityRemoved);
 const sessionHandler = new SessionHandler(
@@ -81,17 +95,8 @@ const sessionHandler = new SessionHandler(
 	removePhysicsBody,
 	onEntityRemoved
 );
-const engine = new GameEngine({
-	physicsSystem,
-	movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
-	spawnSystem,
-	projectileSystem,
-	messageSystem: new MessageSystem(),
-	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
-	treasureSystem,
-});
 
-const worldController = new WorldController(registry, sessionHandler, {
+const worldController = new WorldController(registry, sessionHandler, swordSystem, {
 	playerController: new PlayerController(
 		registry,
 		entityFactory,

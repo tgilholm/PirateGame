@@ -14,6 +14,10 @@ import Treasure from './interactables/treasure';
 import Money from './interactables/money';
 import Cannonball from './projectiles/cannonball';
 import { TreasureState } from '@shared/socket-protocol';
+import PalmTree from './interactables/palm-tree';
+import Coconut from './interactables/coconut';
+import Barrel from './interactables/barrel';
+import Bandage from './interactables/bandage';
 
 /**
  * Aggregates entity creation, applying domain-specific default values from
@@ -50,8 +54,15 @@ export default class EntityFactory {
 	 * @param username the username chosen by the player
 	 * @returns the player
 	 */
-	public createPlayer(id: string, x: number, y: number, parent: Entity | null, username: string): Player {
-		const player = new Player(id, x, y, parent, username, this.playerConfig);
+	public createPlayer(
+		id: string,
+		x: number,
+		y: number,
+		parent: Entity | null,
+		username: string,
+		pirateColour: string = 'default'
+	): Player {
+		const player = new Player(id, x, y, parent, username, this.playerConfig, pirateColour);
 		this.entityRegistry.create(player);
 		return player;
 	}
@@ -103,6 +114,18 @@ export default class EntityFactory {
 				break;
 			case 'money':
 				item = new Money(id, x, y, parent);
+				break;
+			case 'palm-tree':
+				item = new PalmTree(id, x, y);
+				break;
+			case 'coconut':
+				item = new Coconut(id, x, y, instance.treeId ?? '');
+				break;
+			case 'barrel':
+				item = new Barrel(id, x, y);
+				break;
+			case 'bandage':
+				item = new Bandage(id, x, y);
 				break;
 
 			default:
@@ -163,5 +186,29 @@ export default class EntityFactory {
 
 		this.entityRegistry.create(ball);
 		return ball;
+	}
+
+	public createBarrel(id: string, x: number, y: number): Barrel {
+		const barrel = new Barrel(id, x, y);
+		this.entityRegistry.create(barrel);
+		return barrel;
+	}
+
+	public createCoconut(id: string, x: number, y: number, treeId: string): Coconut {
+		const coconut = new Coconut(id, x, y, treeId);
+		this.entityRegistry.create(coconut);
+		return coconut;
+	}
+
+	public createBandage(id: string, x: number, y: number): Bandage {
+		const bandage = new Bandage(id, x, y);
+		this.entityRegistry.create(bandage);
+		return bandage;
+	}
+
+	public createPalmTree(id: string, x: number, y: number): PalmTree {
+		const tree = new PalmTree(id, x, y);
+		this.entityRegistry.create(tree);
+		return tree;
 	}
 }
