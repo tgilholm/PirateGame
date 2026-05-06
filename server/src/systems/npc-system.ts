@@ -155,8 +155,8 @@ export default class NPCSystem implements BaseSystem {
 			*/
 				const p0 = { x: x, y: y };
 				const p1 = {
-					x: x + Math.cos(angle) * speed * time,
-					y: y + Math.sin(angle) * speed * time,
+					x: x + Math.cos(angle) * speed * (time / 1000),
+					y: y + Math.sin(angle) * speed * (time / 1000),
 				};
 
 				let width;

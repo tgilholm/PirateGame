@@ -10,7 +10,8 @@ import Cannon from '../entities/interactables/cannon';
 import NPC from '../entities/npcs/npc';
 import { TreasureState } from '@shared/socket-protocol';
 import Treasure from '../entities/interactables/treasure';
-import Shop from 'src/entities/shop';
+import Shop from '../entities/shop';
+import NPCShip from '../entities/npcs/npc-ship';
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -382,6 +383,8 @@ export default class MovementSystem implements BaseSystem {
 			}
 			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
+
+		if (!(ship instanceof NPCShip)) console.log(ship.id, ship.x, ship.y);
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {

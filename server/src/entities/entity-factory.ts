@@ -159,11 +159,11 @@ export default class EntityFactory {
 			}
 		});
 
-		this.npcShipConfig.npcs.forEach((item, index) => {
-			const npc = this.createNPC(`${npcShip.id}_npc${index}`, item.x, item.y, npcShip);
+		// this.npcShipConfig.npcs.forEach((item, index) => {
+		// 	const npc = this.createNPC(`${npcShip.id}_npc${index}`, item.x, item.y, npcShip);
 
-			console.log(`npc ${npc.id}  created at ${npc.x}, ${npc.y}`);
-		});
+		// 	console.log(`npc ${npc.id}  created at ${npc.x}, ${npc.y}`);
+		// });
 
 		return npcShip;
 	}
