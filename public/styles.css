@@ -385,3 +385,85 @@ h2 {
 .shop-close-button:hover {
 	background: deepskyblue;
 }
+
+/* ---- Settings Menu ---- */
+#settings-menu {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 2000;
+	background: rgba(13, 47, 79, 0.97);
+	border: 1px solid #fff;
+	border-radius: 8px;
+	padding: 24px 28px;
+	min-width: 340px;
+	max-width: 90vw;
+}
+
+.settings-title {
+	font-size: 18px;
+	text-align: center;
+	margin-bottom: 16px;
+	border-bottom: 1px solid #ffffff55;
+	padding-bottom: 8px;
+	color: #fff;
+}
+
+.settings-section-title {
+	font-size: 13px;
+	color: #aad4ff;
+	margin-bottom: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.settings-section {
+	margin-bottom: 16px;
+}
+
+.settings-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.settings-label {
+	width: 52px;
+	font-size: 12px;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+.settings-slider {
+	flex: 1;
+	accent-color: royalblue;
+	cursor: pointer;
+	height: 4px;
+}
+
+.settings-value {
+	width: 40px;
+	text-align: right;
+	font-size: 12px;
+	color: #ffd700;
+	flex-shrink: 0;
+}
+
+#settings-close-button {
+	width: 100%;
+	background: royalblue;
+	color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	padding: 5px 8px;
+	font-size: 11px;
+	font-family: inherit;
+	cursor: pointer;
+	margin-top: 4px;
+}
+
+#settings-close-button:hover {
+	background: deepskyblue;
+}

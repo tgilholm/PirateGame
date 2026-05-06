@@ -10,13 +10,16 @@ import { TreasureState } from '@shared/socket-protocol';
 import SpatialGrid from '../application/spatial-grid';
 import DigMinigame from '../minigames/dig-minigame';
 
+const treasureTileCooldown = 30000;
+
 export default class TreasureSystem implements BaseSystem {
-	private spawnTime = 5000; // spawn treasure every 5s
-	private spawnTimer = 0;
 	private nextTreasureId = 1;
 	private minGold: number = 10;
 	private maxGold: number = 75;
-	private maxTreasures: number = 10;
+	private maxTreasures: number = 500;
+
+	//maps x,y tile key to the timestamp when it becomes available again
+	private treasureTileCooldowns = new Map<string, number>();
 
 	// maps dig events to players via their id
 	private digSessions = new Map<string, DigMinigame>();
@@ -32,8 +35,6 @@ export default class TreasureSystem implements BaseSystem {
 	) {}
 
 	update(dt: number): void {
-		this.spawnTimer += dt * 1000;
-
 		this.pruneExpired();
 		this.spawnTreasure();
 		this.updateMinigames(dt);
@@ -91,6 +92,10 @@ export default class TreasureSystem implements BaseSystem {
 	public createHole(treasure: Treasure) {
 		const now = Date.now();
 
+		//stops cooldown in same tile for 30 seconds
+		const tileKey = Math.round(treasure.x) + ',' + Math.round(treasure.y);
+		this.treasureTileCooldowns.set(tileKey, now + treasureTileCooldown);
+
 		// Treasure has just been collected
 		const hole = this.entityFactory.createTreasure(`treasure_hole_${now}`, treasure.x, treasure.y, 0);
 
@@ -104,10 +109,6 @@ export default class TreasureSystem implements BaseSystem {
 
 	private spawnTreasure() {
 		const treasureCount = this.registry.getByType('treasure').length;
-
-		// only check if timer expired
-		if (this.spawnTimer < this.spawnTime) return;
-		this.spawnTimer = 0;
 
 		if (treasureCount < this.maxTreasures) {
 			const point = this.findSpawnPoint();
@@ -267,12 +268,21 @@ export default class TreasureSystem implements BaseSystem {
 			return undefined;
 		}
 
+		const now = Date.now();
+
+		//remove old cooldowns
+		for (const [key, expiresAt] of this.treasureTileCooldowns) {
+			if (now >= expiresAt) this.treasureTileCooldowns.delete(key);
+		}
+
 		// Shuffle attempts to avoid always picking the same tiles
 		const shuffled = [...spawnTiles].sort(() => Math.random() - 0.5);
 
 		for (const tile of shuffled) {
 			const point = { x: tile.x, y: tile.y };
+			const key = Math.round(tile.x) + ',' + Math.round(tile.y);
 
+			if (this.treasureTileCooldowns.has(key)) continue;
 			if (this.isBlocked(point)) continue;
 
 			return point;
@@ -282,7 +292,7 @@ export default class TreasureSystem implements BaseSystem {
 	}
 
 	private isBlocked(point: { x: number; y: number }): boolean {
-		const radius = 50;
+		const radius = 16;
 
 		const treasures = this.registry.getByType<Treasure>('treasure');
 

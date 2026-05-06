@@ -57,16 +57,20 @@ export default class TerrainMap {
 	 * @returns true if on an island, false otherwise
 	 */
 	public isOnIsland(worldX: number, worldY: number): boolean {
-		const tileX = Math.floor(worldX / this.tileWidth);
-		const tileY = Math.floor(worldY / this.tileWidth);
-
 		const islandTiles = this.mapLayers.get('islands');
 		if (!islandTiles) {
 			console.warn(`[TerrainMap] isOnIsland check failed`);
 			return false;
 		}
 
-		return islandTiles.includes({ x: tileX, y: tileY });
+		//getTilesetFromLayer has tile positions as world-space
+		//x = col * tilewidth + tilewidth/2,  y = row * tilewidth + tilewidth/2
+		const col = Math.floor(worldX / this.tileWidth);
+		const row = Math.floor(worldY / this.tileWidth);
+		const cx = col * this.tileWidth + this.tileWidth / 2;
+		const cy = row * this.tileWidth + this.tileWidth / 2;
+
+		return islandTiles.some((t) => t.x === cx && t.y === cy);
 	}
 
 	getNPCPathNodes() {

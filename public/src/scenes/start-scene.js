@@ -84,6 +84,7 @@ export class StartScene extends Phaser.Scene {
 		this.load.audio('sound-climb', 'assets/sound-climb.mp3');
 		this.load.audio('sound-yell', 'assets/sound-yell.mp3');
 		this.load.json('volume-config', 'src/managers/volume-config.json');
+		this.load.json('settings-config', 'src/managers/settings-config.json');
 
 		// Placeholder player sprite
 		const circle = this.make.graphics();

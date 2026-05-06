@@ -114,7 +114,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		// Determine if the player "should" send the interact packet
-		if (closest && closest.dist < 75) {
+		//uses own interactRange if set, otherwise 75
+		const interactThreshold = closest?.entity?.interactRange ?? 75;
+		if (closest && closest.dist < interactThreshold) {
 			if (closest.entity.type === 'ladder' || this.localPlayer.parentId == closest.entity.parentId) {
 				// handles both === null
 				this.closestInteractable = closest;
@@ -316,6 +318,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('interact', () => {
+			//if digging e is keybind
+			if (this.digMinigame?.active) {
+				this.network.sendFire();
+				return;
+			}
+
 			const target = this.closestInteractable;
 			if (target?.entity) {
 				const closest = target.entity;
@@ -335,9 +343,23 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('fire', () => {
-			// the spacebar fires both the dig minigame and the gun
 			this.network.sendFire();
-			const sfx = this.localPlayer?.parentId ? 'sound-cannon' : 'sound-gun'; //cannon sound if on ship, gun sound if not
+			const player = this.localPlayer;
+			if (!player) return;
+
+			if (player.isUsingCannon) {
+				const cannon = [...this.models.values()].find((m) => m.type === 'cannon' && m.userId === player.id);
+				if (!cannon || cannon.reloadTimer > 0) return;
+			} else if (player.isSteering) {
+				const anyReady = [...this.models.values()].some(
+					(m) => m.type === 'cannon' && m.parentId === player.parentId && m.reloadTimer <= 0
+				);
+				if (!anyReady) return;
+			} else if (player.reloadTimer > 0) {
+				return;
+			}
+
+			const sfx = player.parentId ? 'sound-cannon' : 'sound-gun';
 			this.scene.soundManager?.playSfx(sfx);
 		});
 

@@ -15,9 +15,14 @@ import { Body } from 'matter-js';
  * later on to account for the number of players in the world, replacing
  * inactive npcs with players when they are needed.
  */
+const npcnpcTileCooldown = 30000;
+
 export default class NPCSystem implements BaseSystem {
-	npcLimit: number = 12;
+	npcLimit: number = 500;
 	npcShipLimit: number = 1;
+
+	//maps x,y tile key to the timestamp when it becomes available again
+	private npcTileCooldowns = new Map<string, number>();
 
 	constructor(
 		private terrainMap: TerrainMap,
@@ -108,6 +113,10 @@ export default class NPCSystem implements BaseSystem {
 			this.spatialGrid.remove(npc.id);
 			this.entityRegistry.delete(npc.id);
 
+			//stops cooldown in same tile for 30 seconds
+			const tileKey = Math.round(npc.x) + ',' + Math.round(npc.y);
+			this.npcTileCooldowns.set(tileKey, Date.now() + npcTileCooldown);
+
 			// Spawn money stack at the death point
 			const money = this.entityFactory.createInteractable(
 				npc.parent as Ship | null,
@@ -148,8 +157,9 @@ export default class NPCSystem implements BaseSystem {
 		// Don't include npc ships in count
 		const regularNpcs = npcs.filter((n) => !(n instanceof NPCShip));
 		if (regularNpcs.length < this.npcLimit) {
-			const { x, y } = this.getSpawnPoint();
-			this.entityFactory.createNPC(`npc_${Date.now()}`, x, y);
+			const point = this.getSpawnPoint();
+			if (!point) return;
+			this.entityFactory.createNPC(`npc_${Date.now()}`, point.x, point.y);
 		}
 	}
 
@@ -161,11 +171,22 @@ export default class NPCSystem implements BaseSystem {
 		this.addPhysicsBody(ship.body);
 	}
 
-	getSpawnPoint() {
-		// Choose a spawn point for the npc
+	getSpawnPoint(): { x: number; y: number } | null {
 		const spawnPoints = this.terrainMap.getTileset('npc-spawns');
+		const now = Date.now();
 
-		// Choose randomly from the list
-		return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
+		//remove old cooldowns
+		for (const [key, expiresAt] of this.npcTileCooldowns) {
+			if (now >= expiresAt) this.npcTileCooldowns.delete(key);
+		}
+
+		//Shuffle and pick first available tile
+		const shuffled = [...spawnPoints].sort(() => Math.random() - 0.5);
+		for (const point of shuffled) {
+			const key = Math.round(point.x) + ',' + Math.round(point.y);
+			if (!this.npcTileCooldowns.has(key)) return point;
+		}
+
+		return null;
 	}
 }

@@ -15,7 +15,7 @@ export default class ShopModel extends InteractableModel {
 		super(scene, null, id, 'shop', x, y, 'shop', 'Use Shop', '');
 		this.isInteractable = true;
 		this.type = 'shop';
-		this.interactRange = 100;
+		this.interactRange = 200;
 		const radius = 50;
 
 		// Generates temp shop body texture and reuses across all shops
