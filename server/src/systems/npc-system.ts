@@ -6,9 +6,13 @@ import EntityFactory from '../entities/entity-factory';
 import SpatialGrid from '../application/spatial-grid';
 import Entity from '../entities/entity';
 import NPCShip from '../entities/npcs/npc-ship';
-import Money from 'src/entities/interactables/money';
-import Ship from 'src/entities/ship';
+import Money from '../entities/interactables/money';
+import Ship from '../entities/ship';
 import { Body } from 'matter-js';
+import Interactable from '../entities/interactables/interactable';
+import Cannon from '../entities/interactables/cannon';
+import { lineIntersectsRotatedRect } from '../utils/liang-barsky';
+import CombatHandler from '../handlers/combat-handler';
 
 /**
  * Responsible for creating new NPCs when below the limit. Will be adapted
@@ -24,6 +28,7 @@ export default class NPCSystem implements BaseSystem {
 		private entityFactory: EntityFactory,
 		private entityRegistry: EntityRegistry,
 		private spatialGrid: SpatialGrid,
+		private combatHandler: CombatHandler,
 		private addPhysicsBody: (body: Matter.Body) => void
 	) {
 		this.npcLimit = terrainMap.getObjectLayer('npc-spawns').length; // add npc respawn timer
@@ -66,14 +71,17 @@ export default class NPCSystem implements BaseSystem {
 		this.generateNPCs(allNpcs);
 
 		for (const npc of allNpcs) {
+			const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
 			this.reap(npc);
+			this.getTarget(npc, nearby);
+			this.updateTimer(npc, dt);
 
 			if (npc instanceof NPCShip) {
+				this.fireCannons(npc, npc.target);
 				this.patrol(npc, paths.get(npc.pathName), dt);
 			} else {
-				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
-				this.getTarget(npc, nearby);
-				this.updateTimer(npc, dt);
+				// non-ship NPCs
+				this.attackTarget(npc, npc.target);
 			}
 		}
 	}
@@ -126,6 +134,58 @@ export default class NPCSystem implements BaseSystem {
 		Body.setAngle(ship.body, Math.atan2(dy, dx));
 	}
 
+	// Fire all cannons in range of the player's ship
+	fireCannons(npc: NPCShip, target: Entity | null) {
+		if (!target) return;
+
+		// Fire each cannon in range
+		npc.interactables
+			.filter((item: Interactable) => item.type === 'cannon')
+			.forEach((c, index) => {
+				const cannon = c as Cannon;
+				const angle = cannon.r + npc.r; // expected projectile angle, account for ship rotation
+				const speed = cannon.cannonballSpeed;
+				const time = 1500; // cannonball ttl - magic number needs moving of course
+
+				const x = cannon.worldPos.x;
+				const y = cannon.worldPos.y;
+
+				/*
+				Calculate the endpoint of the line given the speed and time
+			*/
+				const p0 = { x: x, y: y };
+				const p1 = {
+					x: x + Math.cos(angle) * speed * (time / 1000),
+					y: y + Math.sin(angle) * speed * (time / 1000),
+				};
+
+				let width;
+				let height;
+				if (target instanceof Ship) {
+					const { middleWidth, bowLength, sternRadius } = target.dimensions;
+					width = middleWidth + bowLength + sternRadius;
+					height = target.dimensions.height;
+				} else {
+					width = 15;
+					height = 15; // change to actual width of entity
+				}
+
+				const rect = {
+					minX: target.x - width / 2,
+					minY: target.y - height / 2,
+					maxX: target.x + width / 2,
+					maxY: target.y + height / 2,
+					angle: npc.r,
+				};
+
+				const intersect = lineIntersectsRotatedRect(p0, p1, rect);
+				if (intersect) {
+					// fire the cannon
+					this.combatHandler.handleCannonFire(cannon, npc, index);
+				}
+			});
+	}
+
 	reap(npc: NPC) {
 		if (npc.health <= 0 && !npc.isDying) {
 			npc.isDying = true; // flag to prevent double-reap
@@ -152,29 +212,38 @@ export default class NPCSystem implements BaseSystem {
 	}
 
 	getTarget(npc: NPC, nearby: Set<string>) {
-		nearby.forEach((id) => {
+		npc.target = null; // reset target
+
+		for (const id of nearby) {
 			const entity = this.entityRegistry.get(id);
+			if (!entity) continue;
 
-			// Only chase players
-			if (entity?.type !== 'player') return;
+			/*
+				Ships can target both players AND ships. Non-ships can only target players.
+			*/
+			if (npc.type === 'npc-ship' && !['player', 'ship'].includes(entity.type)) continue;
+			if (npc.type === 'npc' && entity.type !== 'player') continue;
 
-			// Get distance to player
 			const dist = Math.hypot(npc.x - entity.x, npc.y - entity.y);
-			if (dist < npc.detectionRadius && !entity.isDead) npc.target = entity;
-			else npc.target = null;
-
-			if (npc.target && dist < npc.attackRange && npc.canAttack) {
-				this.attackTarget(npc, npc.target);
-				npc.attackTimer = npc.attackTime; // reset cooldown
+			if (dist < npc.detectionRadius && !entity.isDead) {
+				npc.target = entity;
+				break; // stop as soon as a target is found
 			}
-		});
+		}
 	}
 
-	attackTarget(npc: NPC, target: Entity) {
-		if (!target.isDead) {
+	attackTarget(npc: NPC, target: Entity | null) {
+		if (!target || npc.parent !== target.parent) return;
+
+		const dist = Math.hypot(npc.x - target.x, npc.y - target.y);
+
+		if (target && dist < 25 && npc.canAttack && !target.isDead) {
+			npc.attackTimer = npc.attackTime; // reset cooldown
 			target.health -= npc.attackDamage;
 			npc.isAttacking = true;
 			npc.markDirty();
+
+			console.log(`npc ${npc.id} attacked ${target.id}. Dist: ${dist}`);
 		}
 	}
 
@@ -183,7 +252,7 @@ export default class NPCSystem implements BaseSystem {
 		const regularNpcs = npcs.filter((n) => !(n instanceof NPCShip));
 		if (regularNpcs.length < this.npcLimit) {
 			const { x, y } = this.getSpawnPoint();
-			this.entityFactory.createNPC(`npc_${Date.now()}`, x, y);
+			this.entityFactory.createNPC(`npc_${Date.now()}`, x, y, null);
 		}
 	}
 

@@ -22,6 +22,8 @@ export default class MoneyModel extends InteractableModel {
 			.setDepth(100)
 			.setPosition(0, -8);
 		this.add(this.valueText);
+
+		this.setDepth(11);
 	}
 
 	sync(data) {

@@ -71,6 +71,7 @@ const treasureSystem = new TreasureSystem(
 	onEntityRemoved
 );
 const spawnSystem = new SpawnSystem(terrainMap);
+const combatHandler = new CombatHandler(entityFactory);
 const swordSystem = new SwordSystem(registry, spatialGrid, entityFactory);
 
 const engine = new GameEngine({
@@ -79,7 +80,7 @@ const engine = new GameEngine({
 	spawnSystem,
 	projectileSystem,
 	messageSystem: new MessageSystem(),
-	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, addPhysicsBody),
+	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
 	treasureSystem,
 	swordSystem,
 });
@@ -94,7 +95,6 @@ const sessionHandler = new SessionHandler(
 	removePhysicsBody,
 	onEntityRemoved
 );
-const combatHandler = new CombatHandler(entityFactory);
 
 const worldController = new WorldController(registry, sessionHandler, swordSystem, {
 	playerController: new PlayerController(

@@ -10,7 +10,8 @@ import Cannon from '../entities/interactables/cannon';
 import NPC from '../entities/npcs/npc';
 import { TreasureState } from '@shared/socket-protocol';
 import Treasure from '../entities/interactables/treasure';
-import Shop from 'src/entities/shop';
+import Shop from '../entities/shop';
+import NPCShip from '../entities/npcs/npc-ship';
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -446,18 +447,40 @@ export default class MovementSystem implements BaseSystem {
 	}
 
 	updateNPC(npc: NPC, dt: number) {
-		// If there is a target, continually move towards it
-		if (!npc.target) return; // <-- Remove when npcs can move independently
-
-		// Get angle to target
 		const target = npc.target;
-		const angle = Math.atan2(npc.y - target.y, npc.x - target.x);
+		const parent = npc.parent as NPCShip | null;
 
-		const dx = npc.speed * Math.cos(angle);
-		const dy = npc.speed * Math.sin(angle);
+		if (!target) {
+			return;
+		}
 
-		// Move towards target
-		npc.x -= dx;
-		npc.y -= dy;
+		const npcWorld = parent ? parent.localToWorld(npc.x, npc.y) : { x: npc.x, y: npc.y };
+
+		const targetWorld = target.parent
+			? (target.parent as Ship).localToWorld(target.x, target.y)
+			: { x: target.x, y: target.y };
+
+		const angle = Math.atan2(targetWorld.y - npcWorld.y, targetWorld.x - npcWorld.x);
+		const nextWorldX = npcWorld.x + Math.cos(angle) * npc.speed * dt;
+		const nextWorldY = npcWorld.y + Math.sin(angle) * npc.speed * dt;
+
+		if (parent) {
+			const newLocal = parent.worldToLocal(nextWorldX, nextWorldY);
+			const padding = 8;
+
+			if (parent.isInside(newLocal.x, newLocal.y, padding)) {
+				npc.x = newLocal.x;
+				npc.y = newLocal.y;
+			} else {
+				// Slide logic
+				npc.x = parent.isInside(newLocal.x, npc.y, padding) ? newLocal.x : npc.x;
+				npc.y = parent.isInside(npc.x, newLocal.y, padding) ? newLocal.y : npc.y;
+			}
+		} else {
+			npc.x = nextWorldX;
+			npc.y = nextWorldY;
+		}
+
+		npc.markDirty();
 	}
 }

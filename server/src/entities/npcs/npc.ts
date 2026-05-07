@@ -11,8 +11,15 @@ export default class NPC extends Entity {
 	isAttacking: boolean = false;
 	isDying: boolean = false;
 
-	constructor(id: string, type: string = 'npc', x: number, y: number, detectionRadius: number = 96) {
-		super(id, type, x, y, 75, null);
+	constructor(
+		id: string,
+		type: string = 'npc',
+		x: number,
+		y: number,
+		parent: Entity | null,
+		detectionRadius: number = 96
+	) {
+		super(id, type, x, y, 75, parent);
 
 		this.detectionRadius = detectionRadius;
 	}

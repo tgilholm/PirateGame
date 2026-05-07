@@ -14,12 +14,17 @@ export default class NPCModel extends Model {
 		this.lastDirection = 'down';
 		this.prevX = x;
 		this.prevY = y;
+		this.setDepth(12);
 	}
 
 	postUpdate(delta, deltaTime, lerp) {
 		this.updateAnimations();
 		const pos = this.worldPos;
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
+
+		if (this.parentContainer) {
+			this.rotation = -this.parentContainer.rotation;
+		}
 	}
 
 	sync(data) {

@@ -1,15 +1,17 @@
 import { NPCShipConfig, UpgradeConfig } from '../../types';
 import Entity from '../entity';
 import Ship from '../ship';
+import NPC from './npc';
 
 export default class NPCShip extends Ship {
 	pathIndex: number = 0; // how far along the path
 	pathName: string = ''; // e.g. "ship1", which path to follow
 
-	patrolSpeed: number = 16; // how fast it moves when circling
-	detectionRadius: number = 200;
+	patrolSpeed: number = 32; // how fast it moves when circling
+	detectionRadius: number = 640;
 	target: Entity | null = null;
 	segmentT: number = 0;
+	npcs: NPC[] = [];
 
 	constructor(id: string, x: number, y: number, config: NPCShipConfig, upgradeConfig: UpgradeConfig) {
 		super(id, 'npc-ship', x, y, config, upgradeConfig); // larger detection radius
