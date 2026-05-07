@@ -110,6 +110,39 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 				this.interactables.add(entity);
 			}
+			// Show coconut tooltip for nearby palm trees
+			const coconutTooltip = document.getElementById('coconut-tooltip');
+			const coconutCount = document.getElementById('coconut-count');
+			let nearestTree = null;
+			let nearestTreeDist = Infinity;
+
+			this.models.forEach((entity) => {
+				if (entity.entityType !== 'palm-tree') return;
+				const dist = Phaser.Math.Distance.Between(
+					this.localPlayer.worldPos.x,
+					this.localPlayer.worldPos.y,
+					entity.worldPos.x,
+					entity.worldPos.y
+				);
+				if (dist < 100 && dist < nearestTreeDist) {
+					nearestTreeDist = dist;
+					nearestTree = entity;
+				}
+			});
+
+			if (nearestTree && coconutTooltip && coconutCount) {
+				// Convert world pos to screen pos
+				const cam = this.scene.cameras.main;
+				const sx = (nearestTree.worldPos.x - cam.scrollX) * cam.zoom;
+				const sy = (nearestTree.worldPos.y - cam.scrollY) * cam.zoom - 40;
+				coconutTooltip.style.display = 'block';
+				coconutTooltip.style.left = `${sx}px`;
+				coconutTooltip.style.top = `${sy}px`;
+				/** @type {any} */
+				coconutCount.textContent = nearestTree.coconuts ?? 0;
+			} else if (coconutTooltip) {
+				coconutTooltip.style.display = 'none';
+			}
 
 			entity.update(delta);
 		});
@@ -227,6 +260,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	applyDelta(delta) {
 		const model = this.models.get(delta.id);
 		if (!model) return;
+
+		if (model.entityType === 'palm-tree') {
+			/** @type {any} */
+			const tree = model;
+
+			if (delta.coconuts !== undefined && delta.coconuts < tree.coconuts) {
+				const pos = tree.worldPos;
+				this.scene.animationManager?.playLeafBurst(pos.x, pos.y);
+			}
+			if (delta.hitCount !== undefined) {
+				tree.shake();
+			}
+		}
+
 		// @ts-ignore
 		if (model instanceof PlayerModel && delta.parentId !== undefined) {
 			this.handleReparent(model, delta);
