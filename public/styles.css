@@ -132,7 +132,7 @@ input.formElement {
 .right-panel {
 	position: absolute;
 	display: flex;
-	align-items: center;
+	align-items: flex-end;
 	top: 20px;
 	right: 20px;
 	width: 220px;
