@@ -242,10 +242,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		model.sync(delta);
 
-		if (delta.id === this.playerId && delta.isSwinging && !wasSwinging) {
-			this.scene.soundManager?.playSfx('sound-sword');
-		}
-
 		if (delta.id === this.playerId && delta.activeMinigame !== undefined) {
 			if (delta.activeMinigame) this.scene.soundManager?.playSfx('sound-dig');
 			this.digMinigame.sync(delta.activeMinigame);
@@ -323,6 +319,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.scene.soundManager?.playSfx('sound-sword-hit');
 		});
 
+		this.network.on(ServerEvent.SWORD_SWING, () => {
+			this.scene.soundManager?.playSfx('sound-sword');
+		});
+
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
@@ -345,6 +345,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('interact', () => {
+			if (this.digMinigame.active) {
+				this.network.sendFire();
+				return;
+			}
 			const target = this.closestInteractable;
 			if (target?.entity) {
 				const closest = target.entity;

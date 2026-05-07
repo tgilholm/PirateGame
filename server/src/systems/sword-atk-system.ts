@@ -10,6 +10,8 @@ import Sword from '../entities/sword';
 import EntityFactory from '../entities/entity-factory';
 
 export default class SwordSystem implements BaseSystem {
+	public onSwingResult?: (attackerId: string, hitEnemy: boolean) => void;
+
 	constructor(
 		private registry: EntityRegistry,
 		private grid: SpatialGrid,
@@ -61,6 +63,7 @@ export default class SwordSystem implements BaseSystem {
 
 		const playerWorldPos = player.worldPos;
 		const nearby = this.grid.getNearby(playerWorldPos.x, playerWorldPos.y);
+		let hitEnemy = false;
 
 		nearby.forEach((id) => {
 			if (id === player.id) return;
@@ -84,12 +87,15 @@ export default class SwordSystem implements BaseSystem {
 
 			if (entity.type === 'player' || entity.type === 'npc') {
 				this.hitLivingEntity(entity as Player | NPC, player, dx, dy, dist);
+				hitEnemy = true;
 			} else if (entity.type === 'palm-tree') {
 				this.hitPalmTree(entity as PalmTree);
 			} else if (entity.type === 'barrel') {
 				this.hitBarrel(entity as Barrel, playerWorldPos);
 			}
 		});
+
+		this.onSwingResult?.(player.id, hitEnemy);
 	}
 
 	private hitLivingEntity(entity: Player | NPC, attacker: Player, dx: number, dy: number, dist: number): void {
