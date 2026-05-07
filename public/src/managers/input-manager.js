@@ -45,6 +45,9 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 		scene.input.keyboard.on('keydown-SHIFT', () => this.emit('dash'));
 		scene.input.keyboard.on('keydown-ESC', () => this.emit('settings'));
 
+		const settingsButton = document.getElementById('settings-button');
+		settingsButton.addEventListener('click', () => this.emit('settings'));
+
 		scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			this.emit('zoom', deltaY);
 		});

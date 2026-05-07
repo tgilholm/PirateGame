@@ -179,6 +179,9 @@ export class StartScene extends Phaser.Scene {
 		const gold = document.getElementById('gold-counter');
 		if (gold) gold.style.display = 'none';
 
+		const settingsBtn = document.getElementById('settings-button');
+		if (settingsBtn) settingsBtn.style.display = 'none';
+
 		// Add the animated background
 		this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
 

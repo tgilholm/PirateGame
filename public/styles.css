@@ -493,6 +493,26 @@ h2 {
 	background: deepskyblue;
 }
 
+#settings-button {
+	position: relative;
+	z-index: 1000;
+	display: none;
+	width: 100%;
+	background: rgba(13, 47, 79, 0.5);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.6);
+	border-radius: 4px;
+	padding: 5px 0;
+	font-size: 20px;
+	cursor: pointer;
+	margin-top: 8px;
+	pointer-events: all;
+}
+
+#settings-button:hover {
+	background: rgba(65, 105, 225, 0.7);
+}
+
 #boost-bar-container {
 	position: fixed;
 	bottom: 120px;
@@ -519,4 +539,43 @@ h2 {
 	border-color: #ffd700 !important;
 	transform: scale(1.2);
 	box-shadow: 0 0 8px #ffd700;
+}
+
+/*---settings button---*/
+
+#settings-button {
+	position: relative;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 120px;
+	height: 40px;
+	gap: 8px;
+	color: white;
+	font-family: 'VT323', monospace;
+	font-size: 18px;
+	font-weight: bold;
+	border: 1px solid #ffffff;
+	border-radius: 4px;
+	padding: 6px 12px;
+	background: rgba(13, 47, 79, 0.5);
+	pointer-events: auto;
+	cursor: pointer;
+	user-select: none;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
+	margin-top: 8px;
+}
+
+#settings-button:hover {
+	background: rgba(30, 90, 140, 0.75);
+	border-color: #aad4ff;
+	color: #aad4ff;
+}
+
+#settings-button button {
+	all: unset;
+	cursor: pointer;
 }
