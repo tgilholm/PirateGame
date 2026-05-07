@@ -1,6 +1,4 @@
-/**
- * manager for sound effects and music, sounds preloaded in start-scene
- */
+//manager for sound effects and music, sounds preloaded in start-scene
 export default class SoundManager {
 	/**
 	 * @param {Phaser.Scene} scene
@@ -21,23 +19,24 @@ export default class SoundManager {
 		this.registerSounds();
 	}
 
-	/**
-	 * all sounds
-	 */
+	//all sounds
 	registerSounds() {
-		const soundList = [{ key: 'sound-cannon' }, { key: 'sound-gun' }];
+		const config = this.scene.cache.json.get('volume-config') ?? { sfx: {}, music: {} };
 
-		const musicList = [{ key: 'music-start' }, { key: 'music-main' }];
+		const soundList = ['sound-cannon', 'sound-gun', 'sound-dig', 'sound-climb', 'sound-yell'];
+		const musicList = ['music-start', 'music-main'];
 
-		soundList.forEach(({ key }) => {
+		soundList.forEach((key) => {
 			if (this.scene.cache.audio.has(key)) {
-				this.sounds.set(key, this.scene.sound.add(key, { volume: this.sfxVolume }));
+				const vol = (config.sfx[key] ?? 1) * this.sfxVolume;
+				this.sounds.set(key, this.scene.sound.add(key, { volume: vol }));
 			}
 		});
 
-		musicList.forEach(({ key }) => {
+		musicList.forEach((key) => {
 			if (this.scene.cache.audio.has(key)) {
-				this.sounds.set(key, this.scene.sound.add(key, { volume: this.musicVolume, loop: true }));
+				const vol = (config.music[key] ?? 0.5) * this.musicVolume;
+				this.sounds.set(key, this.scene.sound.add(key, { volume: vol, loop: true }));
 			}
 		});
 	}
@@ -56,9 +55,11 @@ export default class SoundManager {
 			return;
 		}
 
-		//set volume
-		/** @type {any} */ (sound).setVolume(this.sfxVolume * volumeScale);
-		console.log('sfx: ' + key + ' (volume: ' + (this.sfxVolume * volumeScale).toFixed(2) + ')');
+		const config = this.scene.cache.json.get('volume-config') ?? { sfx: {} };
+		const configVol = config.sfx?.[key] ?? 1;
+		const finalVol = configVol * this.sfxVolume * volumeScale;
+		/** @type {any} */ (sound).setVolume(finalVol);
+		console.log('sfx: ' + key + ' (volume: ' + finalVol.toFixed(2) + ')');
 		sound.play();
 	}
 
@@ -77,15 +78,16 @@ export default class SoundManager {
 			return;
 		}
 
-		/** @type {any} */ (music).setVolume(this.muted ? 0 : this.musicVolume);
-		console.log('music: ' + key + ' (volume: ' + this.musicVolume.toFixed(2) + ')');
+		const config = this.scene.cache.json.get('volume-config') ?? { music: {} };
+		const configVol = config.music?.[key] ?? 0.5;
+		const finalVol = this.muted ? 0 : configVol * this.musicVolume;
+		/** @type {any} */ (music).setVolume(finalVol);
+		console.log('music: ' + key + ' (volume: ' + finalVol.toFixed(2) + ')');
 		music.play();
 		this.currentMusic = music;
 	}
 
-	/**
-	 * stops music
-	 */
+	//stops music
 	stopMusic() {
 		if (this.currentMusic?.isPlaying) {
 			this.currentMusic.stop();
@@ -107,17 +109,14 @@ export default class SoundManager {
 		});
 	}
 
-	/**
-	 * mutes all audio
-	 */
+	//mutes all audio
+
 	mute() {
 		this.muted = true;
 		this.scene.sound.setMute(true);
 	}
 
-	/**
-	 * unmutes all audio
-	 */
+	//unmutes all audio
 	unmute() {
 		this.muted = false;
 		this.scene.sound.setMute(false);
