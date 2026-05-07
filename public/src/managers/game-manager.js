@@ -456,9 +456,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		}
 	}
 
-	//schedules a random yell sfx to play every 5-30 seconds
+	//schedules a random yell sfx to play every 20-100 seconds
 	scheduleYell() {
-		const delay = Phaser.Math.Between(5000, 30000);
+		const delay = Phaser.Math.Between(20000, 100000);
 		this.scene.time.delayedCall(delay, () => {
 			this.scene.soundManager?.playSfx('sound-yell');
 			this.scheduleYell();
