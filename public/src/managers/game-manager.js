@@ -349,7 +349,23 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		this.input.on('fire', () => {
 			this.network.sendFire();
-			const sfx = this.localPlayer?.parentId ? 'sound-cannon' : 'sound-gun'; //cannon sound if on ship, gun sound if not
+
+			const player = this.localPlayer;
+			if (!player) return;
+
+			if (player.isUsingCannon) {
+				const cannon = [...this.models.values()].find((m) => m.type === 'cannon' && m.userId === player.id);
+				if (!cannon || cannon.reloadTimer > 0) return;
+			} else if (player.isSteering) {
+				const anyReady = [...this.models.values()].some(
+					(m) => m.type === 'cannon' && m.parentId === player.parentId && m.reloadTimer <= 0
+				);
+				if (!anyReady) return;
+			} else if (player.reloadTimer > 0) {
+				return;
+			}
+
+			const sfx = player.parentId ? 'sound-cannon' : 'sound-gun';
 			this.scene.soundManager?.playSfx(sfx);
 		});
 

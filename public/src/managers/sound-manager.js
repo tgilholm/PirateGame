@@ -103,9 +103,13 @@ export default class SoundManager {
 		this.sfxVolume = sfx;
 		this.musicVolume = music;
 
+		const config = this.scene.cache.json.get('volume-config') ?? { sfx: {}, music: {} };
+
 		this.sounds.forEach((sound, key) => {
 			const isMusicTrack = key.startsWith('music-');
-			/** @type {any} */ (sound).setVolume(isMusicTrack ? music : sfx);
+			const baseVol = isMusicTrack ? (config.music?.[key] ?? 0.5) : (config.sfx?.[key] ?? 1);
+			const finalVol = isMusicTrack ? baseVol * music : baseVol * sfx;
+			/** @type {any} */ (sound).setVolume(finalVol);
 		});
 	}
 
