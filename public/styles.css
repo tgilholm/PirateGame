@@ -132,7 +132,7 @@ input.formElement {
 .right-panel {
 	position: absolute;
 	display: flex;
-	align-items: center;
+	align-items: flex-end;
 	top: 20px;
 	right: 20px;
 	width: 220px;
@@ -194,7 +194,7 @@ input.formElement {
 	font-family: 'VT323', monospace;
 	font-size: 22px;
 	font-weight: bold;
-	border: 1px solid #ffd700;
+	border: 1px solid rgb(76, 85, 255);
 	border-radius: 4px;
 	padding: 6px 12px;
 	margin-top: 8px;
@@ -281,7 +281,7 @@ h2 {
 	width: 100%;
 	height: 24px;
 	background: rgba(20, 20, 20, 0.9);
-	border: 2px solid white;
+	border: 2px solid rgb(76, 85, 255);
 	border-radius: 12px;
 	overflow: hidden;
 }
@@ -411,6 +411,108 @@ h2 {
 	background: deepskyblue;
 }
 
+/* ---- Settings Menu ---- */
+#settings-menu {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 2000;
+	background: rgba(13, 47, 79, 0.97);
+	border: 1px solid rgb(76, 85, 255);
+	border-radius: 8px;
+	padding: 24px 28px;
+	min-width: 340px;
+	max-width: 90vw;
+}
+
+.settings-title {
+	font-size: 18px;
+	text-align: center;
+	margin-bottom: 16px;
+	border-bottom: 1px solid #ffffff55;
+	padding-bottom: 8px;
+	color: #fff;
+}
+
+.settings-section-title {
+	font-size: 13px;
+	color: #aad4ff;
+	margin-bottom: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.settings-section {
+	margin-bottom: 16px;
+}
+
+.settings-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 10px;
+}
+
+.settings-label {
+	width: 52px;
+	font-size: 12px;
+	color: #fff;
+	flex-shrink: 0;
+}
+
+.settings-slider {
+	flex: 1;
+	accent-color: royalblue;
+	cursor: pointer;
+	height: 4px;
+}
+
+.settings-value {
+	width: 40px;
+	text-align: right;
+	font-size: 12px;
+	color: #ffd700;
+	flex-shrink: 0;
+}
+
+#settings-close-button {
+	width: 100%;
+	background: royalblue;
+	color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	padding: 5px 8px;
+	font-size: 11px;
+	font-family: inherit;
+	cursor: pointer;
+	margin-top: 4px;
+}
+
+#settings-close-button:hover {
+	background: deepskyblue;
+}
+
+#settings-button {
+	position: relative;
+	z-index: 1000;
+	display: none;
+	width: 100%;
+	background: rgba(13, 47, 79, 0.5);
+	color: #fff;
+	border: 1px solid rgba(255, 255, 255, 0.6);
+	border-radius: 4px;
+	padding: 5px 0;
+	font-size: 20px;
+	cursor: pointer;
+	margin-top: 8px;
+	pointer-events: all;
+}
+
+#settings-button:hover {
+	background: rgba(65, 105, 225, 0.7);
+}
+
 #boost-bar-container {
 	position: fixed;
 	bottom: 120px;
@@ -439,14 +541,41 @@ h2 {
 	box-shadow: 0 0 8px #ffd700;
 }
 
-#coconut-tooltip-inner {
-	background: rgba(13, 47, 79, 0.85);
-	border: 1px solid rgba(255, 255, 255, 0.5);
-	border-radius: 4px;
-	padding: 2px 8px;
+/*---settings button---*/
+
+#settings-button {
+	position: relative;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 40px;
+	gap: 8px;
+	color: white;
 	font-family: 'VT323', monospace;
 	font-size: 18px;
-	color: #fff;
-	white-space: nowrap;
-	transform: translate(-50%, -100%);
+	font-weight: bold;
+	border: 1px solid #ffffff;
+	border-radius: 4px;
+	padding: 6px 12px;
+	background: rgba(13, 47, 79, 0.5);
+	pointer-events: auto;
+	cursor: pointer;
+	user-select: none;
+	transition:
+		background 0.15s ease,
+		border-color 0.15s ease;
+	margin-bottom: 8px;
+}
+
+#settings-button:hover {
+	background: rgba(30, 90, 140, 0.75);
+	border-color: #aad4ff;
+	color: #aad4ff;
+}
+
+#settings-button button {
+	all: unset;
+	cursor: pointer;
 }

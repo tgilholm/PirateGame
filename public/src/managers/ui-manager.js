@@ -58,6 +58,9 @@ export default class UIManager {
 		this.goldCounter = document.getElementById('gold-counter');
 		this.goldCounter.style.display = 'flex';
 
+		const settingsButton = document.getElementById('settings-button');
+		if (settingsButton) settingsButton.style.display = 'block';
+
 		this.currentInteractable = null;
 
 		this.lastGold = null;

@@ -284,6 +284,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.handleTreasureReparent(model, delta); // <--
 		}
 
+		//captures wasSwinging before sync updates
+		const wasSwinging = delta.id === this.playerId && model instanceof PlayerModel ? model.wasSwinging : false;
+		const prevGold = delta.id === this.playerId && model instanceof PlayerModel ? model.gold : 0;
 		if (model.entityType === 'npc' && delta.parentId !== undefined) {
 			this.handleNPCReparent(model, delta); // <--
 		}
@@ -291,7 +294,12 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		model.sync(delta);
 
 		if (delta.id === this.playerId && delta.activeMinigame !== undefined) {
+			if (delta.activeMinigame) this.scene.soundManager?.playSfx('sound-dig');
 			this.digMinigame.sync(delta.activeMinigame);
+		}
+
+		if (delta.id === this.playerId && delta.gold !== undefined && delta.gold > prevGold) {
+			this.scene.soundManager?.playSfx('sound-pickup-money');
 		}
 
 		if (delta.upgrades !== undefined && delta.id === this.localPlayer.shipId) {
@@ -358,6 +366,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.digMinigame.stop();
 		});
 
+		this.network.on(ServerEvent.SWORD_HIT, () => {
+			this.scene.soundManager?.playSfx('sound-sword-hit');
+		});
+
+		this.network.on(ServerEvent.SWORD_SWING, () => {
+			this.scene.soundManager?.playSfx('sound-sword');
+		});
+
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
@@ -380,6 +396,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('interact', () => {
+			if (this.digMinigame.active) {
+				this.network.sendFire();
+				return;
+			}
 			const target = this.closestInteractable;
 			if (target?.entity) {
 				const closest = target.entity;
@@ -400,6 +420,24 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		this.input.on('fire', () => {
 			this.network.sendFire();
+
+			const player = this.localPlayer;
+			if (!player) return;
+
+			if (player.isUsingCannon) {
+				const cannon = [...this.models.values()].find((m) => m.type === 'cannon' && m.userId === player.id);
+				if (!cannon || cannon.reloadTimer > 0) return;
+			} else if (player.isSteering) {
+				const anyReady = [...this.models.values()].some(
+					(m) => m.type === 'cannon' && m.parentId === player.parentId && m.reloadTimer <= 0
+				);
+				if (!anyReady) return;
+			} else if (player.reloadTimer > 0) {
+				return;
+			}
+
+			const sfx = player.isUsingCannon || player.isSteering ? 'sound-cannon' : 'sound-gun';
+			this.scene.soundManager?.playSfx(sfx);
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
@@ -420,6 +458,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	handleReparent(player, data) {
 		if (player.parentId === data.parentId) return;
 		this.closestInteractable = null; // reset closest interactable
+		if (player.id === this.playerId) this.scene.soundManager?.playSfx('sound-climb');
 
 		const ship = data.parentId ? this.models.get(data.parentId) : null;
 
@@ -469,7 +508,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	}
 
 	/**
-	 * Finds and assigns the local player when they have joined
+	 *finds and assigns the local player when they have joined
 	 */
 	resolveLocalPlayer() {
 		if (this.localPlayer || !this.playerId) return;
@@ -479,7 +518,17 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			// @ts-ignore
 			this.localPlayer = mine;
 			this.emit('localPlayerReady', this.localPlayer);
+			this.scheduleYell();
 		}
+	}
+
+	//schedules a random yell sfx to play every 20-100 seconds
+	scheduleYell() {
+		const delay = Phaser.Math.Between(20000, 100000);
+		this.scene.time.delayedCall(delay, () => {
+			this.scene.soundManager?.playSfx('sound-yell');
+			this.scheduleYell();
+		});
 	}
 
 	// destroy game manager

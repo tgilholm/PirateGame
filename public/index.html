@@ -193,6 +193,7 @@
 
 			<div class="right-panel" id="right-panel">
 				<!--Active Player Container-->
+				<button id="settings-button" title="Settings" style="display: none">Settings</button>
 				<div id="players-panel" style="display: none">
 					<div class="players-title">Players Online</div>
 					<ol id="players-list"></ol>
@@ -205,12 +206,31 @@
 				<div class="shop-grid"></div>
 				<button id="shop-close-button">Close</button>
 			</div>
+
+			<div id="settings-menu" style="display: none">
+				<h2 class="settings-title">Settings</h2>
+				<div class="settings-section">
+					<h3 class="settings-section-title">Volume</h3>
+					<div class="settings-row">
+						<label for="music-slider" class="settings-label">Music</label>
+						<input type="range" id="music-slider" class="settings-slider" min="0" max="100" value="100" />
+						<span id="music-value" class="settings-value">100%</span>
+					</div>
+					<div class="settings-row">
+						<label for="sfx-slider" class="settings-label">SFX</label>
+						<input type="range" id="sfx-slider" class="settings-slider" min="0" max="100" value="100" />
+						<span id="sfx-value" class="settings-value">100%</span>
+					</div>
+				</div>
+				<button id="settings-close-button">Close</button>
+			</div>
+
 			<div id="dig-minigame" style="display: none">
 				<div id="dig-bar">
 					<div id="dig-success-zone"></div>
 					<div id="dig-slider"></div>
 				</div>
-				<div id="dig-label">Press Space in the green zone</div>
+				<div id="dig-label">Press E in the green zone</div>
 			</div>
 			<div id="boost-bar-container" style="display: none">
 				<div id="boost-bar-fill"></div>

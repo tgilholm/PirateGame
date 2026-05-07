@@ -82,6 +82,14 @@ export default class SocketService {
 			this.io.to(id).emit(ServerEvent.SUNK, id);
 		});
 
+		this.world.on(WorldEvent.SWORD_HIT, (attackerId: string) => {
+			this.io.to(attackerId).emit(ServerEvent.SWORD_HIT);
+		});
+
+		this.world.on(WorldEvent.SWORD_SWING, (attackerId: string) => {
+			this.io.to(attackerId).emit(ServerEvent.SWORD_SWING);
+		});
+
 		// Handle new clients
 		this.io.on('connection', (socket: Socket) => {
 			console.log(`[SocketService] Client connected: ${socket.id}`);

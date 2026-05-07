@@ -1,3 +1,4 @@
+import SoundManager from '../managers/sound-manager.js';
 /**
  * The "landing page" for users to the game. Features a dynamic background and title
  * and routes users to the main scene.
@@ -126,6 +127,21 @@ export class StartScene extends Phaser.Scene {
 		this.load.spritesheet('barrel-hit', '/assets/barrel-hit.png', { frameWidth: 32, frameHeight: 32 });
 		this.load.spritesheet('barrel-break', '/assets/barrel-break.png', { frameWidth: 32, frameHeight: 32 });
 
+		//audio placeholders
+		this.load.audio('music-start', 'assets/music-start.mp3');
+		this.load.audio('music-main', 'assets/music-main.mp3');
+		this.load.audio('music-waves', 'assets/music-waves.mp3');
+		this.load.audio('sound-cannon', 'assets/sound-cannon.mp3');
+		this.load.audio('sound-gun', 'assets/sound-gun.mp3');
+		this.load.audio('sound-dig', 'assets/sound-dig.mp3');
+		this.load.audio('sound-climb', 'assets/sound-climb.mp3');
+		this.load.audio('sound-yell', 'assets/sound-yell.mp3');
+		this.load.audio('sound-sword', 'assets/sound-sword.mp3');
+		this.load.audio('sound-sword-hit', 'assets/sound-sword-hit.mp3');
+		this.load.audio('sound-pickup-money', 'assets/sound-pickup-money.mp3');
+		this.load.json('volume-config', 'src/managers/volume-config.json');
+		this.load.json('settings-config', 'src/managers/settings-config.json');
+
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();
 		ball.fillStyle(0x222222, 1);
@@ -154,6 +170,9 @@ export class StartScene extends Phaser.Scene {
 		this.resetUI();
 		this.input.keyboard.disableGlobalCapture(); // stop key events going to the game instead of the form
 
+		this.soundManager = new SoundManager(this);
+		this.soundManager.playMusic('music-start');
+
 		// To shortcut the start scene, uncomment the below text
 		// let inputText = document.getElementById('input-text');
 		// // @ts-ignore
@@ -166,6 +185,9 @@ export class StartScene extends Phaser.Scene {
 
 		const gold = document.getElementById('gold-counter');
 		if (gold) gold.style.display = 'none';
+
+		const settingsBtn = document.getElementById('settings-button');
+		if (settingsBtn) settingsBtn.style.display = 'none';
 
 		// Add the animated background
 		this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
@@ -238,6 +260,8 @@ export class StartScene extends Phaser.Scene {
 		let username = inputText.value;
 		if (username) // not null or empty
 		{
+			this.soundManager.stopMusic();
+
 			// Hide the form before continuing
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';

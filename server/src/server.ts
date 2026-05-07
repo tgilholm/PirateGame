@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import SocketService from './application/socket-service';
 import { CONFIG } from './config';
-import GameWorld from './application/game-world';
+import GameWorld, { WorldEvent } from './application/game-world';
 import EntityRegistry from './engine/entity-registry';
 import EntityFactory from './entities/entity-factory';
 import entityConfig from '../../shared/entity-config.json';
@@ -120,6 +120,10 @@ const gameWorld = new GameWorld(
 	sessionHandler
 );
 const socketService = new SocketService(io, gameWorld);
+
+swordSystem.onSwingResult = (attackerId, hitEnemy) => {
+	gameWorld.emit(hitEnemy ? WorldEvent.SWORD_HIT : WorldEvent.SWORD_SWING, attackerId);
+};
 
 socketService.initialise();
 

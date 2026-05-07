@@ -12,6 +12,8 @@ export enum ServerEvent {
 	DIG_MINIGAME_RESULT = 'DIG_MINIGAME_RESULT',
 	DEAD = 'DEAD',
 	SUNK = 'SUNK',
+	SWORD_HIT = 'SWORD_HIT',
+	SWORD_SWING = 'SWORD_SWING',
 }
 
 export enum ClientEvent {
