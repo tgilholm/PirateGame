@@ -194,7 +194,7 @@ input.formElement {
 	font-family: 'VT323', monospace;
 	font-size: 22px;
 	font-weight: bold;
-	border: 1px solid #ffd700;
+	border: 1px solid rgb(76, 85, 255);
 	border-radius: 4px;
 	padding: 6px 12px;
 	margin-top: 8px;
@@ -281,7 +281,7 @@ h2 {
 	width: 100%;
 	height: 24px;
 	background: rgba(20, 20, 20, 0.9);
-	border: 2px solid white;
+	border: 2px solid rgb(76, 85, 255);
 	border-radius: 12px;
 	overflow: hidden;
 }
@@ -419,7 +419,7 @@ h2 {
 	transform: translate(-50%, -50%);
 	z-index: 2000;
 	background: rgba(13, 47, 79, 0.97);
-	border: 1px solid #fff;
+	border: 1px solid rgb(76, 85, 255);
 	border-radius: 8px;
 	padding: 24px 28px;
 	min-width: 340px;
@@ -549,7 +549,7 @@ h2 {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 120px;
+	width: 100%;
 	height: 40px;
 	gap: 8px;
 	color: white;
@@ -566,7 +566,7 @@ h2 {
 	transition:
 		background 0.15s ease,
 		border-color 0.15s ease;
-	margin-top: 8px;
+	margin-bottom: 8px;
 }
 
 #settings-button:hover {
