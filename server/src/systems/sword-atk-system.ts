@@ -83,6 +83,7 @@ export default class SwordSystem implements BaseSystem {
 			while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
 			while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
 
+			if (dist < 1) return; //
 			if (Math.abs(angleDiff) > Sword.ARC / 2) return;
 
 			if (entity.type === 'player' || entity.type === 'npc') {
@@ -130,15 +131,19 @@ export default class SwordSystem implements BaseSystem {
 	}
 
 	private hitPalmTree(tree: PalmTree): void {
+		if (tree.coconuts <= 0) return;
+
 		tree.hitCount++;
-		if (tree.hitCount >= tree.treeHealth && tree.coconuts > 0) {
+		tree.markDirty();
+
+		if (tree.hitCount >= tree.treeHealth) {
 			tree.hitCount = 0;
 			tree.coconuts--;
 			tree.markDirty();
 
-			// Spawn coconut near tree with slight randomness
-			const offsetX = (Math.random() - 0.5) * 60;
-			const offsetY = (Math.random() - 0.5) * 60;
+			// Spawn near the base of the trunk, not the center
+			const offsetX = (Math.random() - 0.5) * 30;
+			const offsetY = 20 + Math.random() * 15; // push down toward base
 			this.factory.createCoconut(`coconut_${tree.id}_${Date.now()}`, tree.x + offsetX, tree.y + offsetY, tree.id);
 		}
 	}

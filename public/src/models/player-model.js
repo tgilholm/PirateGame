@@ -46,6 +46,7 @@ export default class PlayerModel extends Model {
 		this.shootDuration = 200; //  how long the shoot anim plays
 		this.swingAnimTimer = 0;
 		this.swingAnimDuration = 300;
+		this.setDepth(10);
 
 		this.nameText = scene.add
 			.text(0, -16, '', {

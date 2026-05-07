@@ -19,6 +19,7 @@ export default class PalmTree extends Interactable {
 		return {
 			...super.toState(),
 			coconuts: this.coconuts,
+			hitCount: this.hitCount,
 		};
 	}
 }

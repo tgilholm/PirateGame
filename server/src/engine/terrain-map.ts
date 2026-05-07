@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { buildPathSpline } from '../utils/catmull-rom';
 import { getTilesetFromLayer, getObjectsFromLayer } from '../utils/tiles';
-import { buildPathSpline } from '../utils/splines';
 
 /**
  * Breaks down a tilemap into its constituent layers, as well as providing helper methods

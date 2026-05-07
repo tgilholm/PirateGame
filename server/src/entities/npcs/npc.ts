@@ -9,9 +9,17 @@ export default class NPC extends Entity {
 	attackDamage: number = 20; // roughly 5-hit a player
 	attackRange: number = 8;
 	isAttacking: boolean = false;
+	isDying: boolean = false;
 
-	constructor(id: string, type: string = 'npc', x: number, y: number, detectionRadius: number = 96) {
-		super(id, type, x, y, 75, null);
+	constructor(
+		id: string,
+		type: string = 'npc',
+		x: number,
+		y: number,
+		parent: Entity | null,
+		detectionRadius: number = 96
+	) {
+		super(id, type, x, y, 75, parent);
 
 		this.detectionRadius = detectionRadius;
 	}
@@ -24,6 +32,7 @@ export default class NPC extends Entity {
 		return {
 			...super.toState(),
 			isAttacking: this.isAttacking,
+			isDying: this.isDying,
 		};
 	}
 }
