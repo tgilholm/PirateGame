@@ -187,22 +187,27 @@ export default class NPCSystem implements BaseSystem {
 	}
 
 	reap(npc: NPC) {
-		if (npc.health <= 0) {
-			this.spatialGrid.remove(npc.id);
-			this.entityRegistry.delete(npc.id);
+		if (npc.health <= 0 && !npc.isDying) {
+			npc.isDying = true; // flag to prevent double-reap
+			npc.markDirty(); // tell client to play death anim
 
-			if (npc instanceof NPCShip) {
-				this.npcShipPaths.delete(npc.pathName);
-			}
+			// Delay removal to let death animation finish (~1 second)
+			setTimeout(() => {
+				this.spatialGrid.remove(npc.id);
+				this.entityRegistry.delete(npc.id);
 
-			// Spawn money stack at the death point
-			const money = this.entityFactory.createInteractable(
-				npc.parent as Ship | null,
-				{ type: 'money', x: npc.x, y: npc.y },
-				npc.id
-			) as Money;
+				if (npc instanceof NPCShip) {
+					this.npcShipPaths.delete(npc.pathName);
+				}
 
-			money.value = Math.floor(Math.random() * 100) + (npc instanceof NPCShip ? 5000 : 50); // avoid floating point money
+				const money = this.entityFactory.createInteractable(
+					npc.parent as Ship | null,
+					{ type: 'money', x: npc.x, y: npc.y },
+					npc.id
+				) as Money;
+
+				money.value = Math.floor(Math.random() * 100) + (npc instanceof NPCShip ? 5000 : 50);
+			}, 1000); // match skeleton death anim duration
 		}
 	}
 

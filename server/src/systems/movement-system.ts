@@ -163,7 +163,8 @@ export default class MovementSystem implements BaseSystem {
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
-				this.checkShopObstacles(x, y, shops, playerConfig.radius);
+				this.checkShopObstacles(x, y, shops, playerConfig.radius) ||
+				this.checkPalmTreeObstacles(x, y, playerConfig.radius);
 
 			if (!isColliding(nextX, nextY)) {
 				player.x = nextX;
@@ -243,7 +244,9 @@ export default class MovementSystem implements BaseSystem {
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
-				this.checkShopObstacles(x, y, shops, playerConfig.radius);
+				this.checkShopObstacles(x, y, shops, playerConfig.radius) ||
+				this.checkPalmTreeObstacles(x, y, playerConfig.radius) ||
+				this.checkBarrelObstacles(x, y, playerConfig.radius);
 
 			if (!isColliding(nextWorldX, nextWorldY)) {
 				player.x = nextWorldX;
@@ -339,6 +342,28 @@ export default class MovementSystem implements BaseSystem {
 			const radiusSum = playerRadius + s.radius;
 
 			if (distanceSquared < radiusSum * radiusSum) return true;
+		}
+		return false;
+	}
+
+	private checkPalmTreeObstacles(x: number, y: number, playerRadius: number): boolean {
+		const trees = this.registry.getByType('palm-tree');
+		const TREE_RADIUS = 12;
+		for (const tree of trees) {
+			const dx = x - tree.x;
+			const dy = y - tree.y;
+			if (dx * dx + dy * dy < (TREE_RADIUS + playerRadius) ** 2) return true;
+		}
+		return false;
+	}
+
+	private checkBarrelObstacles(x: number, y: number, playerRadius: number): boolean {
+		const barrel = this.registry.getByType('barrel');
+		const BARREL_RADIUS = 12;
+		for (const barrels of barrel) {
+			const dx = x - barrels.x;
+			const dy = y - barrels.y;
+			if (dx * dx + dy * dy < (BARREL_RADIUS + playerRadius) ** 2) return true;
 		}
 		return false;
 	}

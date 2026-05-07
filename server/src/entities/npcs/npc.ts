@@ -9,6 +9,7 @@ export default class NPC extends Entity {
 	attackDamage: number = 20; // roughly 5-hit a player
 	attackRange: number = 8;
 	isAttacking: boolean = false;
+	isDying: boolean = false;
 
 	constructor(
 		id: string,
@@ -31,6 +32,7 @@ export default class NPC extends Entity {
 		return {
 			...super.toState(),
 			isAttacking: this.isAttacking,
+			isDying: this.isDying,
 		};
 	}
 }

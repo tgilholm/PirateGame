@@ -27,6 +27,12 @@ export default class NPCModel extends Model {
 		}
 	}
 
+	sync(data) {
+		super.sync(data);
+		if (data.isAttacking !== undefined) this.isAttacking = data.isAttacking;
+		if (data.isDying !== undefined) this.isDying = data.isDying;
+	}
+
 	updateAnimations() {
 		const dx = this.x - this.prevX;
 		const dy = this.y - this.prevY;
@@ -34,13 +40,17 @@ export default class NPCModel extends Model {
 		this.prevY = this.y;
 		const speed = Math.sqrt(dx * dx + dy * dy);
 
-		if (this.isAttacking) {
-			this.playAnim(`skelly-${this.lastDirection}-attack`);
-			return;
+		// Death takes priority and locks all other animations
+		if (this.isDying || this.isDead) {
+			const deathKey = `skelly-${this.lastDirection}-death`;
+			if (this.lastAnim !== deathKey) {
+				this.playAnim(`skelly-${this.lastDirection}-death`);
+			}
+			return; // nothing overrides death
 		}
 
-		if (this.isDead) {
-			this.playAnim(`skelly-${this.lastDirection}-death`);
+		if (this.isAttacking) {
+			this.playAnim(`skelly-${this.lastDirection}-attack`);
 			return;
 		}
 
@@ -50,17 +60,9 @@ export default class NPCModel extends Model {
 		}
 
 		if (Math.abs(dx) > Math.abs(dy)) {
-			if (dx > 0) {
-				this.lastDirection = 'right';
-			} else {
-				this.lastDirection = 'left';
-			}
+			this.lastDirection = dx > 0 ? 'right' : 'left';
 		} else {
-			if (dy > 0) {
-				this.lastDirection = 'down';
-			} else {
-				this.lastDirection = 'up';
-			}
+			this.lastDirection = dy > 0 ? 'down' : 'up';
 		}
 
 		this.playAnim(`skelly-${this.lastDirection}-walk`);
@@ -81,10 +83,5 @@ export default class NPCModel extends Model {
 	destroy() {
 		this.healthBar?.destroy();
 		super.destroy();
-	}
-
-	sync(data) {
-		super.sync(data);
-		if (data.isAttacking !== undefined) this.isAttacking = data.isAttacking;
 	}
 }

@@ -10,6 +10,7 @@ export default class AnimationManager {
 		this.registerAnimations();
 		this.registerPlayerAnimations();
 		this.registerSkeletonAnimations();
+		this.playLeafBurst();
 	}
 
 	/**
@@ -23,13 +24,16 @@ export default class AnimationManager {
 			{ key: 'bullet-water-splash', texture: 'bullet-water-splash' },
 			{ key: 'bullet-dust-splash', texture: 'bullet-dust-splash' },
 			{ key: 'bullet-blood-splash', texture: 'bullet-blood-splash' },
+			{ key: 'leaf-fall', texture: 'leaf-ani', frameCount: 5 },
+			{ key: 'barrel-hit', texture: 'barrel-hit', start: 0, end: 1, frameRate: 6, repeat: 0 },
+			{ key: 'barrel-break', texture: 'barrel-break', start: 0, end: 10, frameRate: 24, repeat: 0 },
 		];
 
-		defs.forEach(({ key, texture }) => {
+		defs.forEach(({ key, texture, frameCount }) => {
 			if (!this.scene.anims.exists(key)) {
 				const frames = this.scene.anims.generateFrameNumbers(texture, {
 					start: 0,
-					end: 7,
+					end: frameCount ? frameCount - 1 : 7,
 				});
 
 				this.scene.anims.create({
@@ -81,6 +85,38 @@ export default class AnimationManager {
 				}
 			});
 		});
+	}
+
+	/**
+	 * Spawns several leaf sprites falling from the tree position
+	 * @param {number} x  world x of the palm tree
+	 * @param {number} y  world y of the palm tree
+	 */
+	playLeafBurst(x, y) {
+		const COUNT = 6; // how many leaves to scatter
+		for (let i = 0; i < COUNT; i++) {
+			const offsetX = (Math.random() - 0.5) * 40;
+			const sprite = this.scene.add.sprite(x + offsetX, y - 20, 'leaf-ani');
+			sprite.setDepth(20);
+			sprite.setScale(2 + Math.random()); // slight size variety
+
+			// random rotation for each leaf
+			const spin = (Math.random() - 0.5) * 0.1;
+
+			// drift downward using a tween while playing the animation
+			this.scene.tweens.add({
+				targets: sprite,
+				x: sprite.x + (Math.random() - 0.5) * 60,
+				y: sprite.y + 80 + Math.random() * 40,
+				angle: (Math.random() - 0.5) * 180,
+				alpha: 0,
+				duration: 800 + Math.random() * 400,
+				ease: 'Sine.Out',
+				onComplete: () => sprite.destroy(),
+			});
+
+			sprite.play('leaf-fall');
+		}
 	}
 
 	registerSkeletonAnimations() {
