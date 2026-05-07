@@ -1,3 +1,4 @@
+import SoundManager from '../managers/sound-manager.js';
 /**
  * The "landing page" for users to the game. Features a dynamic background and title
  * and routes users to the main scene.
@@ -119,6 +120,12 @@ export class StartScene extends Phaser.Scene {
 		this.load.image('palm-tree', '/assets/palm-tree.png');
 		this.load.image('barrel', '/assets/barrel.png');
 
+		//audio placeholders
+		this.load.audio('music-start', 'assets/music-start.mp3');
+		this.load.audio('music-main', 'assets/music-main.mp3');
+		this.load.audio('sound-cannon', 'assets/sound-cannon.mp3');
+		this.load.audio('sound-gun', 'assets/sound-gun.mp3');
+
 		// Placeholder cannonball sprite
 		const ball = this.make.graphics();
 		ball.fillStyle(0x222222, 1);
@@ -146,6 +153,9 @@ export class StartScene extends Phaser.Scene {
 	create() {
 		this.resetUI();
 		this.input.keyboard.disableGlobalCapture(); // stop key events going to the game instead of the form
+
+		this.soundManager = new SoundManager(this);
+		this.soundManager.playMusic('music-start');
 
 		// To shortcut the start scene, uncomment the below text
 		// let inputText = document.getElementById('input-text');
@@ -231,6 +241,8 @@ export class StartScene extends Phaser.Scene {
 		let username = inputText.value;
 		if (username) // not null or empty
 		{
+			this.soundManager.stopMusic();
+
 			// Hide the form before continuing
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';

@@ -348,6 +348,9 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		this.input.on('fire', () => {
 			this.network.sendFire();
+			const sfx = this.localPlayer?.parentId ? 'sound-cannon' : 'sound-gun'; //cannon shound if on ship, gun sound if not
+			const vol = this.localPlayer?.parentId ? 0.75 : 1; // cannon sound too loud
+			this.scene.soundManager?.playSfx(sfx, vol);
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
