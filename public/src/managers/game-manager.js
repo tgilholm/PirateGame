@@ -365,7 +365,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 				return;
 			}
 
-			const sfx = player.parentId ? 'sound-cannon' : 'sound-gun';
+			const sfx = player.isUsingCannon || player.isSteering ? 'sound-cannon' : 'sound-gun';
 			this.scene.soundManager?.playSfx(sfx);
 		});
 
