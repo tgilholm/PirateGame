@@ -23,8 +23,17 @@ export default class SoundManager {
 	registerSounds() {
 		const config = this.scene.cache.json.get('volume-config') ?? { sfx: {}, music: {} };
 
-		const soundList = ['sound-cannon', 'sound-gun', 'sound-dig', 'sound-climb', 'sound-yell'];
-		const musicList = ['music-start', 'music-main'];
+		const soundList = [
+			'sound-cannon',
+			'sound-gun',
+			'sound-dig',
+			'sound-climb',
+			'sound-yell',
+			'sound-pickup-money',
+			'sound-sword',
+			'sound-sword-hit',
+		];
+		const musicList = ['music-start', 'music-main', 'music-waves'];
 
 		soundList.forEach((key) => {
 			if (this.scene.cache.audio.has(key)) {

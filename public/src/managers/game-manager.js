@@ -236,11 +236,23 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.handleTreasureReparent(model, delta); // <--
 		}
 
+		//captures wasSwinging before sync updates
+		const wasSwinging = delta.id === this.playerId && model instanceof PlayerModel ? model.wasSwinging : false;
+		const prevGold = delta.id === this.playerId && model instanceof PlayerModel ? model.gold : 0;
+
 		model.sync(delta);
+
+		if (delta.id === this.playerId && delta.isSwinging && !wasSwinging) {
+			this.scene.soundManager?.playSfx('sound-sword');
+		}
 
 		if (delta.id === this.playerId && delta.activeMinigame !== undefined) {
 			if (delta.activeMinigame) this.scene.soundManager?.playSfx('sound-dig');
 			this.digMinigame.sync(delta.activeMinigame);
+		}
+
+		if (delta.id === this.playerId && delta.gold !== undefined && delta.gold > prevGold) {
+			this.scene.soundManager?.playSfx('sound-pickup-money');
 		}
 
 		if (delta.upgrades !== undefined && delta.id === this.localPlayer.shipId) {
@@ -305,6 +317,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		this.network.on(ServerEvent.DIG_MINIGAME_RESULT, () => {
 			this.digMinigame.stop();
+		});
+
+		this.network.on(ServerEvent.SWORD_HIT, () => {
+			this.scene.soundManager?.playSfx('sound-sword-hit');
 		});
 
 		// Delta packet: full for new models and known models that have changed

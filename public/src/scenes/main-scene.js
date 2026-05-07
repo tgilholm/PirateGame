@@ -71,6 +71,8 @@ export class MainScene extends Phaser.Scene {
 		this.animationManager = new AnimationManager(this);
 		this.soundManager = new SoundManager(this);
 		this.soundManager.playMusic('music-main');
+		const wavesSound = this.soundManager.sounds.get('music-waves');
+		if (wavesSound) wavesSound.play();
 
 		const settingsConfig = this.cache.json.get('settings-config') ?? { sfx: 1.0, music: 1.0 };
 		this.settingsUI = new SettingsUI(this.soundManager, settingsConfig);

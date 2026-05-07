@@ -1,13 +1,16 @@
 {
 	"sfx": {
 		"sound-cannon": 0.5,
-		"sound-gun": 1.0,
+		"sound-gun": 0.3,
 		"sound-dig": 1.0,
-		"sound-climb": 1.0,
-		"sound-yell": 1.0
+		"sound-climb": 0.5,
+		"sound-yell": 0.5,
+		"sound-sword": 1.0,
+		"sound-sword-hit": 1.0
 	},
 	"music": {
 		"music-start": 0.5,
-		"music-main": 0.5
+		"music-main": 0.4,
+		"music-waves": 0.4
 	}
 }
