@@ -21,6 +21,10 @@ export default class NPCModel extends Model {
 		this.updateAnimations();
 		const pos = this.worldPos;
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
+
+		if (this.parentContainer) {
+			this.rotation = -this.parentContainer.rotation;
+		}
 	}
 
 	updateAnimations() {

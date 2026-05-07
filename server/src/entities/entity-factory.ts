@@ -160,10 +160,7 @@ export default class EntityFactory {
 		});
 
 		this.npcShipConfig.npcs.forEach((item, index) => {
-			const pos = npcShip.localToWorld(item.x, item.y);
-			const npc = this.createNPC(`${npcShip.id}_npc${index}`, pos.x, pos.y, npcShip);
-
-			console.log(`npc ${npc.id}  created at ${npc.x}, ${npc.y}`);
+			const npc = this.createNPC(`${npcShip.id}_npc${index}`, item.x, item.y, npcShip);
 		});
 
 		return npcShip;

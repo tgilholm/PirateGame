@@ -425,20 +425,19 @@ export default class MovementSystem implements BaseSystem {
 		const target = npc.target;
 		const parent = npc.parent as NPCShip | null;
 
+		if (!target) {
+			return;
+		}
+
 		const npcWorld = parent ? parent.localToWorld(npc.x, npc.y) : { x: npc.x, y: npc.y };
 
-		let nextWorldX = npcWorld.x;
-		let nextWorldY = npcWorld.y;
+		const targetWorld = target.parent
+			? (target.parent as Ship).localToWorld(target.x, target.y)
+			: { x: target.x, y: target.y };
 
-		if (target) {
-			const targetWorld = target.parent
-				? (target.parent as Ship).localToWorld(target.x, target.y)
-				: { x: target.x, y: target.y };
-
-			const angle = Math.atan2(targetWorld.y - npcWorld.y, targetWorld.x - npcWorld.x);
-			nextWorldX += Math.cos(angle) * npc.speed * dt;
-			nextWorldY += Math.sin(angle) * npc.speed * dt;
-		}
+		const angle = Math.atan2(targetWorld.y - npcWorld.y, targetWorld.x - npcWorld.x);
+		const nextWorldX = npcWorld.x + Math.cos(angle) * npc.speed * dt;
+		const nextWorldY = npcWorld.y + Math.sin(angle) * npc.speed * dt;
 
 		if (parent) {
 			const newLocal = parent.worldToLocal(nextWorldX, nextWorldY);
@@ -448,12 +447,9 @@ export default class MovementSystem implements BaseSystem {
 				npc.x = newLocal.x;
 				npc.y = newLocal.y;
 			} else {
-				// Slide logic: try moving only X or only Y in local space
-				const slideX = parent.isInside(newLocal.x, npc.y, padding) ? newLocal.x : npc.x;
-				const slideY = parent.isInside(npc.x, newLocal.y, padding) ? newLocal.y : npc.y;
-
-				npc.x = slideX;
-				npc.y = slideY;
+				// Slide logic
+				npc.x = parent.isInside(newLocal.x, npc.y, padding) ? newLocal.x : npc.x;
+				npc.y = parent.isInside(npc.x, newLocal.y, padding) ? newLocal.y : npc.y;
 			}
 		} else {
 			npc.x = nextWorldX;
@@ -461,7 +457,5 @@ export default class MovementSystem implements BaseSystem {
 		}
 
 		npc.markDirty();
-
-		console.log(npc.parent);
 	}
 }

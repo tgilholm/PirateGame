@@ -228,7 +228,7 @@ export default class NPCSystem implements BaseSystem {
 	}
 
 	attackTarget(npc: NPC, target: Entity | null) {
-		if (!target) return;
+		if (!target || npc.parent !== target.parent) return;
 
 		const dist = Math.hypot(npc.x - target.x, npc.y - target.y);
 

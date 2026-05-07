@@ -217,6 +217,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		// @ts-ignore reparent the player if they left a ship
 		if (data.type === 'player') this.handleReparent(model, data);
 		if (data.type === 'treasure') this.handleTreasureReparent(model, data);
+		if (data.type === 'npc') this.handleNPCReparent(model, data);
 		model.sync(data);
 	}
 
@@ -234,6 +235,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		if (model.entityType === 'treasure' && delta.parentId !== undefined) {
 			this.handleTreasureReparent(model, delta); // <--
+		}
+
+		if (model.entityType === 'npc' && delta.parentId !== undefined) {
+			this.handleNPCReparent(model, delta); // <--
 		}
 
 		model.sync(delta);
@@ -399,6 +404,21 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		}
 
 		treasure.parentId = newParentId;
+	}
+
+	handleNPCReparent(npc, data) {
+		const newParentId = data.parentId ?? null;
+		if (npc.parentId === newParentId) return;
+
+		const ship = newParentId ? this.models.get(newParentId) : null;
+
+		if (ship) {
+			ship.add(npc);
+		} else {
+			this.scene.add.existing(npc);
+		}
+
+		npc.parentId = newParentId;
 	}
 
 	/**
