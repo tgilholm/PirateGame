@@ -383,8 +383,6 @@ export default class MovementSystem implements BaseSystem {
 			}
 			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
-
-		if (!(ship instanceof NPCShip)) console.log(ship.id, ship.x, ship.y);
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {
@@ -424,18 +422,46 @@ export default class MovementSystem implements BaseSystem {
 	}
 
 	updateNPC(npc: NPC, dt: number) {
-		// If there is a target, continually move towards it
-		if (!npc.target) return; // <-- Remove when npcs can move independently
-
-		// Get angle to target
 		const target = npc.target;
-		const angle = Math.atan2(npc.y - target.y, npc.x - target.x);
+		const parent = npc.parent as NPCShip | null;
 
-		const dx = npc.speed * Math.cos(angle);
-		const dy = npc.speed * Math.sin(angle);
+		const npcWorld = parent ? parent.localToWorld(npc.x, npc.y) : { x: npc.x, y: npc.y };
 
-		// Move towards target
-		npc.x -= dx;
-		npc.y -= dy;
+		let nextWorldX = npcWorld.x;
+		let nextWorldY = npcWorld.y;
+
+		if (target) {
+			const targetWorld = target.parent
+				? (target.parent as Ship).localToWorld(target.x, target.y)
+				: { x: target.x, y: target.y };
+
+			const angle = Math.atan2(targetWorld.y - npcWorld.y, targetWorld.x - npcWorld.x);
+			nextWorldX += Math.cos(angle) * npc.speed * dt;
+			nextWorldY += Math.sin(angle) * npc.speed * dt;
+		}
+
+		if (parent) {
+			const newLocal = parent.worldToLocal(nextWorldX, nextWorldY);
+			const padding = 8;
+
+			if (parent.isInside(newLocal.x, newLocal.y, padding)) {
+				npc.x = newLocal.x;
+				npc.y = newLocal.y;
+			} else {
+				// Slide logic: try moving only X or only Y in local space
+				const slideX = parent.isInside(newLocal.x, npc.y, padding) ? newLocal.x : npc.x;
+				const slideY = parent.isInside(npc.x, newLocal.y, padding) ? newLocal.y : npc.y;
+
+				npc.x = slideX;
+				npc.y = slideY;
+			}
+		} else {
+			npc.x = nextWorldX;
+			npc.y = nextWorldY;
+		}
+
+		npc.markDirty();
+
+		console.log(npc.parent);
 	}
 }

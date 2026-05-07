@@ -14,6 +14,7 @@ export default class NPCModel extends Model {
 		this.lastDirection = 'down';
 		this.prevX = x;
 		this.prevY = y;
+		this.setDepth(12);
 	}
 
 	postUpdate(delta, deltaTime, lerp) {

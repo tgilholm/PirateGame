@@ -18,7 +18,7 @@
 			"mass": 600,
 			"frictionAir": 0.001,
 			"restitution": 0.2,
-			"thrust": 0.05
+			"thrust": 0.15
 		},
 		"interactables": [
 			{
@@ -108,6 +108,26 @@
 				"type": "ladder",
 				"x": -26,
 				"y": -20
+			},
+			{
+				"type": "treasure",
+				"x": 0,
+				"y": 0
+			},
+			{
+				"type": "treasure",
+				"x": 25,
+				"y": 0
+			}
+		],
+		"npcs": [
+			{
+				"x": 40,
+				"y": 0
+			},
+			{
+				"x": -26,
+				"y": 0
 			}
 		]
 	}
