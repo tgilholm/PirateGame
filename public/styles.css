@@ -461,6 +461,13 @@ h2 {
 	flex-shrink: 0;
 }
 
+.settings-keybind-label {
+	width: 250px;
+	font-size: 12px;
+	color: #fff;
+	flex-shrink: 0;
+}
+
 .settings-slider {
 	flex: 1;
 	accent-color: royalblue;
