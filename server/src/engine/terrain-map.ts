@@ -42,6 +42,7 @@ export default class TerrainMap {
 
 		// Add all the layers you need here
 		this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
+		this.mapLayers.set('buildings', getTilesetFromLayer(mapData, 'buildings') || new Set());
 
 		this.objectLayers.set('barrel-spawns', getObjectsFromLayer(mapData, 'barrel-spawns'));
 		this.objectLayers.set('palm-spawns', getObjectsFromLayer(mapData, 'palm-spawns'));
@@ -76,7 +77,8 @@ export default class TerrainMap {
 	 */
 	public isOnIsland(worldX: number, worldY: number): boolean {
 		const islandTiles = this.mapLayers.get('islands');
-		if (!islandTiles) {
+		const buildingTiles = this.mapLayers.get('buildings');
+		if (!islandTiles || !buildingTiles) {
 			console.warn(`[TerrainMap] isOnIsland check failed`);
 			return false;
 		}
@@ -85,7 +87,10 @@ export default class TerrainMap {
 		const tileX = Math.floor(worldX / this.tileWidth) * this.tileWidth + this.tileWidth / 2;
 		const tileY = Math.floor(worldY / this.tileHeight) * this.tileHeight + this.tileHeight / 2;
 
-		return islandTiles.some((tile) => tile.x === tileX && tile.y === tileY);
+		return (
+			islandTiles.some((tile) => tile.x === tileX && tile.y === tileY) ||
+			buildingTiles.some((tile) => tile.x === tileX && tile.y === tileY)
+		);
 	}
 
 	/**
