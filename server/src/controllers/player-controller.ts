@@ -191,6 +191,9 @@ export default class PlayerController {
 			player.gold = newGold;
 		}
 
+		// Remove the player from anything they are using
+		this.handleRelease(player);
+
 		player.markDirty();
 	}
 
