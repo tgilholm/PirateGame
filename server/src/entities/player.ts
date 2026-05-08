@@ -48,6 +48,12 @@ export default class Player extends Entity {
 	swingTimer: number = 0;
 	isSwinging: boolean = false;
 
+	swimmingTimer: number = 0; // Total time spent swimming (ms)
+	swimmingDamageThreshold: number = 10000; // 20 seconds before damage starts
+	swimmingDamageInterval: number = 1000; // Damage every 1 second (after threshold)
+	swimmingDamageTimer: number = 0; // Timer between damage ticks
+	swimmingDamage: number = 10; // Damage per tick
+	swimmingBubbles: number = 4; // Number of bubbles (pops every 5 seconds)
 	/**
 	 * Builds a player with the specified data
 	 * @param id the id of the player
@@ -149,6 +155,8 @@ export default class Player extends Entity {
 			swingCooldownTime: Sword.COOLDOWN,
 			isSwinging: this.isSwinging,
 			isSwimming: this.isSwimming,
+			swimmingTimer: this.swimmingTimer,
+			swimmingBubbles: this.swimmingBubbles,
 		};
 	}
 }

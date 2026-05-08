@@ -12,6 +12,7 @@ import { TreasureState } from '@shared/socket-protocol';
 import Treasure from '../entities/interactables/treasure';
 import Shop from '../entities/shop';
 import NPCShip from '../entities/npcs/npc-ship';
+import Barrel from '../entities/interactables/barrel';
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
@@ -85,6 +86,41 @@ export default class MovementSystem implements BaseSystem {
 		}
 	}
 
+	updateSwimmingDamage(player: Player, dt: number) {
+		if (player.isDead || !player.isSwimming) {
+			// Reset timer when player stops swimming
+			if (!player.isSwimming) {
+				player.swimmingTimer = 0;
+				player.swimmingBubbles = 4;
+				player.markDirty();
+			}
+			return;
+		}
+
+		// Accumulate swimming time
+		player.swimmingTimer += dt * 1000;
+
+		// Calculate how many bubbles should be popped (one every 5 seconds)
+		const expectedBubbles = Math.max(0, 4 - Math.floor(player.swimmingTimer / 2000));
+		if (expectedBubbles !== player.swimmingBubbles) {
+			player.swimmingBubbles = expectedBubbles;
+			player.markDirty();
+		}
+
+		// Start damage after 20 seconds
+		if (player.swimmingTimer >= player.swimmingDamageThreshold) {
+			player.swimmingDamageTimer += dt * 1000;
+
+			if (player.swimmingDamageTimer >= player.swimmingDamageInterval) {
+				player.health -= player.swimmingDamage;
+				player.swimmingDamageTimer = 0;
+				player.markDirty();
+			}
+		} else {
+			player.markDirty(); // Mark dirty to send updated timer
+		}
+	}
+
 	/**
 	 * Applies movement for a given player, accounting for on-ship conditions,
 	 * different movement speed for on-land vs in-sea, collision with inner/outer
@@ -96,6 +132,7 @@ export default class MovementSystem implements BaseSystem {
 		this.updateReloadTimer(player, dt);
 		this.updateRespawnTimer(player, dt);
 		this.updateDashTimer(player, dt);
+		this.updateSwimmingDamage(player, dt);
 
 		// Keep track of aim angle- don't send for static players
 		const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
@@ -348,21 +385,23 @@ export default class MovementSystem implements BaseSystem {
 
 	private checkPalmTreeObstacles(x: number, y: number, playerRadius: number): boolean {
 		const trees = this.registry.getByType('palm-tree');
-		const TREE_RADIUS = 12;
+		const TREE_RADIUS = 8; // reduced from 12
+		const TRUNK_OFFSET_Y = 12; // shift hitbox down toward the trunk
 		for (const tree of trees) {
 			const dx = x - tree.x;
-			const dy = y - tree.y;
+			const dy = y - (tree.y + TRUNK_OFFSET_Y);
 			if (dx * dx + dy * dy < (TREE_RADIUS + playerRadius) ** 2) return true;
 		}
 		return false;
 	}
 
 	private checkBarrelObstacles(x: number, y: number, playerRadius: number): boolean {
-		const barrel = this.registry.getByType('barrel');
-		const BARREL_RADIUS = 12;
-		for (const barrels of barrel) {
-			const dx = x - barrels.x;
-			const dy = y - barrels.y;
+		const barrels = this.registry.getByType<Barrel>('barrel');
+		const BARREL_RADIUS = 16;
+		for (const barrel of barrels) {
+			if (!barrel.hasItem) continue; // broken barrels don't block
+			const dx = x - barrel.x;
+			const dy = y - barrel.y;
 			if (dx * dx + dy * dy < (BARREL_RADIUS + playerRadius) ** 2) return true;
 		}
 		return false;

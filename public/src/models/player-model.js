@@ -7,6 +7,7 @@ import ReloadIndicator from '../ui/reload-indicator.js';
 import RespawnIndicator from '../ui/respawn-indicator.js';
 import DashCooldown from '../ui/dash-bar.js';
 import SwordSwing from '../ui/sword-swing.js';
+import SwimmingBubbles from '../ui/swimming-bubbles.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -44,6 +45,9 @@ export default class PlayerModel extends Model {
 		this.isSwimming = false;
 		this.shootTimer = 0;
 		this.shootDuration = 200; //  how long the shoot anim plays
+		this.swimmingBubbles = new SwimmingBubbles(scene, this);
+		this.swimmingTimer = 0;
+		this.bubblesRemaining = 4;
 		this.swingAnimTimer = 0;
 		this.swingAnimDuration = 300;
 		this.setDepth(10);
@@ -135,6 +139,8 @@ export default class PlayerModel extends Model {
 			}
 			this.wasSwinging = data.isSwinging;
 		}
+		if (data.swimmingTimer !== undefined) this.swimmingTimer = data.swimmingTimer;
+		if (data.swimmingBubbles !== undefined) this.bubblesRemaining = data.swimmingBubbles;
 
 		if ('carryingId' in data) {
 			this.carryingId = data.carryingId;
@@ -183,6 +189,7 @@ export default class PlayerModel extends Model {
 		this.dashCooldown.update(this.dashCooldownVal, this.dashCooldownTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
+		this.swimmingBubbles.update(this.bubblesRemaining, this.isSwimming);
 
 		// Visual feedback for 'dead' players
 		this.nameText.setColor(this.isDead ? '#ee0000' : '#ffffff'); // red: dead, white: alive
@@ -290,7 +297,7 @@ export default class PlayerModel extends Model {
 		this.reloadIndicator?.destroy();
 		this.swordSwing?.destroy();
 		this.dashCooldown?.destroy();
-
+		this.swimmingBubbles?.destroy();
 		super.destroy();
 	}
 }
