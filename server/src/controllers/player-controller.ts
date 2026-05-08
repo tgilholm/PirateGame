@@ -16,7 +16,7 @@ import Treasure from '../entities/interactables/treasure';
 import UpgradeHandler from '../handlers/upgrade-handler';
 import Shop from '../entities/shop';
 import EntityFactory from 'src/entities/entity-factory';
-import Money from 'src/entities/interactables/money';
+import Money from '../entities/interactables/money';
 import Coconut from '../entities/interactables/coconut';
 import Bandage from '../entities/interactables/bandage';
 
@@ -178,15 +178,18 @@ export default class PlayerController {
 			right: false,
 		};
 
-		// Spawn money stack at the death point
-		const money = this.factory.createInteractable(
-			player.parent as Ship | null,
-			{ type: 'money', x: player.x, y: player.y },
-			player.id
-		) as Money;
+		if (player.gold > 0) {
+			// Spawn money stack at the death point
+			const money = this.factory.createInteractable(
+				player.parent as Ship | null,
+				{ type: 'money', x: player.x, y: player.y },
+				player.id
+			) as Money;
 
-		money.value = player.gold;
-		player.gold = 0;
+			const newGold = Math.floor(player.gold / 2);
+			money.value = newGold;
+			player.gold = newGold;
+		}
 
 		player.markDirty();
 	}
