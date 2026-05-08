@@ -51,15 +51,24 @@ export default class PhysicsSystem implements BaseSystem {
 		Matter.World.add(this.engine.world, walls);
 
 		// Add a rectangle at each solid object
-		terrainMap.getTileset('islands').forEach(({ x, y }) => {
+		this.createMatterBodies(terrainMap, 'islands');
+		this.createMatterBodies(terrainMap, 'buildings');
+
+		console.log(`[PhysicsSystem] Added island collision bodies`);
+	}
+
+	private createMatterBodies(terrainMap: TerrainMap, tilesetName: string) {
+		const tileset = terrainMap.getTileset(tilesetName);
+
+		if (!tileset) return;
+
+		tileset.forEach(({ x, y }) => {
 			const body = Matter.Bodies.rectangle(x, y, terrainMap.tileWidth, terrainMap.tileWidth, {
 				isStatic: true,
-				label: 'island',
+				label: tilesetName,
 			});
 			Matter.World.add(this.engine.world, body);
 		});
-
-		console.log(`[PhysicsSystem] Added island collision bodies`);
 	}
 
 	/**
