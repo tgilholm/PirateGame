@@ -193,7 +193,7 @@
 
 			<div class="right-panel" id="right-panel">
 				<!--Active Player Container-->
-				<button id="settings-button" title="Settings" style="display: none">Settings</button>
+				<button id="settings-button" title="Settings" style="display: none">Settings/Help</button>
 				<div id="players-panel" style="display: none">
 					<div class="players-title">Players Online</div>
 					<ol id="players-list"></ol>
@@ -208,8 +208,31 @@
 			</div>
 
 			<div id="settings-menu" style="display: none">
-				<h2 class="settings-title">Settings</h2>
+				<h2 class="settings-title">Settings/Help</h2>
 				<div class="settings-section">
+					<h3 class="settings-section-title">Keybinds</h3>
+					<div class="settings-row">
+						<label class="settings-keybind-label">WASD - Up/Left/Down/Right</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">SPACE/LMB - Fire Cannon/Gun</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">RMB - Swing Sword</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">SHIFT - Boost</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">E - Interact</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">Q - Release</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">ESC - Open/Close Settings Menu</label>
+					</div>
+
 					<h3 class="settings-section-title">Volume</h3>
 					<div class="settings-row">
 						<label for="music-slider" class="settings-label">Music</label>
@@ -234,6 +257,7 @@
 			</div>
 			<div id="boost-bar-container" style="display: none">
 				<div id="boost-bar-fill"></div>
+				<p id="loading-text">Press SHIFT to boost</p>
 			</div>
 			<div id="death-screen">
 				<h1>Scuttled!</h1>
