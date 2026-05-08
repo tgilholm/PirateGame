@@ -128,17 +128,17 @@ export class StartScene extends Phaser.Scene {
 		this.load.spritesheet('barrel-break', '/assets/barrel-break.png', { frameWidth: 32, frameHeight: 32 });
 
 		//audio placeholders
-		this.load.audio('music-start', 'assets/music-start.mp3');
-		this.load.audio('music-main', 'assets/music-main.mp3');
-		this.load.audio('music-waves', 'assets/music-waves.mp3');
-		this.load.audio('sound-cannon', 'assets/sound-cannon.mp3');
-		this.load.audio('sound-gun', 'assets/sound-gun.mp3');
-		this.load.audio('sound-dig', 'assets/sound-dig.mp3');
-		this.load.audio('sound-climb', 'assets/sound-climb.mp3');
-		this.load.audio('sound-yell', 'assets/sound-yell.mp3');
-		this.load.audio('sound-sword', 'assets/sound-sword.mp3');
-		this.load.audio('sound-sword-hit', 'assets/sound-sword-hit.mp3');
-		this.load.audio('sound-pickup-money', 'assets/sound-pickup-money.mp3');
+		this.load.audio('music-start', 'assets/sfx/music-start.mp3');
+		this.load.audio('music-main', 'assets/sfx/music-main.mp3');
+		this.load.audio('music-waves', 'assets/sfx/music-waves.mp3');
+		this.load.audio('sound-cannon', 'assets/sfx/sound-cannon.mp3');
+		this.load.audio('sound-gun', 'assets/sfx/sound-gun.mp3');
+		this.load.audio('sound-dig', 'assets/sfx/sound-dig.mp3');
+		this.load.audio('sound-climb', 'assets/sfx/sound-climb.mp3');
+		this.load.audio('sound-yell', 'assets/sfx/sound-yell.mp3');
+		this.load.audio('sound-sword', 'assets/sfx/sound-sword.mp3');
+		this.load.audio('sound-sword-hit', 'assets/sfx/sound-sword-hit.mp3');
+		this.load.audio('sound-pickup-money', 'assets/sfx/sound-pickup-money.mp3');
 		this.load.json('volume-config', 'src/managers/volume-config.json');
 		this.load.json('settings-config', 'src/managers/settings-config.json');
 

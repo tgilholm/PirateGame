@@ -15,6 +15,14 @@ export default class Minimap {
 			this.canvas.height = this.height;
 		}
 		this.context = this.canvas.getContext('2d');
+
+		const markerColours = ['red', 'blue', 'green', 'yellow', 'white', 'grey'];
+		this.playerMarkerImages = {};
+		markerColours.forEach((colour) => {
+			const img = new Image();
+			img.src = '/assets/player-marker-' + colour + '.png';
+			this.playerMarkerImages[colour] = img;
+		});
 	}
 
 	clear() {
@@ -131,6 +139,15 @@ export default class Minimap {
 				}
 			});
 		});
+	}
+
+	drawPlayerMarker(worldX, worldY, size = 10, colour = 'green') {
+		const key = colour === 'default' ? 'green' : colour;
+		const img = this.playerMarkerImages[key];
+		if (!this.context || !img || !img.complete || img.naturalWidth === 0) return;
+
+		const { x, y } = this.getCanvasPos(worldX, worldY);
+		this.context.drawImage(img, x - size / 2, y - size / 2, size, size);
 	}
 
 	getCanvasPos(worldX, worldY, tileSize = 16) {

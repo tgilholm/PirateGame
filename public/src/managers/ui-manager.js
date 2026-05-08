@@ -141,9 +141,11 @@ export default class UIManager {
 
 		// Draw players
 		this.gameManager.minimalPlayers.forEach((player) => {
-			const colour = player === localPlayer ? 'green' : 'red';
-
-			this.minimap.drawCircle(player.x, player.y, colour, 3);
+			if (player.id === localPlayer.id) {
+				this.minimap.drawPlayerMarker(player.x, player.y, 40, this.gameManager.pirateColour);
+			} else {
+				this.minimap.drawCircle(player.x, player.y, 'red', 3);
+			}
 		});
 
 		this.gameManager.minimalShops.forEach((shop) => {
