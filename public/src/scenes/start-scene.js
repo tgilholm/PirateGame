@@ -10,6 +10,9 @@ export class StartScene extends Phaser.Scene {
 		this.ui = document.getElementById('ui-container');
 		this.form = document.getElementById('input-form');
 		this.logo = document.getElementById('repo-link');
+		this.track = document.getElementById('spTrack');
+		this.current = 0;
+		this.shipChoices = 5;
 
 		// Get the username from the textinput
 		let startBtn = document.getElementById('start-btn');
@@ -181,6 +184,9 @@ export class StartScene extends Phaser.Scene {
 
 		// width & height are given in game config
 		const centerX = this.scale.width / 2;
+		const leftX = this.scale.width / 4;
+		const rightX = centerX + leftX;
+
 		const centerY = this.scale.height / 2;
 
 		const gold = document.getElementById('gold-counter');
@@ -193,7 +199,8 @@ export class StartScene extends Phaser.Scene {
 		this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
 
 		const title = this.add.image(centerX, 200, 'title');
-		const ship = this.add.sprite(centerX, 700, 'ship');
+		const ship = this.add.sprite(leftX, 700, 'ship');
+		const ship2 = this.add.sprite(rightX, 700, 'ship');
 
 		// Animate the ship sprite
 		this.anims.create({
@@ -203,6 +210,7 @@ export class StartScene extends Phaser.Scene {
 			repeat: -1,
 		});
 		ship.play('fly');
+		ship2.play('fly');
 
 		this.anims.create({
 			key: 'chest-open',
@@ -234,7 +242,8 @@ export class StartScene extends Phaser.Scene {
 
 		COLOURS.forEach((colour) => {
 			const btn = document.getElementById(`colour-btn-${colour}`);
-			btn.addEventListener('click', () => {
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
 				this.selectedColour = colour;
 				document.querySelectorAll('.colour-btn').forEach((b) => b.classList.remove('selected'));
 				btn.classList.add('selected');
@@ -242,6 +251,19 @@ export class StartScene extends Phaser.Scene {
 		});
 
 		document.getElementById('colour-btn-default').classList.add('selected');
+
+		const prev = document.getElementById('spPrev');
+		const next = document.getElementById('spNext');
+
+		prev.addEventListener('click', (e) => {
+			e.preventDefault();
+			this.goTo(this.current - 1);
+		});
+
+		next.addEventListener('click', (e) => {
+			e.preventDefault();
+			this.goTo(this.current + 1);
+		});
 	}
 
 	/**
@@ -266,8 +288,13 @@ export class StartScene extends Phaser.Scene {
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
-			this.scene.start('MainScene', { username, pirateColour: this.selectedColour });
+			this.scene.start('MainScene', { username, pirateColour: this.selectedColour, shipChoice: this.current });
 		}
+	}
+
+	goTo(index) {
+		this.current = (index + this.shipChoices) % this.shipChoices; // wraparound
+		this.track.style.transform = `translateX(-${this.current * 256}px)`;
 	}
 
 	/**

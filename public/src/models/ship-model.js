@@ -14,18 +14,19 @@ export default class ShipModel extends Model {
 	 * @param {number} y the (absolute) y coordinate to add this ship to
 	 * @param {ShipConfig} config the config data specifying the ship's dimensions
 	 */
-	constructor(scene, id, x, y, config) {
+	constructor(scene, id, x, y, config, shipChoice) {
 		super(scene, id, x, y, 'ship', 0, false); // not static, 0 rotation
 		this.dimensions = config.dimensions; // for the hull dimensions
 		this.interactables = [];
 		this.pilotId = null;
 		this.angularVelocity = 0;
 		this.swayTimer = Math.random() * 1000; // For the random sine-wave "bobbing"
+		this.shipChoice = null;
 
 		// const textureKey = `hull_${this.dimensions.height}_${this.dimensions.middleWidth}`;
 		// this.getHullTexture(textureKey);
 
-		this.hullSprite = scene.add.sprite(0, 0, 'ship-sprites', 0);
+		this.hullSprite = scene.add.sprite(0, 0, 'ship-sprites', shipChoice);
 
 		// Calculate the centre offset
 		const padding = 5;
@@ -51,56 +52,6 @@ export default class ShipModel extends Model {
 		this.setDepth(10);
 
 		this.healthBar = new HealthBar(scene, 100);
-	}
-
-	/**
-	 * Generates the hull texture from the dimensions supplied in the config
-	 * if it doesn't already exist. This ensures that new ships using the same
-	 * dimensions as this will re-use the existing texture.
-	 * @param {string} textureKey the id of the texture in Phaser's texture cache
-	 */
-	getHullTexture(textureKey) {
-		if (this.scene.textures.exists(textureKey)) return; // already drawn once
-
-		const { height, middleWidth, bowLength, sternRadius } = this.dimensions;
-		const halfH = height / 2;
-		const halfW = middleWidth / 2;
-		const segments = 12;
-		const padding = 5;
-		const totalW = middleWidth + bowLength + sternRadius + padding * 2;
-		const totalH = height + padding * 2;
-		const offsetX = sternRadius + halfW + padding;
-		const offsetY = halfH + padding;
-
-		const graphics = this.scene.make.graphics({ x: 0, y: 0 }, false);
-		graphics.fillStyle(0x5d4037, 1);
-		graphics.lineStyle(4, 0xffffff, 1);
-		graphics.beginPath();
-
-		// Stern semicircle
-		for (let i = 0; i <= segments; i++) {
-			const theta = Math.PI / 2 + (i / segments) * Math.PI;
-			graphics.lineTo(
-				offsetX + (-halfW + Math.cos(theta) * sternRadius),
-				offsetY + Math.sin(theta) * sternRadius
-			);
-		}
-		// Bow Top half quadratic
-		for (let i = 0; i <= segments; i++) {
-			const t = i / segments;
-			graphics.lineTo(offsetX + (halfW + t * bowLength), offsetY + -halfH * (1 - t * t));
-		}
-		// Bow Bottom other half of the quadratic
-		for (let i = segments; i >= 0; i--) {
-			const t = i / segments;
-			graphics.lineTo(offsetX + (halfW + t * bowLength), offsetY + halfH * (1 - t * t));
-		}
-
-		graphics.closePath();
-		graphics.fillPath();
-		graphics.strokePath();
-		graphics.generateTexture(textureKey, totalW, totalH); // for re-use by other ships
-		graphics.destroy(); // cleanup
 	}
 
 	/**

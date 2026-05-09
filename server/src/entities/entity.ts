@@ -14,6 +14,8 @@ export default abstract class Entity {
 	protected _maxHealth: number;
 	public parent: Entity | null; // all entities can "technically" have parents
 	public supertypes: string[] = []; // all "memberships"
+	public width = 0;
+	public height = 0;
 
 	// "Dirty"- meaning this entity has changed recently
 	public dirty: boolean = true; // starts dirty so first broadcast always sends

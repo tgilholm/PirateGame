@@ -6,6 +6,8 @@ export default class BarrelModel extends InteractableModel {
 		this.isInteractable = false;
 		this.hasItem = true;
 		this.health = 2;
+		// Explicitly size the sprite to match the 32x32 source texture
+		this.sprite.setDisplaySize(32, 32);
 	}
 
 	sync(data) {
@@ -13,15 +15,23 @@ export default class BarrelModel extends InteractableModel {
 		super.sync(data);
 
 		if (data.hasItem !== undefined) {
+			this.hasItem = data.hasItem;
 			if (!data.hasItem) {
 				this.sprite.play('barrel-break');
+				// Once the break animation finishes, hide the sprite so
+				// there's no leftover frame sitting on screen
+				this.sprite.once('animationcomplete', () => {
+					this.sprite.setVisible(false);
+				});
 			} else {
-				// idle is a plain image, just set the texture
+				// Barrel has respawned — restore texture and show it
+				this.sprite.stop();
 				this.sprite.setTexture('barrel');
+				this.sprite.setVisible(true);
 			}
 		}
 
-		if (data.health !== undefined && data.health < prevHealth && data.hasItem) {
+		if (data.health !== undefined && data.health < prevHealth && this.hasItem) {
 			this.sprite.play('barrel-hit');
 		}
 	}

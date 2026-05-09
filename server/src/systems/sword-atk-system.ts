@@ -8,6 +8,7 @@ import { BaseSystem } from './base-system';
 import SpatialGrid from '../application/spatial-grid';
 import Sword from '../entities/sword';
 import EntityFactory from '../entities/entity-factory';
+import { lineIntersectsRotatedRect } from '../utils/liang-barsky';
 
 export default class SwordSystem implements BaseSystem {
 	public onSwingResult?: (attackerId: string, hitEnemy: boolean) => void;
@@ -62,6 +63,11 @@ export default class SwordSystem implements BaseSystem {
 		player.markDirty();
 
 		const playerWorldPos = player.worldPos;
+		const swingTip = {
+			x: playerWorldPos.x + Math.cos(player.aimAngle) * Sword.RANGE,
+			y: playerWorldPos.y + Math.sin(player.aimAngle) * Sword.RANGE,
+		};
+
 		const nearby = this.grid.getNearby(playerWorldPos.x, playerWorldPos.y);
 		let hitEnemy = false;
 
@@ -75,17 +81,39 @@ export default class SwordSystem implements BaseSystem {
 			const dy = entityPos.y - playerWorldPos.y;
 			const dist = Math.sqrt(dx * dx + dy * dy);
 
-			if (dist > Sword.RANGE) return;
+			/*
+			Massive bodge. Not all entities have a width and height defined yet,
+			so just use centre-of-entity checking if not found, otherwise use
+			the bounding box algorithm
+			*/
+			if (entity.width !== 0 && entity.height !== 0) {
+				const hw = entity.width / 2;
+				const hh = entity.height / 2;
 
-			// Check if within the swing arc centered on aimAngle
-			const angleToEntity = Math.atan2(dy, dx);
-			let angleDiff = angleToEntity - player.aimAngle;
-			while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-			while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+				const hit = lineIntersectsRotatedRect(playerWorldPos, swingTip, {
+					minX: entityPos.x - hw,
+					minY: entityPos.y - hh,
+					maxX: entityPos.x + hw,
+					maxY: entityPos.y + hh,
+					angle: entity.r ?? 0,
+				});
 
-			if (dist < 1) return; //
-			if (Math.abs(angleDiff) > Sword.ARC / 2) return;
+				if (!hit) return;
+			} else {
+				// centre check
+				if (dist > Sword.RANGE) return;
 
+				// Check if within the swing arc centered on  aimAngle
+				const angleToEntity = Math.atan2(dy, dx);
+				let angleDiff = angleToEntity - player.aimAngle;
+				while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+				while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
+
+				if (dist < 1) return; //
+				if (Math.abs(angleDiff) > Sword.ARC / 2) return;
+			}
+
+			// called regardless of the method used above
 			if (entity.type === 'player' || entity.type === 'npc') {
 				this.hitLivingEntity(entity as Player | NPC, player, dx, dy, dist);
 				hitEnemy = true;
@@ -143,7 +171,7 @@ export default class SwordSystem implements BaseSystem {
 
 			// Spawn near the base of the trunk, not the center
 			const offsetX = (Math.random() - 0.5) * 30;
-			const offsetY = 20 + Math.random() * 15; // push down toward base
+			const offsetY = 32 + Math.random() * 15; // push down toward base
 			this.factory.createCoconut(`coconut_${tree.id}_${Date.now()}`, tree.x + offsetX, tree.y + offsetY, tree.id);
 		}
 	}

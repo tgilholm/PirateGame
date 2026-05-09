@@ -49,107 +49,57 @@
 					maxlength="16"
 				/>
 			</div>
-			<div class="border">
-				<button class="formElement" id="start-btn" type="button">Start Game</button>
-			</div>
-			<div
-				id="colour-picker"
-				style="display: none; flex-direction: column; align-items: center; gap: 8px; margin-top: 8px"
-			>
+
+			<div id="colour-picker" class="formElement">
 				<span style="font-family: monospace; font-size: 16px; color: #fff">Choose your outfit:</span>
 				<div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center">
 					<button
 						class="colour-btn"
 						id="colour-btn-default"
 						title="Default"
-						style="
-							background: #c8a87a;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #ffd700;
-							cursor: pointer;
-						"
+						style="background: #c8a87a"
 					></button>
-					<button
-						class="colour-btn"
-						id="colour-btn-red"
-						title="Red"
-						style="
-							background: crimson;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #fff;
-							cursor: pointer;
-						"
-					></button>
-					<button
-						class="colour-btn"
-						id="colour-btn-blue"
-						title="Blue"
-						style="
-							background: royalblue;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #fff;
-							cursor: pointer;
-						"
-					></button>
+					<button class="colour-btn" id="colour-btn-red" title="Red" style="background: crimson"></button>
+					<button class="colour-btn" id="colour-btn-blue" title="Blue" style="background: royalblue"></button>
 					<button
 						class="colour-btn"
 						id="colour-btn-green"
 						title="Green"
-						style="
-							background: seagreen;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #fff;
-							cursor: pointer;
-						"
+						style="background: seagreen"
 					></button>
 					<button
 						class="colour-btn"
 						id="colour-btn-yellow"
 						title="Yellow"
-						style="
-							background: goldenrod;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #fff;
-							cursor: pointer;
-						"
+						style="background: goldenrod"
 					></button>
-					<button
-						class="colour-btn"
-						id="colour-btn-white"
-						title="White"
-						style="
-							background: #ffffff;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #fff;
-							cursor: pointer;
-						"
-					></button>
-					<button
-						class="colour-btn"
-						id="colour-btn-grey"
-						title="Grey"
-						style="
-							background: #9f9595;
-							width: 40px;
-							height: 40px;
-							border-radius: 50%;
-							border: 3px solid #fff;
-							cursor: pointer;
-						"
-					></button>
+					<button class="colour-btn" id="colour-btn-white" title="White" style="background: #ffffff"></button>
+					<button class="colour-btn" id="colour-btn-grey" title="Grey" style="background: #9f9595"></button>
 				</div>
+			</div>
+
+			<div class="formElement" id="ship-picker">
+				<span style="font-family: monospace; font-size: 16px; color: #fff">Choose a Ship</span>
+
+				<div class="sp-stage" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center">
+					<button class="sp-arrow prev" id="spPrev" aria-label="Previous ship">&#8249;</button>
+
+					<div class="sp-viewport">
+						<div class="sp-track" id="spTrack">
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="0"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="1"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="2"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="3"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="4"></div></div>
+						</div>
+					</div>
+
+					<button class="sp-arrow next" id="spNext" aria-label="Next ship">&#8250;</button>
+				</div>
+			</div>
+
+			<div class="border">
+				<button class="formElement" id="start-btn" type="button">Set Sail!</button>
 			</div>
 		</form>
 
@@ -172,10 +122,6 @@
 				<div id="release-prompt" class="prompt" style="display: none"></div>
 			</div>
 
-			<div id="coconut-tooltip" style="display: none; position: fixed; z-index: 1500; pointer-events: none">
-				<div id="coconut-tooltip-inner">🥥 <span id="coconut-count">0</span></div>
-			</div>
-
 			<div class="left-panel" id="left-panel">
 				<div id="minimap-container">
 					<img id="minimap" />
@@ -193,7 +139,7 @@
 
 			<div class="right-panel" id="right-panel">
 				<!--Active Player Container-->
-				<button id="settings-button" title="Settings" style="display: none">Settings</button>
+				<button id="settings-button" title="Settings" style="display: none">Settings/Help</button>
 				<div id="players-panel" style="display: none">
 					<div class="players-title">Players Online</div>
 					<ol id="players-list"></ol>
@@ -208,8 +154,31 @@
 			</div>
 
 			<div id="settings-menu" style="display: none">
-				<h2 class="settings-title">Settings</h2>
+				<h2 class="settings-title">Settings/Help</h2>
 				<div class="settings-section">
+					<h3 class="settings-section-title">Keybinds</h3>
+					<div class="settings-row">
+						<label class="settings-keybind-label">WASD - Up/Left/Down/Right</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">SPACE/LMB - Fire Cannon/Gun</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">RMB - Swing Sword</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">SHIFT - Boost</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">E - Interact</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">Q - Release</label>
+					</div>
+					<div class="settings-row">
+						<label class="settings-keybind-label">ESC - Open/Close Settings Menu</label>
+					</div>
+
 					<h3 class="settings-section-title">Volume</h3>
 					<div class="settings-row">
 						<label for="music-slider" class="settings-label">Music</label>
@@ -234,6 +203,7 @@
 			</div>
 			<div id="boost-bar-container" style="display: none">
 				<div id="boost-bar-fill"></div>
+				<p id="loading-text">Press SHIFT to boost</p>
 			</div>
 			<div id="death-screen">
 				<h1>Scuttled!</h1>

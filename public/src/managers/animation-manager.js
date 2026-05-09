@@ -25,7 +25,7 @@ export default class AnimationManager {
 			{ key: 'bullet-dust-splash', texture: 'bullet-dust-splash' },
 			{ key: 'bullet-blood-splash', texture: 'bullet-blood-splash' },
 			{ key: 'leaf-fall', texture: 'leaf-ani', frameCount: 5 },
-			{ key: 'barrel-hit', texture: 'barrel-hit', start: 0, end: 1, frameRate: 6, repeat: 0 },
+			{ key: 'barrel-hit', texture: 'barrel-hit', start: 0, end: 1, frameRate: 24, repeat: 0 },
 			{ key: 'barrel-break', texture: 'barrel-break', start: 0, end: 10, frameRate: 24, repeat: 0 },
 		];
 
@@ -144,8 +144,8 @@ export default class AnimationManager {
 			{
 				key: 'skelly-down-death',
 				texture: 'skelly_front',
-				frames: rowFrames(8, 0, 22),
-				frameRate: 10,
+				frames: rowFrames(5, 0, 5),
+				frameRate: 12,
 				repeat: 0,
 			},
 			// up (skellyback)
@@ -153,7 +153,7 @@ export default class AnimationManager {
 			{ key: 'skelly-up-walk', texture: 'skelly_back', frames: rowFrames(2, 0, 7), frameRate: 8, repeat: -1 },
 			{ key: 'skelly-up-hurt', texture: 'skelly_back', frames: rowFrames(3, 0, 4), frameRate: 10, repeat: 0 },
 			{ key: 'skelly-up-attack', texture: 'skelly_back', frames: rowFrames(6, 0, 12), frameRate: 12, repeat: 0 },
-			{ key: 'skelly-up-death', texture: 'skelly_back', frames: rowFrames(8, 0, 22), frameRate: 10, repeat: 0 },
+			{ key: 'skelly-up-death', texture: 'skelly_back', frames: rowFrames(5, 0, 5), frameRate: 6, repeat: 0 },
 			// right (skellyright)
 			{ key: 'skelly-right-idle', texture: 'skelly_right', frames: rowFrames(0, 0, 4), frameRate: 6, repeat: -1 },
 			{ key: 'skelly-right-walk', texture: 'skelly_right', frames: rowFrames(2, 0, 7), frameRate: 8, repeat: -1 },
@@ -168,8 +168,8 @@ export default class AnimationManager {
 			{
 				key: 'skelly-right-death',
 				texture: 'skelly_right',
-				frames: rowFrames(8, 0, 22),
-				frameRate: 10,
+				frames: rowFrames(5, 0, 5),
+				frameRate: 12,
 				repeat: 0,
 			},
 			// left (skellyleft) — right to left
@@ -183,7 +183,7 @@ export default class AnimationManager {
 				frameRate: 12,
 				repeat: 0,
 			},
-			{ key: 'skelly-left-death', texture: 'skelly_left', frames: rowFrames(8, 0, 22), frameRate: 10, repeat: 0 },
+			{ key: 'skelly-left-death', texture: 'skelly_left', frames: rowFrames(5, 0, 5), frameRate: 12, repeat: 0 },
 		];
 
 		for (const def of defs) {

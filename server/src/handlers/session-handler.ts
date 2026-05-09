@@ -27,11 +27,12 @@ export default class SessionHandler {
 	/**
 	 * Called by SocketService when a player says they are READY
 	 */
-	public addPlayer(socketId: string, username: string, pirateColour: string = 'default') {
+	public addPlayer(socketId: string, username: string, pirateColour: string = 'default', shipChoice: number = 0)) {
 		const { x, y, rotation } = this.spawnSystem.getSpawnPoint();
-		const newShip = this.factory.createShip(`ship_${socketId}`, x, y);
-		Matter.Body.rotate(newShip.body, rotation * (Math.PI / 180));
+		const newShip = this.factory.createShip(`ship_${socketId}`, x, y, shipChoice);
 
+		Matter.Body.rotate(newShip.body, rotation * (Math.PI / 180));
+    
 		// "hacky" way of adding to the physics world
 		this.addPhysicsBody(newShip.body);
 		this.factory.createPlayer(socketId, 0, 0, newShip, username, pirateColour);
