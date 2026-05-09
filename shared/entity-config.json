@@ -3,7 +3,7 @@
 		"maxHealth": 100,
 		"runSpeed": 3,
 		"swimSpeed": 1.5,
-		"radius": 4
+		"radius": 8
 	},
 	"ship": {
 		"maxHealth": 1000,
@@ -14,7 +14,7 @@
 			"sternRadius": 28
 		},
 		"physics": {
-			"turnSpeed": 0.008,
+			"turnSpeed": 0.014,
 			"mass": 600,
 			"frictionAir": 0.001,
 			"restitution": 0.2,
