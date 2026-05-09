@@ -150,6 +150,9 @@ export class StartScene extends Phaser.Scene {
 
 		// width & height are given in game config
 		const centerX = this.scale.width / 2;
+		const leftX = this.scale.width / 4;
+		const rightX = centerX + leftX;
+
 		const centerY = this.scale.height / 2;
 
 		const gold = document.getElementById('gold-counter');
@@ -159,7 +162,8 @@ export class StartScene extends Phaser.Scene {
 		this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
 
 		const title = this.add.image(centerX, 200, 'title');
-		const ship = this.add.sprite(centerX, 700, 'ship');
+		const ship = this.add.sprite(leftX, 700, 'ship');
+		const ship2 = this.add.sprite(rightX, 700, 'ship');
 
 		// Animate the ship sprite
 		this.anims.create({
@@ -169,6 +173,7 @@ export class StartScene extends Phaser.Scene {
 			repeat: -1,
 		});
 		ship.play('fly');
+		ship2.play('fly');
 
 		this.anims.create({
 			key: 'chest-open',
