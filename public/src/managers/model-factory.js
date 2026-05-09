@@ -76,8 +76,6 @@ export default class ModelFactory {
 	 * @returns the ship
 	 */
 	createShip(data) {
-		console.log(data);
-
 		const ship = new ShipModel(this.scene, data.id, data.x, data.y, this.config.ship, data.shipChoice);
 		return ship;
 	}
