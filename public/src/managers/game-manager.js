@@ -48,6 +48,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.minimalNPCs = [];
 		this.minimalShips = [];
 		this.minimalShops = [];
+		this.coconutToolTip = null;
 
 		this.startListeners();
 	}
@@ -111,8 +112,6 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 				this.interactables.add(entity);
 			}
 			// Show coconut tooltip for nearby palm trees
-			const coconutTooltip = document.getElementById('coconut-tooltip');
-			const coconutCount = document.getElementById('coconut-count');
 			let nearestTree = null;
 			let nearestTreeDist = Infinity;
 
@@ -130,18 +129,27 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 				}
 			});
 
-			if (nearestTree && coconutTooltip && coconutCount) {
-				// Convert world pos to screen pos
-				const cam = this.scene.cameras.main;
-				const sx = (nearestTree.worldPos.x - cam.scrollX) * cam.zoom;
-				const sy = (nearestTree.worldPos.y - cam.scrollY) * cam.zoom - 40;
-				coconutTooltip.style.display = 'block';
-				coconutTooltip.style.left = `${sx}px`;
-				coconutTooltip.style.top = `${sy}px`;
-				/** @type {any} */
-				coconutCount.textContent = nearestTree.coconuts ?? 0;
-			} else if (coconutTooltip) {
-				coconutTooltip.style.display = 'none';
+			// Create the Phaser text object once
+			if (!this.coconutTooltip) {
+				this.coconutTooltip = this.scene.add
+					.text(0, 0, '', {
+						fontSize: '12px',
+						fontFamily: 'Consolas',
+						color: '#ffffff',
+						backgroundColor: '#00000099',
+						padding: { x: 4, y: 2 },
+					})
+					.setDepth(200)
+					.setVisible(false);
+			}
+
+			if (nearestTree) {
+				const pos = nearestTree.worldPos;
+				this.coconutTooltip.setText(`🥥 ${nearestTree.coconuts ?? 0}`);
+				this.coconutTooltip.setPosition(pos.x - this.coconutTooltip.width / 2, pos.y - 48);
+				this.coconutTooltip.setVisible(true);
+			} else {
+				this.coconutTooltip.setVisible(false);
 			}
 
 			entity.update(delta);
@@ -538,6 +546,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.models.forEach((e) => e.destroy());
 		this.models.clear();
 		this.localPlayer = null;
+		this.coconutTooltip?.destroy();
 	}
 
 	buyUpgrade(name) {

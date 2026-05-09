@@ -11,6 +11,8 @@ export default class Barrel extends Interactable {
 		this._maxHealth = Barrel.HIT_HEALTH;
 		this.health = Barrel.HIT_HEALTH;
 		this.interactRange = 60;
+		this.height = 32;
+		this.width = 32;
 	}
 
 	toState() {

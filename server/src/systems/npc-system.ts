@@ -237,13 +237,11 @@ export default class NPCSystem implements BaseSystem {
 
 		const dist = Math.hypot(npc.x - target.x, npc.y - target.y);
 
-		if (target && dist < 25 && npc.canAttack && !target.isDead) {
-			npc.attackTimer = npc.attackTime; // reset cooldown
+		if (target && dist < 25 && npc.canAttack && !target.isDead && !npc.isDying) {
+			npc.attackTimer = npc.attackTime;
 			target.health -= npc.attackDamage;
 			npc.isAttacking = true;
 			npc.markDirty();
-
-			console.log(`npc ${npc.id} attacked ${target.id}. Dist: ${dist}`);
 		}
 	}
 
