@@ -14,11 +14,17 @@ export enum ServerEvent {
 	SUNK = 'SUNK',
 	SWORD_HIT = 'SWORD_HIT',
 	SWORD_SWING = 'SWORD_SWING',
+	SHIP_HEALED = 'SHIP_HEALED',
 }
 
 export enum ClientEvent {
 	READY = 'READY',
 	ACTION = 'ACTION',
+}
+
+export interface HealEvent {
+	x: number;
+	y: number;
 }
 
 export enum ActionType {

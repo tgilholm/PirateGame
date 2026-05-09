@@ -72,6 +72,8 @@ export default class ProjectileSystem implements BaseSystem {
 			const entity = this.entityRegistry.get(id);
 			if (!entity || proj.firedBy === entity) continue;
 			if (!(entity.type === 'player' || entity.type === 'npc')) continue;
+			if (entity.type === 'player' && (entity as Player).cannon) continue;
+			if (entity.type === 'player' && (entity as Player).isSteering) continue;
 
 			const worldPos = entity.parent
 				? (entity.parent as Ship).localToWorld(entity.x, entity.y)

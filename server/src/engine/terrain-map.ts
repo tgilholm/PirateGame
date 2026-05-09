@@ -43,6 +43,7 @@ export default class TerrainMap {
 		// Add all the layers you need here
 		this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
 		this.mapLayers.set('buildings', getTilesetFromLayer(mapData, 'buildings') || new Set());
+		this.mapLayers.set('dock-heal', getTilesetFromLayer(mapData, 'dock-heal') || []);
 
 		this.objectLayers.set('barrel-spawns', getObjectsFromLayer(mapData, 'barrel-spawns'));
 		this.objectLayers.set('palm-spawns', getObjectsFromLayer(mapData, 'palm-spawns'));
@@ -139,6 +140,36 @@ export default class TerrainMap {
 		}
 
 		return layer;
+	}
+
+	public isOnDockHeal(worldX: number, worldY: number): boolean {
+		const tiles = this.mapLayers.get('dock-heal');
+		if (!tiles || tiles.length === 0) return false;
+
+		// Ship is ~124px wide, 48px tall - check multiple points across its hull
+		const checkPoints = [
+			{ x: worldX, y: worldY }, // center
+			{ x: worldX + 48, y: worldY }, // mid-right
+			{ x: worldX - 48, y: worldY }, // mid-left
+			{ x: worldX + 96, y: worldY }, // far right (bow)
+			{ x: worldX - 96, y: worldY }, // far left (stern)
+			{ x: worldX, y: worldY + 24 }, // top edge
+			{ x: worldX, y: worldY - 24 }, // bottom edge
+			{ x: worldX + 48, y: worldY + 24 }, // diagonals
+			{ x: worldX + 48, y: worldY - 24 },
+			{ x: worldX - 48, y: worldY + 24 },
+			{ x: worldX - 48, y: worldY - 24 },
+		];
+
+		for (const point of checkPoints) {
+			const tileX = Math.floor(point.x / this.tileWidth) * this.tileWidth + this.tileWidth / 2;
+			const tileY = Math.floor(point.y / this.tileHeight) * this.tileHeight + this.tileHeight / 2;
+
+			if (tiles.some((tile) => tile.x === tileX && tile.y === tileY)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
