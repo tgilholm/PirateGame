@@ -2,11 +2,11 @@ import Entity from '../entity';
 
 export default class NPC extends Entity {
 	target: Entity | null = null; // who this npc is currently chasing
-	speed: number = 3;
+	speed: number = 16;
 	detectionRadius: number;
 	attackTimer: number = 0;
 	attackTime: number = 500; // ms
-	attackDamage: number = 20; // roughly 5-hit a player
+	attackDamage: number = 10; // roughly 10-hit a player
 	attackRange: number = 8;
 	isAttacking: boolean = false;
 	isDying: boolean = false;

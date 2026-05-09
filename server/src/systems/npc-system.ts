@@ -242,8 +242,6 @@ export default class NPCSystem implements BaseSystem {
 			target.health -= npc.attackDamage;
 			npc.isAttacking = true;
 			npc.markDirty();
-
-			console.log(`npc ${npc.id} attacked ${target.id}. Dist: ${dist}`);
 		}
 	}
 
