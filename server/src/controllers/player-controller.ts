@@ -196,7 +196,7 @@ export default class PlayerController {
 
 	handleRespawn(player: Player): void {
 		player.respawnStarted = false;
-
+		player.respawnTimer = 0;
 		player.deathNotified = false;
 
 		const ship = player.ship;

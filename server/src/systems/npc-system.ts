@@ -276,28 +276,36 @@ export default class NPCSystem implements BaseSystem {
 	getTarget(npc: NPC, nearby: Set<string>) {
 		npc.target = null; // reset target
 
+		if (npc.isDead) return;
+
 		for (const id of nearby) {
 			const entity = this.entityRegistry.get(id);
-			if (!entity) continue;
+			if (!entity || entity.isDead) continue;
 
-			/*
-				Ships can target both players AND ships. Non-ships can only target players.
-			*/
+			// ships can attack both
+			// skeletons, only players
 			if (npc.type === 'npc-ship' && !['player', 'ship'].includes(entity.type)) continue;
 			if (npc.type === 'npc' && entity.type !== 'player') continue;
 
 			const dist = Math.hypot(npc.x - entity.x, npc.y - entity.y);
-			if (dist < npc.detectionRadius && !entity.isDead) {
-				if (npc.parent) {
+			if (dist < npc.detectionRadius) {
+				// Ships target regardless of terrain
+				if (npc.type === 'npc-ship') {
 					npc.target = entity;
-				} else {
-					// Is the player also on an island
-					if (this.terrainMap.isOnIsland(npc.x, npc.y) && this.terrainMap.isOnIsland(entity.x, entity.y)) {
-						npc.target = entity;
-					}
+					break;
 				}
 
-				break; // stop as soon as a target is found
+				// Skeletons (npc type)
+				if (npc.type === 'npc') {
+					const onSameShip = npc.parent && npc.parent === entity.parent;
+					const bothOnIsland =
+						this.terrainMap.isOnIsland(npc.x, npc.y) && this.terrainMap.isOnIsland(entity.x, entity.y);
+
+					if (onSameShip || bothOnIsland) {
+						npc.target = entity;
+						break;
+					}
+				}
 			}
 		}
 	}
