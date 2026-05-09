@@ -72,10 +72,11 @@ const treasureSystem = new TreasureSystem(
 const spawnSystem = new SpawnSystem(terrainMap);
 const combatHandler = new CombatHandler(entityFactory);
 const swordSystem = new SwordSystem(registry, spatialGrid, entityFactory);
+const movementSystem = new MovementSystem(registry, entityConfig, terrainMap);
 
 const engine = new GameEngine({
 	physicsSystem,
-	movementSystem: new MovementSystem(registry, entityConfig, terrainMap),
+	movementSystem,
 	spawnSystem,
 	projectileSystem,
 	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),

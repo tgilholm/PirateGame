@@ -10,6 +10,7 @@ import SoundManager from '../managers/sound-manager.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
 import SettingsUI from '../ui/settings-ui.js';
+import HealParticles from '../ui/heal-particles.js';
 
 /**
  * The main scene of the Phaser game. This class should act as the "orchestrator"
@@ -73,6 +74,8 @@ export class MainScene extends Phaser.Scene {
 		this.soundManager.playMusic('music-main');
 		const wavesSound = this.soundManager.sounds.get('music-waves');
 		if (wavesSound) wavesSound.play();
+
+		this.healParticles = new HealParticles(this);
 
 		const settingsConfig = this.cache.json.get('settings-config') ?? { sfx: 1.0, music: 1.0 };
 		this.settingsUI = new SettingsUI(this.soundManager, settingsConfig);

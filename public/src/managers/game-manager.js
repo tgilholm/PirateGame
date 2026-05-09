@@ -383,6 +383,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.scene.soundManager?.playSfx('sound-sword');
 		});
 
+		this.network.on(ServerEvent.SHIP_HEALED, (data) => {
+			this.scene.healParticles?.playHeal(data.x, data.y);
+		});
+
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 

@@ -55,7 +55,7 @@ export default class SwordSystem implements BaseSystem {
 	}
 
 	public handleSwing(player: Player): void {
-		if (!player.canSwing || player.isDead) return;
+		if (!player.canSwing || player.isDead || player.isSwimming) return;
 
 		player.isSwinging = true;
 		player.swingTimer = Sword.SWING_TIME;
@@ -141,11 +141,11 @@ export default class SwordSystem implements BaseSystem {
 		if (entity.type === 'player') {
 			const p = entity as Player;
 			if (p.parent instanceof Ship) {
-				const ship = p.parent as Ship;
-				const cos = Math.cos(-ship.r);
-				const sin = Math.sin(-ship.r);
-				p.x += (knockbackX * cos - knockbackY * sin) * 0.05;
-				p.y += (knockbackX * sin + knockbackY * cos) * 0.05;
+				//const ship = p.parent as Ship;
+				//const cos = Math.cos(-ship.r);
+				//const sin = Math.sin(-ship.r);
+				//p.x += (knockbackX * cos - knockbackY * sin) * 0.05;
+				//p.y += (knockbackX * sin + knockbackY * cos) * 0.05;
 			} else {
 				p.x += knockbackX * 0.05;
 				p.y += knockbackY * 0.05;

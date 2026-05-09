@@ -35,7 +35,10 @@ export default class MovementSystem implements BaseSystem {
 	constructor(
 		private registry: EntityRegistry,
 		private entityConfig: EntityConfig,
-		private terrainMap: TerrainMap
+		private terrainMap: TerrainMap,
+		private dockHealTimers: Map<string, number> = new Map(), // ship id → ms since last heal
+		private readonly DOCK_HEAL_AMOUNT = 100,
+		private readonly DOCK_HEAL_INTERVAL = 5000 // ms
 	) {}
 
 	/**
@@ -440,6 +443,8 @@ export default class MovementSystem implements BaseSystem {
 	 * @param dt the difference in time from the last update
 	 */
 	updateShip(ship: Ship, dt: number) {
+		const shipWorldX = ship.x;
+		const shipWorldY = ship.y;
 		// Update boost timer
 		if (ship.boostTimer > 0) {
 			ship.boostTimer = Math.max(0, ship.boostTimer - dt * 1000);
@@ -456,7 +461,6 @@ export default class MovementSystem implements BaseSystem {
 		const acceleration = ship.acceleration;
 		const { up, left, right } = ship.inputs;
 		const { turnSpeed } = ship.physics;
-
 		if (right) Body.setAngularVelocity(body, turnSpeed);
 		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
@@ -473,6 +477,44 @@ export default class MovementSystem implements BaseSystem {
 				});
 			}
 			Body.applyForce(body, body.position, { x: forceX, y: forceY });
+		}
+
+		const tileX =
+			Math.floor(shipWorldX / this.terrainMap.tileWidth) * this.terrainMap.tileWidth +
+			this.terrainMap.tileWidth / 2;
+		const tileY =
+			Math.floor(shipWorldY / this.terrainMap.tileHeight) * this.terrainMap.tileHeight +
+			this.terrainMap.tileHeight / 2;
+
+		const onDock = this.terrainMap.isOnDockHeal(shipWorldX, shipWorldY);
+		if (!(ship instanceof NPCShip)) {
+			// Log every 2 seconds so console isn't spammed (20 ticks/s, dt~0.05)
+			const debugTimer = (this.dockHealTimers.get(ship.id + '_debug') ?? 0) + dt * 1000;
+			if (debugTimer >= 2000) {
+				console.log(
+					`[DockHeal] Ship ${ship.id} | pos=(${Math.round(shipWorldX)}, ${Math.round(shipWorldY)}) | onDock=${onDock} | health=${Math.round(ship.health)}/${Math.round(ship.maxHealth)}`
+				);
+				this.dockHealTimers.set(ship.id + '_debug', 0);
+			} else {
+				this.dockHealTimers.set(ship.id + '_debug', debugTimer);
+			}
+
+			if (onDock) {
+				const elapsed = (this.dockHealTimers.get(ship.id) ?? 0) + dt * 1000;
+				if (elapsed >= this.DOCK_HEAL_INTERVAL) {
+					const oldHealth = ship.health;
+					ship.health = Math.min(ship.maxHealth, ship.health + this.DOCK_HEAL_AMOUNT);
+					console.log(
+						`[dockHeal] HEALING Ship ${ship.id}: ${Math.round(oldHealth)} -> ${Math.round(ship.health)}`
+					);
+					ship.markDirty();
+					this.dockHealTimers.set(ship.id, 0);
+				} else {
+					this.dockHealTimers.set(ship.id, elapsed);
+				}
+			} else {
+				this.dockHealTimers.delete(ship.id);
+			}
 		}
 	}
 

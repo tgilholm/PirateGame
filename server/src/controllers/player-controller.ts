@@ -243,7 +243,7 @@ export default class PlayerController {
 
 	handleGunFire(player: Player, lastActionTime: number) {
 		// Wait until reloaded
-		if (!player || player.carrying || !player.isReloaded || player.isSteering) return;
+		if (!player || player.carrying || !player.isReloaded || player.isSteering || player.isSwimming) return;
 		player.reloadTimer = player.reloadTime;
 
 		const worldPos = this.getWorldPosition(player);
