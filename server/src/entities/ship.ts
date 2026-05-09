@@ -15,6 +15,7 @@ export default class Ship extends Entity {
 	dimensions: ShipConfig['dimensions'];
 	physics: ShipConfig['physics'];
 	interactables: Interactable[];
+	shipChoice: number;
 	body: Matter.Body;
 
 	//variables for shift boost
@@ -60,9 +61,12 @@ export default class Ship extends Entity {
 		x: number,
 		y: number,
 		config: ShipConfig,
-		upgradeConfig: UpgradeConfig
+		upgradeConfig: UpgradeConfig,
+		shipChoice: number = 0
 	) {
 		super(id, type, x, y, config.maxHealth, null); // ships have no parents
+
+		this.shipChoice = shipChoice;
 		this.upgradeConfig = upgradeConfig;
 		this.supertypes = ['ship'];
 		this.pilot = null; // Nobody piloting at startup
@@ -105,6 +109,7 @@ export default class Ship extends Entity {
 			boostCooldown: this.boostCooldown,
 			boostCooldownTime: this.boostCooldownTime,
 			isBoosting: this.isBoosting,
+			shipChoice: this.shipChoice,
 		};
 	}
 
