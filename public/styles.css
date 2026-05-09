@@ -21,7 +21,7 @@ body {
 /* ---- Start form ---- */
 #input-form {
 	position: fixed;
-	top: 45%;
+	top: 60%;
 	left: 50%;
 	width: 500px;
 	transform: translate(-50%, -50%);
@@ -30,6 +30,101 @@ body {
 	align-items: center;
 	gap: 12px;
 	z-index: 9999;
+}
+
+#ship-picker {
+	height: fit-content;
+}
+
+.sp-stage {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.sp-viewport {
+	width: 256px;
+	height: 184px;
+	overflow: hidden;
+}
+
+.sp-track {
+	display: flex;
+	width: calc(256px * 5);
+	transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sp-ship-frame {
+	flex-shrink: 0;
+	width: 256px;
+	height: 184px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.sp-sprite {
+	width: 256px;
+	height: 92px;
+	background-image: url('assets/ship-sprites.png');
+	background-repeat: no-repeat;
+	background-size: 256px 468px;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}
+
+.sp-sprite[data-ship='0'] {
+	background-position: 0 0px;
+}
+.sp-sprite[data-ship='1'] {
+	background-position: 0 -94px;
+}
+.sp-sprite[data-ship='2'] {
+	background-position: 0 -188px;
+}
+.sp-sprite[data-ship='3'] {
+	background-position: 0 -282px;
+}
+.sp-sprite[data-ship='4'] {
+	background-position: 0 -376px;
+}
+
+/* Arrows */
+.sp-arrow {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: 1.5px solid rgba(255, 255, 255, 0.5);
+	background: rgba(13, 47, 79, 0.85);
+	color: #fff;
+	font-size: 28px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition:
+		background 0.15s,
+		border-color 0.15s,
+		color 0.15s;
+	z-index: 2;
+}
+.sp-arrow:hover {
+	background: rgba(200, 168, 75, 0.25);
+	border-color: #ffd700;
+	color: #ffd700;
+}
+.sp-arrow:active {
+	transform: translateY(-50%) scale(0.93);
+}
+.sp-arrow.prev {
+	left: -52px;
+}
+.sp-arrow.next {
+	right: -52px;
 }
 
 .colour-btn {
@@ -42,8 +137,8 @@ body {
 
 .colour-btn.selected {
 	border-color: #ffd700 !important;
-	transform: scale(1.2);
-	box-shadow: 0 0 8px #ffd700;
+	transform: scale(1.1);
+	box-shadow: 0 0 4px #ffd700;
 }
 
 #colour-picker {
@@ -68,6 +163,13 @@ body {
 	border: 2px solid #fff;
 	border-radius: 4px;
 	cursor: pointer;
+}
+
+#start-btn {
+	color: #ffd700;
+	font-weight: bold;
+	font-size: 2em;
+	opacity: 90%;
 }
 
 input.formElement {

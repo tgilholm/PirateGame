@@ -91,7 +91,8 @@ export default class SocketService {
 			socket.on(ClientEvent.READY, (data) => {
 				const username = data?.username ?? '';
 				const pirateColour = data?.pirateColour ?? 'default';
-				this.world.addPlayer(socket.id, username, pirateColour);
+				const shipChoice = data?.shipChoice ?? 0;
+				this.world.addPlayer(socket.id, username, pirateColour, shipChoice);
 				socket.emit(ServerEvent.INIT_GAME, { ...this.world.getFullState(), id: socket.id });
 			});
 

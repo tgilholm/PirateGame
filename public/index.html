@@ -78,8 +78,28 @@
 				</div>
 			</div>
 
+			<div class="formElement" id="ship-picker">
+				<span style="font-family: monospace; font-size: 16px; color: #fff">Choose a Ship</span>
+
+				<div class="sp-stage" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center">
+					<button class="sp-arrow prev" id="spPrev" aria-label="Previous ship">&#8249;</button>
+
+					<div class="sp-viewport">
+						<div class="sp-track" id="spTrack">
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="0"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="1"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="2"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="3"></div></div>
+							<div class="sp-ship-frame"><div class="sp-sprite" data-ship="4"></div></div>
+						</div>
+					</div>
+
+					<button class="sp-arrow next" id="spNext" aria-label="Next ship">&#8250;</button>
+				</div>
+			</div>
+
 			<div class="border">
-				<button class="formElement" id="start-btn" type="button">Set Sail</button>
+				<button class="formElement" id="start-btn" type="button">Set Sail!</button>
 			</div>
 		</form>
 

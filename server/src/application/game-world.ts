@@ -133,8 +133,8 @@ export default class GameWorld extends EventEmitter {
 		this.controller.handle(socketId, action);
 	}
 
-	public addPlayer(socketId: string, username: string, pirateColour: string = 'default') {
-		this.sessionHandler.addPlayer(socketId, username, pirateColour);
+	public addPlayer(socketId: string, username: string, pirateColour: string = 'default', shipChoice: number = 0) {
+		this.sessionHandler.addPlayer(socketId, username, pirateColour, shipChoice);
 	}
 
 	public removePlayer(socketId: string) {

@@ -74,8 +74,8 @@ export default class EntityFactory {
 	 * @param y the absolute y coordinate of the ship
 	 * @returns the ship
 	 */
-	public createShip(id: string, x: number, y: number): Ship {
-		const ship = new Ship(id, 'ship', x, y, this.shipConfig, this.upgradeConfig);
+	public createShip(id: string, x: number, y: number, shipChoice: number = 0): Ship {
+		const ship = new Ship(id, 'ship', x, y, this.shipConfig, this.upgradeConfig, shipChoice);
 		this.entityRegistry.create(ship);
 
 		this.shipConfig.interactables.forEach((item, index) => {

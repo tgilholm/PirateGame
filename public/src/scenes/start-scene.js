@@ -9,6 +9,9 @@ export class StartScene extends Phaser.Scene {
 		this.ui = document.getElementById('ui-container');
 		this.form = document.getElementById('input-form');
 		this.logo = document.getElementById('repo-link');
+		this.track = document.getElementById('spTrack');
+		this.current = 0;
+		this.shipChoices = 5;
 
 		// Get the username from the textinput
 		let startBtn = document.getElementById('start-btn');
@@ -205,7 +208,8 @@ export class StartScene extends Phaser.Scene {
 
 		COLOURS.forEach((colour) => {
 			const btn = document.getElementById(`colour-btn-${colour}`);
-			btn.addEventListener('click', () => {
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
 				this.selectedColour = colour;
 				document.querySelectorAll('.colour-btn').forEach((b) => b.classList.remove('selected'));
 				btn.classList.add('selected');
@@ -213,6 +217,19 @@ export class StartScene extends Phaser.Scene {
 		});
 
 		document.getElementById('colour-btn-default').classList.add('selected');
+
+		const prev = document.getElementById('spPrev');
+		const next = document.getElementById('spNext');
+
+		prev.addEventListener('click', (e) => {
+			e.preventDefault();
+			this.goTo(this.current - 1);
+		});
+
+		next.addEventListener('click', (e) => {
+			e.preventDefault();
+			this.goTo(this.current + 1);
+		});
 	}
 
 	/**
@@ -235,8 +252,13 @@ export class StartScene extends Phaser.Scene {
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
-			this.scene.start('MainScene', { username, pirateColour: this.selectedColour });
+			this.scene.start('MainScene', { username, pirateColour: this.selectedColour, shipChoice: this.current });
 		}
+	}
+
+	goTo(index) {
+		this.current = (index + this.shipChoices) % this.shipChoices; // wraparound
+		this.track.style.transform = `translateX(-${this.current * 256}px)`;
 	}
 
 	/**
