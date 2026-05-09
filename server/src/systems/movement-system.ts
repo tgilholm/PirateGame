@@ -10,15 +10,17 @@ import Cannon from '../entities/interactables/cannon';
 import NPC from '../entities/npcs/npc';
 import { TreasureState } from '@shared/socket-protocol';
 import Treasure from '../entities/interactables/treasure';
-import Shop from 'src/entities/shop';
+import Shop from '../entities/shop';
+import NPCShip from '../entities/npcs/npc-ship';
+import Barrel from '../entities/interactables/barrel';
 
 // Players that have moved beyond this threshold are marked "dirty"
 const POS_THRESHOLD = 0.5;
 const MAX_CANNON_SPEED = 20 * (Math.PI / 180); // cannons move towards mouse
 const CANNON_ARC = Math.PI / 4; // 90 deg
-const CHEST_OBSTACLE_RADIUS = 20; // loose + dugup chests
-const HOLE_OBSTACLE_RADIUS = 20; // open holes
-const HOLE_OBSTACLE_RADIUS_Y = 12;
+const CHEST_OBSTACLE_RADIUS = 8; // loose + dugup chests
+const HOLE_OBSTACLE_RADIUS = 8; // open holes
+const HOLE_OBSTACLE_RADIUS_Y = 6;
 
 /**
  * Contains all movement logic for moving entities
@@ -84,6 +86,41 @@ export default class MovementSystem implements BaseSystem {
 		}
 	}
 
+	updateSwimmingDamage(player: Player, dt: number) {
+		if (player.isDead || !player.isSwimming) {
+			// Reset timer when player stops swimming
+			if (!player.isSwimming) {
+				player.swimmingTimer = 0;
+				player.swimmingBubbles = 4;
+				player.markDirty();
+			}
+			return;
+		}
+
+		// Accumulate swimming time
+		player.swimmingTimer += dt * 1000;
+
+		// Calculate how many bubbles should be popped (one every 5 seconds)
+		const expectedBubbles = Math.max(0, 4 - Math.floor(player.swimmingTimer / 2000));
+		if (expectedBubbles !== player.swimmingBubbles) {
+			player.swimmingBubbles = expectedBubbles;
+			player.markDirty();
+		}
+
+		// Start damage after 20 seconds
+		if (player.swimmingTimer >= player.swimmingDamageThreshold) {
+			player.swimmingDamageTimer += dt * 1000;
+
+			if (player.swimmingDamageTimer >= player.swimmingDamageInterval) {
+				player.health -= player.swimmingDamage;
+				player.swimmingDamageTimer = 0;
+				player.markDirty();
+			}
+		} else {
+			player.markDirty(); // Mark dirty to send updated timer
+		}
+	}
+
 	/**
 	 * Applies movement for a given player, accounting for on-ship conditions,
 	 * different movement speed for on-land vs in-sea, collision with inner/outer
@@ -95,6 +132,7 @@ export default class MovementSystem implements BaseSystem {
 		this.updateReloadTimer(player, dt);
 		this.updateRespawnTimer(player, dt);
 		this.updateDashTimer(player, dt);
+		this.updateSwimmingDamage(player, dt);
 
 		// Keep track of aim angle- don't send for static players
 		const prevAimAngle = (player as any).prevAimAngle ?? player.aimAngle;
@@ -162,7 +200,8 @@ export default class MovementSystem implements BaseSystem {
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
-				this.checkShopObstacles(x, y, shops, playerConfig.radius);
+				this.checkShopObstacles(x, y, shops, playerConfig.radius) ||
+				this.checkPalmTreeObstacles(x, y, playerConfig.radius);
 
 			if (!isColliding(nextX, nextY)) {
 				player.x = nextX;
@@ -242,7 +281,9 @@ export default class MovementSystem implements BaseSystem {
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
-				this.checkShopObstacles(x, y, shops, playerConfig.radius);
+				this.checkShopObstacles(x, y, shops, playerConfig.radius) ||
+				this.checkPalmTreeObstacles(x, y, playerConfig.radius) ||
+				this.checkBarrelObstacles(x, y, playerConfig.radius);
 
 			if (!isColliding(nextWorldX, nextWorldY)) {
 				player.x = nextWorldX;
@@ -342,6 +383,30 @@ export default class MovementSystem implements BaseSystem {
 		return false;
 	}
 
+	private checkPalmTreeObstacles(x: number, y: number, playerRadius: number): boolean {
+		const trees = this.registry.getByType('palm-tree');
+		const TREE_RADIUS = 8; // reduced from 12
+		const TRUNK_OFFSET_Y = 12; // shift hitbox down toward the trunk
+		for (const tree of trees) {
+			const dx = x - tree.x;
+			const dy = y - (tree.y + TRUNK_OFFSET_Y);
+			if (dx * dx + dy * dy < (TREE_RADIUS + playerRadius) ** 2) return true;
+		}
+		return false;
+	}
+
+	private checkBarrelObstacles(x: number, y: number, playerRadius: number): boolean {
+		const barrels = this.registry.getByType<Barrel>('barrel');
+		const BARREL_RADIUS = 16;
+		for (const barrel of barrels) {
+			if (!barrel.hasItem) continue; // broken barrels don't block
+			const dx = x - barrel.x;
+			const dy = y - barrel.y;
+			if (dx * dx + dy * dy < (BARREL_RADIUS + playerRadius) ** 2) return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Updates a given ship's movement by applying force/angular velocity from the provided inputs.
 	 * @param ship the ship to update
@@ -365,10 +430,6 @@ export default class MovementSystem implements BaseSystem {
 		const { up, left, right } = ship.inputs;
 		const { turnSpeed } = ship.physics;
 
-		const DRIFT_FRICTION = 0.015;
-		const BASE_FRICTION = ship.physics.frictionAir;
-		body.frictionAir = ship.pilot ? BASE_FRICTION : DRIFT_FRICTION;
-
 		if (right) Body.setAngularVelocity(body, turnSpeed);
 		if (left) Body.setAngularVelocity(body, -turnSpeed);
 
@@ -384,7 +445,6 @@ export default class MovementSystem implements BaseSystem {
 					y: Math.sin(body.angle) * 2,
 				});
 			}
-
 			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
 	}
@@ -426,18 +486,40 @@ export default class MovementSystem implements BaseSystem {
 	}
 
 	updateNPC(npc: NPC, dt: number) {
-		// If there is a target, continually move towards it
-		if (!npc.target) return; // <-- Remove when npcs can move independently
-
-		// Get angle to target
 		const target = npc.target;
-		const angle = Math.atan2(npc.y - target.y, npc.x - target.x);
+		const parent = npc.parent as NPCShip | null;
 
-		const dx = npc.speed * Math.cos(angle);
-		const dy = npc.speed * Math.sin(angle);
+		if (!target) {
+			return;
+		}
 
-		// Move towards target
-		npc.x -= dx;
-		npc.y -= dy;
+		const npcWorld = parent ? parent.localToWorld(npc.x, npc.y) : { x: npc.x, y: npc.y };
+
+		const targetWorld = target.parent
+			? (target.parent as Ship).localToWorld(target.x, target.y)
+			: { x: target.x, y: target.y };
+
+		const angle = Math.atan2(targetWorld.y - npcWorld.y, targetWorld.x - npcWorld.x);
+		const nextWorldX = npcWorld.x + Math.cos(angle) * npc.speed * dt;
+		const nextWorldY = npcWorld.y + Math.sin(angle) * npc.speed * dt;
+
+		if (parent) {
+			const newLocal = parent.worldToLocal(nextWorldX, nextWorldY);
+			const padding = 8;
+
+			if (parent.isInside(newLocal.x, newLocal.y, padding)) {
+				npc.x = newLocal.x;
+				npc.y = newLocal.y;
+			} else {
+				// Slide logic
+				npc.x = parent.isInside(newLocal.x, npc.y, padding) ? newLocal.x : npc.x;
+				npc.y = parent.isInside(npc.x, newLocal.y, padding) ? newLocal.y : npc.y;
+			}
+		} else {
+			npc.x = nextWorldX;
+			npc.y = nextWorldY;
+		}
+
+		npc.markDirty();
 	}
 }

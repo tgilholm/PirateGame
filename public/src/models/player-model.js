@@ -7,6 +7,7 @@ import ReloadIndicator from '../ui/reload-indicator.js';
 import RespawnIndicator from '../ui/respawn-indicator.js';
 import DashCooldown from '../ui/dash-bar.js';
 import SwordSwing from '../ui/sword-swing.js';
+import SwimmingBubbles from '../ui/swimming-bubbles.js';
 
 /**
  * Client-side Player. Owns presentation concerns for player objects
@@ -42,6 +43,14 @@ export default class PlayerModel extends Model {
 		this.swingCooldownTime = 600;
 		this.wasSwinging = false;
 		this.isSwimming = false;
+		this.shootTimer = 0;
+		this.shootDuration = 200; //  how long the shoot anim plays
+		this.swimmingBubbles = new SwimmingBubbles(scene, this);
+		this.swimmingTimer = 0;
+		this.bubblesRemaining = 4;
+		this.swingAnimTimer = 0;
+		this.swingAnimDuration = 300;
+		this.setDepth(10);
 
 		this.nameText = scene.add
 			.text(0, -16, '', {
@@ -89,7 +98,12 @@ export default class PlayerModel extends Model {
 		if (data.gold !== undefined) this.gold = data.gold;
 		if (data.isSteering !== undefined) this.isSteering = data.isSteering;
 		if (data.isUsingCannon !== undefined) this.isUsingCannon = data.isUsingCannon;
-		if (data.reloadTimer !== undefined) this.reloadTimer = data.reloadTimer;
+		if (data.reloadTimer !== undefined) {
+			if (data.reloadTimer > this.reloadTimer) {
+				this.shootTimer = this.shootDuration;
+			}
+			this.reloadTimer = data.reloadTimer;
+		}
 		if (data.reloadTime !== undefined) this.reloadTime = data.reloadTime;
 		if (data.dashCooldown !== undefined) this.dashCooldownVal = data.dashCooldown;
 		if (data.dashCooldownTime !== undefined) this.dashCooldownTime = data.dashCooldownTime;
@@ -106,15 +120,28 @@ export default class PlayerModel extends Model {
 			}
 			this.pirateColour = data.pirateColour;
 		}
-
 		if (data.swingCooldown !== undefined) this.swingCooldown = data.swingCooldown;
 		if (data.swingCooldownTime !== undefined) this.swingCooldownTime = data.swingCooldownTime;
 		if (data.isSwinging !== undefined) {
 			if (data.isSwinging && !this.wasSwinging) {
 				this.swordSwing.trigger();
+				this.swingAnimTimer = this.swingAnimDuration;
+				const colour = this.pirateColour ?? 'default';
+				const angle = this.aimAngle;
+				let atkDir;
+				if (Math.abs(Math.cos(angle)) > Math.abs(Math.sin(angle))) {
+					atkDir = angle > -Math.PI / 2 && angle < Math.PI / 2 ? 'right' : 'left';
+				} else {
+					atkDir = angle > 0 ? 'down' : 'up';
+				}
+				this.bodySprite.play(`pirate-${colour}-atk-${atkDir}`, true);
+				this.lastAnim = '';
 			}
 			this.wasSwinging = data.isSwinging;
 		}
+		if (data.swimmingTimer !== undefined) this.swimmingTimer = data.swimmingTimer;
+		if (data.swimmingBubbles !== undefined) this.bubblesRemaining = data.swimmingBubbles;
+
 		if ('carryingId' in data) {
 			this.carryingId = data.carryingId;
 		}
@@ -132,6 +159,10 @@ export default class PlayerModel extends Model {
 		const pos = this.worldPos;
 		const isBusy = this.isSteering || this.isUsingCannon || this.isDead; // busy dyin'
 		const showCarry = !!this.carryingId;
+
+		if (this.shootTimer > 0) this.shootTimer = Math.max(0, this.shootTimer - delta);
+		if (this.swingAnimTimer > 0) this.swingAnimTimer = Math.max(0, this.swingAnimTimer - delta);
+		if (this.shootTimer > 0) this.shootTimer = Math.max(0, this.shootTimer - delta);
 
 		if (this.parentContainer) {
 			this.rotation = -this.parentContainer.rotation;
@@ -158,6 +189,7 @@ export default class PlayerModel extends Model {
 		this.dashCooldown.update(this.dashCooldownVal, this.dashCooldownTime, delta);
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
+		this.swimmingBubbles.update(this.bubblesRemaining, this.isSwimming);
 
 		// Visual feedback for 'dead' players
 		this.nameText.setColor(this.isDead ? '#ee0000' : '#ffffff'); // red: dead, white: alive
@@ -190,12 +222,36 @@ export default class PlayerModel extends Model {
 			this.playAnim('pirate-death');
 			return;
 		}
+
+		if (this.swingAnimTimer > 0) return;
+
+		if (this.shootTimer > 0) {
+			let shootDir;
+			if (Math.abs(Math.cos(this.aimAngle)) > Math.abs(Math.sin(this.aimAngle))) {
+				shootDir = this.aimAngle > -Math.PI / 2 && this.aimAngle < Math.PI / 2 ? 'right' : 'left';
+			} else {
+				shootDir = this.aimAngle > 0 ? 'down' : 'up';
+			}
+			this.playAnim(`pirate-shoot-${shootDir}`);
+			return;
+		}
+
+		if (this.activeMinigame) {
+			const digDir = Math.abs(Math.cos(this.aimAngle)) > Math.abs(Math.sin(this.aimAngle)) ? 'right' : 'left';
+			this.playAnim(`pirate-dig-${digDir}`);
+			return;
+		}
+
 		if (this.isSteering || this.isUsingCannon) {
 			this.playAnim('pirate-idle-down');
 			return;
 		}
 		if (speed < 0.1) {
-			this.playAnim(`pirate-idle-${this.lastDirection}`);
+			if (this.isSwimming) {
+				this.playAnim('pirate-swim');
+			} else {
+				this.playAnim(`pirate-idle-${this.lastDirection}`);
+			}
 			return;
 		}
 		// Swimming idle is handled above via pirate-idle-* — only override movement anims
@@ -241,7 +297,7 @@ export default class PlayerModel extends Model {
 		this.reloadIndicator?.destroy();
 		this.swordSwing?.destroy();
 		this.dashCooldown?.destroy();
-
+		this.swimmingBubbles?.destroy();
 		super.destroy();
 	}
 }

@@ -6,8 +6,10 @@ import UIManager from '../managers/ui-manager.js';
 import InputManager from '../managers/input-manager.js';
 import ModelFactory from '../managers/model-factory.js';
 import AnimationManager from '../managers/animation-manager.js';
+import SoundManager from '../managers/sound-manager.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
+import SettingsUI from '../ui/settings-ui.js';
 
 /**
  * The main scene of the Phaser game. This class should act as the "orchestrator"
@@ -67,6 +69,13 @@ export class MainScene extends Phaser.Scene {
 		this.inputManager = new InputManager(this);
 		this.gameManager = new GameManager(this, new NetworkManager(socket), this.inputManager, modelFactory);
 		this.animationManager = new AnimationManager(this);
+		this.soundManager = new SoundManager(this);
+		this.soundManager.playMusic('music-main');
+		const wavesSound = this.soundManager.sounds.get('music-waves');
+		if (wavesSound) wavesSound.play();
+
+		const settingsConfig = this.cache.json.get('settings-config') ?? { sfx: 1.0, music: 1.0 };
+		this.settingsUI = new SettingsUI(this.soundManager, settingsConfig);
 
 		const minimap = new Minimap(this.map, canvas);
 		this.shopUI = new ShopUI(this.gameManager, upgradeConfig, (name) => {
@@ -87,6 +96,10 @@ export class MainScene extends Phaser.Scene {
 			const maxZoom = 2.5;
 
 			this.targetZoom = Phaser.Math.Clamp(this.targetZoom + step, minZoom, maxZoom);
+		});
+
+		this.inputManager.on('settings', () => {
+			this.settingsUI.toggle();
 		});
 
 		// Contain the camera in the map

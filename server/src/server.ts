@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 import path from 'path';
 import SocketService from './application/socket-service';
 import { CONFIG } from './config';
-import GameWorld from './application/game-world';
+import GameWorld, { WorldEvent } from './application/game-world';
 import EntityRegistry from './engine/entity-registry';
 import EntityFactory from './entities/entity-factory';
 import entityConfig from '../../shared/entity-config.json';
@@ -71,6 +71,7 @@ const treasureSystem = new TreasureSystem(
 	onEntityRemoved
 );
 const spawnSystem = new SpawnSystem(terrainMap);
+const combatHandler = new CombatHandler(entityFactory);
 const swordSystem = new SwordSystem(registry, spatialGrid, entityFactory);
 
 const engine = new GameEngine({
@@ -79,7 +80,7 @@ const engine = new GameEngine({
 	spawnSystem,
 	projectileSystem,
 	messageSystem: new MessageSystem(),
-	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, addPhysicsBody),
+	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
 	treasureSystem,
 	swordSystem,
 });
@@ -94,7 +95,6 @@ const sessionHandler = new SessionHandler(
 	removePhysicsBody,
 	onEntityRemoved
 );
-const combatHandler = new CombatHandler(entityFactory);
 
 const worldController = new WorldController(registry, sessionHandler, swordSystem, {
 	playerController: new PlayerController(
@@ -120,6 +120,10 @@ const gameWorld = new GameWorld(
 	sessionHandler
 );
 const socketService = new SocketService(io, gameWorld);
+
+swordSystem.onSwingResult = (attackerId, hitEnemy) => {
+	gameWorld.emit(hitEnemy ? WorldEvent.SWORD_HIT : WorldEvent.SWORD_SWING, attackerId);
+};
 
 socketService.initialise();
 

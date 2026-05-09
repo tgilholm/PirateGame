@@ -48,6 +48,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.minimalNPCs = [];
 		this.minimalShips = [];
 		this.minimalShops = [];
+		this.coconutToolTip = null;
 
 		this.startListeners();
 	}
@@ -110,6 +111,46 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 				}
 
 				this.interactables.add(entity);
+			}
+			// Show coconut tooltip for nearby palm trees
+			let nearestTree = null;
+			let nearestTreeDist = Infinity;
+
+			this.models.forEach((entity) => {
+				if (entity.entityType !== 'palm-tree') return;
+				const dist = Phaser.Math.Distance.Between(
+					this.localPlayer.worldPos.x,
+					this.localPlayer.worldPos.y,
+					entity.worldPos.x,
+					entity.worldPos.y
+				);
+				if (dist < 100 && dist < nearestTreeDist) {
+					nearestTreeDist = dist;
+					nearestTree = entity;
+				}
+			});
+
+			// Create the Phaser text object once
+			if (!this.coconutTooltip) {
+				this.coconutTooltip = this.scene.add
+					.text(0, 0, '', {
+						fontSize: '12px',
+						fontFamily: 'Consolas',
+						color: '#ffffff',
+						backgroundColor: '#00000099',
+						padding: { x: 4, y: 2 },
+					})
+					.setDepth(200)
+					.setVisible(false);
+			}
+
+			if (nearestTree) {
+				const pos = nearestTree.worldPos;
+				this.coconutTooltip.setText(`🥥 ${nearestTree.coconuts ?? 0}`);
+				this.coconutTooltip.setPosition(pos.x - this.coconutTooltip.width / 2, pos.y - 48);
+				this.coconutTooltip.setVisible(true);
+			} else {
+				this.coconutTooltip.setVisible(false);
 			}
 
 			entity.update(delta);
@@ -218,6 +259,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		// @ts-ignore reparent the player if they left a ship
 		if (data.type === 'player') this.handleReparent(model, data);
 		if (data.type === 'treasure') this.handleTreasureReparent(model, data);
+		if (data.type === 'npc') this.handleNPCReparent(model, data);
 		model.sync(data);
 	}
 
@@ -228,6 +270,20 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	applyDelta(delta) {
 		const model = this.models.get(delta.id);
 		if (!model) return;
+
+		if (model.entityType === 'palm-tree') {
+			/** @type {any} */
+			const tree = model;
+
+			if (delta.coconuts !== undefined && delta.coconuts < tree.coconuts) {
+				const pos = tree.worldPos;
+				this.scene.animationManager?.playLeafBurst(pos.x, pos.y);
+			}
+			if (delta.hitCount !== undefined) {
+				tree.shake();
+			}
+		}
+
 		// @ts-ignore
 		if (model instanceof PlayerModel && delta.parentId !== undefined) {
 			this.handleReparent(model, delta);
@@ -237,10 +293,22 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.handleTreasureReparent(model, delta); // <--
 		}
 
+		//captures wasSwinging before sync updates
+		const wasSwinging = delta.id === this.playerId && model instanceof PlayerModel ? model.wasSwinging : false;
+		const prevGold = delta.id === this.playerId && model instanceof PlayerModel ? model.gold : 0;
+		if (model.entityType === 'npc' && delta.parentId !== undefined) {
+			this.handleNPCReparent(model, delta); // <--
+		}
+
 		model.sync(delta);
 
 		if (delta.id === this.playerId && delta.activeMinigame !== undefined) {
+			if (delta.activeMinigame) this.scene.soundManager?.playSfx('sound-dig');
 			this.digMinigame.sync(delta.activeMinigame);
+		}
+
+		if (delta.id === this.playerId && delta.gold !== undefined && delta.gold > prevGold) {
+			this.scene.soundManager?.playSfx('sound-pickup-money');
 		}
 
 		if (delta.upgrades !== undefined && delta.id === this.localPlayer.shipId) {
@@ -307,6 +375,14 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			this.digMinigame.stop();
 		});
 
+		this.network.on(ServerEvent.SWORD_HIT, () => {
+			this.scene.soundManager?.playSfx('sound-sword-hit');
+		});
+
+		this.network.on(ServerEvent.SWORD_SWING, () => {
+			this.scene.soundManager?.playSfx('sound-sword');
+		});
+
 		// Delta packet: full for new models and known models that have changed
 		this.network.on(ServerEvent.GAME_STATE, (data) => this.onDeltaSync(data));
 
@@ -329,6 +405,10 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		});
 
 		this.input.on('interact', () => {
+			if (this.digMinigame.active) {
+				this.network.sendFire();
+				return;
+			}
 			const target = this.closestInteractable;
 			if (target?.entity) {
 				const closest = target.entity;
@@ -349,6 +429,24 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 
 		this.input.on('fire', () => {
 			this.network.sendFire();
+
+			const player = this.localPlayer;
+			if (!player) return;
+
+			if (player.isUsingCannon) {
+				const cannon = [...this.models.values()].find((m) => m.type === 'cannon' && m.userId === player.id);
+				if (!cannon || cannon.reloadTimer > 0) return;
+			} else if (player.isSteering) {
+				const anyReady = [...this.models.values()].some(
+					(m) => m.type === 'cannon' && m.parentId === player.parentId && m.reloadTimer <= 0
+				);
+				if (!anyReady) return;
+			} else if (player.reloadTimer > 0) {
+				return;
+			}
+
+			const sfx = player.isUsingCannon || player.isSteering ? 'sound-cannon' : 'sound-gun';
+			this.scene.soundManager?.playSfx(sfx);
 		});
 
 		this.input.on('release', () => this.network.sendRelease());
@@ -369,6 +467,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 	handleReparent(player, data) {
 		if (player.parentId === data.parentId) return;
 		this.closestInteractable = null; // reset closest interactable
+		if (player.id === this.playerId) this.scene.soundManager?.playSfx('sound-climb');
 
 		const ship = data.parentId ? this.models.get(data.parentId) : null;
 
@@ -402,8 +501,23 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		treasure.parentId = newParentId;
 	}
 
+	handleNPCReparent(npc, data) {
+		const newParentId = data.parentId ?? null;
+		if (npc.parentId === newParentId) return;
+
+		const ship = newParentId ? this.models.get(newParentId) : null;
+
+		if (ship) {
+			ship.add(npc);
+		} else {
+			this.scene.add.existing(npc);
+		}
+
+		npc.parentId = newParentId;
+	}
+
 	/**
-	 * Finds and assigns the local player when they have joined
+	 *finds and assigns the local player when they have joined
 	 */
 	resolveLocalPlayer() {
 		if (this.localPlayer || !this.playerId) return;
@@ -413,7 +527,17 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 			// @ts-ignore
 			this.localPlayer = mine;
 			this.emit('localPlayerReady', this.localPlayer);
+			this.scheduleYell();
 		}
+	}
+
+	//schedules a random yell sfx to play every 20-100 seconds
+	scheduleYell() {
+		const delay = Phaser.Math.Between(20000, 100000);
+		this.scene.time.delayedCall(delay, () => {
+			this.scene.soundManager?.playSfx('sound-yell');
+			this.scheduleYell();
+		});
 	}
 
 	// destroy game manager
@@ -423,6 +547,7 @@ export default class GameManager extends Phaser.Events.EventEmitter {
 		this.models.forEach((e) => e.destroy());
 		this.models.clear();
 		this.localPlayer = null;
+		this.coconutTooltip?.destroy();
 	}
 
 	buyUpgrade(name) {

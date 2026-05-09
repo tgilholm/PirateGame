@@ -27,7 +27,7 @@ export default class SwordSwing {
 
 		const progress = 1 - this.swingTimer / this.swingDuration;
 		const arc = Math.PI * 0.75;
-		const range = 80;
+		const range = 40;
 
 		// Sweep the arc as progress goes 0->1
 		const startAngle = aimAngle - arc / 2;

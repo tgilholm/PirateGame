@@ -13,6 +13,7 @@ export default class ShopModel extends InteractableModel {
 	 */
 	constructor(scene, id, x, y) {
 		super(scene, null, id, 'shop', x, y, 'shop', 'Use Shop', '');
+		this.sprite.setVisible(false);
 		this.isInteractable = true;
 		this.type = 'shop';
 		this.interactRange = 100;
@@ -28,6 +29,8 @@ export default class ShopModel extends InteractableModel {
 
 			const gfx = scene.make.graphics({ x: 0, y: 0 }, false);
 
+			gfx.clear();
+
 			// Filled gold body
 			gfx.fillStyle(0xf5c542, 1);
 			gfx.fillCircle(cx, cy, radius);
@@ -37,6 +40,7 @@ export default class ShopModel extends InteractableModel {
 			gfx.strokeCircle(cx, cy, radius);
 
 			gfx.generateTexture(textureKey, size, size);
+			gfx.closePath();
 			gfx.destroy();
 		}
 
