@@ -139,21 +139,18 @@ export default class PlayerController {
 
 	handleRespawnShip(player: Player): void {
 		// Respawn ship & player at a new location
-		// TODO: Ensure player is a set distance from their death point
-
 		const ship = player.ship;
 		const { x, y } = this.spawnSystem.getSpawnPoint();
 
-		ship.body.position.x = x;
-		ship.body.position.y = y;
+		// Everything must be reset through matter to change properly
+		Matter.Body.setPosition(ship.body, { x, y });
+		Matter.Body.setVelocity(ship.body, { x: 0, y: 0 });
+		Matter.Body.setAngle(ship.body, 0);
+		Matter.Body.setAngularVelocity(ship.body, 0);
+
 		ship.x = x;
 		ship.y = y;
 		ship.health = ship.maxHealth;
-
-		// velocity has to be set like this
-		// ship.vx is mirrored directly from the physics body
-		const vec = Matter.Vector.create(0, 0);
-		Matter.Body.setVelocity(ship.body, vec);
 
 		// tell client to skip extrapolation
 		ship.pendingTeleport = true;

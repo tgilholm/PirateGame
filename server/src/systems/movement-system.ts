@@ -474,12 +474,6 @@ export default class MovementSystem implements BaseSystem {
 			}
 			Body.applyForce(body, body.position, { x: forceX, y: forceY });
 		}
-
-		ship.health -= 0.5;
-		if (!(ship instanceof NPCShip))
-			console.log(
-				`Body Pos ${ship.body.position.x}, ${ship.body.position.y}, Mirrored Pos: ${ship.x}, ${ship.y}.`
-			);
 	}
 
 	updateCannon(cannon: Cannon, dt: number) {
