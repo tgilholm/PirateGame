@@ -3,7 +3,7 @@
 		"maxHealth": 100,
 		"runSpeed": 3,
 		"swimSpeed": 1.5,
-		"radius": 8
+		"radius": 4
 	},
 	"ship": {
 		"maxHealth": 1000,

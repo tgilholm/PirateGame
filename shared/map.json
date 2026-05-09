@@ -10135,6 +10135,2378 @@
 			"spacing": 0,
 			"tilecount": 432,
 			"tileheight": 16,
+			"tiles": [
+				{
+					"id": 0,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 1,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 2,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 3,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 5,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 6,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 7,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 8,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 9,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 10,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 12,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 13,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 14,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 15,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 16,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 27,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 28,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 29,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 30,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 32,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 33,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 34,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 35,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 36,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 37,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 39,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 40,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 41,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 42,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 43,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 54,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 55,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 56,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 57,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 59,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 60,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 61,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 62,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 63,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 64,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 66,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 67,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 68,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 69,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 70,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 81,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 82,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 83,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 84,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 86,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 87,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 88,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 89,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 90,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 91,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 93,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 94,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 95,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 96,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 97,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 108,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 109,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 110,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 111,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 113,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 114,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 115,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 116,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 117,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 118,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 120,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 121,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 122,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 123,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 124,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 135,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 136,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 137,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 138,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 140,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 141,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 142,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 143,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 144,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 145,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 147,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 148,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 149,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 150,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 151,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 162,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 163,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 164,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 165,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 166,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 167,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 168,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 169,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 170,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 171,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 172,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 173,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 174,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 175,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 176,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 177,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 178,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 179,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 180,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 181,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 182,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 183,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 184,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 185,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 189,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 190,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 191,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 192,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 193,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 194,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 195,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 196,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 197,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 198,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 199,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 200,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 201,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 202,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 203,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 204,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 205,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 206,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 207,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 208,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 209,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 210,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 211,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 212,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 216,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 217,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 218,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 219,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 220,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 221,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 222,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 223,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 224,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 225,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 226,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 227,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 228,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 229,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 230,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 231,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 232,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 233,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 234,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 235,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 236,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 237,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 238,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 239,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 243,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 244,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 245,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 246,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 247,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 248,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 249,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 250,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 251,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 252,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 253,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 254,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 255,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 256,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 257,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 258,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 259,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 260,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 261,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 262,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 263,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 264,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 265,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 266,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 270,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 271,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 272,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 273,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 274,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 275,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 276,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 277,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 278,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 279,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 280,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 281,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 297,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 298,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 299,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 300,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 301,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 302,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 303,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 304,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 305,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 306,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 307,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 308,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 324,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 325,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 326,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 327,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 328,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 329,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 330,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 331,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 332,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 351,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 352,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 353,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 354,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 355,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 356,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 357,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 358,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 359,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 378,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 379,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 380,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 381,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 382,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 383,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 384,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 385,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				},
+				{
+					"id": 386,
+					"properties": [
+						{
+							"name": "collidesPlayer",
+							"type": "bool",
+							"value": true
+						}
+					]
+				}
+			],
 			"tilewidth": 16
 		},
 		{

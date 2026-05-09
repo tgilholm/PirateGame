@@ -201,7 +201,9 @@ export default class MovementSystem implements BaseSystem {
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
 				this.checkShopObstacles(x, y, shops, playerConfig.radius) ||
-				this.checkPalmTreeObstacles(x, y, playerConfig.radius);
+				this.checkPalmTreeObstacles(x, y, playerConfig.radius) ||
+				this.checkBarrelObstacles(x, y, playerConfig.radius) ||
+				this.checkWallObstacles(x, y, playerConfig.radius);
 
 			if (!isColliding(nextX, nextY)) {
 				player.x = nextX;
@@ -277,13 +279,14 @@ export default class MovementSystem implements BaseSystem {
 
 			const shops = this.registry.getByType<Shop>('shop');
 
-			// Collide with exterior of ships
+			// Collide
 			const isColliding = (x: number, y: number) =>
 				this.checkShipCollisions(x, y, ships, collisionPadding) ||
 				this.checkTreasureObstacles(x, y, groundTreasures, playerConfig.radius) ||
 				this.checkShopObstacles(x, y, shops, playerConfig.radius) ||
 				this.checkPalmTreeObstacles(x, y, playerConfig.radius) ||
-				this.checkBarrelObstacles(x, y, playerConfig.radius);
+				this.checkBarrelObstacles(x, y, playerConfig.radius) ||
+				this.checkWallObstacles(x, y, playerConfig.radius);
 
 			if (!isColliding(nextWorldX, nextWorldY)) {
 				player.x = nextWorldX;
@@ -379,6 +382,30 @@ export default class MovementSystem implements BaseSystem {
 			const radiusSum = playerRadius + s.radius;
 
 			if (distanceSquared < radiusSum * radiusSum) return true;
+		}
+		return false;
+	}
+
+	private checkWallObstacles(x: number, y: number, playerRadius: number): boolean {
+		const tileSize = this.terrainMap.tileWidth;
+
+		// Define the bounding box of the player in world space
+		const left = x - playerRadius;
+		const right = x + playerRadius;
+		const top = y - playerRadius;
+		const bottom = y + playerRadius;
+
+		// Convert bounding box to tile coordinates
+		const startX = Math.floor(left / tileSize);
+		const endX = Math.floor(right / tileSize);
+		const startY = Math.floor(top / tileSize);
+		const endY = Math.floor(bottom / tileSize);
+
+		// Only check tiles within the player's immediate area
+		for (let tx = startX; tx <= endX; tx++) {
+			for (let ty = startY; ty <= endY; ty++) {
+				if (this.terrainMap.isWall(tx, ty)) return true;
+			}
 		}
 		return false;
 	}
@@ -516,8 +543,16 @@ export default class MovementSystem implements BaseSystem {
 				npc.y = parent.isInside(npc.x, newLocal.y, padding) ? newLocal.y : npc.y;
 			}
 		} else {
-			npc.x = nextWorldX;
-			npc.y = nextWorldY;
+			const npcRadius = 8;
+			const isBlocked = (nx: number, ny: number) => this.checkWallObstacles(nx, ny, npcRadius);
+
+			if (!isBlocked(nextWorldX, nextWorldY)) {
+				npc.x = nextWorldX;
+				npc.y = nextWorldY;
+			} else {
+				if (!isBlocked(nextWorldX, npc.y)) npc.x = nextWorldX;
+				else if (!isBlocked(npc.x, nextWorldY)) npc.y = nextWorldY;
+			}
 		}
 
 		npc.markDirty();

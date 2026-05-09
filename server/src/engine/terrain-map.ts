@@ -12,8 +12,9 @@ import { getTilesetFromLayer, getObjectsFromLayer } from '../utils/tiles';
 export default class TerrainMap {
 	private mapLayers: Map<string, Array<{ x: number; y: number }>> = new Map();
 	private objectLayers: Map<string, Array<{ x: number; y: number; type: string; rotation: number }>> = new Map();
-
+	private wallLookup: Set<string> = new Set();
 	public npcPaths: Map<string, Array<{ x: number; y: number }>> = new Map();
+
 	public readonly tileWidth: number;
 	public readonly tileHeight: number;
 	public readonly mapWidth: number;
@@ -43,6 +44,7 @@ export default class TerrainMap {
 		// Add all the layers you need here
 		this.mapLayers.set('islands', getTilesetFromLayer(mapData, 'islands') || new Set());
 		this.mapLayers.set('buildings', getTilesetFromLayer(mapData, 'buildings') || new Set());
+		this.mapLayers.set('walls', getTilesetFromLayer(mapData, 'buildings', 'collidesPlayer') || new Set());
 
 		this.objectLayers.set('barrel-spawns', getObjectsFromLayer(mapData, 'barrel-spawns'));
 		this.objectLayers.set('palm-spawns', getObjectsFromLayer(mapData, 'palm-spawns'));
@@ -67,6 +69,18 @@ export default class TerrainMap {
 		});
 
 		console.log(`[TerrainMap] Loaded ${this.npcPaths.size} ship paths. Total nodes: ${total}`);
+
+		const wallTiles = this.mapLayers.get('walls');
+		if (wallTiles) {
+			wallTiles.forEach((tile) => {
+				// Store as "tileX,tileY" for O(1) lookup
+				const tx = Math.floor(tile.x / this.tileWidth);
+				const ty = Math.floor(tile.y / this.tileHeight);
+				this.wallLookup.add(`${tx},${ty}`);
+			});
+		}
+
+		console.log(`[TerrainMap] Loaded ${wallTiles?.length} wall tiles`);
 	}
 
 	/**
@@ -91,6 +105,10 @@ export default class TerrainMap {
 			islandTiles.some((tile) => tile.x === tileX && tile.y === tileY) ||
 			buildingTiles.some((tile) => tile.x === tileX && tile.y === tileY)
 		);
+	}
+
+	public isWall(tx: number, ty: number): boolean {
+		return this.wallLookup.has(`${tx},${ty}`);
 	}
 
 	/**
