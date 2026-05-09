@@ -65,6 +65,9 @@ export default class PlayerModel extends Model {
 			.setPosition(0, -8);
 		this.add(this.nameText);
 
+		this.shadowSprite = scene.add.ellipse(0, 8, 12, 4, 0x22222, 0.3);
+		this.add(this.shadowSprite);
+
 		this.bodySprite = scene.add.sprite(0, 0, 'pirate_default');
 		this.add(this.bodySprite);
 
@@ -190,6 +193,8 @@ export default class PlayerModel extends Model {
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 		this.respawnIndicator.update(this.respawnTimer);
 		this.swimmingBubbles.update(this.bubblesRemaining, this.isSwimming);
+
+		this.shadowSprite.setVisible(!this.isSwimming);
 
 		// Visual feedback for 'dead' players
 		this.nameText.setColor(this.isDead ? '#ee0000' : '#ffffff'); // red: dead, white: alive
