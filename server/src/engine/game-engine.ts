@@ -1,6 +1,5 @@
 import NPCSystem from '../systems/npc-system';
 import { BaseSystem } from '../systems/base-system';
-import MessageSystem from '../systems/message-system';
 import MovementSystem from '../systems/movement-system';
 import PhysicsSystem from '../systems/physics-system';
 import ProjectileSystem from '../systems/projectile-system';
@@ -15,7 +14,6 @@ export interface GameSystems {
 	physicsSystem: PhysicsSystem;
 	movementSystem: MovementSystem;
 	projectileSystem: ProjectileSystem;
-	messageSystem: MessageSystem;
 	npcSystem: NPCSystem;
 	treasureSystem: TreasureSystem;
 	spawnSystem: SpawnSystem;
@@ -37,7 +35,6 @@ export default class GameEngine {
 		this.systems.set('movement', systems.movementSystem);
 		this.systems.set('physics', systems.physicsSystem);
 		this.systems.set('projectile', systems.projectileSystem);
-		this.systems.set('message', systems.messageSystem);
 		this.systems.set('npc', systems.npcSystem);
 		this.systems.set('treasure', systems.treasureSystem);
 		this.systems.set('spawns', systems.spawnSystem);

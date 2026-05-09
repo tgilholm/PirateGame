@@ -64,6 +64,8 @@ export default class EntityFactory {
 	): Player {
 		const player = new Player(id, x, y, parent, username, this.playerConfig, pirateColour);
 		this.entityRegistry.create(player);
+
+		player.pendingTeleport = true;
 		return player;
 	}
 

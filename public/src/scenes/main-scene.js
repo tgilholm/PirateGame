@@ -86,9 +86,6 @@ export class MainScene extends Phaser.Scene {
 		this.cameraTarget = this.add.circle(0, 0, 5, 0xffffff, 0);
 		const camera = this.cameras.main;
 
-		camera.startFollow(this.cameraTarget, true, 0.1, 0.1);
-		camera.zoom = this.targetZoom;
-
 		this.inputManager.on('zoom', (deltaY) => {
 			const step = deltaY > 0 ? -0.1 : 0.1;
 
@@ -105,6 +102,9 @@ export class MainScene extends Phaser.Scene {
 		// Contain the camera in the map
 		this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 		this.gameManager.start(data.username, data.pirateColour ?? 'default', data.shipChoice ?? 0);
+
+		camera.startFollow(this.cameraTarget, true, 0.1, 0.1);
+		camera.zoom = this.targetZoom;
 
 		this.gameManager.on('shipSunk', () => {
 			this.uiManager.showShipSunkMessage();
