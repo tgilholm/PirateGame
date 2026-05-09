@@ -43,6 +43,8 @@ export default class ProjectileSystem implements BaseSystem {
 			this.collideShip(projectile, nearby);
 			if (projectile.ttl <= 0) return;
 			this.collideShop(projectile, nearby);
+			if (projectile.ttl <= 0) return;
+			this.collideWalls(projectile);
 		});
 	}
 
@@ -124,6 +126,29 @@ export default class ProjectileSystem implements BaseSystem {
 				this.destroyEntity(proj);
 			}
 		});
+	}
+
+	collideWalls(proj: Projectile): void {
+		const tileSize = this.terrain.tileWidth;
+
+		// Define the bounding box of the player in world space
+		const left = proj.x - proj.radius;
+		const right = proj.x + proj.radius;
+		const top = proj.y - proj.radius;
+		const bottom = proj.y + proj.radius;
+
+		// Convert bounding box to tile coordinates
+		const startX = Math.floor(left / tileSize);
+		const endX = Math.floor(right / tileSize);
+		const startY = Math.floor(top / tileSize);
+		const endY = Math.floor(bottom / tileSize);
+
+		// Only check tiles within the player's immediate area
+		for (let tx = startX; tx <= endX; tx++) {
+			for (let ty = startY; ty <= endY; ty++) {
+				if (this.terrain.isWall(tx, ty)) this.destroyEntity(proj);
+			}
+		}
 	}
 
 	/**

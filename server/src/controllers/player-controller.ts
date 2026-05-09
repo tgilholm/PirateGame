@@ -139,21 +139,18 @@ export default class PlayerController {
 
 	handleRespawnShip(player: Player): void {
 		// Respawn ship & player at a new location
-		// TODO: Ensure player is a set distance from their death point
-
 		const ship = player.ship;
 		const { x, y } = this.spawnSystem.getSpawnPoint();
 
-		ship.body.position.x = x;
-		ship.body.position.y = y;
+		// Everything must be reset through matter to change properly
+		Matter.Body.setPosition(ship.body, { x, y });
+		Matter.Body.setVelocity(ship.body, { x: 0, y: 0 });
+		Matter.Body.setAngle(ship.body, 0);
+		Matter.Body.setAngularVelocity(ship.body, 0);
+
 		ship.x = x;
 		ship.y = y;
 		ship.health = ship.maxHealth;
-
-		// velocity has to be set like this
-		// ship.vx is mirrored directly from the physics body
-		const vec = Matter.Vector.create(0, 0);
-		Matter.Body.setVelocity(ship.body, vec);
 
 		// tell client to skip extrapolation
 		ship.pendingTeleport = true;
@@ -199,7 +196,7 @@ export default class PlayerController {
 
 	handleRespawn(player: Player): void {
 		player.respawnStarted = false;
-
+		player.respawnTimer = 0;
 		player.deathNotified = false;
 
 		const ship = player.ship;
@@ -249,27 +246,14 @@ export default class PlayerController {
 		if (!player || player.carrying || !player.isReloaded || player.isSteering || player.isSwimming) return;
 		player.reloadTimer = player.reloadTime;
 
-		// Calculate time between this event and the last packet
-		const now = Date.now();
-		const latency = (now - lastActionTime) / 1000;
-
 		const worldPos = this.getWorldPosition(player);
-
-		// Spawn the bullet at the client's next visual position, not their interp target
-		let spawnX = worldPos.x - player.vx * latency;
-		let spawnY = worldPos.y - player.vy * latency;
-
-		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, spawnX, spawnY, player.aimAngle);
+		const bullet = new Bullet(`bullet_${Date.now()}_${player.id}`, worldPos.x, worldPos.y, player.aimAngle);
 
 		// Apply parent velocity only if on ship
 		if (player.parent && player.parent instanceof Ship) {
 			bullet.vx += player.parent.vx;
 			bullet.vy += player.parent.vy;
 		}
-
-		// catch up to where the bullet should originally have been fired
-		bullet.x += bullet.vx * latency;
-		bullet.y += bullet.vy * latency;
 
 		bullet.firedBy = player;
 		this.entityRegistry.create(bullet);

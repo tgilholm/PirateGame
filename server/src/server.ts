@@ -18,7 +18,6 @@ import GameEngine from './engine/game-engine';
 import PhysicsSystem from './systems/physics-system';
 import MovementSystem from './systems/movement-system';
 import ProjectileSystem from './systems/projectile-system';
-import MessageSystem from './systems/message-system';
 import { Engine } from 'matter-js';
 import TerrainMap from './engine/terrain-map';
 import WorldController from './controllers/world-controller';
@@ -80,7 +79,6 @@ const engine = new GameEngine({
 	movementSystem,
 	spawnSystem,
 	projectileSystem,
-	messageSystem: new MessageSystem(),
 	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
 	treasureSystem,
 	swordSystem,

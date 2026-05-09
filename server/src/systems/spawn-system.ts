@@ -37,6 +37,7 @@ export default class SpawnSystem implements BaseSystem {
 		//     distances.sort();
 		//     dist = distances[0];
 		// }
+
 		return spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
 	}
 }
