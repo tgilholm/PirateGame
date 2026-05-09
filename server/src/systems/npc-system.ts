@@ -81,7 +81,13 @@ export default class NPCSystem implements BaseSystem {
 				this.patrol(npc, paths.get(npc.pathName), dt);
 			} else {
 				// non-ship NPCs
-				this.attackTarget(npc, npc.target);
+
+				if (npc.target) {
+					this.attackTarget(npc, npc.target);
+				} else {
+					this.getPatrolTarget(npc);
+					this.moveToPatrolTarget(npc, dt);
+				}
 			}
 		}
 	}
@@ -93,6 +99,62 @@ export default class NPCSystem implements BaseSystem {
 			if (npc.attackTimer <= 0) {
 				npc.isAttacking = false;
 			}
+			npc.markDirty();
+		}
+	}
+
+	moveToPatrolTarget(npc: NPC, dt: number) {
+		if (npc.target || npc.parent) return; // chasing player
+		if (!npc.hasPatrolTarget) return;
+
+		const { patrolPointX, patrolPointY } = npc;
+
+		const dx = patrolPointX - npc.x;
+		const dy = patrolPointY - npc.y;
+		const dist = Math.sqrt(dx * dx + dy * dy);
+
+		// Calculate frame-independent movement step
+		const step = npc.speed * dt;
+
+		// snap to target if close
+		if (dist <= step) {
+			npc.x = patrolPointX;
+			npc.y = patrolPointY;
+			npc.clearPatrolTarget();
+			npc.markDirty();
+			return;
+		}
+
+		// angle to target
+		const angle = Math.atan2(dy, dx);
+
+		npc.x += Math.cos(angle) * step;
+		npc.y += Math.sin(angle) * step;
+
+		npc.markDirty();
+	}
+
+	getPatrolTarget(npc: NPC) {
+		if (npc.target || npc.parent) return;
+		if (npc.hasPatrolTarget) return;
+
+		// Get all coordinates around the npc
+		const coords = this.terrainMap.getTileset('islands').filter((tile) => {
+			const dx = tile.x - npc.x;
+			const dy = tile.y - npc.y;
+			const dist = Math.sqrt(dx * dx + dy * dy);
+
+			return dist < 250;
+		});
+
+		const dest = coords[Math.floor(Math.random() * coords.length)];
+
+		const dist = Math.sqrt((npc.x - dest.x) ** 2 + (npc.y - dest.y) ** 2);
+
+		if (dist > 32) {
+			// only move if reasonably far away
+			npc.patrolPointX = dest.x;
+			npc.patrolPointY = dest.y;
 			npc.markDirty();
 		}
 	}
@@ -226,7 +288,15 @@ export default class NPCSystem implements BaseSystem {
 
 			const dist = Math.hypot(npc.x - entity.x, npc.y - entity.y);
 			if (dist < npc.detectionRadius && !entity.isDead) {
-				npc.target = entity;
+				if (npc.parent) {
+					npc.target = entity;
+				} else {
+					// Is the player also on an island
+					if (this.terrainMap.isOnIsland(npc.x, npc.y) && this.terrainMap.isOnIsland(entity.x, entity.y)) {
+						npc.target = entity;
+					}
+				}
+
 				break; // stop as soon as a target is found
 			}
 		}
