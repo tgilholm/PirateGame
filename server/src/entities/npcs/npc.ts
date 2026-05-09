@@ -24,6 +24,9 @@ export default class NPC extends Entity {
 	) {
 		super(id, type, x, y, 75, parent);
 
+		this.width = 48;
+		this.width = 48;
+
 		this.detectionRadius = detectionRadius;
 	}
 

@@ -13,6 +13,7 @@ export default class HealthBar {
 	 * @param {number} maxHealth
 	 */
 	update(x, y, health, maxHealth) {
+		/** @type {Phaser.GameObjects.Graphics} */
 		const g = this.graphics;
 		g.clear();
 
@@ -30,6 +31,8 @@ export default class HealthBar {
 		const color = ratio > 0.5 ? 0x44ff44 : ratio > 0.25 ? 0xffaa00 : 0xff3333;
 		g.fillStyle(color, 0.9);
 		g.fillRect(bx, by, w * ratio, h);
+
+		health <= 0 ? g.setVisible(false) : g.setVisible(true);
 	}
 
 	destroy() {

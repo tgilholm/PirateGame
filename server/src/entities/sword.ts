@@ -1,5 +1,5 @@
 export default class Sword {
-	public static readonly RANGE = 40;
+	public static readonly RANGE = 55;
 	public static readonly ARC = Math.PI * 0.75; // radius of sword swing
 	public static readonly DAMAGE = 35;
 	public static readonly KNOCKBACK = 350;

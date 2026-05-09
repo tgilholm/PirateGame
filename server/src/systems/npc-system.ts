@@ -71,22 +71,24 @@ export default class NPCSystem implements BaseSystem {
 		this.generateNPCs(allNpcs);
 
 		for (const npc of allNpcs) {
-			const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
-			this.reap(npc);
-			this.getTarget(npc, nearby);
-			this.updateTimer(npc, dt);
+			if (!npc.isDead) {
+				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
+				this.reap(npc);
+				this.getTarget(npc, nearby);
+				this.updateTimer(npc, dt);
 
-			if (npc instanceof NPCShip) {
-				this.fireCannons(npc, npc.target);
-				this.patrol(npc, paths.get(npc.pathName), dt);
-			} else {
-				// non-ship NPCs
-
-				if (npc.target) {
-					this.attackTarget(npc, npc.target);
+				if (npc instanceof NPCShip) {
+					this.fireCannons(npc, npc.target);
+					this.patrol(npc, paths.get(npc.pathName), dt);
 				} else {
-					this.getPatrolTarget(npc);
-					this.moveToPatrolTarget(npc, dt);
+					// non-ship NPCs
+
+					if (npc.target) {
+						this.attackTarget(npc, npc.target);
+					} else {
+						this.getPatrolTarget(npc);
+						this.moveToPatrolTarget(npc, dt);
+					}
 				}
 			}
 		}
