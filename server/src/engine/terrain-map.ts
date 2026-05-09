@@ -11,7 +11,7 @@ import { getTilesetFromLayer, getObjectsFromLayer } from '../utils/tiles';
  */
 export default class TerrainMap {
 	private mapLayers: Map<string, Array<{ x: number; y: number }>> = new Map();
-	private objectLayers: Map<string, Array<{ x: number; y: number; type: string }>> = new Map();
+	private objectLayers: Map<string, Array<{ x: number; y: number; type: string; rotation: number }>> = new Map();
 
 	public npcPaths: Map<string, Array<{ x: number; y: number }>> = new Map();
 	public readonly tileWidth: number;
@@ -129,7 +129,7 @@ export default class TerrainMap {
 		return layer;
 	}
 
-	public getObjectLayer(objectLayerName: string): Array<{ x: number; y: number; type: string }> {
+	public getObjectLayer(objectLayerName: string): Array<{ x: number; y: number; type: string; rotation: number }> {
 		const layer = this.objectLayers.get(objectLayerName);
 
 		if (!layer) {
