@@ -41,7 +41,7 @@ export function getTilesetFromLayer(mapData: any, layerName: string): Array<{ x:
 export function getObjectsFromLayer(
 	mapData: any,
 	objectLayerName: string
-): Array<{ x: number; y: number; type: string }> {
+): Array<{ x: number; y: number; type: string; rotation: number }> {
 	// all object layers are grouped under "spawns"
 	const spawns = mapData.layers.find((l: any) => l.name === 'spawns'); // all spawn layers
 
@@ -49,7 +49,7 @@ export function getObjectsFromLayer(
 
 	// object layers are uncompressed
 	const output = objectLayer.objects.map((object: any) => {
-		return { x: object.x, y: object.y, type: object.type }; // type is present if a class is specified
+		return { x: object.x, y: object.y, type: object.type, rotation: object.rotation }; // type is present if a class is specified
 	});
 
 	console.log(`[Tiles] Loaded ${output.length} tiles from layer: ${objectLayerName}`);
