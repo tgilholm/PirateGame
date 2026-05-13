@@ -16,8 +16,8 @@ export default class TreasureSystem implements BaseSystem {
 	private spawnTime = 5000; // spawn treasure every 5s
 	private spawnTimer = 0;
 	private nextTreasureId = 1;
-	private minGold: number = 10;
-	private maxGold: number = 75;
+	private minGold: number = 250;
+	private maxGold: number = 750;
 	private maxTreasures: number = 10;
 
 	// maps dig events to players via their id
