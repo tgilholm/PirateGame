@@ -76,8 +76,8 @@ export default class TreasureModel extends InteractableModel {
 
 		this.scene.tweens.add({
 			targets: this.sprite,
-			scaleX: 1.15,
-			scaleY: 1.15,
+			scaleX: 0.5,
+			scaleY: 0.5,
 			duration: 140,
 			yoyo: true,
 			ease: 'Back.Out',

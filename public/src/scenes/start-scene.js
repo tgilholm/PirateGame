@@ -119,8 +119,8 @@ export class StartScene extends Phaser.Scene {
 		this.load.image('hole', '/assets/hole.png');
 		this.load.image('money-stack', '/assets/money-stack.png');
 		this.load.spritesheet('chest_open', '/assets/chestopen.png', {
-			frameWidth: 48,
-			frameHeight: 48,
+			frameWidth: 64,
+			frameHeight: 64,
 		});
 		this.load.image('chest-in-hole', '/assets/chestinhole.png');
 		this.load.image('coconut', '/assets/coconut.png');
@@ -215,6 +215,7 @@ export class StartScene extends Phaser.Scene {
 		this.anims.create({
 			key: 'chest-open',
 			frames: [
+				{ key: 'chest_open', frame: 0 },
 				{ key: 'chest_open', frame: 0 },
 				{ key: 'chest_open', frame: 1 },
 				{ key: 'chest_open', frame: 2 },
