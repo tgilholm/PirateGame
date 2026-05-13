@@ -71,9 +71,10 @@ export default class NPCSystem implements BaseSystem {
 		this.generateNPCs(allNpcs);
 
 		for (const npc of allNpcs) {
+			this.reap(npc);
+
 			if (!npc.isDead) {
 				const nearby = this.spatialGrid.getNearby(npc.x, npc.y);
-				this.reap(npc);
 				this.getTarget(npc, nearby);
 				this.updateTimer(npc, dt);
 

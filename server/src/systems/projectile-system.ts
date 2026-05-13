@@ -29,9 +29,6 @@ export default class ProjectileSystem implements BaseSystem {
 	 */
 	update(dt: number): void {
 		const projectiles = this.entityRegistry.getByType<Projectile>('projectile');
-		const players = this.entityRegistry.getByType<Player>('player');
-		const ships = this.entityRegistry.getByType<Ship>('ship');
-		const shops = this.entityRegistry.getByType<Shop>('shop');
 
 		projectiles.forEach((projectile) => {
 			const nearby = this.grid.getNearby(projectile.x, projectile.y);
