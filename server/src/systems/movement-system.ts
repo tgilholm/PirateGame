@@ -488,25 +488,11 @@ export default class MovementSystem implements BaseSystem {
 
 		const onDock = this.terrainMap.isOnDockHeal(shipWorldX, shipWorldY);
 		if (!(ship instanceof NPCShip)) {
-			// Log every 2 seconds so console isn't spammed (20 ticks/s, dt~0.05)
-			const debugTimer = (this.dockHealTimers.get(ship.id + '_debug') ?? 0) + dt * 1000;
-			if (debugTimer >= 2000) {
-				console.log(
-					`[DockHeal] Ship ${ship.id} | pos=(${Math.round(shipWorldX)}, ${Math.round(shipWorldY)}) | onDock=${onDock} | health=${Math.round(ship.health)}/${Math.round(ship.maxHealth)}`
-				);
-				this.dockHealTimers.set(ship.id + '_debug', 0);
-			} else {
-				this.dockHealTimers.set(ship.id + '_debug', debugTimer);
-			}
-
 			if (onDock) {
 				const elapsed = (this.dockHealTimers.get(ship.id) ?? 0) + dt * 1000;
 				if (elapsed >= this.DOCK_HEAL_INTERVAL) {
 					const oldHealth = ship.health;
 					ship.health = Math.min(ship.maxHealth, ship.health + this.DOCK_HEAL_AMOUNT);
-					console.log(
-						`[dockHeal] HEALING Ship ${ship.id}: ${Math.round(oldHealth)} -> ${Math.round(ship.health)}`
-					);
 					ship.markDirty();
 					this.dockHealTimers.set(ship.id, 0);
 				} else {
