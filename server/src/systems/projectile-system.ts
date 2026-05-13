@@ -8,6 +8,7 @@ import Entity from '../entities/entity';
 import Shop from '../entities/shop';
 import { SplashEvent, SplashType } from '@shared/socket-protocol';
 import TerrainMap from '../engine/terrain-map';
+import NPC from 'src/entities/npcs/npc';
 
 /**
  * Updates all projectile objects each tick. Handles collisions between
@@ -73,6 +74,7 @@ export default class ProjectileSystem implements BaseSystem {
 			if (!(entity.type === 'player' || entity.type === 'npc')) continue;
 			if (entity.type === 'player' && (entity as Player).cannon) continue;
 			if (entity.type === 'player' && (entity as Player).isSteering) continue;
+			if (entity.type === 'npc' && (entity as NPC).parent) continue;
 
 			const worldPos = entity.parent
 				? (entity.parent as Ship).localToWorld(entity.x, entity.y)
