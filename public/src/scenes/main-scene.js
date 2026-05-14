@@ -10,6 +10,7 @@ import SoundManager from '../managers/sound-manager.js';
 import Minimap from '../ui/minimap.js';
 import ShopUI from '../ui/shop-ui.js';
 import SettingsUI from '../ui/settings-ui.js';
+import TutorialUI from '../ui/tutorial-ui.js';
 import HealParticles from '../ui/heal-particles.js';
 
 /**
@@ -79,6 +80,7 @@ export class MainScene extends Phaser.Scene {
 
 		const settingsConfig = this.cache.json.get('settings-config') ?? { sfx: 1.0, music: 1.0 };
 		this.settingsUI = new SettingsUI(this.soundManager, settingsConfig);
+		this.tutorialUI = new TutorialUI();
 
 		const minimap = new Minimap(this.map, canvas);
 		this.shopUI = new ShopUI(this.gameManager, upgradeConfig, (name) => {
@@ -100,6 +102,10 @@ export class MainScene extends Phaser.Scene {
 
 		this.inputManager.on('settings', () => {
 			this.settingsUI.toggle();
+		});
+
+		this.inputManager.on('tutorial', () => {
+			this.tutorialUI.toggle();
 		});
 
 		// Contain the camera in the map

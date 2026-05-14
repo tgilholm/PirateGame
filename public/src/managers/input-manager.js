@@ -48,6 +48,9 @@ export default class InputManager extends Phaser.Events.EventEmitter {
 		const settingsButton = document.getElementById('settings-button');
 		settingsButton.addEventListener('click', () => this.emit('settings'));
 
+		const tutorialButton = document.getElementById('tutorial-button');
+		tutorialButton.addEventListener('click', () => this.emit('tutorial'));
+
 		scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
 			this.emit('zoom', deltaY);
 		});
