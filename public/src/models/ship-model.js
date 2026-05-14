@@ -20,8 +20,10 @@ export default class ShipModel extends Model {
 		this.interactables = [];
 		this.pilotId = null;
 		this.angularVelocity = 0;
+
 		this.swayTimer = Math.random() * 1000; // For the random sine-wave "bobbing"
 		this.shipChoice = null;
+		this.lastHealth = 0;
 
 		// const textureKey = `hull_${this.dimensions.height}_${this.dimensions.middleWidth}`;
 		// this.getHullTexture(textureKey);
@@ -70,6 +72,10 @@ export default class ShipModel extends Model {
 			this.initialised = true;
 		}
 
+		if (this.lastHealth === undefined) {
+			this.lastHealth = data.health || 0;
+		}
+
 		if (data.av !== undefined) this.angularVelocity = data.av;
 		if (data.pilotId !== undefined) this.pilotId = data.pilotId;
 		if (data.upgrades !== undefined) this.upgrades = data.upgrades;
@@ -116,6 +122,14 @@ export default class ShipModel extends Model {
 		});
 
 		const pos = this.worldPos;
+		if (this.health > this.lastHealth) {
+			// Trigger particles at the ship's position
+			if (this.scene.healParticles) {
+				this.scene.healParticles.playHeal(this.worldPos.x, this.worldPos.y);
+			}
+			this.lastHealth = this.health;
+		}
+
 		this.healthBar.update(pos.x, pos.y, this.health, this.maxHealth);
 	}
 

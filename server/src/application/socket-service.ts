@@ -90,6 +90,10 @@ export default class SocketService {
 			this.io.to(attackerId).emit(ServerEvent.SWORD_SWING);
 		});
 
+		this.world.on(WorldEvent.SHIP_HEALED, (data: { x: number; y: number }) => {
+			this.io.emit(ServerEvent.SHIP_HEALED, data);
+		});
+
 		// Handle new clients
 		this.io.on('connection', (socket: Socket) => {
 			console.log(`[SocketService] Client connected: ${socket.id}`);

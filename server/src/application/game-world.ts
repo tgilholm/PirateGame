@@ -25,6 +25,7 @@ export enum WorldEvent {
 	SHIP_SUNK = 'SHIP_SUNK',
 	SWORD_HIT = 'SWORD_HIT',
 	SWORD_SWING = 'SWORD_SWING',
+	SHIP_HEALED = 'SHIP_HEALED',
 }
 
 /**

@@ -183,7 +183,7 @@ export default class AnimationManager {
 				frameRate: 12,
 				repeat: 0,
 			},
-			{ key: 'skelly-left-death', texture: 'skelly_left', frames: rowFrames(5, 0, 5), frameRate: 12, repeat: 0 },
+			{ key: 'skelly-left-death', texture: 'skelly_left', frames: rowFrames(5, 0, 22), frameRate: 12, repeat: 0 },
 		];
 
 		for (const def of defs) {
