@@ -183,6 +183,7 @@ export default class AnimationManager {
 				frameRate: 12,
 				repeat: 0,
 			},
+			//had to remove a comma
 			{ key: 'skelly-left-death', texture: 'skelly_left', frames: rowFrames(5, 0, 22), frameRate: 12, repeat: 0 },
 		];
 
