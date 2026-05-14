@@ -61,6 +61,9 @@ export default class UIManager {
 		const settingsButton = document.getElementById('settings-button');
 		if (settingsButton) settingsButton.style.display = 'block';
 
+		const tutorialButton = document.getElementById('tutorial-button');
+		if (tutorialButton) tutorialButton.style.display = 'block';
+
 		this.currentInteractable = null;
 
 		this.lastGold = null;
