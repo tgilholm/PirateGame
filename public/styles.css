@@ -834,20 +834,15 @@ h2 {
 	min-height: 0;
 	min-width: 0;
 	box-sizing: border-box;
-
 	border: 1px solid rgba(255, 255, 255, 0.2);
 	border-radius: 4px;
-
 	padding: 12px 16px;
-
 	color: #ccc;
 	font-size: clamp(8px, 1vw, 18px);
-
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	text-align: center;
-
 	overflow: hidden;
 }
 
