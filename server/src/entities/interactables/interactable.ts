@@ -7,6 +7,7 @@ import Player from '../player';
 export default class Interactable extends Entity {
 	user: Player | null;
 	interactRange: number = 50;
+	isDestructible: boolean = false;
 
 	constructor(id: string, x: number, y: number, parent: Entity | null, entityType: string = 'interactable') {
 		super(id, entityType, x, y, Infinity, parent);
@@ -19,5 +20,12 @@ export default class Interactable extends Entity {
 		const dy = this.worldPos.y - player.worldPos.y;
 
 		return Math.sqrt(dx * dx + dy * dy) <= this.interactRange;
+	}
+
+	toState() {
+		return {
+			...super.toState(),
+			isDestructible: this.isDestructible,
+		};
 	}
 }

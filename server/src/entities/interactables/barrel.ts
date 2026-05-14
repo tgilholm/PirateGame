@@ -13,6 +13,8 @@ export default class Barrel extends Interactable {
 		this.interactRange = 60;
 		this.height = 32;
 		this.width = 32;
+
+		this.isDestructible = true;
 	}
 
 	toState() {

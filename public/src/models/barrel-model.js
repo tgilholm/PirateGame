@@ -2,7 +2,7 @@ import InteractableModel from './interactable-model.js';
 
 export default class BarrelModel extends InteractableModel {
 	constructor(scene, id, x, y) {
-		super(scene, null, id, 'barrel', x, y, 'barrel', '', '');
+		super(scene, null, id, 'barrel', x, y, 'barrel', 'Hit barrel', '');
 		this.isInteractable = false;
 		this.hasItem = true;
 		this.health = 2;

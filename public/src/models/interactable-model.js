@@ -37,4 +37,10 @@ export default class InteractableModel extends Model {
 			this.parentId = null;
 		}
 	}
+
+	sync(data) {
+		super.sync(data);
+
+		this.isDestructible = data.isDestructible;
+	}
 }
