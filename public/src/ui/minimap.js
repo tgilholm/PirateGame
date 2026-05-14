@@ -44,6 +44,12 @@ export default class Minimap {
 		this.context.fill();
 	}
 
+	/**
+	 * Draws the local player's marker with a circle and text
+	 * @param {number} worldX the position of the player in the x axis
+	 * @param {number} worldY the position of the player in the y axis
+	 * @returns nothing
+	 */
 	drawLocalPlayerMarker(worldX, worldY) {
 		if (!this.context) return;
 
