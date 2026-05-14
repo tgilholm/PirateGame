@@ -26,7 +26,7 @@ export default class Treasure extends Interactable {
 		return { x: this.x, y: this.y };
 	}
 
-	protected override toState(): Record<string, any> {
+	toState() {
 		return {
 			...super.toState(),
 			x: this.x,

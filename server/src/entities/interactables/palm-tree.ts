@@ -14,6 +14,7 @@ export default class PalmTree extends Interactable {
 		this._maxHealth = Infinity; // trees dont die, just get hit
 		this.health = Infinity;
 		this.interactRange = 80;
+		this.isDestructible = true;
 		this.width = 63;
 		this.height = 68;
 	}

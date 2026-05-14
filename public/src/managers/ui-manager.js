@@ -222,7 +222,11 @@ export default class UIManager {
 		}
 
 		if (target && !isInteracting) {
-			useText = `[E] ${target.entity.usePrompt || 'Interact'}`;
+			if (target.entity.isDestructible) {
+				useText = `[RMB] ${target.entity.usePrompt || 'Hit'}`;
+			} else {
+				useText = `[E] ${target.entity.usePrompt || 'Interact'}`;
+			}
 		}
 
 		if (this.gameManager.playerListDirty) {
