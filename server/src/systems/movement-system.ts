@@ -544,7 +544,7 @@ export default class MovementSystem implements BaseSystem {
 		const target = npc.target;
 		const parent = npc.parent as NPCShip | null;
 
-		if (!target) {
+		if (!target || npc.isDead || npc.isDying) {
 			return;
 		}
 

@@ -1,7 +1,7 @@
 {
 	"player": {
 		"maxHealth": 100,
-		"runSpeed": 3,
+		"runSpeed": 2.25,
 		"swimSpeed": 1.5,
 		"radius": 8
 	},
