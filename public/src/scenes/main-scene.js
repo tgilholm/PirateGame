@@ -81,6 +81,7 @@ export class MainScene extends Phaser.Scene {
 		const settingsConfig = this.cache.json.get('settings-config') ?? { sfx: 1.0, music: 1.0 };
 		this.settingsUI = new SettingsUI(this.soundManager, settingsConfig);
 		this.tutorialUI = new TutorialUI();
+		this.tutorialUI.show();
 
 		const minimap = new Minimap(this.map, canvas);
 		this.shopUI = new ShopUI(this.gameManager, upgradeConfig, (name) => {
