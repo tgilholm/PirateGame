@@ -49,7 +49,7 @@
 		]
 	},
 	"npcShip": {
-		"maxHealth": 2500,
+		"maxHealth": 1250,
 		"dimensions": {
 			"height": 48,
 			"middleWidth": 48,

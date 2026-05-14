@@ -259,9 +259,6 @@ export default class NPCSystem implements BaseSystem {
 
 			// Delay removal to let death animation finish (~1 second)
 			setTimeout(() => {
-				this.spatialGrid.remove(npc.id);
-				this.entityRegistry.delete(npc.id);
-
 				if (npc instanceof NPCShip) {
 					this.npcShipPaths.delete(npc.pathName);
 
@@ -276,6 +273,9 @@ export default class NPCSystem implements BaseSystem {
 					});
 					this.removePhysicsBody(npc.body);
 				}
+
+				this.spatialGrid.remove(npc.id);
+				this.entityRegistry.delete(npc.id);
 
 				const money = this.entityFactory.createInteractable(
 					npc.parent as Ship | null,

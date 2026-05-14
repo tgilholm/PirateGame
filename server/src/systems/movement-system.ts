@@ -347,7 +347,7 @@ export default class MovementSystem implements BaseSystem {
 	private checkShipCollisions(x: number, y: number, ships: Ship[], padding: number): boolean {
 		for (const ship of ships) {
 			const local = ship.worldToLocal(x, y);
-			if (ship.isInside(local.x, local.y, padding)) return true;
+			if (ship.isInside(local.x, local.y, padding) && !ship.isDead) return true;
 		}
 		return false;
 	}
