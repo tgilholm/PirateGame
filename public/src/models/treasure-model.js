@@ -34,20 +34,22 @@ export default class TreasureModel extends InteractableModel {
 				this.playChestReveal();
 			}
 		}
-
 		this.applyVisuals();
 	}
 
 	applyVisuals() {
 		if (this.state === TreasureState.BURIED) {
 			this.sprite.setTexture('x-mark');
+			this.sprite.setDisplaySize(24, 24);
 			this.isInteractable = true;
 		} else if (this.state === TreasureState.OPENING) {
 			this.sprite.setTexture('chest_open');
+			this.sprite.setDisplaySize(32, 32);
 			this.isInteractable = false;
 		} else if (this.state === TreasureState.DUGUP) {
 			this.usePrompt = 'Pick up treasure';
 			this.sprite.setTexture('chest-in-hole');
+			this.sprite.setDisplaySize(32, 32);
 			this.isInteractable = true;
 		} else if (this.state === TreasureState.CARRIED) {
 			this.sprite.setVisible(false);
@@ -56,9 +58,11 @@ export default class TreasureModel extends InteractableModel {
 			this.sprite.setVisible(true);
 			this.usePrompt = 'Pick up treasure';
 			this.sprite.setTexture('treasure-chest');
+			this.sprite.setDisplaySize(19, 14);
 			this.isInteractable = true;
 		} else if (this.state === TreasureState.HOLE) {
 			this.sprite.setTexture('hole');
+			this.sprite.setDisplaySize(32, 32);
 			this.isInteractable = false;
 		}
 

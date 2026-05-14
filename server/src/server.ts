@@ -126,6 +126,10 @@ const gameWorld = new GameWorld(
 	terrainMap,
 	sessionHandler
 );
+
+// NOW set gameWorld on movementSystem
+(movementSystem as any).gameWorld = gameWorld;
+
 const socketService = new SocketService(io, gameWorld);
 
 swordSystem.onSwingResult = (attackerId, hitEnemy) => {

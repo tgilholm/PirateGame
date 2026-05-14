@@ -38,7 +38,8 @@ export default class MovementSystem implements BaseSystem {
 		private terrainMap: TerrainMap,
 		private dockHealTimers: Map<string, number> = new Map(), // ship id → ms since last heal
 		private readonly DOCK_HEAL_AMOUNT = 100,
-		private readonly DOCK_HEAL_INTERVAL = 5000 // ms
+		private readonly DOCK_HEAL_INTERVAL = 5000,
+		private gameWorld?: any
 	) {}
 
 	/**
@@ -495,6 +496,11 @@ export default class MovementSystem implements BaseSystem {
 					ship.health = Math.min(ship.maxHealth, ship.health + this.DOCK_HEAL_AMOUNT);
 					ship.markDirty();
 					this.dockHealTimers.set(ship.id, 0);
+
+					// ONLY EMIT HEAL EVENT IF HEALTH ACTUALLY INCREASED
+					if (ship.health > oldHealth && this.gameWorld) {
+						this.gameWorld.emit('SHIP_HEALED', { x: ship.x, y: ship.y });
+					}
 				} else {
 					this.dockHealTimers.set(ship.id, elapsed);
 				}
