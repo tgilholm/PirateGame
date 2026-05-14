@@ -307,6 +307,9 @@ export default class TreasureSystem implements BaseSystem {
 			player.markDirty();
 
 			this.registry.delete(treasure.id);
+			this.grid.remove(treasure.id);
+
+			treasure.markDirty();
 		}
 	}
 

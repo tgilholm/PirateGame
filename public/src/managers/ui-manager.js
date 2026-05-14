@@ -228,7 +228,7 @@ export default class UIManager {
 			}
 		}
 
-		if (target && !isInteracting) {
+		if (target && !isInteracting && target.entity.health > 0) {
 			if (target.entity.isDestructible) {
 				useText = `[RMB] ${target.entity.usePrompt || 'Hit'}`;
 			} else {

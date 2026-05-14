@@ -10,7 +10,7 @@ export default class Interactable extends Entity {
 	isDestructible: boolean = false;
 
 	constructor(id: string, x: number, y: number, parent: Entity | null, entityType: string = 'interactable') {
-		super(id, entityType, x, y, Infinity, parent);
+		super(id, entityType, x, y, 999, parent);
 		this.user = null; // No user to start
 		this.supertypes = ['interactable']; // member of that supertype group
 	}

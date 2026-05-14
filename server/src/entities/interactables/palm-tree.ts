@@ -11,8 +11,8 @@ export default class PalmTree extends Interactable {
 		super(id, x, y, null, 'palm-tree');
 		this.maxCoconuts = Math.floor(Math.random() * 4) + 1; // 1-4
 		this.coconuts = this.maxCoconuts;
-		this._maxHealth = Infinity; // trees dont die, just get hit
-		this.health = Infinity;
+		this._maxHealth = 999; // trees dont die, just get hit
+		this.health = 999;
 		this.interactRange = 80;
 		this.isDestructible = true;
 		this.width = 63;

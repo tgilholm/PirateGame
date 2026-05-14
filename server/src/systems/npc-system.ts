@@ -29,7 +29,8 @@ export default class NPCSystem implements BaseSystem {
 		private entityRegistry: EntityRegistry,
 		private spatialGrid: SpatialGrid,
 		private combatHandler: CombatHandler,
-		private addPhysicsBody: (body: Matter.Body) => void
+		private addPhysicsBody: (body: Matter.Body) => void,
+		private removePhysicsBody: (body: Matter.Body) => void
 	) {
 		this.npcLimit = terrainMap.getObjectLayer('npc-spawns').length; // add npc respawn timer
 	}
@@ -263,6 +264,17 @@ export default class NPCSystem implements BaseSystem {
 
 				if (npc instanceof NPCShip) {
 					this.npcShipPaths.delete(npc.pathName);
+
+					npc.interactables.forEach((item) => {
+						this.entityRegistry.delete(item.id);
+						this.spatialGrid.remove(item.id);
+					});
+
+					npc.npcs.forEach((npc) => {
+						this.entityRegistry.delete(npc.id);
+						this.spatialGrid.remove(npc.id);
+					});
+					this.removePhysicsBody(npc.body);
 				}
 
 				const money = this.entityFactory.createInteractable(

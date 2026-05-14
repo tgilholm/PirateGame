@@ -79,7 +79,15 @@ const engine = new GameEngine({
 	movementSystem,
 	spawnSystem,
 	projectileSystem,
-	npcSystem: new NPCSystem(terrainMap, entityFactory, registry, spatialGrid, combatHandler, addPhysicsBody),
+	npcSystem: new NPCSystem(
+		terrainMap,
+		entityFactory,
+		registry,
+		spatialGrid,
+		combatHandler,
+		addPhysicsBody,
+		removePhysicsBody
+	),
 	treasureSystem,
 	swordSystem,
 });
