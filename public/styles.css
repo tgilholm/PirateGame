@@ -770,7 +770,7 @@ h2 {
 }
 
 .tutorial-page-title {
-	font-size: 20px;
+	font-size: clamp(12px, 2vw, 24px);
 	text-align: center;
 	color: #fff;
 	margin: 0;
@@ -836,8 +836,8 @@ h2 {
 	border-radius: 4px;
 	padding: 8px 12px;
 	color: #ccc;
-	font-size: 18px;
-	overflow-y: auto;
+	font-size: clamp(11px, 1.4vw, 20px);
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -860,7 +860,7 @@ h2 {
 	border: 1px solid rgba(255, 255, 255, 0.5);
 	background: rgba(13, 47, 79, 0.5);
 	color: #fff;
-	font-size: 22px;
+	font-size: clamp(14px, 2vw, 26px);
 	line-height: 1;
 	cursor: pointer;
 	display: flex;
@@ -886,9 +886,8 @@ h2 {
 	flex: 1;
 	text-align: center;
 	color: #aad4ff;
-	font-size: 13px;
 	font-family: 'VT323', monospace;
-	font-size: 18px;
+	font-size: clamp(13px, 1.5vw, 22px);
 }
 
 #tutorial-close-button {
@@ -897,7 +896,7 @@ h2 {
 	border: 1px solid #fff;
 	border-radius: 3px;
 	padding: 5px 14px;
-	font-size: 11px;
+	font-size: clamp(9px, 0.9vw, 14px);
 	font-family: inherit;
 	cursor: pointer;
 	flex-shrink: 0;

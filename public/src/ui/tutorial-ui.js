@@ -126,6 +126,7 @@ export default class TutorialUI {
 
 	hide() {
 		this.menu.style.display = 'none';
+		this.goTo(0);
 	}
 
 	toggle() {
