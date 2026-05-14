@@ -26,6 +26,7 @@ export class StartScene extends Phaser.Scene {
 		// Resize the game if the window changes size
 		window.addEventListener('resize', () => {
 			this.scale.resize(window.innerWidth, window.innerHeight);
+			this.handleResize();
 		});
 	}
 
@@ -182,25 +183,18 @@ export class StartScene extends Phaser.Scene {
 		// inputText.value = 'abc';
 		// this.goToMain();
 
-		// width & height are given in game config
-		const centerX = this.scale.width / 2;
-		const leftX = this.scale.width / 4;
-		const rightX = centerX + leftX;
-
-		const centerY = this.scale.height / 2;
-
 		const gold = document.getElementById('gold-counter');
 		if (gold) gold.style.display = 'none';
 
 		const settingsBtn = document.getElementById('settings-button');
 		if (settingsBtn) settingsBtn.style.display = 'none';
 
-		// Add the animated background
-		this.background = this.add.tileSprite(centerX, centerY, this.scale.width, this.scale.height, 'background');
+		this.background = this.add.tileSprite(0, 0, this.scale.width, this.scale.height, 'background');
+		this.background.setOrigin(0, 0);
 
-		const title = this.add.image(centerX, 200, 'title');
-		const ship = this.add.sprite(leftX, 700, 'ship');
-		const ship2 = this.add.sprite(rightX, 700, 'ship');
+		this.titleImage = this.add.image(0, 0, 'title');
+		this.ship = this.add.sprite(0, 0, 'ship');
+		this.ship2 = this.add.sprite(0, 0, 'ship');
 
 		// Animate the ship sprite
 		this.anims.create({
@@ -209,8 +203,8 @@ export class StartScene extends Phaser.Scene {
 			frameRate: 8,
 			repeat: -1,
 		});
-		ship.play('fly');
-		ship2.play('fly');
+		this.ship.play('fly');
+		this.ship2.play('fly');
 
 		this.anims.create({
 			key: 'chest-open',
@@ -226,15 +220,10 @@ export class StartScene extends Phaser.Scene {
 			repeat: 0,
 		});
 
-		// Make the title text "wave" in and out
-		this.tweens.add({
-			targets: title,
-			y: 150,
-			duration: 2000,
-			ease: 'Sine.inOut',
-			yoyo: true,
-			loop: -1,
-		});
+		this.titleTween = null;
+
+		this.handleResize();
+
 		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
 		this.selectedColour = COLOURS[0];
 
@@ -265,6 +254,45 @@ export class StartScene extends Phaser.Scene {
 			e.preventDefault();
 			this.goTo(this.current + 1);
 		});
+	}
+
+	handleResize() {
+		const w = this.scale.width;
+		const h = this.scale.height;
+
+		const centerX = w / 2;
+		const centerY = h / 2;
+		const leftX = w / 4;
+		const rightX = centerX + leftX;
+
+		if (this.background) {
+			this.background.setSize(w, h);
+		}
+
+		if (this.titleImage) {
+			this.titleImage.setPosition(centerX, h * 0.2);
+		}
+
+		const shipY = h * 0.85;
+		if (this.ship) this.ship.setPosition(leftX, shipY);
+		if (this.ship2) this.ship2.setPosition(rightX, shipY);
+
+		if (this.titleTween) {
+			this.titleTween.stop();
+			this.titleTween.remove();
+		}
+		if (this.titleImage) {
+			const baseY = h * 0.2;
+			this.titleImage.y = baseY;
+			this.titleTween = this.tweens.add({
+				targets: this.titleImage,
+				y: baseY - 25,
+				duration: 2000,
+				ease: 'Sine.inOut',
+				yoyo: true,
+				loop: -1,
+			});
+		}
 	}
 
 	/**
