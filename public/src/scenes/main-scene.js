@@ -151,7 +151,7 @@ export class MainScene extends Phaser.Scene {
 		const ship = this.map.addTilesetImage('ships', 'ship-tiles');
 
 		//if (!island || !fort || !water || !ship) return;
-
+		this.map.createLayer('undersea', water, 0, 0);
 		this.map.createLayer('sea', water, 0, 0);
 		this.map.createLayer('oversea', water, 0, 0);
 		this.map.createLayer('oversea2', water, 0, 0);
