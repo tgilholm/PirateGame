@@ -14,6 +14,7 @@ export class StartScene extends Phaser.Scene {
 		this.current = 0;
 		this.shipChoices = 5;
 
+		// Get the username from the textinput
 		let startBtn = document.getElementById('start-btn');
 
 		startBtn.addEventListener('click', () => this.goToMain());
@@ -22,7 +23,11 @@ export class StartScene extends Phaser.Scene {
 			this.goToMain();
 		});
 
-		this.scale.on('resize', this.handleResize, this);
+		// Resize the game if the window changes size
+		window.addEventListener('resize', () => {
+			this.scale.resize(window.innerWidth, window.innerHeight);
+			this.handleResize();
+		});
 	}
 
 	/**
@@ -167,10 +172,16 @@ export class StartScene extends Phaser.Scene {
 	 */
 	create() {
 		this.resetUI();
-		this.input.keyboard.disableGlobalCapture();
+		this.input.keyboard.disableGlobalCapture(); // stop key events going to the game instead of the form
 
 		this.soundManager = new SoundManager(this);
 		this.soundManager.playMusic('music-start');
+
+		// To shortcut the start scene, uncomment the below text
+		// let inputText = document.getElementById('input-text');
+		// // @ts-ignore
+		// inputText.value = 'abc';
+		// this.goToMain();
 
 		const gold = document.getElementById('gold-counter');
 		if (gold) gold.style.display = 'none';
@@ -185,6 +196,7 @@ export class StartScene extends Phaser.Scene {
 		this.ship = this.add.sprite(0, 0, 'ship');
 		this.ship2 = this.add.sprite(0, 0, 'ship');
 
+		// Animate the ship sprite
 		this.anims.create({
 			key: 'fly',
 			frames: this.anims.generateFrameNumbers('ship', { start: 0, end: 2 }),
@@ -210,7 +222,7 @@ export class StartScene extends Phaser.Scene {
 
 		this.titleTween = null;
 
-		this.handleResize(this.scale);
+		this.handleResize();
 
 		const COLOURS = ['default', 'red', 'blue', 'green', 'yellow', 'white', 'grey'];
 		this.selectedColour = COLOURS[0];
@@ -244,11 +256,12 @@ export class StartScene extends Phaser.Scene {
 		});
 	}
 
-	handleResize(gameSize) {
-		const w = gameSize.width;
-		const h = gameSize.height;
+	handleResize() {
+		const w = this.scale.width;
+		const h = this.scale.height;
 
 		const centerX = w / 2;
+		const centerY = h / 2;
 		const leftX = w / 4;
 		const rightX = centerX + leftX;
 
@@ -268,7 +281,6 @@ export class StartScene extends Phaser.Scene {
 			this.titleTween.stop();
 			this.titleTween.remove();
 		}
-
 		if (this.titleImage) {
 			const baseY = h * 0.2;
 			this.titleImage.y = baseY;
@@ -283,6 +295,9 @@ export class StartScene extends Phaser.Scene {
 		}
 	}
 
+	/**
+	 * Hides all in-game UI elements and shows the input form. Used when returning to the start scene
+	 */
 	resetUI() {
 		this.ui.style.display = 'none';
 		this.form.style.display = 'flex';
@@ -292,29 +307,30 @@ export class StartScene extends Phaser.Scene {
 
 	goToMain() {
 		let inputText = document.getElementById('input-text');
+		// @ts-ignore because getElementById returns HTMLElement, not HTMLInputElement- it works regardless
 		let username = inputText.value;
-
-		if (username) {
+		if (username) // not null or empty
+		{
 			this.soundManager.stopMusic();
 
+			// Hide the form before continuing
 			this.form.style.display = 'none';
 			this.logo.style.display = 'none';
 			this.ui.style.display = 'flex';
-
-			this.scene.start('MainScene', {
-				username,
-				pirateColour: this.selectedColour,
-				shipChoice: this.current,
-			});
+			this.scene.start('MainScene', { username, pirateColour: this.selectedColour, shipChoice: this.current });
 		}
 	}
 
 	goTo(index) {
-		this.current = (index + this.shipChoices) % this.shipChoices;
+		this.current = (index + this.shipChoices) % this.shipChoices; // wraparound
 		this.track.style.transform = `translateX(-${this.current * 256}px)`;
 	}
 
+	/**
+	 * Updates the scrolling background
+	 */
 	update() {
+		// Vertically scroll
 		if (this.background) {
 			this.background.tilePositionY -= 6;
 		}
