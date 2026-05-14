@@ -44,6 +44,36 @@ export default class Minimap {
 		this.context.fill();
 	}
 
+	drawLocalPlayerMarker(worldX, worldY) {
+		if (!this.context) return;
+
+		const colour = 'purple';
+		const { x, y } = this.getCanvasPos(worldX, worldY);
+		const radius = 10; // slightly larger than other icons
+
+		const startAngle = 0;
+		const endAngle = Math.PI * 2;
+
+		// convert to canvas context
+		this.context.fillStyle = colour;
+		this.context.beginPath();
+
+		this.context.arc(x, y, radius, startAngle, endAngle); // a circle
+		this.context.fill();
+
+		this.context.restore();
+
+		// Draw "you" text level (not rotated)
+		this.context.save();
+		this.context.translate(x, y);
+		this.context.fillStyle = 'purple';
+		this.context.font = '32px Arial';
+		this.context.textAlign = 'center';
+		this.context.fillText('YOU', 0, -radius - 3);
+
+		this.context.restore();
+	}
+
 	drawRect(worldX, worldY, worldWidth, worldHeight, colour = 'red') {
 		if (!this.context) return;
 		const tileSize = this.map.tileHeight;

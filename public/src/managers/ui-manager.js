@@ -122,6 +122,11 @@ export default class UIManager {
 		if (!closeToShop) this.shopUI.hide();
 	}
 
+	/**
+	 *
+	 * @param {PlayerModel} localPlayer
+	 * @returns
+	 */
 	updateMinimap(localPlayer) {
 		if (!this.minimap) return;
 
@@ -142,15 +147,17 @@ export default class UIManager {
 			this.minimap.drawCircle(npc.x, npc.y, 'blue', 2);
 		});
 
-		// Draw players
-		this.gameManager.minimalPlayers.forEach((player) => {
-			const colour = player === localPlayer ? 'green' : 'red';
-
-			this.minimap.drawCircle(player.x, player.y, colour, 3);
-		});
-
 		this.gameManager.minimalShops.forEach((shop) => {
 			this.minimap.drawCircle(shop.x, shop.y, 'gold', 6);
+		});
+
+		// Draw players on top of everything
+		this.gameManager.minimalPlayers.forEach((player) => {
+			if (player.id === localPlayer.id) {
+				this.minimap.drawLocalPlayerMarker(player.x, player.y);
+			} else {
+				this.minimap.drawCircle(player.x, player.y, 'red', 3);
+			}
 		});
 	}
 
