@@ -273,7 +273,7 @@ export class StartScene extends Phaser.Scene {
 			this.titleImage.setPosition(centerX, h * 0.2);
 		}
 
-		const shipY = h * 0.85;
+		const shipY = h * 0.75;
 		if (this.ship) this.ship.setPosition(leftX, shipY);
 		if (this.ship2) this.ship2.setPosition(rightX, shipY);
 
