@@ -801,7 +801,7 @@ h2 {
 }
 
 .tutorial-image-wrap {
-	flex: 8.5;
+	flex: 6;
 	min-height: 0;
 	display: flex;
 	align-items: center;
@@ -830,18 +830,20 @@ h2 {
 }
 
 .tutorial-desc {
-	flex: 1.5;
+	flex: 3;
 	min-height: 0;
+	min-width: 0;
+	box-sizing: border-box;
 	border: 1px solid rgba(255, 255, 255, 0.2);
 	border-radius: 4px;
-	padding: 8px 12px;
+	padding: 12px 16px;
 	color: #ccc;
-	font-size: clamp(11px, 1.4vw, 20px);
-	overflow: hidden;
+	font-size: clamp(8px, 1vw, 18px);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	text-align: center;
+	overflow: hidden;
 }
 
 #tutorial-footer {
